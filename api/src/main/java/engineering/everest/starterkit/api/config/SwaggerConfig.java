@@ -23,17 +23,10 @@ import static springfox.documentation.builders.PathSelectors.regex;
 @ComponentScan({"engineering.everest.starterkit.api"})
 @PropertySource("swagger.properties")
 @SwaggerDefinition(tags = {
-        @Tag(name = "Admin", description = "Internal administrative use only"),
         @Tag(name = "System", description = "Information on the system you are interacting with"),
         @Tag(name = "Organizations", description = "Organization information and management"),
-        @Tag(name = "Projects", description = "Project information and management"),
         @Tag(name = "Users", description = "User information and management"),
-        @Tag(name = "Assets", description = "Asset information and management"),
-        @Tag(name = "AssetTypes", description = "Asset Type information and management"),
-        @Tag(name = "HelpSessions", description = "Calling, responding and managing help sessions"),
         @Tag(name = "OrgAdmins", description = "Organization Admin information and management"),
-        @Tag(name = "Experts", description = "Organization Expert information and management"),
-        @Tag(name = "OrganizationBoundNetworks", description = "Organization Bound Network information and management"),
 })
 public class SwaggerConfig {
 

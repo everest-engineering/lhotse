@@ -14,6 +14,7 @@ import java.time.Instant;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 
 import static java.util.stream.Collectors.toList;
@@ -69,25 +70,11 @@ public class DefaultUsersReadService implements UsersReadService {
     }
 
     @Override
-    public List<User> getAdmins() {
-        return usersRepository.findAdmins().stream()
-                .map(this::convert)
-                .collect(toList());
-    }
-
-    @Override
-    public List<User> getAdminsForOrganization(UUID organizationId) {
-        return usersRepository.findOrganizationAdmins(organizationId).stream()
-                .map(this::convert)
-                .collect(toList());
-    }
-
-    @Override
     public InputStream getProfilePhotoThumbnailStream(UUID userId, int width, int height) throws IOException {
         PersistableUser persistableUser = usersRepository.findById(userId).orElseThrow();
         UUID profilePhotoFileId = persistableUser.getProfilePhotoFileId();
         if (profilePhotoFileId == null) {
-            throw new RuntimeException("Profile photo not present");
+            throw new NoSuchElementException("Profile photo not present");
         }
         return thumbnailService.streamThumbnailForOriginalFile(profilePhotoFileId, width, height);
     }
@@ -97,7 +84,7 @@ public class DefaultUsersReadService implements UsersReadService {
         PersistableUser persistableUser = usersRepository.findById(id).orElseThrow();
         UUID profilePhotoFileId = persistableUser.getProfilePhotoFileId();
         if (profilePhotoFileId == null) {
-            throw new RuntimeException("Profile photo not present");
+            throw new NoSuchElementException("Profile photo not present");
         }
         return fileService.stream(profilePhotoFileId);
     }

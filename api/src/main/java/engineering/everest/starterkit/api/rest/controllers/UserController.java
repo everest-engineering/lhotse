@@ -61,10 +61,10 @@ public class UserController {
     }
 
     @PostMapping("/profile-photo")
-    public UUID uploadProfilePhoto(User requestingUser,
+    public void uploadProfilePhoto(User requestingUser,
                                    @RequestParam("file") MultipartFile uploadedFile) throws IOException {
         var persistedFileId = fileService.transferToPermanentStore(uploadedFile.getOriginalFilename(), uploadedFile.getInputStream());
-        return usersService.storeProfilePhoto(requestingUser.getId(), persistedFileId);
+        usersService.storeProfilePhoto(requestingUser.getId(), persistedFileId);
     }
 
     @GetMapping("/profile-photo")

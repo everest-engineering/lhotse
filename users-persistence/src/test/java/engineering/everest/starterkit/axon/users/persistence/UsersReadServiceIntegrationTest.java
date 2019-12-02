@@ -133,12 +133,6 @@ class UsersReadServiceIntegrationTest {
     }
 
     @Test
-    void getOrganizationAdmins_WillReturnAdminsBElongingToOrganization() {
-        assertEquals(singletonList(ORG_1_USER_1),
-                usersReadService.getAdminsForOrganization(ORGANIZATION_ID_1));
-    }
-
-    @Test
     void getProfilePhotoStream_WillReturnStreamForProfilePhoto() throws IOException {
         ByteArrayInputStream inputStream = new ByteArrayInputStream("my profile photo".getBytes());
         when(fileService.stream(PROFILE_PHOTO_ID)).thenReturn(inputStream);

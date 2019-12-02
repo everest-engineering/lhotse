@@ -135,14 +135,4 @@ public class OrganizationsController {
         return usersService.createUser(requestingUser.getId(),
                 organizationId, request.getUsername(), request.getDisplayName(), request.getPassword());
     }
-
-    @GetMapping("/{organizationId}/org-admins")
-    @ApiOperation(produces = APPLICATION_JSON_VALUE,
-            value = "Retrieves a list of users who have administrative privileges in this organisation")
-    @AdminOrUserOfTargetOrganization
-    public List<UserResponse> getOrganizationAdmins(User requestingUser, @PathVariable UUID organizationId) {
-        return usersReadService.getAdminsForOrganization(organizationId).stream()
-                .map(dtoConverter::convert)
-                .collect(toList());
-    }
 }

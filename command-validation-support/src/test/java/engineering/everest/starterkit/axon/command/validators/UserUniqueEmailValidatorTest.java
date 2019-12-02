@@ -28,7 +28,7 @@ public class UserUniqueEmailValidatorTest {
     }
 
     @Test
-    void validate_willFail_WhenUserWithEmailAlreadyExists() {
+    void validate_WillFail_WhenUserWithEmailAlreadyExists() {
         when(usersReadService.hasUserWithEmail(EXISTING_USER_EMAIL_1)).thenReturn(true);
 
         assertThrows(IllegalArgumentException.class, () -> {
@@ -37,7 +37,7 @@ public class UserUniqueEmailValidatorTest {
     }
 
     @Test
-    void validate_willPass_WhenUserNameWithEmailDoesNotExist() {
+    void validate_WillPass_WhenUserNameWithEmailDoesNotExist() {
         when(usersReadService.hasUserWithEmail(NEW_USER_EMAIL)).thenReturn(false);
 
         usersUniqueEmailValidator.validate((UserUniqueEmailValidatableCommand) () -> NEW_USER_EMAIL);

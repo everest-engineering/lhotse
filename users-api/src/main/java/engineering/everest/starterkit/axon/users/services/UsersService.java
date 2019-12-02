@@ -9,5 +9,5 @@ public interface UsersService {
     void updateUser(UUID requestingUserId, UUID userId, String emailChange,
                     String displayNameChange, String passwordChange);
 
-    UUID storeProfilePhoto(UUID requestingUserId, UUID profilePhotoFileId);
+    void storeProfilePhoto(UUID requestingUserId, UUID profilePhotoFileId);
 }

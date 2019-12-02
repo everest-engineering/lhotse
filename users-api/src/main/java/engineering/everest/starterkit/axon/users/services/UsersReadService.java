@@ -20,10 +20,6 @@ public interface UsersReadService extends ReadService<User> {
 
     boolean hasUserWithEmail(String email);
 
-    List<User> getAdmins();
-
-    List<User> getAdminsForOrganization(UUID organizationId);
-
     InputStream getProfilePhotoStream(UUID id) throws IOException;
 
     InputStream getProfilePhotoThumbnailStream(UUID userId, int width, int height) throws IOException;

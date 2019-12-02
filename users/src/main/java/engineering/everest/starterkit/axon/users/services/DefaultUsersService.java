@@ -42,8 +42,8 @@ public class DefaultUsersService implements UsersService {
     }
 
     @Override
-    public UUID storeProfilePhoto(UUID requestingUserId, UUID profilePhotoFileId) {
-        return commandGateway.sendAndWait(new RegisterUploadedUserProfilePhotoCommand(requestingUserId, profilePhotoFileId));
+    public void storeProfilePhoto(UUID requestingUserId, UUID profilePhotoFileId) {
+        commandGateway.sendAndWait(new RegisterUploadedUserProfilePhotoCommand(requestingUserId, profilePhotoFileId));
     }
 
     private String encodePasswordIfNotBlank(String passwordChange) {
