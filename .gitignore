@@ -39,3 +39,5 @@ build/
 /*/*.iws
 /*/out
 
+.ipynb_checkpoints/
+
