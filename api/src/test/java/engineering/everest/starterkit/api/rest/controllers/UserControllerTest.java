@@ -53,7 +53,7 @@ class UserControllerTest {
 
     private static final byte[] PROFILE_PHOTO_FILE_CONTENTS = "profile-photo-file-contents".getBytes();
     private static final byte[] PROFILE_PHOTO_THUMBNAIL_FILE_CONTENTS = "profile-photo-thumbnail-file-contents".getBytes();
-    private static final String ROLE_ORGANIZATION_USER = "ROLE_ORGANIZATION_USER";
+    private static final String ROLE_ORGANIZATION_USER = "ORG_USER";
 
     @Autowired
     private MockMvc mockMvc;
@@ -106,7 +106,6 @@ class UserControllerTest {
     @WithMockUser(username = "user@umbrella.com", roles = ROLE_ORGANIZATION_USER)
     void streamProfilePhoto_WillReturnProfilePhoto() throws Exception {
         User authUser = MockAuthenticationContextProvider.getAuthUser();
-
 
         InputStream profilePhotoInputStream = mock(InputStream.class);
         when(profilePhotoInputStream.transferTo(any(OutputStream.class))).thenAnswer(invocation -> {

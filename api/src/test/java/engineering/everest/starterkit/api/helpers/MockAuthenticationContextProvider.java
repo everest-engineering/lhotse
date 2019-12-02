@@ -13,13 +13,10 @@ import java.util.EnumSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static engineering.everest.starterkit.users.UserTestHelper.ADMIN_USER;
 import static java.util.UUID.randomUUID;
 
 public class MockAuthenticationContextProvider implements AuthenticationContextProvider {
-
-    public static final UUID ADMIN_USER_ID = randomUUID();
-    public static final UUID ORGANIZATION_ID = randomUUID();
-    public static final User ADMIN_USER = new User(ADMIN_USER_ID, ORGANIZATION_ID, "admin", "admin user");
 
     static ThreadLocal<User> userHolder = new ThreadLocal<>();
 

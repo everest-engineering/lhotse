@@ -27,7 +27,9 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.UUID;
 
+import static engineering.everest.starterkit.users.UserTestHelper.ADMIN_USER;
 import static java.util.Arrays.asList;
+import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.verify;
@@ -49,14 +51,13 @@ class UsersControllerTest {
     private static final UUID USER_ID_2 = randomUUID();
     private static final UUID ORGANIZATION_ID_1 = randomUUID();
     private static final UUID ORGANIZATION_ID_2 = randomUUID();
-    private static final UUID ADMIN_ID = randomUUID();
     private static final User ORG_1_USER_1 = new User(USER_ID_1, ORGANIZATION_ID_1, "org-1-user-1", "org-1-user-1-display");
     private static final User ORG_2_USER_1 = new User(USER_ID_2, ORGANIZATION_ID_2, "org-2-user-1", "org-2-user-1-display");
     private static final String USER_USERNAME = "user@umbrella.com";
     private static final String ADMIN_USERNAME = "admin@umbrella.com";
-    private static final String ROLE_ADMIN = "ROLE_ADMIN";
-    private static final String ROLE_ORGANIZATION_ADMIN = "ROLE_ORGANIZATION_ADMIN";
-    private static final String ROLE_ORGANIZATION_USER = "ROLE_ORGANIZATION_USER";
+    private static final String ROLE_ADMIN = "ADMIN";
+    private static final String ROLE_ORGANIZATION_ADMIN = "ORG_ADMIN";
+    private static final String ROLE_ORGANIZATION_USER = "ORG_USER";
 
     @Autowired
     private MockMvc mockMvc;
@@ -112,12 +113,13 @@ class UsersControllerTest {
     @WithMockUser(username = ADMIN_USERNAME, roles = ROLE_ADMIN)
     void updateUserDetailsWillDelegate_WhenRequestingUserIsAdmin() throws Exception {
         when(usersReadService.getById(ORG_2_USER_1.getId())).thenReturn(ORG_2_USER_1);
+
         mockMvc.perform(put("/api/users/{userId}", ORG_2_USER_1.getId())
                 .contentType(APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(new UpdateUserRequest("display-name-change", "email-change", "password-change"))))
                 .andExpect(status().isOk());
 
-        verify(usersService).updateUser(ADMIN_ID, ORG_2_USER_1.getId(), "email-change",
+        verify(usersService).updateUser(ADMIN_USER.getId(), ORG_2_USER_1.getId(), "email-change",
                 "display-name-change", "password-change");
     }
 
@@ -166,7 +168,6 @@ class UsersControllerTest {
     @Test
     @WithMockUser(username = USER_USERNAME, roles = ROLE_ORGANIZATION_USER)
     void getUserOfOtherOrganization_WillThrow() throws Exception {
-        User authUser = MockAuthenticationContextProvider.getAuthUser();
         User targetUser = new User(randomUUID(), randomUUID(), "other@umbrella.com", "other");
         when(usersReadService.getById(targetUser.getId())).thenReturn(targetUser);
         mockMvc.perform(get("/api/users/{userId}", targetUser.getId()))
@@ -176,7 +177,6 @@ class UsersControllerTest {
     @Test
     @WithMockUser(username = ADMIN_USERNAME, roles = ROLE_ADMIN)
     void getUserOfAnyOrganization_WillDelegateForAdmin() throws Exception {
-        User authUser = MockAuthenticationContextProvider.getAuthUser();
         User targetUser = new User(randomUUID(), randomUUID(), "other@umbrella.com", "other");
         when(usersReadService.getById(targetUser.getId())).thenReturn(targetUser);
         mockMvc.perform(get("/api/users/{userId}", targetUser.getId()))
@@ -197,18 +197,6 @@ class UsersControllerTest {
                 .contentType(APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(new UpdateUserRequest("new", null, null))))
                 .andExpect(status().isOk());
-    }
-
-    @Test
-    @WithMockUser(username = ADMIN_USERNAME, roles = ROLE_ORGANIZATION_ADMIN)
-    void updateUserOfOtherOrganization_WillFail() throws Exception {
-        UUID targetUserId = randomUUID();
-        when(usersReadService.getById(targetUserId)).thenReturn(
-                new User(targetUserId, randomUUID(), "some@ghostbusters.com", ""));
-        mockMvc.perform(put("/api/users/{userId}", targetUserId)
-                .contentType(APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new UpdateUserRequest("new", null, null))))
-                .andExpect(status().isForbidden());
     }
 
     @Test

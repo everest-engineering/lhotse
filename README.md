@@ -53,6 +53,9 @@ API documentation is accessible when running the application locally by visiting
 
 !!! TODO !!! swagger docs seem to be broken
 
+### Checkstyle and PMD configuration
+[PMD](https://pmd.github.io/) and [Checkstyle](https://checkstyle.org/) quality checks are automatically applied to all 
+subprojects.
 
 ## IntelliJ configuration
 This project uses [Project Lombok](https://projectlombok.org/) to generate common boilerplate code.

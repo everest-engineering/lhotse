@@ -3,7 +3,6 @@ package engineering.everest.starterkit.axon.security.persistence;
 import org.springframework.stereotype.Component;
 
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
