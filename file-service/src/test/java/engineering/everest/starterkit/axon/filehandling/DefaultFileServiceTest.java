@@ -56,7 +56,7 @@ class DefaultFileServiceTest {
     }
 
     @Test
-    void transferToPermanentStorage_WillDelegateToPermanentStore() throws IOException {
+    void transferToPermanentStorE_WillDelegateToPermanentStore() throws IOException {
         when(permanentFileStore.store(eq(ORIGINAL_FILENAME), any(InputStream.class))).thenReturn(new PersistedFile());
 
         File tempFile = fileService.createTemporaryFile();
@@ -69,13 +69,26 @@ class DefaultFileServiceTest {
     }
 
     @Test
-    void transferToArtifactStorage_WillDelegateToArtifactStore() throws IOException {
+    void transferToArtifactStore_WillDelegateToArtifactStore() throws IOException {
         when(artifactFileStore.store(eq(ORIGINAL_FILENAME), any(InputStream.class))).thenReturn(new PersistedFile());
 
         File tempFile = fileService.createTemporaryFile();
         try (FileInputStream inputStream = new FileInputStream(tempFile)) {
             fileService.transferToArtifactStore(ORIGINAL_FILENAME, inputStream);
             verify(artifactFileStore).store(ORIGINAL_FILENAME, inputStream);
+        }
+
+        verifyNoInteractions(permanentFileStore);
+    }
+
+    @Test
+    void transferToArtifactStore_WillDelegateToArtifactStore_WhenNoFilenamespecified() throws IOException {
+        when(artifactFileStore.store(eq(""), any(InputStream.class))).thenReturn(new PersistedFile());
+
+        File tempFile = fileService.createTemporaryFile();
+        try (FileInputStream inputStream = new FileInputStream(tempFile)) {
+            fileService.transferToArtifactStore(inputStream);
+            verify(artifactFileStore).store("", inputStream);
         }
 
         verifyNoInteractions(permanentFileStore);

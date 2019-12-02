@@ -2,7 +2,7 @@ package engineering.everest.starterkit.axon.command.validators;
 
 import engineering.everest.starterkit.axon.command.validation.UsersBelongToOrganizationValidatableCommand;
 import engineering.everest.starterkit.axon.command.validation.Validates;
-import engineering.everest.starterkit.axon.users.services.UsersReadService;
+import engineering.everest.starterkit.users.services.UsersReadService;
 import org.apache.commons.lang3.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

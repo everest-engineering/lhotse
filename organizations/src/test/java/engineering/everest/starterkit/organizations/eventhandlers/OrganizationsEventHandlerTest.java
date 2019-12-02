@@ -1,10 +1,6 @@
 package engineering.everest.starterkit.organizations.eventhandlers;
 
-import engineering.everest.starterkit.organizations.domain.events.OrganizationAddressUpdatedByAdminEvent;
-import engineering.everest.starterkit.organizations.domain.events.OrganizationContactDetailsUpdatedByAdminEvent;
-import engineering.everest.starterkit.organizations.domain.events.OrganizationDeregisteredByAdminEvent;
-import engineering.everest.starterkit.organizations.domain.events.OrganizationNameUpdatedByAdminEvent;
-import engineering.everest.starterkit.organizations.domain.events.OrganizationRegisteredByAdminEvent;
+import engineering.everest.starterkit.organizations.domain.events.*;
 import engineering.everest.starterkit.organizations.OrganizationAddress;
 import engineering.everest.starterkit.organizations.persistence.Address;
 import engineering.everest.starterkit.organizations.persistence.OrganizationsRepository;
@@ -78,13 +74,24 @@ class OrganizationsEventHandlerTest {
     }
 
     @Test
-    void onOrganizationDeRegisteredByAdminEvent_willDelegate() {
+    void onOrganizationDeRegisteredByAdminEvent_WillPersistChanges() {
         PersistableOrganization persistableOrganization = mock(PersistableOrganization.class);
         when(organizationsRepository.findById(ORGANIZATION_ID)).thenReturn(Optional.of(persistableOrganization));
 
         organizationsEventHandler.on(new OrganizationDeregisteredByAdminEvent(ORGANIZATION_ID, ADMIN_ID));
 
         verify(persistableOrganization).setDeregistered(true);
+        verify(organizationsRepository).save(persistableOrganization);
+    }
+
+    @Test
+    void onOrganizationReregisteredByAdminEvent_WillPersistChanges() {
+        PersistableOrganization persistableOrganization = mock(PersistableOrganization.class);
+        when(organizationsRepository.findById(ORGANIZATION_ID)).thenReturn(Optional.of(persistableOrganization));
+
+        organizationsEventHandler.on(new OrganizationReregisteredByAdminEvent(ORGANIZATION_ID, ADMIN_ID));
+
+        verify(persistableOrganization).setDeregistered(false);
         verify(organizationsRepository).save(persistableOrganization);
     }
 

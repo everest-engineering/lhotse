@@ -15,5 +15,4 @@ class ReadServiceTest {
         final Method getByIdMethod = ReadService.class.getMethod("getById", UUID.class);
         assertTrue(getByIdMethod.getGenericReturnType() instanceof TypeVariable);
     }
-
 }

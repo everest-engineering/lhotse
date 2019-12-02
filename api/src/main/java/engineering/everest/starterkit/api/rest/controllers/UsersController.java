@@ -1,8 +1,8 @@
 package engineering.everest.starterkit.api.rest.controllers;
 
 import engineering.everest.starterkit.axon.common.domain.User;
-import engineering.everest.starterkit.axon.users.services.UsersReadService;
-import engineering.everest.starterkit.axon.users.services.UsersService;
+import engineering.everest.starterkit.users.services.UsersReadService;
+import engineering.everest.starterkit.users.services.UsersService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import engineering.everest.starterkit.api.rest.annotations.AdminOnly;

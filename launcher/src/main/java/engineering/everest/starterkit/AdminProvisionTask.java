@@ -1,8 +1,8 @@
 package engineering.everest.starterkit;
 
 import engineering.everest.starterkit.axon.common.PasswordEncoder;
-import engineering.everest.starterkit.axon.users.persistence.PersistableUser;
-import engineering.everest.starterkit.axon.users.persistence.UsersRepository;
+import engineering.everest.starterkit.users.persistence.PersistableUser;
+import engineering.everest.starterkit.users.persistence.UsersRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;

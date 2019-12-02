@@ -2,8 +2,8 @@ package engineering.everest.starterkit.api.rest.controllers;
 
 import engineering.everest.starterkit.axon.common.domain.User;
 import engineering.everest.starterkit.axon.filehandling.FileService;
-import engineering.everest.starterkit.axon.users.services.UsersReadService;
-import engineering.everest.starterkit.axon.users.services.UsersService;
+import engineering.everest.starterkit.users.services.UsersReadService;
+import engineering.everest.starterkit.users.services.UsersService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import engineering.everest.starterkit.api.rest.converters.DtoConverter;
@@ -22,7 +22,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.io.IOException;
-import java.util.UUID;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM;

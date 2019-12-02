@@ -1,6 +1,6 @@
 package engineering.everest.starterkit.axon.security.userdetails;
 
-import engineering.everest.starterkit.axon.users.services.UsersReadService;
+import engineering.everest.starterkit.users.services.UsersReadService;
 import engineering.everest.starterkit.axon.common.domain.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

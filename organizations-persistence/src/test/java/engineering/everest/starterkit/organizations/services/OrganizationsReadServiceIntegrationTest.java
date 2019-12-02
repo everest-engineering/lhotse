@@ -1,6 +1,6 @@
 package engineering.everest.starterkit.organizations.services;
 
-import engineering.everest.starterkit.axon.users.services.UsersReadService;
+import engineering.everest.starterkit.users.services.UsersReadService;
 import engineering.everest.starterkit.organizations.Organization;
 import engineering.everest.starterkit.organizations.OrganizationAddress;
 import engineering.everest.starterkit.organizations.persistence.OrganizationsRepository;

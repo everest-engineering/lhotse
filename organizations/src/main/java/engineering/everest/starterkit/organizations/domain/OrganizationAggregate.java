@@ -31,8 +31,6 @@ public class OrganizationAggregate implements Serializable {
 
     @AggregateIdentifier
     private UUID id;
-    private String organizationName;
-    private String organizationWebsiteUrl;
     @AggregateMember
     private OrganizationContactDetails organizationContactDetails = new OrganizationContactDetails();
     private boolean deregistered;
@@ -78,8 +76,6 @@ public class OrganizationAggregate implements Serializable {
     @EventSourcingHandler
     void on(OrganizationRegisteredByAdminEvent event) {
         id = event.getOrganizationId();
-        organizationName = event.getOrganizationName();
-        organizationWebsiteUrl = event.getWebsiteUrl();
     }
 
     @EventSourcingHandler
@@ -90,11 +86,6 @@ public class OrganizationAggregate implements Serializable {
     @EventSourcingHandler
     void on(OrganizationReregisteredByAdminEvent event) {
         deregistered = false;
-    }
-
-    @EventSourcingHandler
-    void on(OrganizationNameUpdatedByAdminEvent event) {
-        organizationName = event.getOrganizationName();
     }
 
     private void validateOrganizationIsNotDeregistered() {

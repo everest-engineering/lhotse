@@ -7,8 +7,8 @@ import engineering.everest.starterkit.api.helpers.MockAuthenticationContextProvi
 import engineering.everest.starterkit.api.rest.requests.UpdateUserRequest;
 import engineering.everest.starterkit.axon.common.domain.User;
 import engineering.everest.starterkit.axon.filehandling.FileService;
-import engineering.everest.starterkit.axon.users.services.UsersReadService;
-import engineering.everest.starterkit.axon.users.services.UsersService;
+import engineering.everest.starterkit.users.services.UsersReadService;
+import engineering.everest.starterkit.users.services.UsersService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;

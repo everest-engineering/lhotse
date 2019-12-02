@@ -1,7 +1,7 @@
 package engineering.everest.starterkit.axon.security.userdetails;
 
-import engineering.everest.starterkit.axon.users.authserver.AuthServerUser;
-import engineering.everest.starterkit.axon.users.authserver.AuthServerUserReadService;
+import engineering.everest.starterkit.users.authserver.AuthServerUser;
+import engineering.everest.starterkit.users.authserver.AuthServerUserReadService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

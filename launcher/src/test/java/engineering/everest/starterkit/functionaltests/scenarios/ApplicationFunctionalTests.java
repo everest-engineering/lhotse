@@ -3,7 +3,7 @@ package engineering.everest.starterkit.functionaltests.scenarios;
 import engineering.everest.starterkit.Launcher;
 import engineering.everest.starterkit.api.rest.security.EntityPermissionEvaluator;
 import engineering.everest.starterkit.axon.CommandValidatingMessageHandlerInterceptor;
-import engineering.everest.starterkit.axon.users.persistence.UsersRepository;
+import engineering.everest.starterkit.users.persistence.UsersRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

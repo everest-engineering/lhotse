@@ -2,7 +2,7 @@ package engineering.everest.starterkit.axon;
 
 import engineering.everest.starterkit.axon.common.domain.Role;
 import engineering.everest.starterkit.axon.common.domain.User;
-import engineering.everest.starterkit.axon.users.services.UsersReadService;
+import engineering.everest.starterkit.users.services.UsersReadService;
 import engineering.everest.starterkit.axon.command.validators.EmailAddressValidator;
 import engineering.everest.starterkit.axon.command.validators.UsersUniqueEmailValidator;
 import org.axonframework.commandhandling.CommandMessage;

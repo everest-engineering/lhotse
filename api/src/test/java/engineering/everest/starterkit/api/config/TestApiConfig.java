@@ -6,7 +6,7 @@ import engineering.everest.starterkit.api.rest.converters.DtoConverter;
 import engineering.everest.starterkit.api.rest.security.EntityPermissionEvaluator;
 import engineering.everest.starterkit.axon.common.services.ReadServiceProvider;
 import engineering.everest.starterkit.axon.security.AuthenticationContextProvider;
-import engineering.everest.starterkit.axon.users.services.UsersReadService;
+import engineering.everest.starterkit.users.services.UsersReadService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
