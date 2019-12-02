@@ -1,0 +1,15 @@
+dependencies {
+    implementation project(':file-service-api')
+    implementation project(':media-support-api')
+    implementation project(':users-api')
+    implementation project(':security-support-api')
+
+    implementation "org.axonframework:axon-spring:${axonVersion}"
+    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+
+    testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
+    testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
+    testImplementation 'org.springframework.boot:spring-boot-test-autoconfigure'
+    testImplementation 'org.springframework:spring-test'
+    testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo'
+}

@@ -1,0 +1,13 @@
+dependencies {
+    implementation project(':database-support')
+    implementation project(':file-service-api')
+
+    implementation 'org.springframework:spring-context'
+    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+    implementation "com.google.guava:guava:${guavaVersion}"
+
+    testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
+    testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
+    testImplementation "org.hamcrest:hamcrest-library:${hamcrestVersion}"
+    testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo'
+}

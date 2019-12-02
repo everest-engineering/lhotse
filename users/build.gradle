@@ -1,0 +1,21 @@
+dependencies {
+    implementation project(':axon-support')
+    implementation project(':common')
+    implementation project(':command-validation-support')
+    implementation project(':users-api')
+    implementation project(':users-persistence')
+
+    implementation "javax.validation:validation-api"
+    implementation 'org.springframework:spring-beans'
+    implementation 'org.springframework:spring-context'
+    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+    implementation "org.axonframework:axon-spring:${axonVersion}"
+    implementation "org.apache.commons:commons-lang3:${commonsLangVersion}"
+
+    testImplementation project(':axon-support').sourceSets.test.output
+    testImplementation project(':users-api').sourceSets.test.output
+    testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
+    testImplementation "org.axonframework:axon-test:${axonVersion}"
+    testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
+    testImplementation "org.hamcrest:hamcrest-library:${hamcrestVersion}"
+}

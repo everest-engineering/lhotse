@@ -1,0 +1,24 @@
+dependencies {
+    implementation project(':common')
+    implementation project(':file-service-api')
+    implementation project(':media-support-api')
+    implementation project(':organizations-api')
+    implementation project(':security-support-api')
+    implementation project(':users-api')
+
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework:spring-messaging'
+    implementation "io.springfox:springfox-swagger2:${swaggerVersion}"
+    implementation "io.springfox:springfox-swagger-ui:${swaggerVersion}"
+    implementation "org.axonframework:axon-modelling:${axonVersion}"
+    implementation "org.axonframework:axon-messaging:${axonVersion}"
+
+    testImplementation project(':users-api').sourceSets.test.output
+    testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
+    testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
+    testImplementation "org.springframework.boot:spring-boot-starter-test"
+    testImplementation "org.springframework.security:spring-security-test"
+    testImplementation "org.apache.commons:commons-lang3:${commonsLangVersion}"
+}

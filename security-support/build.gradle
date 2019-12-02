@@ -1,0 +1,15 @@
+dependencies {
+    implementation project(':users-api')
+    implementation project(':security-support-api')
+    implementation project(':security-support-persistence')
+
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+    implementation "io.springfox:springfox-swagger2:${swaggerVersion}"
+    implementation "org.springframework.security.oauth.boot:spring-security-oauth2-autoconfigure:${springBootVersion}"
+
+    testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
+    testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
+    testImplementation "org.springframework.security:spring-security-test"
+}

@@ -1,0 +1,49 @@
+{
+  "properties": [
+    {
+      "name": "application.jwt.signing-secret",
+      "type": "java.lang.String",
+      "description": "Description for application.jwt.signing-secret."
+    },
+    {
+      "name": "application.jwt.access-token.validity-seconds",
+      "type": "java.lang.String",
+      "description": "Description for application.jwt.access-token.validity-seconds."
+    },
+    {
+      "name": "application.jwt.refresh-token.validity-seconds",
+      "type": "java.lang.String",
+      "description": "Description for application.jwt.refresh-token.validity-seconds."
+    },
+    {
+      "name": "application.setup.admin.username",
+      "type": "java.lang.String",
+      "description": "Description for application.setup.admin.username."
+    },
+    {
+      "name": "application.setup.admin.password",
+      "type": "java.lang.String",
+      "description": "Description for application.setup.admin.password."
+    },
+    {
+      "name": "graph.neo4j.uri",
+      "type": "java.lang.String",
+      "description": "Description for graph.neo4j.uri."
+    },
+    {
+      "name": "graph.neo4j.username",
+      "type": "java.lang.String",
+      "description": "Description for graph.neo4j.username."
+    },
+    {
+      "name": "graph.neo4j.password",
+      "type": "java.lang.String",
+      "description": "Description for graph.neo4j.password."
+    },
+    {
+      "name": "application.axon.tracking-event-processor",
+      "type": "java.lang.String",
+      "description": "Description for application.axon.tracking-event-processor."
+    }
+  ]
+}

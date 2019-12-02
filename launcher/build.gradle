@@ -1,0 +1,105 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath "com.avast.gradle:gradle-docker-compose-plugin:0.9.4"
+    }
+}
+
+plugins {
+    id 'org.springframework.boot'
+    id 'com.bmuschko.docker-spring-boot-application' version '5.0.0'
+}
+
+import com.bmuschko.gradle.docker.tasks.image.DockerTagImage
+
+apply plugin: 'docker-compose'
+
+springBoot {
+    buildInfo()
+}
+
+bootBuildInfo.mustRunAfter processResources
+
+bootJar {
+    launchScript()
+    archiveFileName = 'web-app.jar' // will be placed in launcher/build/libs
+}
+
+docker {
+    springBootApplication {
+        tag = "REGISTRY.HOST.NAME/name/web-app:${version}"
+        baseImage = 'openjdk:11'
+        ports = [8080]
+        jvmArgs = ['-Dspring.profiles.active=prod', '-Xmx1024m']
+    }
+    registryCredentials {
+        url = 'https://REGISTRY.HOST.NAME/v2'
+        username = 'USERNAME'
+        password = 'container-repo-password'
+    }
+}
+
+task tagLatestImage(type: DockerTagImage) {
+    repository = "REGISTRY.HOST.NAME/name/web-app"
+    imageId = "REGISTRY.HOST.NAME/name/web-app:${version}"
+    tag = 'latest'
+}
+
+dockerBuildImage.finalizedBy tagLatestImage
+
+dockerCompose {
+    useComposeFiles = ['docker-compose.yml']
+}
+
+compileJava.dependsOn(processResources)
+bootRun.dependsOn composeUp
+
+test {
+    systemProperty "org.gradle.project.buildDir", "$project.buildDir"
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}
+
+dependencies {
+    implementation project(':api')
+    implementation project(':axon-support')
+    implementation project(':common')
+    implementation project(':command-validation-support')
+    implementation project(':database-support')
+    implementation project(':file-service')
+    implementation project(':file-service-api')
+    implementation project(':media-support')
+    implementation project(':media-support-api')
+    implementation project(':organizations')
+    implementation project(':organizations-api')
+    implementation project(':organizations-persistence')
+    implementation project(':security-support-api')
+    implementation project(':security-support')
+    implementation project(':users')
+    implementation project(':users-api')
+    implementation project(':users-persistence')
+
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation "io.micrometer:micrometer-registry-prometheus:${microMeterPrometheusRegistry}"
+    implementation "io.prometheus:simpleclient_pushgateway:${prometheusPushGateway}"
+
+    annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
+
+    testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
+    testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
+    testImplementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+    testImplementation "org.springframework.boot:spring-boot-starter-test"
+    testImplementation "org.springframework.boot:spring-boot-starter-webflux"
+    testImplementation "org.springframework.security:spring-security-test"
+    testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo:2.2.0'
+    testImplementation 'org.apache.commons:commons-text:1.8'
+    testImplementation "org.bouncycastle:bcpkix-jdk15on:${bouncyCastleVersion}"
+    testRuntimeOnly "com.h2database:h2:${h2Version}"
+}
