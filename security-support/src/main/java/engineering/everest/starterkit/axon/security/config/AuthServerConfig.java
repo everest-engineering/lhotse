@@ -33,8 +33,8 @@ public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
                             AuthServerUserDetailsService authServerUserDetailsService,
                             AuthenticationManager authenticationManager,
                             @Qualifier("mongoTokenStore") TokenStore tokenStore,
-                            @Value("${application.jwt.access-token.validity-seconds}") int accessTokenValiditySeconds,
-                            @Value("${application.jwt.refresh-token.validity-seconds}") int refreshTokenValiditySeconds) {
+                            @Value("${application.jwt.access-token.validity-seconds:3600}") int accessTokenValiditySeconds,
+                            @Value("${application.jwt.refresh-token.validity-seconds:7200}") int refreshTokenValiditySeconds) {
         super();
         this.passwordEncoder = passwordEncoder;
         this.jwtAccessTokenConverter = jwtAccessTokenConverter;
