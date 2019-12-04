@@ -70,7 +70,7 @@ public class DefaultThumbnailService implements ThumbnailService {
     private UUID persistThumbnailAndUpdateMapping(UUID originalFileId, int width, int height,
                                                   File tempFile, String thumbnailFilename) throws IOException {
         try (var thumbnailInputStream = newInputStream(tempFile.toPath())) {
-            var thumbnailFileID = fileService.transferToArtifactStore(thumbnailFilename, thumbnailInputStream);
+            var thumbnailFileID = fileService.transferToEphemeralStore(thumbnailFilename, thumbnailInputStream);
             var thumbnailMapping = thumbnailMappingRepository.findById(originalFileId)
                     .orElseGet(() -> new PersistableThumbnailMapping(originalFileId, new ArrayList<>()));
             thumbnailMapping.addThumbnail(thumbnailFileID, width, height);

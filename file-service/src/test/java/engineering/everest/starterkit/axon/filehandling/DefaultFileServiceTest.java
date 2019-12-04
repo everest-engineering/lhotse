@@ -16,7 +16,7 @@ import java.io.InputStream;
 import java.util.Optional;
 import java.util.UUID;
 
-import static engineering.everest.starterkit.axon.filehandling.FileStoreType.ARTIFACT;
+import static engineering.everest.starterkit.axon.filehandling.FileStoreType.EPHEMERAL;
 import static engineering.everest.starterkit.axon.filehandling.FileStoreType.PERMANENT;
 import static engineering.everest.starterkit.axon.filehandling.NativeStorageType.MONGO_GRID_FS;
 import static java.util.UUID.randomUUID;
@@ -40,11 +40,11 @@ class DefaultFileServiceTest {
     @Mock
     private DeduplicatingFileStore permanentFileStore;
     @Mock
-    private DeduplicatingFileStore artifactFileStore;
+    private DeduplicatingFileStore ephemeralFileStore;
 
     @BeforeEach
     void setUp() {
-        fileService = new DefaultFileService(fileMappingRepository, permanentFileStore, artifactFileStore);
+        fileService = new DefaultFileService(fileMappingRepository, permanentFileStore, ephemeralFileStore);
     }
 
     @Test
@@ -65,30 +65,30 @@ class DefaultFileServiceTest {
             verify(permanentFileStore).store(ORIGINAL_FILENAME, inputStream);
         }
 
-        verifyNoInteractions(artifactFileStore);
+        verifyNoInteractions(ephemeralFileStore);
     }
 
     @Test
-    void transferToArtifactStore_WillDelegateToArtifactStore() throws IOException {
-        when(artifactFileStore.store(eq(ORIGINAL_FILENAME), any(InputStream.class))).thenReturn(new PersistedFile());
+    void transferToEphemeralStore_WillDelegateToEphemeralStore() throws IOException {
+        when(ephemeralFileStore.store(eq(ORIGINAL_FILENAME), any(InputStream.class))).thenReturn(new PersistedFile());
 
         File tempFile = fileService.createTemporaryFile();
         try (FileInputStream inputStream = new FileInputStream(tempFile)) {
-            fileService.transferToArtifactStore(ORIGINAL_FILENAME, inputStream);
-            verify(artifactFileStore).store(ORIGINAL_FILENAME, inputStream);
+            fileService.transferToEphemeralStore(ORIGINAL_FILENAME, inputStream);
+            verify(ephemeralFileStore).store(ORIGINAL_FILENAME, inputStream);
         }
 
         verifyNoInteractions(permanentFileStore);
     }
 
     @Test
-    void transferToArtifactStore_WillDelegateToArtifactStore_WhenNoFilenamespecified() throws IOException {
-        when(artifactFileStore.store(eq(""), any(InputStream.class))).thenReturn(new PersistedFile());
+    void transferToEphemeralStore_WillDelegateToEphemeralStore_WhenNoFilenamespecified() throws IOException {
+        when(ephemeralFileStore.store(eq(""), any(InputStream.class))).thenReturn(new PersistedFile());
 
         File tempFile = fileService.createTemporaryFile();
         try (FileInputStream inputStream = new FileInputStream(tempFile)) {
-            fileService.transferToArtifactStore(inputStream);
-            verify(artifactFileStore).store("", inputStream);
+            fileService.transferToEphemeralStore(inputStream);
+            verify(ephemeralFileStore).store("", inputStream);
         }
 
         verifyNoInteractions(permanentFileStore);
@@ -107,14 +107,14 @@ class DefaultFileServiceTest {
     }
 
     @Test
-    void stream_WillDelegateToArtifactFileStore_WhenFileMapsToArtifactStore() throws IOException {
+    void stream_WillDelegateToEphemeralFileStore_WhenFileMapsToEphemeralStore() throws IOException {
         UUID fileId = randomUUID();
-        PersistedFileIdentifier persistedFileIdentifier = new PersistedFileIdentifier(fileId, ARTIFACT, MONGO_GRID_FS, "native-file-id");
-        PersistableFileMapping persistableFileMapping = new PersistableFileMapping(fileId, ARTIFACT, MONGO_GRID_FS, "native-file-id", "", "", 123L);
+        PersistedFileIdentifier persistedFileIdentifier = new PersistedFileIdentifier(fileId, EPHEMERAL, MONGO_GRID_FS, "native-file-id");
+        PersistableFileMapping persistableFileMapping = new PersistableFileMapping(fileId, EPHEMERAL, MONGO_GRID_FS, "native-file-id", "", "", 123L);
         ByteArrayInputStream inputStreamOngoingStubbing = new ByteArrayInputStream("hello".getBytes());
 
         when(fileMappingRepository.findById(persistedFileIdentifier.getFileId())).thenReturn(Optional.of(persistableFileMapping));
-        when(artifactFileStore.stream(persistedFileIdentifier)).thenReturn(inputStreamOngoingStubbing);
+        when(ephemeralFileStore.stream(persistedFileIdentifier)).thenReturn(inputStreamOngoingStubbing);
         assertEquals(inputStreamOngoingStubbing, fileService.stream(persistedFileIdentifier.getFileId()));
     }
 }

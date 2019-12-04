@@ -98,8 +98,8 @@ dependencies {
     testImplementation "org.springframework.boot:spring-boot-starter-test"
     testImplementation "org.springframework.boot:spring-boot-starter-webflux"
     testImplementation "org.springframework.security:spring-security-test"
-    testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo:2.2.0'
-    testImplementation 'org.apache.commons:commons-text:1.8'
+    testImplementation "de.flapdoodle.embed:de.flapdoodle.embed.mongo:${flapDoodleMongoVersion}"
+    testImplementation "org.apache.commons:commons-text:${commonsTextVersion}"
     testImplementation "org.bouncycastle:bcpkix-jdk15on:${bouncyCastleVersion}"
     testRuntimeOnly "com.h2database:h2:${h2Version}"
 }

@@ -19,15 +19,15 @@ class DefaultFileService implements FileService {
     private final FileMappingRepository fileMappingRepository;
     @Qualifier("permanentFileStore")
     private final DeduplicatingFileStore permanentFileStore;
-    @Qualifier("artifactFileStore")
-    private final DeduplicatingFileStore artifactFileStore;
+    @Qualifier("ephemeralFileStore")
+    private final DeduplicatingFileStore ephemeralFileStore;
 
     public DefaultFileService(FileMappingRepository fileMappingRepository,
                               DeduplicatingFileStore permanentFileStore,
-                              DeduplicatingFileStore artifactFileStore) {
+                              DeduplicatingFileStore ephemeralFileStore) {
         this.fileMappingRepository = fileMappingRepository;
         this.permanentFileStore = permanentFileStore;
-        this.artifactFileStore = artifactFileStore;
+        this.ephemeralFileStore = ephemeralFileStore;
     }
 
     @Override
@@ -43,19 +43,19 @@ class DefaultFileService implements FileService {
     }
 
     @Override
-    public UUID transferToArtifactStore(String filename, InputStream inputStream) throws IOException {
-        return artifactFileStore.store(filename, inputStream).getPersistedFileIdentifier().getFileId();
+    public UUID transferToEphemeralStore(String filename, InputStream inputStream) throws IOException {
+        return ephemeralFileStore.store(filename, inputStream).getPersistedFileIdentifier().getFileId();
     }
 
     @Override
-    public UUID transferToArtifactStore(InputStream inputStream) throws IOException {
-        return transferToArtifactStore("", inputStream);
+    public UUID transferToEphemeralStore(InputStream inputStream) throws IOException {
+        return transferToEphemeralStore("", inputStream);
     }
 
     @Override
     public InputStream stream(UUID fileId) throws IOException {
         PersistableFileMapping persistableFileMapping = fileMappingRepository.findById(fileId).orElseThrow();
-        var fileStore = persistableFileMapping.getFileStoreType().equals(PERMANENT) ? permanentFileStore : artifactFileStore;
+        var fileStore = persistableFileMapping.getFileStoreType().equals(PERMANENT) ? permanentFileStore : ephemeralFileStore;
         return fileStore.stream(persistableFileMapping.getPersistedFileIdentifier());
     }
 }

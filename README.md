@@ -1,10 +1,23 @@
 # Introduction
-This project contains a starter kit for writing event sourced DDD application servers with CQRS. It's like using
-JHipster but with less moustache.
+This project contains a starter kit for writing event sourced web applications following domain driven design principles. 
+
+Based on Spring Boot and the Axon framework, this starter kit offers you:
+ 
+ * horizontal scalability via self forming clusters with distributed command processing
+ * OAuth ready authentication
+ * role based authorisation
+ * event replay capabilities
+ * Prometheus integration
+ * deduplicating filestore abstractions for permanent and ephemeral files
+ * on demand thumbnail generation (and caching)
+ 
+... all in a Kubernetes aware package.
+ 
+It's the perfect way to start your next greenfield project. Like [JHipster](https://www.jhipster.tech) but with less 
+moustache.
  
 The only end user functionality provided out of the box is basic support for creating organisations and users. The 
-sample code is end-to-end, demonstrating the command handling and event processing flow from API endpoints down to 
-projections.  
+sample code demonstrates end-to-end command handling and event processing flows from API endpoints down to projections.  
 
 # Starter kit features
 
@@ -59,8 +72,8 @@ Hazelcast will automatically reassign aggregate ownership if an application inst
 network disconnection or other failure.
 
 Events emitted by an aggregate are passed to the application instance's local event bus. Events are persisted to the 
-event log by the instance handling the command. Subscribing event processing (the default in our configuration) also 
-guarantees that the same instance will be performing the event handling. 
+event log by the instance handling the command. Subscribing event processing (the default in our configuration) guarantee 
+that the same instance will be performing the event handling. 
  
 ### Command validation
 Commands represent user actions that may be rejected by the system. Events, however, represent historical events and can
@@ -73,9 +86,9 @@ overhead.
 
 There is an philosophical argument for defining aggregates such that all information required to validate commands is 
 held by an aggregate in memory. In practice, however, more natural aggregates can be formed by allowing some validation 
-to be based on __projected__ data. We also know from experience that some validation will shared among multiple 
-aggregates. The amount of testing required to verify all possible command failure situations tends to grow non-linearly 
-as the number of checks that are performed inside an aggregate grows. 
+to be based on __projections__. We also know from experience that some validation will shared among multiple aggregates. 
+The amount of testing required to verify all possible command failure situations tends to grow non-linearly as the number 
+of checks that are performed inside an aggregate grows. 
 
 We have addressed this in the `axon-support` and `command-validation-suport` modules through the introduction of marker 
 interfaces that map commands to dedicated command validators. Validators extract common checks or checks based on 
@@ -101,31 +114,31 @@ TEPs introduce additional complexity by not guaranteeing that projections will b
 TEPs should, in our opinion, be only used for longer running processing, during replays and when preparing projections 
 for new feature releases. 
 
-Axon also introduces the concept of processing groups as a way of segmenting and orchestrating event processing by 
-ensuring that events are handled sequentially within a group. By default, Axon assigns each tracking event processor
-(TEP) to its own processing group, aiming to parallelise event processing as much as possible. We take a more 
-conservative approach to make the system easier to reason about by defaulting to subscribing event processing and 
-assigning all event processors to a default processing group.  
+Axon also introduces the concept of processing groups as a way of segmenting and orchestrating event processing, ensuring 
+that events are handled sequentially within a group. By default, Axon assigns each tracking event processor (TEP) to its 
+own processing group, aiming to parallelise event processing as much as possible. We take a more conservative approach to 
+make the system easier to reason about by defaulting to subscribing event processors and assigning them to a default 
+processing group unless explicitly assigned elsewhere.  
 
 ### Event replays
 Event replaying takes the system back to a previous point in time in order to apply a different interpretation of what
 it means to process an event.  
 
-The simplest way of executing an replay is to wipe all projections and then reapply every event ever emitted so as to 
-rebuild projections using the latest logic. This is a valid approach for fledgling applications but may not be acceptable 
-once the system has scaled up. More advanced approaches are made possible by assigning event processors to different 
-processing groups and running a mixture of subscribing and tracking event processors. Advanced configuration opens up 
-the possibility of:
+The simplest way of executing a replay is to wipe all projections and then reapply every event ever emitted so as to 
+rebuild using the latest logic. This is a valid approach for fledgling applications but may not be acceptable once the 
+system has scaled up. More advanced approaches are made possible by assigning event processors to different processing 
+groups and running a mixture of subscribing and tracking event processors. Advanced configuration opens up the 
+possibility of:
 
  * Replaying events into a new projection database while continuing to project to an existing one, making the replay
    transparent to end users. The system can then be switched over to use the new projection while optionally continuing 
    to maintain the old one.
- * Tracking event processing can be used to generate projections for new features that are not yet released to users 
+ * Tracking event processors can be used to generate projections for new features that are not yet released to users 
    until the projections are ready for use.
  * Processing groups allow replays to be limited to bounded contexts that are naturally isolated. 
 
-The starter kit currently lacks programmatic support for triggering replays. Once this is implemented, the steps to 
-perform a replay will be:
+The starter kit currently lacks programmatic support for triggering replays. Once this is implemented, however, the steps 
+to perform a replay will be:
  
  * disconnect the application from load balancers
  * trigger a replay via a JMX or Spring actuator call
@@ -142,8 +155,9 @@ However, as of right now we need to:
  * optionally clear aggregate snapshots from the Axon database
  * clear our projections
  * start up the application 
- * monitor the logs and the tracking tokens to determine when tracking event processors have caught up with
- * change the event processing configuration back to subscribing event processing
+ * monitor the logs and the tracking tokens to determine when tracking event processors have caught up with the tail of 
+   the event log
+ * change the event processing configuration back to subscribing mode
  * restart the application to apply the configuration change
  * reconnect the application to load balancers 
 
@@ -154,9 +168,9 @@ However, as of right now we need to:
 - "identifiable" entities (not aggregates, not projections) answer the actual question
 
 ## File storage support
-The `file-service` module implements two file stores: one is referred to as _permanent_, the other as the _artefact_ store. 
-The permanent file store is for storing critical files that, such as user uploads, cannot be recovered. The artefact store 
-is for non-critical files that can be regenerated by the system either dynamically or via an event replay.   
+The `file-service` module implements two file stores: one is referred to as _permanent_, the other as the _ephemeral_ 
+store. The permanent file store is for storing critical files that, such as user uploads, cannot be recovered. The 
+ephemeral store is for non-critical files that can be regenerated by the system either dynamically or via an event replay.   
 
 File stores need backing service such as a blob store or filesystem. This starter kit only supports 
 [Mongo GridFS](https://docs.mongodb.com/manual/core/gridfs/) at time of writing.
@@ -166,47 +180,46 @@ a previous file will return a (new) file identifier mapping to the original. The
 silently removed. 
 
 ## Thumbnail support
-The `thumbnail-support` module generates thumbnail images on the fly, caching them in the artefact file store for 
-subsequent requests. Thumbnail sizes are limited to prevent the system from being overwhelmed but no API rate limiting is 
-applied yet. Consider adding it and contributing back to this repository!
+The `thumbnail-support` module generates thumbnail images on the fly, caching them in the ephemeral file store for 
+subsequent requests. Thumbnail sizes are limited to prevent the system from being overwhelmed but no API rate limiting 
+has been applied yet.
 
 ## Security support
-
-The `security-support` modules are built upon 
+The `security-support` modules build on 
 [Spring Security OAuth](https://projects.spring.io/spring-security-oauth/docs/oauth2.html).
-Out of the box, it sets up both an auth server
-and a resource server and facilitates an authenticatin and authorization workflow based on
-[OAuth2](https://oauth.net/2/) and [JWT](https://jwt.io/). The session configuration is
-stateless which makes it easy to scale out.
+Out of the box, it sets up both an __authentication server__ and a __resource server__ (the main application) that 
+facilitate an authentication and authorisation workflow based on [OAuth2](https://oauth.net/2/). Stateless sessions 
+using [Jason Web Tokens](https://jwt.io/) (JWT) makes is easy to extract microservices.
 
-The resource server refers to the main application where the business logic resides.
-The auth server is just responsible for issuing JWT tokens, which can be verified 
-by the resource server. 
-The current setup has both authorization and resource servers run as a single application.
-The OAuth2 workflow uses the simple [password grant](https://oauth.net/2/grant-types/password/)
-approach. A single hard-coded client, `web-app-ui`, is configured for the auth server to perform the authentication flow. It is expected that front-end UI will be assuming this client ID to
-perform authentication on behalf of the end users.
+JWT tokens are issued by the authentication server which client applications include as part of the `Authorization`
+header included with every API request. The main application -- the resource server in OAuth parlance -- uses a shared
+secret to validate each request and enforces role based authorisation.   
 
-It is not mandatory for the auth server to run along side the resource server. 
-If necessary, the auth server can be easily split out into its own service and 
-potentially serve other resource servers.
-The resource server can also be configured to use a 3rd party OAuth2 provider, e.g. GitHub.
-These two are fairly independant.
-Because of the rather independant nature of the two servers, the same authenticated User is also 
-represented differently on each server. We believe the authentication should be handled 
-by the auth server while authorization should be handled by the resource server.
-Hence on the auth server side, the user object provides only necessary information, 
-e.g. password, for authentication purpose. While on the resource server
-side, the user object provides role information for authorization and all other business 
-related information, e.g. display name etc. In summary, only the authentication is delegated
-to the auth server, the resource server handles everything else.
+Our initial set up has both authentication and resource servers running together in a single application.  A single 
+hard-coded client, `web-app-ui`, is configured in the authentication server to support the 
+[password grant](https://oauth.net/2/grant-types/password/) approach to exchanging credentials. Front end applications 
+need to specify this identify to perform authentication on behalf of end users.
 
+If necessary, the authentication server can be extracted into its own service to serve multiple resource servers. Third
+party authentication OAuth2 providers can also be integrated with the resource server.
+ 
 
 ## ETag HTTP headers
 [ETag HTTP headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag) are enabled by default for all API 
 endpoints via a shallow filter. The filter is unaware of any changes made to underlying data so while clients may use the
 ETag to avoid unnecessary transfers and client side processing, there is no benefit to application server performance.
 
+# Feature request list
+Here are some ideas for future features that we'd like to support out of the box:
+
+ * API error code enhancements to make it easier for UIs to consume error responses
+ * Internationalisation support
+ * Programmatic replay triggering
+ * (Optional) authentication server out of the box 
+ * Out of the box support for common OAuth2 authentication providers
+ * API rate limiting
+ * More cloud provider file stores
+ 
 
 # Tooling
 This project uses [Java 11](https://openjdk.java.net/projects/jdk/11/).

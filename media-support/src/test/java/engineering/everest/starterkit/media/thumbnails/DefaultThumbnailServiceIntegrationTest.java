@@ -82,23 +82,23 @@ class DefaultThumbnailServiceIntegrationTest {
     }
 
     @Test
-    void willStreamExistingThumbnailForGivenDimension_WhenCachedInArtifactFileStore() throws IOException {
+    void willStreamExistingThumbnailForGivenDimension_WhenCachedInEphemeralFileStore() throws IOException {
         assertEquals(file1Thumbnail1InputStream, thumbnailService.streamThumbnailForOriginalFile(SOURCE_FILE_ID_1, SMALL_WIDTH, SMALL_HEIGHT));
         assertEquals(file1Thumbnail2InputStream, thumbnailService.streamThumbnailForOriginalFile(SOURCE_FILE_ID_1, LARGE_WIDTH, LARGE_HEIGHT));
         assertEquals(file2Thumbnail1InputStream, thumbnailService.streamThumbnailForOriginalFile(SOURCE_FILE_ID_2, SMALL_WIDTH, SMALL_HEIGHT));
 
-        verify(fileService, never()).transferToArtifactStore(anyString(), any(InputStream.class));
-        verify(fileService, never()).transferToArtifactStore(any(InputStream.class));
+        verify(fileService, never()).transferToEphemeralStore(anyString(), any(InputStream.class));
+        verify(fileService, never()).transferToEphemeralStore(any(InputStream.class));
     }
 
     @Test
-    void willCreateThumbnailOnTheFlyAndPersistInArtifactStore_WhenSourceFileHasNoCachedThumbnails() throws IOException {
+    void willCreateThumbnailOnTheFlyAndPersistInEphemeralStore_WhenSourceFileHasNoCachedThumbnails() throws IOException {
         UUID newSourceFileId = randomUUID();
         UUID newThumbnailFileId = randomUUID();
 
         String expectedThumbnailFilename = String.format("%s-thumbnail-%sx%s.png", newSourceFileId, SMALL_WIDTH, SMALL_HEIGHT);
         when(fileService.stream(newSourceFileId)).thenReturn(getTestInputStream("new-image.jpg"));
-        when(fileService.transferToArtifactStore(eq(expectedThumbnailFilename), any(InputStream.class))).thenReturn(newThumbnailFileId);
+        when(fileService.transferToEphemeralStore(eq(expectedThumbnailFilename), any(InputStream.class))).thenReturn(newThumbnailFileId);
         when(fileService.stream(newSourceFileId)).thenReturn(getTestInputStream("new-image.jpg"));
         InputStream newThumbnailInputStream = mock(InputStream.class);
         when(fileService.stream(newThumbnailFileId)).thenReturn(newThumbnailInputStream);
@@ -116,7 +116,7 @@ class DefaultThumbnailServiceIntegrationTest {
         int newWidth = 1234;
         int newHeight = 5678;
         String expectedThumbnailFilename = String.format("%s-thumbnail-%sx%s.png", SOURCE_FILE_ID_1, newWidth, newHeight);
-        when(fileService.transferToArtifactStore(eq(expectedThumbnailFilename), any(InputStream.class))).thenReturn(newThumbnailFileId);
+        when(fileService.transferToEphemeralStore(eq(expectedThumbnailFilename), any(InputStream.class))).thenReturn(newThumbnailFileId);
         when(fileService.stream(SOURCE_FILE_ID_1)).thenReturn(getTestInputStream("existing-image.jpg"));
         InputStream newThumbnailInputStream = mock(InputStream.class);
         when(fileService.stream(newThumbnailFileId)).thenReturn(newThumbnailInputStream);

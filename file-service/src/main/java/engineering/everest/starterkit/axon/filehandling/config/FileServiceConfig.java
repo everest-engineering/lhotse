@@ -10,7 +10,7 @@ import org.springframework.data.mongodb.MongoDbFactory;
 import org.springframework.data.mongodb.core.convert.MongoConverter;
 import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 
-import static engineering.everest.starterkit.axon.filehandling.FileStoreType.ARTIFACT;
+import static engineering.everest.starterkit.axon.filehandling.FileStoreType.EPHEMERAL;
 import static engineering.everest.starterkit.axon.filehandling.FileStoreType.PERMANENT;
 
 @Configuration
@@ -26,11 +26,11 @@ public class FileServiceConfig {
     }
 
     @Bean
-    @Qualifier("artifactFileStore")
-    DeduplicatingFileStore artifactFileStore(FileMappingRepository fileMappingRepository,
+    @Qualifier("ephemeralFileStore")
+    DeduplicatingFileStore ephemeralFileStore(FileMappingRepository fileMappingRepository,
                                              MongoConverter mongoConverter,
                                              MongoDbFactory dbFactory) {
-        GridFsTemplate gridFs = new GridFsTemplate(dbFactory, mongoConverter, "fs.artifact");
-        return new MongoGridFsNativeDeduplicatingFileStore(ARTIFACT, gridFs, fileMappingRepository);
+        GridFsTemplate gridFs = new GridFsTemplate(dbFactory, mongoConverter, "fs.ephemeral");
+        return new MongoGridFsNativeDeduplicatingFileStore(EPHEMERAL, gridFs, fileMappingRepository);
     }
 }

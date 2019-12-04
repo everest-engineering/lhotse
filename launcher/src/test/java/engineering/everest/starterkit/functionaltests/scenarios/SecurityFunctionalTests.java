@@ -17,7 +17,10 @@ import java.nio.file.Paths;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-@SpringBootTest(webEnvironment = RANDOM_PORT, classes = Launcher.class)
+@SpringBootTest(
+        webEnvironment = RANDOM_PORT,
+        classes = Launcher.class,
+        properties = {"spring.data.mongodb.host=", "spring.data.mongodb.port="})
 @ActiveProfiles("standalone")
 class SecurityFunctionalTests {
 

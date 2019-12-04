@@ -11,9 +11,9 @@ public interface FileService {
 
     UUID transferToPermanentStore(String originalFilename, InputStream inputStream) throws IOException;
 
-    UUID transferToArtifactStore(String filename, InputStream inputStream) throws IOException;
+    UUID transferToEphemeralStore(String filename, InputStream inputStream) throws IOException;
 
-    UUID transferToArtifactStore(InputStream inputStream) throws IOException;
+    UUID transferToEphemeralStore(InputStream inputStream) throws IOException;
 
     InputStream stream(UUID fileId) throws IOException;
 }

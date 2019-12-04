@@ -53,6 +53,7 @@ subprojects {
         axonVersion = '4.2'
         commonsLangVersion = '3.9'
         commonsValidatorVersion = '1.6'
+        swaggerVersion = '2.9.2'
         ehCacheVersion = '3.8.1'
         kubernetesClientVersion = '6.0.1'
         guavaVersion = '28.1-jre'
@@ -63,17 +64,18 @@ subprojects {
         javaXPersistenceVersion = '2.2'
         postgresDriverVersion = '42.2.8'
         thumbnailatorVersion = '0.4.8'
-
-        swaggerVersion = '2.9.2'
-        junitVersion = '5.5.2'
-        hamcrestVersion = '2.1'
-        mockitoVersion = '2.23.0'
-        jjwtVersion = '0.10.7'
-        h2Version = '1.4.199'
         bouncyCastleVersion = '1.64'
         microMeterPrometheusRegistry = '1.3.1'
         prometheusPushGateway = '0.8.0'
         aspectjVersion = '1.9.4'
+        jjwtVersion = '0.10.7'
+        commonsTextVersion = '1.8'
+
+        junitVersion = '5.5.2'
+        hamcrestVersion = '2.1'
+        mockitoVersion = '2.23.0'
+        h2Version = '1.4.199'
+        flapDoodleMongoVersion = '2.2.0'
     }
 
     dependencyManagement {
