@@ -11,9 +11,9 @@ projections.
 ## Axon: DDD and event sourcing simplified (a little bit)
 Previously known as Axon Framework, [Axon](https://axoniq.io/) is a framework for implementing 
 [domain driven design](https://dddcommunity.org/learning-ddd/what_is_ddd/) using 
-[event sourced])https://martinfowler.com/eaaDev/EventSourcing.html) 
+[event sourced](https://martinfowler.com/eaaDev/EventSourcing.html) 
 [aggregates](https://www.martinfowler.com/bliki/DDD_Aggregate.html) and 
-[CQRS](https://www.martinfowler.com/bliki/CQRS.html.
+[CQRS](https://www.martinfowler.com/bliki/CQRS.html).
 
 DDD is, at its core, about __linguistics__. Establishing a ubiquitous language helps identify sources of overlap or 
 tension in conceptual understanding that __may be__ indicative of a separation of concern in a system. Rather than
