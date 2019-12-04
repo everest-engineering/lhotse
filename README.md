@@ -2,8 +2,9 @@
 This project contains a starter kit for writing event sourced DDD application servers with CQRS. It's like using
 JHipster but with less moustache.
  
-The only functionality provided out of the box is basic support for creating organisations and users. The sample code
-is end-to-end, demonstrating the command handling and event processing flow from API endpoints down to projections.  
+The only end user functionality provided out of the box is basic support for creating organisations and users. The 
+sample code is end-to-end, demonstrating the command handling and event processing flow from API endpoints down to 
+projections.  
 
 # Starter kit features
 
@@ -37,7 +38,7 @@ of projections for use by the query side of the system. Being able to replay eve
 Axon provides the event sourcing framework. User actions of interest to a business (typically anything that modifies data)
 are dispatched to command handlers that, after validation, emit events.
  
-### Distributed command processing
+### Distributed command handling
 Part of Axon's appeal is the ability to horizontally scale an application. A typical Axon deployment will rely on Axon 
 Server to implement command and event dispatching, and event log persistence. A commercial license of Axon Server is 
 needed, however, to fully support distributed command processing. Axon Server also adds maintenance and configuration 
@@ -50,8 +51,8 @@ to form a cluster.
 
 Commands dispatched through the Hazelcast command gateway are deterministically routed to a single application instance 
 which, based on the aggregate identifier, has ownership of an aggregate for as long as that instance remains a member of
-the cluster. This clear aggregate ownership is vital to avoid a split brain scenario as aggregates are responsible for 
-command validation and are cached in memory. A split brain situation could arise if multiple unsynchronised copies were 
+the cluster. This clear aggregate ownership is vital to avoid a split brain scenario as aggregates are cached in memory
+and are responsible for command validation. A split brain situation could arise if multiple unsynchronised copies were 
 to be distributed among cluster members. 
 
 Hazelcast will automatically reassign aggregate ownership if an application instance leaves the cluster due to a restart,
@@ -60,7 +61,6 @@ network disconnection or other failure.
 Events emitted by an aggregate are passed to the application instance's local event bus. Events are persisted to the 
 event log by the instance handling the command. Subscribing event processing (the default in our configuration) also 
 guarantees that the same instance will be performing the event handling. 
-
  
 ### Command validation
 Commands represent user actions that may be rejected by the system. Events, however, represent historical events and can
@@ -69,24 +69,84 @@ robust command validation be performed to protect the integrity of the system.
  
 If events are ever emitted in error then this creates a situation that should only be addressed by generating events
 countering the erroneous ones. This, naturally, comes with a significant cost in terms of implementation and validation
-overhead.  
+overhead.
 
-There is an justifiable argument for defining aggregates such that all information required to validate a command is held
-by an aggregate. In practice, however, more natural aggregates can be formed by allowing some validation to be 
-performed based on projections. Experience also has demonstrated that some validation will shared by multiple aggregates.
-The amount of testing required to verify all possible command failure situations tends to grow geometrically as the 
-number of checks that are performed inside an aggregate grows.
+There is an philosophical argument for defining aggregates such that all information required to validate commands is 
+held by an aggregate in memory. In practice, however, more natural aggregates can be formed by allowing some validation 
+to be based on __projected__ data. We also know from experience that some validation will shared among multiple 
+aggregates. The amount of testing required to verify all possible command failure situations tends to grow non-linearly 
+as the number of checks that are performed inside an aggregate grows. 
 
 We have addressed this in the `axon-support` and `command-validation-suport` modules through the introduction of marker 
-interfaces that maps commands to dedicated command validators. Validators extract common checks or checks based on 
+interfaces that map commands to dedicated command validators. Validators extract common checks or checks based on 
 projections and allow them to be tested independently. Aggregate tests just need to ensure that a failure in the validator 
 fails command validation. Since this design opens up the possibility of a validator to be missed, reflection is used to 
 detect validators at application start up and register them with a command interceptor that is triggered prior to the 
-command handler method being called. This has significantly reduced testing effort and human error.
+command handler method being called. This significantly reduces testing effort and human error.
 
-### Replays (TODO)
-- what they are, why they're so important
-- subscribing event processors vs tracking event processors
+### Event processing
+Axon provides two types of event processors: 
+[subscribing and tracking](https://docs.axoniq.io/reference-guide/configuring-infrastructure-components/event-processing/event-processors).
+
+Subscribing processors execute on the same thread that is publishing the event. This allow command dispatching to wait 
+until the event has been both appended to the event store and all event handling as completed. Commands are queued for
+processing on a FIFO basis. It is important, therefore, to not use them for long running tasks.  
+
+Tracking event processors (TEPs), in contrast, execute in their own thread, monitoring the event store for new events. 
+TEPs track their progress consuming events using tracking tokens persisted in the database. TEPs hold ownership of the 
+tokens, preventing multiple application instances from concurrently performing the same processing. Token ownership 
+passes to another application instance in the event that a token owner is shut down or restarted.  
+
+TEPs introduce additional complexity by not guaranteeing that projections will be up to date when an API call has ended. 
+TEPs should, in our opinion, be only used for longer running processing, during replays and when preparing projections 
+for new feature releases. 
+
+Axon also introduces the concept of processing groups as a way of segmenting and orchestrating event processing by 
+ensuring that events are handled sequentially within a group. By default, Axon assigns each tracking event processor
+(TEP) to its own processing group, aiming to parallelise event processing as much as possible. We take a more 
+conservative approach to make the system easier to reason about by defaulting to subscribing event processing and 
+assigning all event processors to a default processing group.  
+
+### Event replays
+Event replaying takes the system back to a previous point in time in order to apply a different interpretation of what
+it means to process an event.  
+
+The simplest way of executing an replay is to wipe all projections and then reapply every event ever emitted so as to 
+rebuild projections using the latest logic. This is a valid approach for fledgling applications but may not be acceptable 
+once the system has scaled up. More advanced approaches are made possible by assigning event processors to different 
+processing groups and running a mixture of subscribing and tracking event processors. Advanced configuration opens up 
+the possibility of:
+
+ * Replaying events into a new projection database while continuing to project to an existing one, making the replay
+   transparent to end users. The system can then be switched over to use the new projection while optionally continuing 
+   to maintain the old one.
+ * Tracking event processing can be used to generate projections for new features that are not yet released to users 
+   until the projections are ready for use.
+ * Processing groups allow replays to be limited to bounded contexts that are naturally isolated. 
+
+The starter kit currently lacks programmatic support for triggering replays. Once this is implemented, the steps to 
+perform a replay will be:
+ 
+ * disconnect the application from load balancers
+ * trigger a replay via a JMX or Spring actuator call
+ * monitor the state of replay via a Spring actuator endpoint 
+ * reconnect the application to load balancers 
+
+However, as of right now we need to:
+
+ * disconnect the application from load balancers
+ * shut down the application nodes
+ * change the event processing configuration from subscribing event processors to 
+   [tracking event processors](https://axoniq.io/blog-overview/tracking-event-processors)
+ * clear the tracking tokens (if present) in the Axon database
+ * optionally clear aggregate snapshots from the Axon database
+ * clear our projections
+ * start up the application 
+ * monitor the logs and the tracking tokens to determine when tracking event processors have caught up with
+ * change the event processing configuration back to subscribing event processing
+ * restart the application to apply the configuration change
+ * reconnect the application to load balancers 
+
 
 ## Endpoint access control (TODO)
 - annotations
