@@ -19,7 +19,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class AdminUserDetailsServiceTest {
+class AppUserDetailsServiceTest {
 
     private static final String USER_NAME = "admin@example.com";
     private static final User USER = new User(randomUUID(), randomUUID(), USER_NAME, "a user");
@@ -27,25 +27,25 @@ class AdminUserDetailsServiceTest {
     @Mock
     private UsersReadService usersReadService;
 
-    private AdminUserDetailsService adminUserDetailsService;
+    private AppUserDetailsService appUserDetailsService;
 
     @BeforeEach
     void setUp() {
-        adminUserDetailsService = new AdminUserDetailsService(usersReadService);
+        appUserDetailsService = new AppUserDetailsService(usersReadService);
     }
 
     @Test
     void willLoadUserByUsername() {
         when(usersReadService.getUserByUsername(USER_NAME)).thenReturn(USER);
-        UserDetails userDetails = adminUserDetailsService.loadUserByUsername(USER_NAME);
+        UserDetails userDetails = appUserDetailsService.loadUserByUsername(USER_NAME);
 
-        assertEquals(new AdminUserDetails(USER), userDetails);
+        assertEquals(new AppUserDetails(USER), userDetails);
     }
 
     @Test
     void willThrowUsernameNotFoundException_WhenUserIsNotFound() {
         doThrow(NoSuchElementException.class).when(usersReadService).getUserByUsername(USER_NAME);
-        assertThrows(UsernameNotFoundException.class, () -> adminUserDetailsService.loadUserByUsername(USER_NAME));
+        assertThrows(UsernameNotFoundException.class, () -> appUserDetailsService.loadUserByUsername(USER_NAME));
     }
 
 }

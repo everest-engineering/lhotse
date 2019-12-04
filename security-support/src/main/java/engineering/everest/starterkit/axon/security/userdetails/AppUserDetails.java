@@ -8,7 +8,7 @@ import lombok.experimental.Delegate;
 import org.springframework.security.core.userdetails.UserDetails;
 
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class AdminUserDetails implements UserDetails {
+public class AppUserDetails implements UserDetails {
 
     @Getter
     @EqualsAndHashCode.Include
@@ -17,7 +17,7 @@ public class AdminUserDetails implements UserDetails {
     @Delegate(types = UserDetails.class)
     private final UserDetails userDetails;
 
-    public AdminUserDetails(User user) {
+    public AppUserDetails(User user) {
         this.user = user;
         this.userDetails = org.springframework.security.core.userdetails.User.builder()
                 .username(user.getUsername())

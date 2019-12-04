@@ -31,8 +31,8 @@ public class AdminProvisionTask {
 
     public AdminProvisionTask(UsersRepository usersRepository,
                               PasswordEncoder passwordEncoder,
-                              @Value("admin") String adminUsername,
-                              @Value("ac0n3x72") String adminPassword) {
+                              @Value("${application.setup.admin.username}") String adminUsername,
+                              @Value("${application.setup.admin.password}") String adminPassword) {
         this.usersRepository = usersRepository;
         this.passwordEncoder = passwordEncoder;
         this.adminUsername = adminUsername;

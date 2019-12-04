@@ -170,7 +170,36 @@ The `thumbnail-support` module generates thumbnail images on the fly, caching th
 subsequent requests. Thumbnail sizes are limited to prevent the system from being overwhelmed but no API rate limiting is 
 applied yet. Consider adding it and contributing back to this repository!
 
-## Security support (TODO)
+## Security support
+
+The `security-support` modules are built upon 
+[Spring Security OAuth](https://projects.spring.io/spring-security-oauth/docs/oauth2.html).
+Out of the box, it sets up both an auth server
+and a resource server and facilitates an authenticatin and authorization workflow based on
+[OAuth2](https://oauth.net/2/) and [JWT](https://jwt.io/). The session configuration is
+stateless which makes it easy to scale out.
+
+The resource server refers to the main application where the business logic resides.
+The auth server is just responsible for issuing JWT tokens, which can be verified 
+by the resource server. 
+The current setup has both authorization and resource servers run as a single application.
+The OAuth2 workflow uses the simple [password grant](https://oauth.net/2/grant-types/password/)
+approach. A single hard-coded client, `web-app-ui`, is configured for the auth server to perform the authentication flow. It is expected that front-end UI will be assuming this client ID to
+perform authentication on behalf of the end users.
+
+It is not mandatory for the auth server to run along side the resource server. 
+If necessary, the auth server can be easily split out into its own service and 
+potentially serve other resource servers.
+The resource server can also be configured to use a 3rd party OAuth2 provider, e.g. GitHub.
+These two are fairly independant.
+Because of the rather independant nature of the two servers, the same authenticated User is also 
+represented differently on each server. We believe the authentication should be handled 
+by the auth server while authorization should be handled by the resource server.
+Hence on the auth server side, the user object provides only necessary information, 
+e.g. password, for authentication purpose. While on the resource server
+side, the user object provides role information for authorization and all other business 
+related information, e.g. display name etc. In summary, only the authentication is delegated
+to the auth server, the resource server handles everything else.
 
 
 ## ETag HTTP headers

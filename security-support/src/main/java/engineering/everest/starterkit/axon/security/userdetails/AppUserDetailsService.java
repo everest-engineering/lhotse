@@ -10,11 +10,11 @@ import org.springframework.stereotype.Component;
 import java.util.NoSuchElementException;
 
 @Component("adminUserDetailsService")
-public class AdminUserDetailsService implements UserDetailsService {
+public class AppUserDetailsService implements UserDetailsService {
 
     private final UsersReadService usersReadService;
 
-    public AdminUserDetailsService(UsersReadService usersReadService) {
+    public AppUserDetailsService(UsersReadService usersReadService) {
         this.usersReadService = usersReadService;
     }
 
@@ -26,6 +26,6 @@ public class AdminUserDetailsService implements UserDetailsService {
         } catch (NoSuchElementException e) {
             throw new UsernameNotFoundException("Invalid credentials", e);
         }
-        return new AdminUserDetails(user);
+        return new AppUserDetails(user);
     }
 }

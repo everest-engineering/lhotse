@@ -1,6 +1,6 @@
 package engineering.everest.starterkit.axon.security;
 
-import engineering.everest.starterkit.axon.security.userdetails.AdminUserDetails;
+import engineering.everest.starterkit.axon.security.userdetails.AppUserDetails;
 import engineering.everest.starterkit.axon.common.domain.User;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,9 +25,9 @@ public class DefaultAuthenticationContextProvider implements AuthenticationConte
 
     private User convert(Authentication authentication) {
         final var principal = authentication.getPrincipal();
-        if (!(principal instanceof AdminUserDetails)) {
+        if (!(principal instanceof AppUserDetails)) {
             throw new AuthenticationFailureException("Principle object is not valid");
         }
-        return ((AdminUserDetails) principal).getUser();
+        return ((AppUserDetails) principal).getUser();
     }
 }

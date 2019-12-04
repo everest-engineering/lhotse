@@ -1,7 +1,7 @@
 package engineering.everest.starterkit.axon.security;
 
 import engineering.everest.starterkit.axon.common.domain.User;
-import engineering.everest.starterkit.axon.security.userdetails.AdminUserDetails;
+import engineering.everest.starterkit.axon.security.userdetails.AppUserDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,7 +23,7 @@ class DefaultAuthenticationContextProviderTest {
 
     private static final String USER_NAME = "foo@example.com";
     private static final User USER = new User(randomUUID(), randomUUID(), USER_NAME, "");
-    private static final AdminUserDetails ADMIN_USER_DETAILS = new AdminUserDetails(USER);
+    private static final AppUserDetails ADMIN_USER_DETAILS = new AppUserDetails(USER);
 
     @Mock
     private SecurityContext securityContext;

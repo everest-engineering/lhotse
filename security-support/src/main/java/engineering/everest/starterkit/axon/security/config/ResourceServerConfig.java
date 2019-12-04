@@ -1,6 +1,6 @@
 package engineering.everest.starterkit.axon.security.config;
 
-import engineering.everest.starterkit.axon.security.userdetails.AdminUserDetailsService;
+import engineering.everest.starterkit.axon.security.userdetails.AppUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,10 +35,10 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
     private final JwtAccessTokenConverter jwtAccessTokenConverter;
 
     @Autowired
-    public ResourceServerConfig(JwtAccessTokenConverter jwtAccessTokenConverter, AdminUserDetailsService adminUserDetailsService) {
+    public ResourceServerConfig(JwtAccessTokenConverter jwtAccessTokenConverter, AppUserDetailsService appUserDetailsService) {
         super();
         var defaultUserAuthenticationConverter = new DefaultUserAuthenticationConverter();
-        defaultUserAuthenticationConverter.setUserDetailsService(adminUserDetailsService);
+        defaultUserAuthenticationConverter.setUserDetailsService(appUserDetailsService);
         var accessTokenConverter = (DefaultAccessTokenConverter) jwtAccessTokenConverter.getAccessTokenConverter();
         accessTokenConverter.setUserTokenConverter(defaultUserAuthenticationConverter);
         this.jwtAccessTokenConverter = jwtAccessTokenConverter;
