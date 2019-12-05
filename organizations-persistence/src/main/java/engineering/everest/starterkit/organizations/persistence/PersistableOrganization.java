@@ -1,6 +1,5 @@
 package engineering.everest.starterkit.organizations.persistence;
 
-import engineering.everest.starterkit.axon.common.domain.Identifiable;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
@@ -12,7 +11,7 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @Document(collection = "organizations")
-public class PersistableOrganization implements Identifiable {
+public class PersistableOrganization {
 
     @Id
     private UUID id;

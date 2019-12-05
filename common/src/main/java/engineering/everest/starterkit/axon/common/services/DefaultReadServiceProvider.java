@@ -32,6 +32,11 @@ public class DefaultReadServiceProvider implements ReadServiceProvider {
     }
 
     @Override
+    public ReadService<? extends Identifiable> getService(Class<?> clazz) {
+        return getService(clazz.getSimpleName());
+    }
+
+    @Override
     public ReadService<? extends Identifiable> getService(String classSimpleName) {
         return readerServicesLookup.get(classSimpleName);
     }

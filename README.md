@@ -162,10 +162,34 @@ However, as of right now we need to:
  * reconnect the application to load balancers 
 
 
-## Endpoint access control (TODO)
-- annotations
-- follow the pattern!
-- "identifiable" entities (not aggregates, not projections) answer the actual question
+## Endpoint access control
+Controller end-points are secured based on user roles, properties and entity permissions. Annotations are used to
+configure the access control for each handler method. To reduce repetition and improve readability, a few
+meta-annotations are created for common security configuration, e.g. `AdminOrAdminOfTargetOrganization`. There are
+situations when user roles and properties are not sufficient to determine the access control. This is where the entity
+permission check comes in.  An entity in this case is a representation of domain object in the application layer. It
+corresponds to at least one persistable object. For an example, one `Organization` entity corresponds to one
+`PersistableOrganization`.  To put it simply in the event sourcing context, it can be just considered as the projection. 
+
+The entity permission check is specified within the security annotation and takes the form of `hasPermission(#entityId,
+'EntityClassName', 'permissionType')`.  This expression is evaluated by `EntityPermissionEvaluator`, which in turn
+delegates to corresponding permission check methods of an entity, where customized permission requirements can be
+implemented.  This workflow is made possible by: a) having all entity classes implementing the `Identifiable` interface
+and b) having a `ReadService` for each `Identifable` entity. The `Identifiable` interface provides default *reject all*
+permission checks which can be overridden by implementing entities. The `ReadService` provides a way to load an entity
+by its simple class name. To help managing increasing number of `ReadService`, the starter kit provides a
+`ReadServiceProvider` bean which collects all `ReadService` beans during start of the application context.
+
+When adding new controllers and security configurations, it is important to refer to existing patterns and ensure
+consistency. This also applies to tests where  fixtures are provided to support the necessary *automagic* behaviours. 
+
+### User and Authentication Context
+An User object in the business domain often requires more attributes than the User object from spring security module.
+For an example, the starter kit's User object has an extra `organizationId` property. To bridge this difference for
+authentication context, a `AuthenticationContextProvider` bean is configured to get a domain User object from the
+authentication context. This domain User object can be injected into any controller handler methods so that any user
+properties can be easily checked for security purpose.
+
 
 ## File storage support
 The `file-service` module implements two file stores: one is referred to as _permanent_, the other as the _ephemeral_ 
