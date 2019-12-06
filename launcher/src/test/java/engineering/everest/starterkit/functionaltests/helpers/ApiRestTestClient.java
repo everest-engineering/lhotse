@@ -32,7 +32,7 @@ public class ApiRestTestClient {
     }
 
     public void loginAsAdmin() {
-        login("admin", "ac0n3x72");
+        login("admin@everest.engineering", "ac0n3x72");
     }
 
     public void login(String username, String password) {
@@ -99,6 +99,23 @@ public class ApiRestTestClient {
     public void removeOrgAdminUser(UUID userId, HttpStatus expectedHttpStatus) {
         webTestClient.delete().uri("/api/org-admins/{userId}", userId)
                 .header("Authorization", "Bearer " + accessToken)
+                .exchange()
+                .expectStatus().isEqualTo(expectedHttpStatus);
+    }
+
+    public Map<String, Object> getReplayStatus(HttpStatus expectedHttpStatus) {
+        return webTestClient.get().uri("/actuator/replay")
+                .header("Authorization", "Bearer " + accessToken)
+                .exchange()
+                .expectStatus().isEqualTo(expectedHttpStatus)
+                .returnResult(new ParameterizedTypeReference<Map<String, Object>>() {
+                }).getResponseBody().blockFirst();
+    }
+
+    public void triggerReplay(HttpStatus expectedHttpStatus) {
+        webTestClient.post().uri("/actuator/replay")
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isEqualTo(expectedHttpStatus);
     }

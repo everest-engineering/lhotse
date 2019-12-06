@@ -39,11 +39,6 @@
       "name": "graph.neo4j.password",
       "type": "java.lang.String",
       "description": "Description for graph.neo4j.password."
-    },
-    {
-      "name": "application.axon.tracking-event-processor",
-      "type": "java.lang.String",
-      "description": "Description for application.axon.tracking-event-processor."
     }
   ]
 }
