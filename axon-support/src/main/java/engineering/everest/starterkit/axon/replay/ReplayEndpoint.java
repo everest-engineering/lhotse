@@ -60,6 +60,10 @@ public class ReplayEndpoint {
             var switchingEventProcessors = processingGroups == null
                     ? getSwitchingEventProcessors() : getSwitchingEventProcessors(processingGroups);
 
+            if (switchingEventProcessors.isEmpty()) {
+                throw new IllegalStateException("No matching SwitchingEventProcessor");
+            }
+
             EventStore eventStore = axonConfiguration.eventStore();
             var trackingToken = startTime == null
                     ? eventStore.createTailToken() : eventStore.createTokenAt(startTime.toInstant());
@@ -87,7 +91,9 @@ public class ReplayEndpoint {
     }
 
     private void stopReplay() {
-        taskExecutor.execute(() -> ensureSwitchableEventProcessor().stopReplay());
+        taskExecutor.execute(() -> getSwitchingEventProcessors().stream()
+                .filter(SwitchingEventProcessor::isRelaying)
+                .forEach(SwitchingEventProcessor::stopReplay));
     }
 
     private boolean isReplaying() {
@@ -108,14 +114,6 @@ public class ReplayEndpoint {
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(toList());
-    }
-
-    private SwitchingEventProcessor ensureSwitchableEventProcessor() {
-        var eventProcessor = axonConfiguration.eventProcessingConfiguration().eventProcessor("default").orElseThrow();
-        if (!(eventProcessor instanceof SwitchingEventProcessor)) {
-            throw new RuntimeException("cannot back to normal while event processor is not switchable");
-        }
-        return (SwitchingEventProcessor) eventProcessor;
     }
 
 }

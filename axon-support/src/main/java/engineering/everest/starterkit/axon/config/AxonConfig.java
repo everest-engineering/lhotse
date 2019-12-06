@@ -68,7 +68,6 @@ public class AxonConfig {
     public void configure(AxonConfiguration axonConfiguration,
                           EventProcessingModule eventProcessingModule) {
         eventProcessingModule.byDefaultAssignTo("default");
-
         eventProcessingModule.registerEventProcessorFactory(
                 new SwitchingEventProcessorBuilder(axonConfiguration, eventProcessingModule));
     }

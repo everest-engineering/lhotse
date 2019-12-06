@@ -1,12 +1,13 @@
 package engineering.everest.starterkit.axon.config;
 
 import engineering.everest.starterkit.axon.CommandValidatingMessageHandlerInterceptor;
+import engineering.everest.starterkit.axon.replay.SwitchingEventProcessorBuilder;
 import org.axonframework.commandhandling.CommandBus;
 import org.axonframework.commandhandling.SimpleCommandBus;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.commandhandling.gateway.DefaultCommandGateway;
 import org.axonframework.common.transaction.TransactionManager;
-import org.axonframework.config.EventProcessingConfigurer;
+import org.axonframework.config.EventProcessingModule;
 import org.axonframework.eventsourcing.eventstore.EmbeddedEventStore;
 import org.axonframework.eventsourcing.eventstore.EventStorageEngine;
 import org.axonframework.eventsourcing.eventstore.EventStore;
@@ -41,7 +42,8 @@ public class AxonStandaloneConfig {
     }
 
     @Bean
-    public SimpleCommandBus commandBus(TransactionManager txManager, AxonConfiguration axonConfiguration,
+    public SimpleCommandBus commandBus(TransactionManager txManager,
+                                       AxonConfiguration axonConfiguration,
                                        CommandValidatingMessageHandlerInterceptor commandValidatingMessageHandlerInterceptor) {
         SimpleCommandBus simpleCommandBus = SimpleCommandBus.builder()
                 .transactionManager(txManager)
@@ -60,9 +62,11 @@ public class AxonStandaloneConfig {
     }
 
     @Autowired
-    public void configure(EventProcessingConfigurer config) {
-        config.byDefaultAssignTo("default");
-        config.usingSubscribingEventProcessors();
+    public void configure(AxonConfiguration axonConfiguration,
+                          EventProcessingModule eventProcessingModule) {
+        eventProcessingModule.byDefaultAssignTo("default");
+        eventProcessingModule.registerEventProcessorFactory(
+                new SwitchingEventProcessorBuilder(axonConfiguration, eventProcessingModule));
     }
 
     @Bean
