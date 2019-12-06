@@ -1,7 +1,8 @@
 package engineering.everest.starterkit.axon.config;
 
-import engineering.everest.starterkit.axon.LoggingMessageHandlerInterceptor;
 import engineering.everest.starterkit.axon.CommandValidatingMessageHandlerInterceptor;
+import engineering.everest.starterkit.axon.LoggingMessageHandlerInterceptor;
+import engineering.everest.starterkit.axon.replay.SwitchingEventProcessorBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.commandhandling.CommandBus;
 import org.axonframework.commandhandling.CommandMessage;
@@ -10,13 +11,12 @@ import org.axonframework.commandhandling.gateway.DefaultCommandGateway;
 import org.axonframework.commandhandling.gateway.IntervalRetryScheduler;
 import org.axonframework.commandhandling.gateway.RetryScheduler;
 import org.axonframework.common.transaction.TransactionManager;
-import org.axonframework.config.EventProcessingConfigurer;
+import org.axonframework.config.EventProcessingModule;
 import org.axonframework.messaging.MessageDispatchInterceptor;
 import org.axonframework.messaging.interceptors.CorrelationDataInterceptor;
 import org.axonframework.modelling.command.AnnotationCommandTargetResolver;
 import org.axonframework.spring.config.AxonConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -65,16 +65,12 @@ public class AxonConfig {
     }
 
     @Autowired
-    public void configure(EventProcessingConfigurer config,
-                          @Value("${application.axon.tracking-event-processor:false}") boolean useTrackingEventProcessor) {
-        config.byDefaultAssignTo("default");
-        if (useTrackingEventProcessor) {
-            LOGGER.info("Configuring Axon with tracking event processors");
-            config.usingTrackingEventProcessors();
-        } else {
-            LOGGER.info("Configuring Axon with subscribing event processors");
-            config.usingSubscribingEventProcessors();
-        }
+    public void configure(AxonConfiguration axonConfiguration,
+                          EventProcessingModule eventProcessingModule) {
+        eventProcessingModule.byDefaultAssignTo("default");
+
+        eventProcessingModule.registerEventProcessorFactory(
+                new SwitchingEventProcessorBuilder(axonConfiguration, eventProcessingModule));
     }
 
     @Bean
