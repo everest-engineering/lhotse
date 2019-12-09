@@ -35,7 +35,6 @@ class TokenControllerTest {
     private static final String REFRESH_TOKEN_VALUE = "refresh-token-value";
     private static final String ACCESS_TOKEN_VALUE = "access-token-value";
 
-
     @Autowired
     private MockMvc mockMvc;
 
