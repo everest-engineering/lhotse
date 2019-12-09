@@ -137,29 +137,23 @@ possibility of:
    until the projections are ready for use.
  * Processing groups allow replays to be limited to bounded contexts that are naturally isolated. 
 
-The starter kit currently lacks programmatic support for triggering replays. Once this is implemented, however, the steps 
-to perform a replay will be:
+The starter kit comes with programmatic support for triggering replays. To perform a replay:
  
- * disconnect the application from load balancers
- * trigger a replay via a JMX or Spring actuator call
+ * disconnect the application from load balancers (don't skip this is!)
+ * trigger a replay via a Spring actuator call
  * monitor the state of replay via a Spring actuator endpoint 
  * reconnect the application to load balancers 
 
-However, as of right now we need to:
-
- * disconnect the application from load balancers
- * shut down the application nodes
- * change the event processing configuration from subscribing event processors to 
+Behind the scenes, replays are being executed by:
+ * changing the event processing configuration from subscribing event processors to 
    [tracking event processors](https://axoniq.io/blog-overview/tracking-event-processors)
- * clear the tracking tokens (if present) in the Axon database
- * optionally clear aggregate snapshots from the Axon database
- * clear our projections
- * start up the application 
- * monitor the logs and the tracking tokens to determine when tracking event processors have caught up with the tail of 
-   the event log
- * change the event processing configuration back to subscribing mode
- * restart the application to apply the configuration change
- * reconnect the application to load balancers 
+ * clearing the tracking tokens in the Axon database 
+ * placing a marker event into the event log that will end replays
+ * starting TEP processing, and
+ * changing the event processing configuration back to subscribing mode when the TEP reaches the marker event
+
+
+TODO: we need to check if we need to clear aggregate snapshots from the Axon database as part of triggering a replay!
 
 
 ## Endpoint access control
@@ -238,7 +232,6 @@ Here are some ideas for future features that we'd like to support out of the box
 
  * API error code enhancements to make it easier for UIs to consume error responses
  * Internationalisation support
- * Programmatic replay triggering
  * (Optional) authentication server out of the box 
  * Out of the box support for common OAuth2 authentication providers
  * API rate limiting
