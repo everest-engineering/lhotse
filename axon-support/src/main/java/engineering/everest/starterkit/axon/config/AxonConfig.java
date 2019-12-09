@@ -12,11 +12,16 @@ import org.axonframework.commandhandling.gateway.IntervalRetryScheduler;
 import org.axonframework.commandhandling.gateway.RetryScheduler;
 import org.axonframework.common.transaction.TransactionManager;
 import org.axonframework.config.EventProcessingModule;
+import org.axonframework.eventsourcing.eventstore.EmbeddedEventStore;
+import org.axonframework.eventsourcing.eventstore.EventStorageEngine;
+import org.axonframework.eventsourcing.eventstore.EventStore;
+import org.axonframework.eventsourcing.eventstore.inmemory.InMemoryEventStorageEngine;
 import org.axonframework.messaging.MessageDispatchInterceptor;
 import org.axonframework.messaging.interceptors.CorrelationDataInterceptor;
 import org.axonframework.modelling.command.AnnotationCommandTargetResolver;
 import org.axonframework.spring.config.AxonConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -26,15 +31,16 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 @Slf4j
 @Configuration
-@Profile("!standalone")
 public class AxonConfig {
 
     @Bean
-    public RetryScheduler retryScheduler() {
+    public RetryScheduler retryScheduler(@Value("${application.axon.retry.interval-milli-seconds}") int retryInterval,
+                                         @Value("${application.axon.retry.max-count}") int retryMaxCount,
+                                         @Value("${application.axon.retry.pool-size}") int retryPoolSize) {
         return IntervalRetryScheduler.builder()
-                .retryInterval(1000)
-                .maxRetryCount(1)
-                .retryExecutor(new ScheduledThreadPoolExecutor(1))
+                .retryInterval(retryInterval)
+                .maxRetryCount(retryMaxCount)
+                .retryExecutor(new ScheduledThreadPoolExecutor(retryPoolSize))
                 .build();
     }
 
@@ -76,4 +82,22 @@ public class AxonConfig {
     public AnnotationCommandTargetResolver annotationCommandTargetResolver() {
         return AnnotationCommandTargetResolver.builder().build();
     }
+
+    @Configuration
+    @Profile("standalone")
+    public static class Standalone {
+        @Bean
+        public EmbeddedEventStore embeddedEventStore(EventStorageEngine storageEngine, AxonConfiguration configuration) {
+            return EmbeddedEventStore.builder()
+                    .storageEngine(storageEngine)
+                    .messageMonitor(configuration.messageMonitor(EventStore.class, "eventStore"))
+                    .build();
+        }
+
+        @Bean
+        public EventStorageEngine ephemeralStorageEngine() {
+            return new InMemoryEventStorageEngine();
+        }
+    }
+
 }

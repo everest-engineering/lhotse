@@ -39,6 +39,21 @@
       "name": "graph.neo4j.password",
       "type": "java.lang.String",
       "description": "Description for graph.neo4j.password."
+    },
+    {
+      "name": "application.axon.retry.interval-milli-seconds",
+      "type": "java.lang.String",
+      "description": "Description for application.axon.retry.interval-milli-seconds."
+    },
+    {
+      "name": "application.axon.retry.max-count",
+      "type": "java.lang.String",
+      "description": "Description for application.axon.retry.max-count."
+    },
+    {
+      "name": "application.axon.retry.pool-size",
+      "type": "java.lang.String",
+      "description": "Description for application.axon.retry.pool-size."
     }
   ]
 }
