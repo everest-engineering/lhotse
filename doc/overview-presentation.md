@@ -224,7 +224,7 @@ Add your own custom hooks for wiping projections
 
 Build ons [Spring Security OAuth](https://projects.spring.io/spring-security-oauth/docs/oauth2.html)
 
-Sets up both an _authentication server_ and a _resource server_ (that is, us!)
+Sets up both an _authorisation server_ and a _resource server_ (that is, us!)
 
 ----
 
@@ -342,23 +342,44 @@ Enabled by default for all API endpoints via a shallow filter
 
 ## Missing Features
 
- * API error code enhancements to make it easier for UIs to consume error responses
+* GDPR compliance: annotations and disposable decryption keys to protect PII
 
- * Internationalisation support
+* API error code enhancements to make it easier for UIs to consume error responses
 
- * (Optional) authentication server out of the box 
+* Internationalisation support
 
 ----
 
- * Out of the box support for common OAuth2 authentication providers
+* (Optional) out of the box authorisation server
 
- * API rate limiting
+* Out of the box support for common OAuth2 authentication providers
 
- * Additional cloud provider file stores
+* API rate limiting
+
+----
+
+* Additional cloud provider file stores
+
+* Programmatic clearing of aggregate snapshots
 
 ---
 
-# Demo
+## Tooling
+
+* Java 11
+
+* Gradle
+
+* Lombok
+
+* Semantic versioning
+
+* Swagger
+
+---
+
+
+## Demo
 
  
 
