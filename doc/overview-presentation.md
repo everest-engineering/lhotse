@@ -1,8 +1,8 @@
-# Endoscale
+# Lhotse
 
 An event sourced DDD starter kit
 
-(Suggest a better name!)
+Also a [mountain next to Everest](https://en.wikipedia.org/wiki/Lhotse) 
 
 ---
 
