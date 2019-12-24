@@ -1,34 +1,12 @@
 plugins {
     id 'io.spring.dependency-management' version '1.0.8.RELEASE'
-    id 'org.springframework.boot' version '2.2.1.RELEASE' apply false
+    id 'org.springframework.boot' version '2.2.2.RELEASE' apply false
     id 'fr.brouillard.oss.gradle.jgitver' version '0.9.1'
     id 'io.freefair.lombok' version '4.1.5'
 }
 
 allprojects {
     apply plugin: 'idea'
-
-    idea {
-        module {
-            downloadJavadoc = false
-            downloadSources = true
-
-            iml {
-                withXml {
-                    def moduleRoot = it.asNode()
-                    def facetManager = moduleRoot.component.find { component -> component.'@name' == 'FacetManager' }
-                    if (!facetManager) {
-                        facetManager = moduleRoot.appendNode('component', [name: 'FacetManager'])
-                    }
-                    def springFacet = facetManager.facet.find { facet -> facet.'@type' == 'Spring' && facet.'@name' == 'Spring' }
-                    if (!springFacet) {
-                        springFacet = facetManager.appendNode('facet', [type: 'Spring', name: 'Spring'])
-                        springFacet.appendNode('configuration')
-                    }
-                }
-            }
-        }
-    }
 }
 
 subprojects {
@@ -49,7 +27,7 @@ subprojects {
     }
 
     ext {
-        springBootVersion = '2.2.1.RELEASE'
+        springBootVersion = '2.2.2.RELEASE'
         axonVersion = '4.2'
         commonsLangVersion = '3.9'
         commonsValidatorVersion = '1.6'
