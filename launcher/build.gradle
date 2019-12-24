@@ -69,7 +69,6 @@ dependencies {
     implementation project(':axon-support')
     implementation project(':common')
     implementation project(':command-validation-support')
-    implementation project(':database-support')
     implementation project(':file-service')
     implementation project(':file-service-api')
     implementation project(':media-support')
