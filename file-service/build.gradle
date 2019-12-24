@@ -1,5 +1,4 @@
 dependencies {
-    implementation project(':database-support')
     implementation project(':file-service-api')
 
     implementation 'org.springframework:spring-context'
