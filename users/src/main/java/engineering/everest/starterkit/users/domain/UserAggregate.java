@@ -1,18 +1,17 @@
 package engineering.everest.starterkit.users.domain;
 
-import engineering.everest.starterkit.users.domain.events.UserCreatedByAdminEvent;
-import engineering.everest.starterkit.users.domain.events.UserProfilePhotoUploadedEvent;
 import engineering.everest.starterkit.users.domain.commands.CreateUserCommand;
 import engineering.everest.starterkit.users.domain.commands.RegisterUploadedUserProfilePhotoCommand;
 import engineering.everest.starterkit.users.domain.commands.UpdateUserDetailsCommand;
+import engineering.everest.starterkit.users.domain.events.UserCreatedByAdminEvent;
 import engineering.everest.starterkit.users.domain.events.UserDetailsUpdatedByAdminEvent;
+import engineering.everest.starterkit.users.domain.events.UserProfilePhotoUploadedEvent;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.Validate;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.modelling.command.AggregateIdentifier;
 import org.axonframework.spring.stereotype.Aggregate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.UUID;
@@ -21,9 +20,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.axonframework.modelling.command.AggregateLifecycle.apply;
 
 @Aggregate(repository = "repositoryForUser")
+@Log4j2
 public class UserAggregate implements Serializable {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(UserAggregate.class);
 
     @AggregateIdentifier
     private UUID userId;
@@ -42,7 +40,6 @@ public class UserAggregate implements Serializable {
                 command.getEncodedPassword()));
     }
 
-    // TODO: should check organization status for all user editing commands?
     @CommandHandler
     void handle(UpdateUserDetailsCommand command) {
         validateUserIsNotDisabled();
@@ -59,9 +56,6 @@ public class UserAggregate implements Serializable {
     @CommandHandler
     UUID handle(RegisterUploadedUserProfilePhotoCommand command) {
         validateUserIsNotDisabled();
-        LOGGER.info("User id: {} on organization id:{} uploaded photo with fileId: {}", command.getUserId(), userOnOrganizationId,
-                command.getProfilePhotoFileId());
-
         apply(new UserProfilePhotoUploadedEvent(command.getUserId(), command.getProfilePhotoFileId()));
         return command.getProfilePhotoFileId();
     }

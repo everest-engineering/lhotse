@@ -6,8 +6,6 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.modelling.command.EntityId;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.UUID;
@@ -15,8 +13,6 @@ import java.util.UUID;
 @EqualsAndHashCode
 @ToString
 class OrganizationContactDetails implements Serializable {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(OrganizationContactDetails.class);
 
     @EntityId
     private UUID organizationId;
@@ -35,7 +31,6 @@ class OrganizationContactDetails implements Serializable {
 
     @EventSourcingHandler
     void on(OrganizationContactDetailsUpdatedByAdminEvent event) {
-        LOGGER.info("Organization '{}' contact details updated by {}", event.getOrganizationId(), event.getAdminId());
         contactName = event.getContactName();
         contactEmail = event.getEmailAddress();
         contactPhoneNumber = event.getPhoneNumber();
@@ -44,7 +39,6 @@ class OrganizationContactDetails implements Serializable {
 
     @EventSourcingHandler
     void on(OrganizationAddressUpdatedByAdminEvent event) {
-        LOGGER.info("Organization '{}' address updated by {}", event.getOrganizationId(), event.getAdminId());
         city = event.getCity();
         country = event.getCountry();
         postalCode = event.getPostalCode();

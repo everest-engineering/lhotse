@@ -3,8 +3,7 @@ package engineering.everest.starterkit;
 import engineering.everest.starterkit.axon.common.PasswordEncoder;
 import engineering.everest.starterkit.users.persistence.PersistableUser;
 import engineering.everest.starterkit.users.persistence.UsersRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -18,9 +17,8 @@ import static engineering.everest.starterkit.axon.common.domain.Role.ADMIN;
 import static java.util.UUID.fromString;
 
 @Component
+@Log4j2
 public class AdminProvisionTask {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(AdminProvisionTask.class);
     private static final UUID ADMIN_ID = fromString("00000000-0000-0000-0000-000000000000");
     private static final String ADMIN_DISPLAY_NAME = "Admin";
 

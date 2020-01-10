@@ -4,10 +4,9 @@ import com.hazelcast.config.Config;
 import com.hazelcast.config.ExecutorConfig;
 import com.hazelcast.config.JoinConfig;
 import io.kubernetes.client.util.ClientBuilder;
+import lombok.extern.log4j.Log4j2;
 import org.axonframework.common.caching.JCacheAdapter;
 import org.ehcache.jsr107.EhcacheCachingProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,11 +21,10 @@ import static javax.cache.Caching.getCachingProvider;
 import static javax.cache.expiry.Duration.FIVE_MINUTES;
 
 @Configuration
+@Log4j2
 public class AxonHazelcastConfig {
-
     public static final String AXON_COMMAND_DISPATCHER = "axon-command-dispatcher";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AxonHazelcastConfig.class);
     private static final String AXON_AGGREGATES_CACHE = "axonAggregates";
     private static final String KUBERNETES_NAMESPACE = "default";
     private static final String KUBERNETES_SERVICE_NAME = "web-app";
@@ -40,6 +38,7 @@ public class AxonHazelcastConfig {
         hazelcastConfiguration.setInstanceName("axon")
                 .addExecutorConfig(executorConfig);
 
+        // TODO: Spring 5.2 introduced @ConditionalOnCloudPlatform annotation
         if (isRunningInKubernetes()) {
             LOGGER.info("**********************************************************");
             LOGGER.info("************* HAZELCAST DETECTED KUBERNETES **************");

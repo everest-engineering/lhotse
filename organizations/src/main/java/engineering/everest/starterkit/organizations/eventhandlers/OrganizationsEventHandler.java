@@ -9,19 +9,17 @@ import engineering.everest.starterkit.organizations.domain.events.OrganizationRe
 import engineering.everest.starterkit.organizations.domain.events.OrganizationReregisteredByAdminEvent;
 import engineering.everest.starterkit.organizations.persistence.Address;
 import engineering.everest.starterkit.organizations.persistence.OrganizationsRepository;
+import lombok.extern.log4j.Log4j2;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventhandling.Timestamp;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 
 @Service
+@Log4j2
 public class OrganizationsEventHandler {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(OrganizationsEventHandler.class);
 
     private final OrganizationsRepository organizationsRepository;
 
@@ -32,7 +30,7 @@ public class OrganizationsEventHandler {
 
     @EventHandler
     void on(OrganizationRegisteredByAdminEvent event, @Timestamp Instant creationTime) {
-        LOGGER.info("Creating new organization: {}", event.getOrganizationId());
+        LOGGER.info("Creating new organization {}", event.getOrganizationId());
         var organizationAddress = new OrganizationAddress(event.getStreet(), event.getCity(), event.getState(),
                 event.getCountry(), event.getPostalCode());
         organizationsRepository.createOrganization(event.getOrganizationId(), event.getOrganizationName(),
@@ -42,6 +40,7 @@ public class OrganizationsEventHandler {
 
     @EventHandler
     void on(OrganizationDeregisteredByAdminEvent event) {
+        LOGGER.info("Organization {} de-registered by {}", event.getOrganizationId(), event.getAdminId());
         var persistableOrganization = organizationsRepository.findById(event.getOrganizationId()).orElseThrow();
         persistableOrganization.setDeregistered(true);
         organizationsRepository.save(persistableOrganization);
@@ -49,6 +48,7 @@ public class OrganizationsEventHandler {
 
     @EventHandler
     void on(OrganizationReregisteredByAdminEvent event) {
+        LOGGER.info("Organization {} re-registered by {}", event.getOrganizationId(), event.getAdminId());
         var persistableOrganization = organizationsRepository.findById(event.getOrganizationId()).orElseThrow();
         persistableOrganization.setDeregistered(false);
         organizationsRepository.save(persistableOrganization);
@@ -56,6 +56,7 @@ public class OrganizationsEventHandler {
 
     @EventHandler
     void on(OrganizationNameUpdatedByAdminEvent event) {
+        LOGGER.info("Organization {} name updated by {}", event.getOrganizationId(), event.getAdminId());
         var organization = organizationsRepository.findById(event.getOrganizationId()).orElseThrow();
         organization.setOrganizationName(selectDesiredState(event.getOrganizationName(), organization.getOrganizationName()));
         organizationsRepository.save(organization);
@@ -63,6 +64,7 @@ public class OrganizationsEventHandler {
 
     @EventHandler
     void on(OrganizationContactDetailsUpdatedByAdminEvent event) {
+        LOGGER.info("Organization {} contact details updated by {}", event.getOrganizationId(), event.getAdminId());
         var organization = organizationsRepository.findById(event.getOrganizationId()).orElseThrow();
         organization.setContactName(selectDesiredState(event.getContactName(), organization.getContactName()));
         organization.setPhoneNumber(selectDesiredState(event.getPhoneNumber(), organization.getPhoneNumber()));
@@ -73,6 +75,7 @@ public class OrganizationsEventHandler {
 
     @EventHandler
     void on(OrganizationAddressUpdatedByAdminEvent event) {
+        LOGGER.info("Organization {} address updated by {}", event.getOrganizationId(), event.getAdminId());
         var organization = organizationsRepository.findById(event.getOrganizationId()).orElseThrow();
         var organizationAddress = organization.getAddress();
         String city = selectDesiredState(event.getCity(), organizationAddress.getCity());

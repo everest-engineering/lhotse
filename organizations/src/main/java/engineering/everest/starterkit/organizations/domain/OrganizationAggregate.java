@@ -16,8 +16,6 @@ import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.modelling.command.AggregateIdentifier;
 import org.axonframework.modelling.command.AggregateMember;
 import org.axonframework.spring.stereotype.Aggregate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.UUID;
@@ -26,8 +24,6 @@ import static org.axonframework.modelling.command.AggregateLifecycle.apply;
 
 @Aggregate(repository = "repositoryForOrganization")
 public class OrganizationAggregate implements Serializable {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(OrganizationAggregate.class);
 
     @AggregateIdentifier
     private UUID id;
@@ -49,14 +45,12 @@ public class OrganizationAggregate implements Serializable {
     @CommandHandler
     void handle(DeregisterOrganizationCommand command) {
         validateOrganizationIsNotDeregistered();
-        LOGGER.info("Organization id: {} de-registered by {}", command.getOrganizationId(), command.getRequestingUserId());
         apply(new OrganizationDeregisteredByAdminEvent(command.getOrganizationId(), command.getRequestingUserId()));
     }
 
     @CommandHandler
     void handle(ReregisterOrganizationCommand command) {
         Validate.validState(deregistered, "Organization is still active");
-        LOGGER.info("Organization id: {} re-registered by {}", command.getOrganizationId(), command.getRequestingUserId());
         apply(new OrganizationReregisteredByAdminEvent(command.getOrganizationId(), command.getRequestingUserId()));
     }
 

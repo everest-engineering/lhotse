@@ -1,8 +1,7 @@
 package engineering.everest.starterkit.axon.common.services;
 
 import engineering.everest.starterkit.axon.common.domain.Identifiable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -12,9 +11,9 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
+@Log4j2
 public class DefaultReadServiceProvider implements ReadServiceProvider {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultReadServiceProvider.class);
     private static final String GET_BY_ID_METHOD = "getById";
 
     private final Map<String, ReadService<? extends Identifiable>> readerServicesLookup;
@@ -40,5 +39,4 @@ public class DefaultReadServiceProvider implements ReadServiceProvider {
     public ReadService<? extends Identifiable> getService(String classSimpleName) {
         return readerServicesLookup.get(classSimpleName);
     }
-
 }
