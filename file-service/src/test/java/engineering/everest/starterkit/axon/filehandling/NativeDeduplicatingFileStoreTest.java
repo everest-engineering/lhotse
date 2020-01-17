@@ -2,15 +2,12 @@ package engineering.everest.starterkit.axon.filehandling;
 
 import engineering.everest.starterkit.axon.filehandling.persistence.FileMappingRepository;
 import engineering.everest.starterkit.axon.filehandling.persistence.PersistableFileMapping;
-import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Example;
-import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -26,13 +23,10 @@ import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-import static org.springframework.data.mongodb.core.query.Criteria.where;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class MongoGridFsNativeDeduplicatingFileStoreTest {
+class NativeDeduplicatingFileStoreTest {
 
     private static final String ORIGINAL_FILENAME = "original-filename";
     private static final String EXISTING_NATIVE_STORE_FILE_ID = "existing-native-store-file-id";
@@ -41,34 +35,35 @@ class MongoGridFsNativeDeduplicatingFileStoreTest {
     private static final String TEMPORARY_FILE_CONTENTS = "A temporary file for unit testing";
     private static final Long FILE_SIZE = (long) TEMPORARY_FILE_CONTENTS.length();
 
-    private MongoGridFsNativeDeduplicatingFileStore mongoGridFsNativeObjectStore;
-    private ObjectId newMongoObjectId;
+    private NativeDeduplicatingFileStore nativeDeduplicatingFileStore;
+    private String fileIdentifier;
 
     @Mock
-    private GridFsTemplate gridFs;
+    private FileStore fileStore;
     @Mock
     private FileMappingRepository fileMappingRepository;
 
     @BeforeEach
     void setUp() {
-        mongoGridFsNativeObjectStore = new MongoGridFsNativeDeduplicatingFileStore(PERMANENT, gridFs, fileMappingRepository);
-        newMongoObjectId = new ObjectId();
+        nativeDeduplicatingFileStore = new NativeDeduplicatingFileStore(PERMANENT, fileMappingRepository, fileStore);
+        fileIdentifier = "FILE_ID";
 
-        when(gridFs.store(any(InputStream.class), eq(ORIGINAL_FILENAME))).thenAnswer(invocation -> {
+        when(fileStore.nativeStorageType()).thenReturn(MONGO_GRID_FS);
+        when(fileStore.create(any(InputStream.class), eq(ORIGINAL_FILENAME))).thenAnswer(invocation -> {
             InputStream inputFile = invocation.getArgument(0);
             inputFile.readAllBytes();
             inputFile.close();
-            return newMongoObjectId;
+            return fileIdentifier;
         });
     }
 
     @Test
     void store_WillPersistAndReturnNativeStorageEncodingFileId() throws IOException {
-        PersistedFile persistedFile = mongoGridFsNativeObjectStore.store(ORIGINAL_FILENAME, createTempFileWithContents());
+        PersistedFile persistedFile = nativeDeduplicatingFileStore.store(ORIGINAL_FILENAME, createTempFileWithContents());
 
-        verifyNoMoreInteractions(gridFs);
-        verify(fileMappingRepository).save(new PersistableFileMapping(persistedFile.getFileId(), PERMANENT, MONGO_GRID_FS, newMongoObjectId.toString(), SHA_256, SHA_512, FILE_SIZE));
-        PersistedFile expectedPersistedFile = new PersistedFile(persistedFile.getFileId(), PERMANENT, MONGO_GRID_FS, newMongoObjectId.toString(), SHA_256, SHA_512, FILE_SIZE);
+        verifyNoMoreInteractions(fileStore);
+        verify(fileMappingRepository).save(new PersistableFileMapping(persistedFile.getFileId(), PERMANENT, MONGO_GRID_FS, fileIdentifier, SHA_256, SHA_512, FILE_SIZE));
+        PersistedFile expectedPersistedFile = new PersistedFile(persistedFile.getFileId(), PERMANENT, MONGO_GRID_FS, fileIdentifier, SHA_256, SHA_512, FILE_SIZE);
         assertEquals(expectedPersistedFile, persistedFile);
     }
 
@@ -77,9 +72,9 @@ class MongoGridFsNativeDeduplicatingFileStoreTest {
         when(fileMappingRepository.findOne(any(Example.class))).thenReturn(
                 Optional.of(new PersistableFileMapping(randomUUID(), PERMANENT, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE)));
 
-        PersistedFile persistedFile = mongoGridFsNativeObjectStore.store(ORIGINAL_FILENAME, createTempFileWithContents());
+        PersistedFile persistedFile = nativeDeduplicatingFileStore.store(ORIGINAL_FILENAME, createTempFileWithContents());
 
-        verify(gridFs).delete(Query.query(where("_id").is(newMongoObjectId)));
+        verify(fileStore).delete(fileIdentifier);
         verify(fileMappingRepository).save(new PersistableFileMapping(persistedFile.getFileId(), PERMANENT, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE));
         PersistedFile expectedPersistedFile = new PersistedFile(persistedFile.getFileId(), PERMANENT, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE);
         assertEquals(expectedPersistedFile, persistedFile);

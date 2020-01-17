@@ -48,6 +48,7 @@ subprojects {
         aspectjVersion = '1.9.4'
         jjwtVersion = '0.10.7'
         commonsTextVersion = '1.8'
+        awsSdkVersion = '1.11.705'
 
         junitVersion = '5.5.2'
         hamcrestVersion = '2.1'

@@ -4,6 +4,7 @@ dependencies {
     implementation 'org.springframework:spring-context'
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
     implementation "com.google.guava:guava:${guavaVersion}"
+    compile "com.amazonaws:aws-java-sdk-s3:${awsSdkVersion}"
 
     testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
     testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
