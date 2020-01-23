@@ -82,6 +82,7 @@ dependencies {
     implementation project(':users-api')
     implementation project(':users-persistence')
 
+    implementation "engineering.everest:axon-hazelcast-command-distribution:${axonHazelcastCommandDistributionVersion}"
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
     implementation 'org.springframework.boot:spring-boot-starter-security'

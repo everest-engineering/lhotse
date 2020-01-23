@@ -7,6 +7,7 @@ dependencies {
     implementation project(':organizations-persistence')
     implementation project(':users-api')
 
+    implementation "engineering.everest:axon-hazelcast-command-distribution:${axonHazelcastCommandDistributionVersion}"
     implementation "javax.validation:validation-api"
     implementation 'org.springframework:spring-beans'
     implementation 'org.springframework:spring-context'
