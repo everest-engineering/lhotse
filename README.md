@@ -275,6 +275,18 @@ To see all available Gradle tasks for this project:
 
 `./gradlew tasks`
 
+To run the OWASP dependency check plugin
+
+`./gradlew dependencyCheckAggregate`
+
+Report location `build/reports/dependency-check-report.html`
+
+To run the dependencies license plugin
+
+`./gradlew generateLicenseReport`
+
+Report location `build/reports/dependency-license/index.html`
+
 ## Semantic versioning
 [Semantic versioning](https://semver.org/) is automatically applied using git tags. Simply create a tag of, say, `1.2.0` 
 and Gradle will build a JAR package (or a docker container, if you wish) tagged with version `1.2.0-0` where `-0` is the 

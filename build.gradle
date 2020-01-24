@@ -1,12 +1,20 @@
+import com.github.jk1.license.render.*
+
 plugins {
     id 'io.spring.dependency-management' version '1.0.8.RELEASE'
     id 'org.springframework.boot' version '2.2.2.RELEASE' apply false
     id 'fr.brouillard.oss.gradle.jgitver' version '0.9.1'
     id 'io.freefair.lombok' version '4.1.5'
+    id 'org.owasp.dependencycheck' version '5.3.0'
+    id 'com.github.jk1.dependency-license-report' version '1.12'
 }
 
 allprojects {
     apply plugin: 'idea'
+}
+
+licenseReport {
+    renderers = [new InventoryHtmlReportRenderer()]
 }
 
 subprojects {
@@ -27,7 +35,7 @@ subprojects {
     }
 
     ext {
-        springBootVersion = '2.2.2.RELEASE'
+        springBootVersion = '2.2.3.RELEASE'
         axonVersion = '4.2'
         commonsLangVersion = '3.9'
         commonsValidatorVersion = '1.6'
