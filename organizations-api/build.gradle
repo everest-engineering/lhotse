@@ -1,7 +1,6 @@
 dependencies {
     implementation project(":command-validation-api")
     implementation project(':common')
-    implementation project(':file-service-api')
 
     implementation "javax.validation:validation-api"
     implementation "org.axonframework:axon-modelling:${axonVersion}"

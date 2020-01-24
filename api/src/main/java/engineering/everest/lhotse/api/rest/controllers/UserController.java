@@ -1,7 +1,7 @@
 package engineering.everest.lhotse.api.rest.controllers;
 
 import engineering.everest.lhotse.axon.common.domain.User;
-import engineering.everest.lhotse.axon.filehandling.FileService;
+import engineering.everest.starterkit.filestorage.FileService;
 import engineering.everest.lhotse.users.services.UsersReadService;
 import engineering.everest.lhotse.users.services.UsersService;
 import io.swagger.annotations.Api;

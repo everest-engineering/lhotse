@@ -4,7 +4,7 @@ import engineering.everest.lhotse.axon.command.validators.EmailAddressValidator;
 import engineering.everest.lhotse.axon.command.validators.UsersBelongToOrganizationValidator;
 import engineering.everest.lhotse.organizations.domain.commands.DeregisterOrganizationCommand;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationNameUpdatedByAdminEvent;
-import engineering.everest.lhotse.axon.filehandling.FileService;
+import engineering.everest.starterkit.filestorage.FileService;
 import engineering.everest.lhotse.organizations.domain.commands.RegisterOrganizationCommand;
 import engineering.everest.lhotse.organizations.domain.commands.UpdateOrganizationCommand;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationAddressUpdatedByAdminEvent;

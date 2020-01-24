@@ -6,7 +6,7 @@ import engineering.everest.lhotse.api.helpers.AuthContextExtension;
 import engineering.everest.lhotse.api.helpers.MockAuthenticationContextProvider;
 import engineering.everest.lhotse.api.rest.requests.UpdateUserRequest;
 import engineering.everest.lhotse.axon.common.domain.User;
-import engineering.everest.lhotse.axon.filehandling.FileService;
+import engineering.everest.starterkit.filestorage.FileService;
 import engineering.everest.lhotse.users.services.UsersReadService;
 import engineering.everest.lhotse.users.services.UsersService;
 import org.junit.jupiter.api.Test;

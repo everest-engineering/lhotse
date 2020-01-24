@@ -1,7 +1,7 @@
 package engineering.everest.lhotse.media.thumbnails;
 
+import engineering.everest.starterkit.filestorage.FileService;
 import engineering.everest.lhotse.media.thumbnails.persistence.ThumbnailMappingRepository;
-import engineering.everest.lhotse.axon.filehandling.FileService;
 import engineering.everest.lhotse.media.thumbnails.persistence.PersistableThumbnail;
 import engineering.everest.lhotse.media.thumbnails.persistence.PersistableThumbnailMapping;
 import org.springframework.stereotype.Component;
