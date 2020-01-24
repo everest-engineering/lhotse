@@ -17,9 +17,9 @@ import static java.nio.file.Files.createTempFile;
 class DefaultFileService implements FileService {
 
     private final FileMappingRepository fileMappingRepository;
-    @Qualifier("permanentFileStore")
+    @Qualifier("permanentDeduplicatingFileStore")
     private final DeduplicatingFileStore permanentFileStore;
-    @Qualifier("ephemeralFileStore")
+    @Qualifier("ephemeralDeduplicatingFileStore")
     private final DeduplicatingFileStore ephemeralFileStore;
 
     public DefaultFileService(FileMappingRepository fileMappingRepository,
