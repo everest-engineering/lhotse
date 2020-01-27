@@ -1,4 +1,4 @@
-package engineering.everest.starterkit.axon.filehandling;
+package engineering.everest.lhotse.axon.filehandling;
 
 import java.io.File;
 import java.io.IOException;

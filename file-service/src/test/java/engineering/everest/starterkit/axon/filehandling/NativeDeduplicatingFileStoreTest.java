@@ -1,7 +1,7 @@
-package engineering.everest.starterkit.axon.filehandling;
+package engineering.everest.lhotse.axon.filehandling;
 
-import engineering.everest.starterkit.axon.filehandling.persistence.FileMappingRepository;
-import engineering.everest.starterkit.axon.filehandling.persistence.PersistableFileMapping;
+import engineering.everest.lhotse.axon.filehandling.persistence.FileMappingRepository;
+import engineering.everest.lhotse.axon.filehandling.persistence.PersistableFileMapping;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,8 +16,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 
-import static engineering.everest.starterkit.axon.filehandling.FileStoreType.PERMANENT;
-import static engineering.everest.starterkit.axon.filehandling.NativeStorageType.MONGO_GRID_FS;
+import static engineering.everest.lhotse.axon.filehandling.FileStoreType.PERMANENT;
+import static engineering.everest.lhotse.axon.filehandling.NativeStorageType.MONGO_GRID_FS;
 import static java.nio.file.Files.createTempFile;
 import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
