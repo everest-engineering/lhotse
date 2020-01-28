@@ -2,7 +2,7 @@ package engineering.everest.lhotse.users.persistence;
 
 import engineering.everest.lhotse.axon.common.domain.User;
 import engineering.everest.starterkit.filestorage.FileService;
-import engineering.everest.lhotse.media.thumbnails.ThumbnailService;
+import engineering.everest.starterkit.media.thumbnails.ThumbnailService;
 import engineering.everest.lhotse.users.services.UsersReadService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;

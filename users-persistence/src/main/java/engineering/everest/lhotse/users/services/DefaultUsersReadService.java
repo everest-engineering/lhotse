@@ -4,7 +4,7 @@ import engineering.everest.lhotse.axon.common.domain.User;
 import engineering.everest.lhotse.users.persistence.PersistableUser;
 import engineering.everest.lhotse.users.persistence.UsersRepository;
 import engineering.everest.starterkit.filestorage.FileService;
-import engineering.everest.lhotse.media.thumbnails.ThumbnailService;
+import engineering.everest.starterkit.media.thumbnails.ThumbnailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

@@ -1,8 +1,8 @@
 dependencies {
-    implementation project(':media-support-api')
     implementation project(':users-api')
     implementation project(':security-support-api')
 
+    implementation "engineering.everest:media-support:${mediaSupportVersion}"
     implementation "engineering.everest:file-storage:${fileStorageVersion}"
     implementation "org.axonframework:axon-spring:${axonVersion}"
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'

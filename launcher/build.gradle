@@ -69,8 +69,6 @@ dependencies {
     implementation project(':axon-support')
     implementation project(':common')
     implementation project(':command-validation-support')
-    implementation project(':media-support')
-    implementation project(':media-support-api')
     implementation project(':organizations')
     implementation project(':organizations-api')
     implementation project(':organizations-persistence')
