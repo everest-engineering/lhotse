@@ -59,7 +59,7 @@ subprojects {
         commonsTextVersion = '1.8'
         awsSdkVersion = '1.11.705'
         axonHazelcastCommandDistributionVersion = '0.0.6'
-        fileStorageVersion = '0.0.6'
+        storageVersion = '0.0.6'
         mediaSupportVersion = '0.0.6'
 
         junitVersion = '5.5.2'

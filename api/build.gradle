@@ -5,7 +5,7 @@ dependencies {
     implementation project(':users-api')
 
     implementation "engineering.everest:media-support:${mediaSupportVersion}"
-    implementation "engineering.everest:file-storage:${fileStorageVersion}"
+    implementation "engineering.everest:storage:${storageVersion}"
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.springframework.boot:spring-boot-starter-security'

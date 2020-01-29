@@ -6,7 +6,7 @@ dependencies {
     implementation project(':organizations-persistence')
     implementation project(':users-api')
 
-    implementation "engineering.everest:file-storage:${fileStorageVersion}"
+    implementation "engineering.everest:storage:${storageVersion}"
     implementation "engineering.everest:axon-hazelcast-command-distribution:${axonHazelcastCommandDistributionVersion}"
     implementation "javax.validation:validation-api"
     implementation 'org.springframework:spring-beans'
