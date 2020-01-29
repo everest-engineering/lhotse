@@ -33,6 +33,9 @@ subprojects {
     repositories {
         mavenLocal()
         jcenter()
+        maven {
+            url  "https://dl.bintray.com/everestengineering/starterkit"
+        }
     }
 
     ext {
