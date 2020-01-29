@@ -1,0 +1,4 @@
+package engineering.everest.lhotse.axon.command.validation;
+
+public interface UsersBelongToOrganizationValidatableCommand extends UsersStatusValidatableCommand, OrganizationStatusValidatableCommand {
+}

@@ -2,11 +2,12 @@ dependencies {
     implementation project(':axon-support')
     implementation project(':common')
     implementation project(':command-validation-support')
-    implementation project(':file-service-api')
     implementation project(':organizations-api')
     implementation project(':organizations-persistence')
     implementation project(':users-api')
 
+    implementation "engineering.everest:storage:${storageVersion}"
+    implementation "engineering.everest:axon-hazelcast-command-distribution:${axonHazelcastCommandDistributionVersion}"
     implementation "javax.validation:validation-api"
     implementation 'org.springframework:spring-beans'
     implementation 'org.springframework:spring-context'

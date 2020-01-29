@@ -69,10 +69,6 @@ dependencies {
     implementation project(':axon-support')
     implementation project(':common')
     implementation project(':command-validation-support')
-    implementation project(':file-service')
-    implementation project(':file-service-api')
-    implementation project(':media-support')
-    implementation project(':media-support-api')
     implementation project(':organizations')
     implementation project(':organizations-api')
     implementation project(':organizations-persistence')
@@ -82,6 +78,7 @@ dependencies {
     implementation project(':users-api')
     implementation project(':users-persistence')
 
+    implementation "engineering.everest:axon-hazelcast-command-distribution:${axonHazelcastCommandDistributionVersion}"
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
     implementation 'org.springframework.boot:spring-boot-starter-security'

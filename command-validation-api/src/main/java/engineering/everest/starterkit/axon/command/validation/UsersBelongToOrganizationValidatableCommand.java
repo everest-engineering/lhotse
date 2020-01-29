@@ -1,4 +1,0 @@
-package engineering.everest.starterkit.axon.command.validation;
-
-public interface UsersBelongToOrganizationValidatableCommand extends UsersStatusValidatableCommand, OrganizationStatusValidatableCommand {
-}
