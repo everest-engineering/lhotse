@@ -60,7 +60,7 @@ subprojects {
         awsSdkVersion = '1.11.705'
         axonHazelcastCommandDistributionVersion = '0.0.6'
         storageVersion = '0.0.6'
-        mediaSupportVersion = '0.0.6'
+        mediaVersion = '0.0.6'
 
         junitVersion = '5.5.2'
         hamcrestVersion = '2.1'
