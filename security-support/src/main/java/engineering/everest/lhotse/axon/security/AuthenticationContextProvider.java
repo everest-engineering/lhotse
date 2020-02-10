@@ -8,9 +8,8 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DefaultAuthenticationContextProvider implements AuthenticationContextProvider {
+public class AuthenticationContextProvider {
 
-    @Override
     public User getUser() {
         Authentication authentication = getAuthentication();
         if (authentication instanceof OAuth2Authentication && authentication.isAuthenticated()) {

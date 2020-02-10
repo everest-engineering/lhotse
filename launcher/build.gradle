@@ -72,13 +72,12 @@ dependencies {
     implementation project(':organizations')
     implementation project(':organizations-api')
     implementation project(':organizations-persistence')
-    implementation project(':security-support-api')
-    implementation project(':security-support')
     implementation project(':users')
     implementation project(':users-api')
     implementation project(':users-persistence')
 
     implementation "engineering.everest.starterkit:axon-command-distribution-extension:${axonHazelcastCommandDistributionVersion}"
+    implementation "engineering.everest.starterkit:security:${securityVersion}"
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
     implementation 'org.springframework.boot:spring-boot-starter-security'

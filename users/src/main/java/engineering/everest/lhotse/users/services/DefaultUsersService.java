@@ -1,11 +1,11 @@
 package engineering.everest.lhotse.users.services;
 
-import engineering.everest.starterkit.axon.HazelcastCommandGateway;
-import engineering.everest.lhotse.axon.common.PasswordEncoder;
 import engineering.everest.lhotse.axon.common.RandomFieldsGenerator;
 import engineering.everest.lhotse.users.domain.commands.CreateUserCommand;
 import engineering.everest.lhotse.users.domain.commands.RegisterUploadedUserProfilePhotoCommand;
 import engineering.everest.lhotse.users.domain.commands.UpdateUserDetailsCommand;
+import engineering.everest.starterkit.axon.HazelcastCommandGateway;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;

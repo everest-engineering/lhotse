@@ -19,7 +19,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class DefaultAuthenticationContextProviderTest {
+class AuthenticationContextProviderTest {
 
     private static final String USER_NAME = "foo@example.com";
     private static final User USER = new User(randomUUID(), randomUUID(), USER_NAME, "");
@@ -30,12 +30,12 @@ class DefaultAuthenticationContextProviderTest {
     @Mock
     private OAuth2Authentication oAuth2Authentication;
 
-    private DefaultAuthenticationContextProvider defaultAuthenticationContextProvider;
+    private AuthenticationContextProvider authenticationContextProvider;
 
     @BeforeEach
     void setUp() {
         SecurityContextHolder.setContext(securityContext);
-        defaultAuthenticationContextProvider = new DefaultAuthenticationContextProvider();
+        authenticationContextProvider = new AuthenticationContextProvider();
     }
 
     @Test
@@ -44,20 +44,20 @@ class DefaultAuthenticationContextProviderTest {
         when(oAuth2Authentication.getPrincipal()).thenReturn(ADMIN_USER_DETAILS);
         when(securityContext.getAuthentication()).thenReturn(oAuth2Authentication);
 
-        assertEquals(USER, defaultAuthenticationContextProvider.getUser());
+        assertEquals(USER, authenticationContextProvider.getUser());
     }
 
     @Test
     void willThrowAuthenticationFailureException_WhenAuthenticationIsNotOfTypeOAuth2Authentication() {
         when(securityContext.getAuthentication()).thenReturn(mock(Authentication.class));
-        assertThrows(AuthenticationFailureException.class, () -> defaultAuthenticationContextProvider.getUser());
+        assertThrows(AuthenticationFailureException.class, () -> authenticationContextProvider.getUser());
     }
 
     @Test
     void willThrowAuthenticationFailureException_WhenIsNotAuthenticated() {
         when(oAuth2Authentication.isAuthenticated()).thenReturn(false);
         when(securityContext.getAuthentication()).thenReturn(oAuth2Authentication);
-        assertThrows(AuthenticationFailureException.class, () -> defaultAuthenticationContextProvider.getUser());
+        assertThrows(AuthenticationFailureException.class, () -> authenticationContextProvider.getUser());
     }
 
     @Test
@@ -65,6 +65,6 @@ class DefaultAuthenticationContextProviderTest {
         when(oAuth2Authentication.isAuthenticated()).thenReturn(true);
         when(oAuth2Authentication.getPrincipal()).thenReturn(new Object());
         when(securityContext.getAuthentication()).thenReturn(oAuth2Authentication);
-        assertThrows(AuthenticationFailureException.class, () -> defaultAuthenticationContextProvider.getUser());
+        assertThrows(AuthenticationFailureException.class, () -> authenticationContextProvider.getUser());
     }
 }
