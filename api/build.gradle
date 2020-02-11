@@ -1,11 +1,12 @@
 dependencies {
     implementation project(':common')
     implementation project(':organizations-api')
-    implementation project(':security-support-api')
     implementation project(':users-api')
+    implementation project(':security-support')
 
     implementation "engineering.everest.starterkit:media:${mediaVersion}"
     implementation "engineering.everest.starterkit:storage:${storageVersion}"
+    implementation "engineering.everest.starterkit:security:${securityVersion}"
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.springframework.boot:spring-boot-starter-security'

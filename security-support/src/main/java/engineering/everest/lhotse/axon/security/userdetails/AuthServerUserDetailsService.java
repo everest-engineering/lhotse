@@ -2,16 +2,16 @@ package engineering.everest.lhotse.axon.security.userdetails;
 
 import engineering.everest.lhotse.users.authserver.AuthServerUser;
 import engineering.everest.lhotse.users.authserver.AuthServerUserReadService;
+import engineering.everest.starterkit.security.AuthenticationServerUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.NoSuchElementException;
 
-@Service("authServerUserDetailsService")
-public class AuthServerUserDetailsService implements UserDetailsService {
+@Service
+public class AuthServerUserDetailsService implements AuthenticationServerUserDetailsService {
 
     private final AuthServerUserReadService authServerUserReadService;
 

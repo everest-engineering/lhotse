@@ -1,9 +1,9 @@
 dependencies {
     implementation project(':users-api')
-    implementation project(':security-support-api')
 
     implementation "engineering.everest.starterkit:media:${mediaVersion}"
     implementation "engineering.everest.starterkit:storage:${storageVersion}"
+    implementation "engineering.everest.starterkit:security:${securityVersion}"
     implementation "org.axonframework:axon-spring:${axonVersion}"
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
 

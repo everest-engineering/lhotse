@@ -1,7 +1,7 @@
 package engineering.everest.lhotse.axon.security.api.rest;
 
-import engineering.everest.lhotse.axon.security.config.AuthServerConfig;
 import engineering.everest.lhotse.axon.security.userdetails.AuthServerUserDetailsService;
+import engineering.everest.starterkit.security.config.AuthServerConfig;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;

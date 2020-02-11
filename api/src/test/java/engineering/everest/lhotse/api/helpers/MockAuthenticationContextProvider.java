@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 import static engineering.everest.lhotse.users.UserTestHelper.ADMIN_USER;
 import static java.util.UUID.randomUUID;
 
-public class MockAuthenticationContextProvider implements AuthenticationContextProvider {
+public class MockAuthenticationContextProvider extends AuthenticationContextProvider {
 
     static ThreadLocal<User> userHolder = new ThreadLocal<>();
 
