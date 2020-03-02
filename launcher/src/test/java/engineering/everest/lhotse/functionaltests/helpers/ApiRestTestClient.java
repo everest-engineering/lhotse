@@ -1,5 +1,6 @@
 package engineering.everest.lhotse.functionaltests.helpers;
 
+import engineering.everest.lhotse.AdminProvisionTask;
 import engineering.everest.lhotse.api.rest.requests.NewUserRequest;
 import engineering.everest.lhotse.api.rest.requests.UpdateUserRequest;
 import engineering.everest.lhotse.api.rest.responses.UserResponse;
@@ -8,13 +9,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.reactive.server.WebTestClient.ResponseSpec;
 
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.web.reactive.function.BodyInserters.fromValue;
@@ -22,16 +22,17 @@ import static org.springframework.web.reactive.function.BodyInserters.fromValue;
 public class ApiRestTestClient {
     private static final String AUTHENTICATION_ENDPOINT = "/oauth/token";
 
-    private static final String ADMIN_ORG_ADMIN_USERS_ENDPOINT = "/api/organizations/{organizationId}/org-admins";
-
     private final WebTestClient webTestClient;
+    private final AdminProvisionTask adminProvisionTask;
     private String accessToken;
 
-    public ApiRestTestClient(WebTestClient webTestClient) {
+    public ApiRestTestClient(WebTestClient webTestClient, AdminProvisionTask adminProvisionTask) {
         this.webTestClient = webTestClient;
+        this.adminProvisionTask = adminProvisionTask;
     }
 
-    public void loginAsAdmin() {
+    public void createAdminUserAndLogin() {
+        adminProvisionTask.run();
         login("admin@everest.engineering", "ac0n3x72");
     }
 
@@ -40,7 +41,7 @@ public class ApiRestTestClient {
                 .contentType(APPLICATION_FORM_URLENCODED)
                 .body(fromValue(String.format("grant_type=password&username=%s&password=%s&client_id=web-app-ui", username, password)))
                 .exchange()
-                .expectStatus().isEqualTo(HttpStatus.OK)
+                .expectStatus().isEqualTo(OK)
                 .returnResult(new ParameterizedTypeReference<Map<String, String>>() {
                 })
                 .getResponseBody().blockFirst();
@@ -79,28 +80,6 @@ public class ApiRestTestClient {
                 .exchange()
                 .expectStatus().isEqualTo(expectedHttpStatus)
                 .returnResult(UUID.class).getResponseBody().blockFirst();
-    }
-
-    public List<UserResponse> getOrgAdminUsers(UUID organizationId, HttpStatus expectedHttpStatus) {
-        return webTestClient.get().uri(ADMIN_ORG_ADMIN_USERS_ENDPOINT, organizationId)
-                .header("Authorization", "Bearer " + accessToken)
-                .exchange()
-                .expectStatus().isEqualTo(expectedHttpStatus)
-                .returnResult(UserResponse.class).getResponseBody().toStream().collect(toList());
-    }
-
-    public void assignOrgAdminUser(UUID userId, HttpStatus expectedHttpStatus) {
-        webTestClient.post().uri("/api/org-admins/{userId}", userId)
-                .header("Authorization", "Bearer " + accessToken)
-                .exchange()
-                .expectStatus().isEqualTo(expectedHttpStatus);
-    }
-
-    public void removeOrgAdminUser(UUID userId, HttpStatus expectedHttpStatus) {
-        webTestClient.delete().uri("/api/org-admins/{userId}", userId)
-                .header("Authorization", "Bearer " + accessToken)
-                .exchange()
-                .expectStatus().isEqualTo(expectedHttpStatus);
     }
 
     public Map<String, Object> getReplayStatus(HttpStatus expectedHttpStatus) {

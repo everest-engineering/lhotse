@@ -5,10 +5,10 @@ import org.axonframework.modelling.command.AggregateNotFoundException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import java.io.IOException;
-import java.util.NoSuchElementException;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.ValidationException;
+import java.io.IOException;
+import java.util.NoSuchElementException;
 
 import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 import static javax.servlet.http.HttpServletResponse.SC_NOT_FOUND;
@@ -47,5 +47,4 @@ public class ExceptionHandlingControllerAdvice {
         response.sendError(SC_BAD_REQUEST,
                 cause instanceof InterruptedException ? cause.getMessage() : cause.getCause().getMessage());
     }
-
 }

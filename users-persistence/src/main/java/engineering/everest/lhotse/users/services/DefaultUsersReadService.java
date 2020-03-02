@@ -6,7 +6,7 @@ import engineering.everest.lhotse.users.persistence.UsersRepository;
 import engineering.everest.starterkit.filestorage.FileService;
 import engineering.everest.starterkit.media.thumbnails.ThumbnailService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,7 +16,7 @@ import java.util.UUID;
 
 import static java.util.stream.Collectors.toList;
 
-@Component
+@Service
 public class DefaultUsersReadService implements UsersReadService {
 
     private final UsersRepository usersRepository;

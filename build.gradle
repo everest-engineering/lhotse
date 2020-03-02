@@ -39,6 +39,11 @@ subprojects {
     }
 
     ext {
+        axonHazelcastCommandDistributionVersion = '0.0.6'
+        storageVersion = '0.0.7'
+        mediaVersion = '0.0.7'
+        securityVersion = '0.0.7'
+
         springBootVersion = '2.2.3.RELEASE'
         axonVersion = '4.2'
         commonsLangVersion = '3.9'
@@ -61,10 +66,6 @@ subprojects {
         jjwtVersion = '0.10.7'
         commonsTextVersion = '1.8'
         awsSdkVersion = '1.11.705'
-        axonHazelcastCommandDistributionVersion = '0.0.6'
-        storageVersion = '0.0.6'
-        mediaVersion = '0.0.6'
-        securityVersion = '0.0.6'
 
         junitVersion = '5.5.2'
         hamcrestVersion = '2.1'

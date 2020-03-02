@@ -5,11 +5,13 @@ dependencies {
     implementation "engineering.everest.starterkit:storage:${storageVersion}"
     implementation "engineering.everest.starterkit:security:${securityVersion}"
     implementation "org.axonframework:axon-spring:${axonVersion}"
-    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.liquibase:liquibase-core:3.8.7'
 
-    testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
-    testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
     testImplementation 'org.springframework.boot:spring-boot-test-autoconfigure'
     testImplementation 'org.springframework:spring-test'
-    testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo'
+    testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
+    testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
+    testImplementation 'org.liquibase:liquibase-core:3.8.7'
+    testRuntimeOnly 'com.h2database:h2:1.4.200'
 }

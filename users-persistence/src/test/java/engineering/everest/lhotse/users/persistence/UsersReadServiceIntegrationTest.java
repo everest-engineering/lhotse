@@ -1,17 +1,21 @@
 package engineering.everest.lhotse.users.persistence;
 
 import engineering.everest.lhotse.axon.common.domain.User;
+import engineering.everest.lhotse.users.config.TestUserSessionsJpaConfig;
+import engineering.everest.lhotse.users.config.UserSessionsJpaConfig;
+import engineering.everest.lhotse.users.services.UsersReadService;
 import engineering.everest.starterkit.filestorage.FileService;
 import engineering.everest.starterkit.media.thumbnails.ThumbnailService;
-import engineering.everest.lhotse.users.services.UsersReadService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.data.mongo.AutoConfigureDataMongo;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.ByteArrayInputStream;
@@ -26,12 +30,19 @@ import static engineering.everest.lhotse.axon.common.domain.Role.ORG_USER;
 import static java.time.Instant.ofEpochSecond;
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
+import static org.springframework.context.annotation.FilterType.ASSIGNABLE_TYPE;
 
-@AutoConfigureDataMongo
 @ExtendWith(SpringExtension.class)
-@ComponentScan(basePackages = "engineering.everest.lhotse.users")
+@DataJpaTest
+@EnableAutoConfiguration
+@ComponentScan(basePackages = "engineering.everest.lhotse.users",
+        excludeFilters = @ComponentScan.Filter(type = ASSIGNABLE_TYPE, value = UserSessionsJpaConfig.class))
+@ContextConfiguration(classes = {TestUserSessionsJpaConfig.class})
 class UsersReadServiceIntegrationTest {
 
     private static final UUID ORG_1_USER_ID_1 = randomUUID();

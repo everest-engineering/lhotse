@@ -10,7 +10,7 @@ dependencies {
     implementation "javax.validation:validation-api"
     implementation 'org.springframework:spring-beans'
     implementation 'org.springframework:spring-context'
-    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation "org.axonframework:axon-spring:${axonVersion}"
     implementation "org.apache.commons:commons-lang3:${commonsLangVersion}"
 

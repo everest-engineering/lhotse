@@ -1,16 +1,19 @@
 package engineering.everest.lhotse.organizations.services;
 
-import engineering.everest.lhotse.users.services.UsersReadService;
 import engineering.everest.lhotse.organizations.Organization;
 import engineering.everest.lhotse.organizations.OrganizationAddress;
 import engineering.everest.lhotse.organizations.persistence.OrganizationsRepository;
+import engineering.everest.lhotse.users.services.UsersReadService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.data.mongo.AutoConfigureDataMongo;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.Instant;
@@ -24,9 +27,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@AutoConfigureDataMongo
 @ExtendWith(SpringExtension.class)
+@DataJpaTest
 @ComponentScan(basePackages = "engineering.everest.lhotse.organizations")
+@EntityScan(basePackages = "engineering.everest.lhotse.organizations.persistence")
+@EnableJpaRepositories(basePackages = "engineering.everest.lhotse.organizations.persistence")
+@ContextConfiguration(classes = TestProjectionsJpaConfig.class)
 class OrganizationsReadServiceIntegrationTest {
 
     private static final UUID ORGANIZATION_ID_1 = randomUUID();
@@ -117,8 +123,6 @@ class OrganizationsReadServiceIntegrationTest {
 
     @Test
     void getOrganization_WillFail_WhenOrganizationDoesNotExist() {
-        assertThrows(NoSuchElementException.class, () -> {
-            organizationsReadService.getById(randomUUID());
-        });
+        assertThrows(NoSuchElementException.class, () -> organizationsReadService.getById(randomUUID()));
     }
 }

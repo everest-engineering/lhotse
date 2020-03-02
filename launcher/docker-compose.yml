@@ -1,17 +1,19 @@
 version: '3'
 services:
   postgres-db:
-    image: postgres:12.0-alpine
+    image: postgres:12-alpine
+    container_name: postgres-db
+    restart: always
     ports:
       - 5432:5432
     volumes:
       - ./db-scripts:/docker-entrypoint-initdb.d
     environment:
-      POSTGRES_USER: axon
-      POSTGRES_DB: axon
-      POSTGRES_PASSWORD: axon
+      POSTGRES_USER: postgres
+      POSTGRES_DB: default
+      POSTGRES_PASSWORD: postgres
   mongo-db:
-    image: mongo:4.2
+    image: mongo:4
     container_name: mongo-db
     restart: always
     ports:

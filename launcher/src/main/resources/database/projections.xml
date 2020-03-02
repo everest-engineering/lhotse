@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="1" author="Lhotse starter kit">
+        <createTable tableName="organizations">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" primaryKeyName="PK_organizations"/>
+            </column>
+            <column name="city" type="varchar(255)"/>
+            <column name="country" type="varchar(255)"/>
+            <column name="postalcode" type="varchar(255)"/>
+            <column name="state" type="varchar(255)"/>
+            <column name="street" type="varchar(255)"/>
+            <column name="contactname" type="varchar(255)"/>
+            <column name="deregistered" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="emailaddress" type="varchar(255)"/>
+            <column name="organizationname" type="varchar(255)"/>
+            <column name="phonenumber" type="varchar(255)"/>
+            <column name="registeredon" type="timestamp"/>
+            <column name="websiteurl" type="varchar(255)"/>
+        </createTable>
+
+        <createTable tableName="users">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" primaryKeyName="PK_usrs"/>
+            </column>
+            <column name="createdon" type="timestamp"/>
+            <column name="disabled" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="displayname" type="varchar(255)"/>
+            <column name="email" type="varchar(255)"/>
+            <column name="encodedpassword" type="varchar(255)"/>
+            <column name="organizationid" type="uuid"/>
+            <column name="profilephotofileid" type="uuid"/>
+            <column name="username" type="varchar(255)">
+                <constraints unique="true" uniqueConstraintName="UNIQUE_users_email" nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex tableName="users" indexName="INDEX_users_email">
+            <column name="email"/>
+        </createIndex>
+        <createIndex tableName="users" indexName="INDEX_users_username">
+            <column name="username"/>
+        </createIndex>
+        <createIndex tableName="users" indexName="INDEX_users_organization_id">
+            <column name="organizationid"/>
+        </createIndex>
+
+        <createTable tableName="users_roles">
+            <column name="users_id" type="uuid"/>
+            <column name="roles" type="integer"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="users_roles" baseColumnNames="users_id"
+                                 constraintName="FK_users_roles_users_id"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+</databaseChangeLog>

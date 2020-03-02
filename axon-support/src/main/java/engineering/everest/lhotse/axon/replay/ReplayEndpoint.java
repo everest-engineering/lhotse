@@ -75,8 +75,8 @@ public class ReplayEndpoint {
 
     @ResetHandler
     void onReset() {
-        LOGGER.info("on reset");
-        preparations.forEach(ReplayPreparation::run);
+        LOGGER.info("Preparing for replay");
+        preparations.forEach(ReplayPreparation::prepareForReplay);
     }
 
     @EventHandler
@@ -97,7 +97,8 @@ public class ReplayEndpoint {
     }
 
     private boolean isReplaying() {
-        return getSwitchingEventProcessors().stream().anyMatch(SwitchingEventProcessor::isRelaying);
+        return getSwitchingEventProcessors().stream()
+                .anyMatch(SwitchingEventProcessor::isRelaying);
     }
 
     private List<SwitchingEventProcessor> getSwitchingEventProcessors() {
@@ -115,5 +116,4 @@ public class ReplayEndpoint {
                 .map(Optional::get)
                 .collect(toList());
     }
-
 }

@@ -88,7 +88,7 @@ class ReplayEndpointTest {
     @Test
     void onResetWillRunPreparations() {
         replayEndpoint.onReset();
-        verify(replayPreparation).run();
+        verify(replayPreparation).prepareForReplay();
     }
 
     @Test

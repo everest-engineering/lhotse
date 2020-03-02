@@ -17,10 +17,7 @@ import java.nio.file.Paths;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-@SpringBootTest(
-        webEnvironment = RANDOM_PORT,
-        classes = Launcher.class,
-        properties = {"spring.data.mongodb.host=", "spring.data.mongodb.port="})
+@SpringBootTest(webEnvironment = RANDOM_PORT, classes = Launcher.class)
 @ActiveProfiles("standalone")
 class SecurityFunctionalTests {
 
@@ -47,7 +44,9 @@ class SecurityFunctionalTests {
                 .exchange()
                 .expectStatus().isOk()
                 .returnResult(String.class).getResponseBody().blockFirst();
+
         assertNotNull(apiContent);
+
         Files.writeString(
                 Paths.get(System.getProperty("org.gradle.project.buildDir"), "web-app-api.json"),
                 apiContent);

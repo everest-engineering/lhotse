@@ -1,10 +1,10 @@
 package engineering.everest.lhotse.users.eventhandlers;
 
-import engineering.everest.lhotse.users.persistence.PersistableUser;
-import engineering.everest.lhotse.users.persistence.UsersRepository;
 import engineering.everest.lhotse.users.domain.events.UserCreatedByAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserDetailsUpdatedByAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserProfilePhotoUploadedEvent;
+import engineering.everest.lhotse.users.persistence.PersistableUser;
+import engineering.everest.lhotse.users.persistence.UsersRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,8 +17,6 @@ import java.util.UUID;
 
 import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -44,6 +42,13 @@ class UsersEventHandlerTest {
     @BeforeEach
     void setUp() {
         usersEventHandler = new UsersEventHandler(usersRepository);
+    }
+
+    @Test
+    void prepareForReplay_willDeleteAllProjections() {
+        usersEventHandler.prepareForReplay();
+
+        verify(usersRepository).deleteAll();
     }
 
     @Test

@@ -9,6 +9,7 @@ import engineering.everest.lhotse.axon.security.AuthenticationContextProvider;
 import engineering.everest.lhotse.users.services.UsersReadService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -23,6 +24,7 @@ import java.util.List;
 
 import static engineering.everest.lhotse.axon.common.domain.Role.ADMIN;
 import static org.mockito.Mockito.mock;
+import static org.springframework.core.Ordered.HIGHEST_PRECEDENCE;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 @EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true, jsr250Enabled = true)
@@ -67,6 +69,7 @@ public class TestApiConfig {
     }
 
     @Configuration
+    @Order(HIGHEST_PRECEDENCE)
     public static class TestWebSecurityConfig extends WebSecurityConfigurerAdapter {
 
         @Override

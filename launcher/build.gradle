@@ -79,22 +79,22 @@ dependencies {
     implementation "engineering.everest.starterkit:axon-command-distribution-extension:${axonHazelcastCommandDistributionVersion}"
     implementation "engineering.everest.starterkit:security:${securityVersion}"
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation "com.h2database:h2:${h2Version}"
     implementation "io.micrometer:micrometer-registry-prometheus:${microMeterPrometheusRegistry}"
     implementation "io.prometheus:simpleclient_pushgateway:${prometheusPushGateway}"
+    implementation 'org.liquibase:liquibase-core:3.8.7'
 
     annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
 
     testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
     testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
-    testImplementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
     testImplementation "org.springframework.boot:spring-boot-starter-test"
     testImplementation "org.springframework.boot:spring-boot-starter-webflux"
     testImplementation "org.springframework.security:spring-security-test"
-    testImplementation "de.flapdoodle.embed:de.flapdoodle.embed.mongo:${flapDoodleMongoVersion}"
     testImplementation "org.apache.commons:commons-text:${commonsTextVersion}"
     testImplementation "org.bouncycastle:bcpkix-jdk15on:${bouncyCastleVersion}"
-    testRuntimeOnly "com.h2database:h2:${h2Version}"
 }
