@@ -1,6 +1,6 @@
 package engineering.everest.lhotse.organizations.eventhandlers;
 
-import engineering.everest.lhotse.axon.replay.ReplayPreparation;
+import engineering.everest.lhotse.axon.replay.ReplayAware;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationNameUpdatedByAdminEvent;
 import engineering.everest.lhotse.organizations.persistence.Address;
 import engineering.everest.lhotse.organizations.persistence.OrganizationsRepository;
@@ -20,7 +20,7 @@ import java.time.Instant;
 
 @Service
 @Log4j2
-public class OrganizationsEventHandler implements ReplayPreparation {
+public class OrganizationsEventHandler implements ReplayAware {
 
     private final OrganizationsRepository organizationsRepository;
 

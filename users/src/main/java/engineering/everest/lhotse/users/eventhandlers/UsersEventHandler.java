@@ -1,6 +1,6 @@
 package engineering.everest.lhotse.users.eventhandlers;
 
-import engineering.everest.lhotse.axon.replay.ReplayPreparation;
+import engineering.everest.lhotse.axon.replay.ReplayAware;
 import engineering.everest.lhotse.users.persistence.UsersRepository;
 import engineering.everest.lhotse.users.domain.events.UserCreatedByAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserProfilePhotoUploadedEvent;
@@ -15,7 +15,7 @@ import java.time.Instant;
 
 @Service
 @Log4j2
-public class UsersEventHandler implements ReplayPreparation {
+public class UsersEventHandler implements ReplayAware {
 
     private final UsersRepository usersRepository;
 

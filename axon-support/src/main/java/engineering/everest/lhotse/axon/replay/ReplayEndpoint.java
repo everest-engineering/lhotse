@@ -30,12 +30,12 @@ import static java.util.stream.Collectors.toList;
 public class ReplayEndpoint {
 
     private final AxonConfiguration axonConfiguration;
-    private final List<ReplayPreparation> preparations;
+    private final List<ReplayAware> preparations;
     private final TaskExecutor taskExecutor;
 
     @Autowired
     public ReplayEndpoint(AxonConfiguration axonConfiguration,
-                          List<ReplayPreparation> preparations,
+                          List<ReplayAware> preparations,
                           TaskExecutor taskExecutor) {
         this.axonConfiguration = axonConfiguration;
         this.preparations = preparations;
@@ -76,7 +76,7 @@ public class ReplayEndpoint {
     @ResetHandler
     void onReset() {
         LOGGER.info("Preparing for replay");
-        preparations.forEach(ReplayPreparation::prepareForReplay);
+        preparations.forEach(ReplayAware::prepareForReplay);
     }
 
     @EventHandler
