@@ -86,7 +86,7 @@ dependencies {
     implementation "com.h2database:h2:${h2Version}"
     implementation "io.micrometer:micrometer-registry-prometheus:${microMeterPrometheusRegistry}"
     implementation "io.prometheus:simpleclient_pushgateway:${prometheusPushGateway}"
-    implementation 'org.liquibase:liquibase-core:3.8.7'
+    implementation "org.liquibase:liquibase-core:${liquibaseVersion}"
 
     annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
 

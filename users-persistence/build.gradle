@@ -12,6 +12,6 @@ dependencies {
     testImplementation 'org.springframework:spring-test'
     testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
     testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
-    testImplementation 'org.liquibase:liquibase-core:3.8.7'
-    testRuntimeOnly 'com.h2database:h2:1.4.200'
+    testImplementation "org.liquibase:liquibase-core:${liquibaseVersion}"
+    testRuntimeOnly "com.h2database:h2:${h2Version}"
 }

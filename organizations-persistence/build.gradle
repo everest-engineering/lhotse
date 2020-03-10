@@ -10,6 +10,6 @@ dependencies {
     testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
     testImplementation 'org.springframework.boot:spring-boot-test-autoconfigure'
     testImplementation 'org.springframework:spring-test'
-    testRuntimeOnly 'com.h2database:h2:1.4.200'
+    testRuntimeOnly "com.h2database:h2:${h2Version}"
 }
 
