@@ -38,7 +38,7 @@ class TokenControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean(name = "mongoTokenStore")
+    @MockBean(name = "authTokenStore")
     private TokenStore tokenStore;
     @MockBean
     private PasswordEncoder passwordEncoder;
@@ -48,7 +48,6 @@ class TokenControllerTest {
     private AuthServerUserDetailsService authServerUserDetailsService;
     @MockBean
     private AuthenticationManager authenticationManager;
-
     @Mock
     private OAuth2RefreshToken oAuth2RefreshToken;
     @Mock

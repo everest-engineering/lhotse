@@ -3,6 +3,9 @@ package engineering.everest.lhotse.organizations.persistence;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
+import javax.persistence.Embeddable;
+
+@Embeddable
 @ToString
 @EqualsAndHashCode
 public class Address {

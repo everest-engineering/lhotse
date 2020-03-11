@@ -2,15 +2,15 @@ package engineering.everest.lhotse.organizations.persistence;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
 import java.time.Instant;
 import java.util.UUID;
 
 @Data
 @NoArgsConstructor
-@Document(collection = "organizations")
+@Entity(name = "organizations")
 public class PersistableOrganization {
 
     @Id

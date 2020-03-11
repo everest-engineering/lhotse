@@ -21,7 +21,6 @@ public class SwitchingEventProcessorBuilder implements EventProcessorBuilder {
     @SuppressWarnings("unchecked")
     public SwitchingEventProcessorBuilder(AxonConfiguration axonConfiguration,
                                           EventProcessingModule eventProcessingModule) {
-
         subscribingEventProcessorBuilder = (name, configuration, eventHandlerInvoker) ->
                 SubscribingEventProcessor.builder()
                         .name(name)
@@ -55,6 +54,4 @@ public class SwitchingEventProcessorBuilder implements EventProcessorBuilder {
                 (SubscribingEventProcessor) subscribingEventProcessorBuilder.build(name, configuration, eventHandlerInvoker),
                 (TrackingEventProcessor) trackingEventProcessorBuilder.build(name, configuration, eventHandlerInvoker));
     }
-
-
 }

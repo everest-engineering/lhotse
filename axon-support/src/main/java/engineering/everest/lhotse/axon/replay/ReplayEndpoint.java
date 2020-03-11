@@ -30,12 +30,12 @@ import static java.util.stream.Collectors.toList;
 public class ReplayEndpoint {
 
     private final AxonConfiguration axonConfiguration;
-    private final List<ReplayPreparation> preparations;
+    private final List<ReplayAware> preparations;
     private final TaskExecutor taskExecutor;
 
     @Autowired
     public ReplayEndpoint(AxonConfiguration axonConfiguration,
-                          List<ReplayPreparation> preparations,
+                          List<ReplayAware> preparations,
                           TaskExecutor taskExecutor) {
         this.axonConfiguration = axonConfiguration;
         this.preparations = preparations;
@@ -75,8 +75,8 @@ public class ReplayEndpoint {
 
     @ResetHandler
     void onReset() {
-        LOGGER.info("on reset");
-        preparations.forEach(ReplayPreparation::run);
+        LOGGER.info("Preparing for replay");
+        preparations.forEach(ReplayAware::prepareForReplay);
     }
 
     @EventHandler
@@ -97,7 +97,8 @@ public class ReplayEndpoint {
     }
 
     private boolean isReplaying() {
-        return getSwitchingEventProcessors().stream().anyMatch(SwitchingEventProcessor::isRelaying);
+        return getSwitchingEventProcessors().stream()
+                .anyMatch(SwitchingEventProcessor::isRelaying);
     }
 
     private List<SwitchingEventProcessor> getSwitchingEventProcessors() {
@@ -115,5 +116,4 @@ public class ReplayEndpoint {
                 .map(Optional::get)
                 .collect(toList());
     }
-
 }

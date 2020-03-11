@@ -33,7 +33,7 @@ class ReplayEndpointTest {
     @Mock
     private AxonConfiguration axonConfiguration;
     @Mock
-    private ReplayPreparation replayPreparation;
+    private ReplayAware replayAware;
     @Mock
     private TaskExecutor taskExecutor;
     @Mock
@@ -54,7 +54,7 @@ class ReplayEndpointTest {
         lenient().when(axonConfiguration.eventProcessingConfiguration()).thenReturn(eventProcessingConfiguration);
         lenient().when(eventProcessingConfiguration.eventProcessors()).thenReturn(Map.of("default", switchingEventProcessor));
         lenient().when(switchingEventProcessor.isRelaying()).thenReturn(false);
-        replayEndpoint = new ReplayEndpoint(axonConfiguration, List.of(replayPreparation), taskExecutor);
+        replayEndpoint = new ReplayEndpoint(axonConfiguration, List.of(replayAware), taskExecutor);
     }
 
     @Test
@@ -88,7 +88,7 @@ class ReplayEndpointTest {
     @Test
     void onResetWillRunPreparations() {
         replayEndpoint.onReset();
-        verify(replayPreparation).run();
+        verify(replayAware).prepareForReplay();
     }
 
     @Test

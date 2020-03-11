@@ -7,3 +7,5 @@ services:
       - ./files:/home/jovyan/work
     ports:
       - 8888:8888
+    network_mode: "host"
+ 

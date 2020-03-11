@@ -1,11 +1,15 @@
 package engineering.everest.lhotse.organizations.eventhandlers;
 
-import engineering.everest.lhotse.organizations.domain.events.*;
+import engineering.everest.lhotse.organizations.OrganizationAddress;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationAddressUpdatedByAdminEvent;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationContactDetailsUpdatedByAdminEvent;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationDeregisteredByAdminEvent;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationNameUpdatedByAdminEvent;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationRegisteredByAdminEvent;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationReregisteredByAdminEvent;
 import engineering.everest.lhotse.organizations.persistence.Address;
 import engineering.everest.lhotse.organizations.persistence.OrganizationsRepository;
 import engineering.everest.lhotse.organizations.persistence.PersistableOrganization;
-import engineering.everest.lhotse.organizations.domain.events.*;
-import engineering.everest.lhotse.organizations.OrganizationAddress;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -62,6 +66,13 @@ class OrganizationsEventHandlerTest {
     @BeforeEach
     void setUp() {
         organizationsEventHandler = new OrganizationsEventHandler(organizationsRepository);
+    }
+
+    @Test
+    void prepareForReplay_willDeleteAllProjections() {
+        organizationsEventHandler.prepareForReplay();
+
+        verify(organizationsRepository).deleteAll();
     }
 
     @Test

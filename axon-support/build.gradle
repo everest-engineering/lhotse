@@ -23,6 +23,7 @@ dependencies {
     implementation "org.postgresql:postgresql:${postgresDriverVersion}"
     implementation "org.ehcache:ehcache:${ehCacheVersion}"
     implementation "io.kubernetes:client-java:${kubernetesClientVersion}"
+    implementation "org.liquibase:liquibase-core:${liquibaseVersion}"
 
     testImplementation project(':command-validation-support')
     testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"

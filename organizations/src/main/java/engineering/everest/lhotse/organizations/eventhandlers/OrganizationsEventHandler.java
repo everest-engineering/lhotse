@@ -1,5 +1,6 @@
 package engineering.everest.lhotse.organizations.eventhandlers;
 
+import engineering.everest.lhotse.axon.replay.ReplayAware;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationNameUpdatedByAdminEvent;
 import engineering.everest.lhotse.organizations.persistence.Address;
 import engineering.everest.lhotse.organizations.persistence.OrganizationsRepository;
@@ -19,13 +20,19 @@ import java.time.Instant;
 
 @Service
 @Log4j2
-public class OrganizationsEventHandler {
+public class OrganizationsEventHandler implements ReplayAware {
 
     private final OrganizationsRepository organizationsRepository;
 
     @Autowired
     public OrganizationsEventHandler(OrganizationsRepository organizationsRepository) {
         this.organizationsRepository = organizationsRepository;
+    }
+
+    @Override
+    public void prepareForReplay() {
+        LOGGER.info("{} deleting projections", OrganizationsEventHandler.class.getSimpleName());
+        organizationsRepository.deleteAll();
     }
 
     @EventHandler

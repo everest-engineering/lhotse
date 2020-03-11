@@ -20,7 +20,7 @@ public class SwitchingEventProcessor implements EventProcessor {
                                    TrackingEventProcessor trackingEventProcessor) {
         this.subscribingEventProcessor = subscribingEventProcessor;
         this.trackingEventProcessor = trackingEventProcessor;
-        currentEventProcessor = subscribingEventProcessor;
+        this.currentEventProcessor = subscribingEventProcessor;
     }
 
     public void startReplay(TrackingToken trackingToken) {
@@ -30,7 +30,7 @@ public class SwitchingEventProcessor implements EventProcessor {
             currentEventProcessor = trackingEventProcessor;
             trackingEventProcessor.resetTokens(trackingToken);
             start();
-            LOGGER.info("Done starting replay");
+            LOGGER.info("Started replay");
         }
     }
 
@@ -40,7 +40,7 @@ public class SwitchingEventProcessor implements EventProcessor {
             currentEventProcessor.shutDown();
             currentEventProcessor = subscribingEventProcessor;
             start();
-            LOGGER.info("Done stopping replay");
+            LOGGER.info("Stopped replay");
         }
     }
 

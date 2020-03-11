@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Arrays;
-import java.util.EnumSet;
+import java.util.Set;
 import java.util.UUID;
 
 import static engineering.everest.lhotse.axon.common.domain.Role.ADMIN;
@@ -24,16 +24,14 @@ public class User implements Identifiable {
     private String displayName;
     private String email;
     private boolean disabled;
-    private EnumSet<Role> roles;
+    private Set<Role> roles;
 
     public User(UUID id, UUID organizationId, String username, String displayName) {
         this(id, organizationId, username, displayName, false);
     }
 
-    public User(UUID id, UUID organizationId, String username, String displayName,
-                boolean disabled) {
-        this(id, organizationId, username, displayName, username, disabled,
-                EnumSet.of(ORG_USER));
+    public User(UUID id, UUID organizationId, String username, String displayName, boolean disabled) {
+        this(id, organizationId, username, displayName, username, disabled, Set.of(ORG_USER));
     }
 
     public boolean hasRole(Role role) {
