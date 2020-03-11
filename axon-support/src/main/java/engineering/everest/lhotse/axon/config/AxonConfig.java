@@ -14,6 +14,7 @@ import org.axonframework.common.transaction.TransactionManager;
 import org.axonframework.config.EventProcessingModule;
 import org.axonframework.messaging.MessageDispatchInterceptor;
 import org.axonframework.messaging.interceptors.CorrelationDataInterceptor;
+import org.axonframework.modelling.command.AnnotationCommandTargetResolver;
 import org.axonframework.spring.config.AxonConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -69,5 +70,10 @@ public class AxonConfig {
         eventProcessingModule.byDefaultAssignTo("default");
         eventProcessingModule.registerEventProcessorFactory(
                 new SwitchingEventProcessorBuilder(axonConfiguration, eventProcessingModule));
+    }
+
+    @Bean
+    public AnnotationCommandTargetResolver annotationCommandTargetResolver() {
+        return AnnotationCommandTargetResolver.builder().build();
     }
 }

@@ -1,13 +1,10 @@
 package engineering.everest.lhotse.axon.security.api.rest;
 
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-
-import java.util.List;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
@@ -18,6 +15,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+
 @RestController
 @Api(consumes = APPLICATION_JSON_VALUE, tags = "Tokens", description = "Authentication and Authorization services")
 @Log4j2
@@ -26,7 +27,7 @@ public class TokenController {
     private final TokenStore tokenStore;
 
     @Autowired
-    public TokenController(TokenStore tokenStore) {
+    public TokenController(@Qualifier("authTokenStore") TokenStore tokenStore) {
         this.tokenStore = tokenStore;
     }
 

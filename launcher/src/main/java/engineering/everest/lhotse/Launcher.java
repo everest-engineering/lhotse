@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 
-@SpringBootApplication(scanBasePackages = "engineering.everest.lhotse")
+@SpringBootApplication(scanBasePackages = {"engineering.everest.lhotse", "engineering.everest.starterkit"})
 @EnableScheduling
 @SuppressWarnings("PMD.ClassWithOnlyPrivateConstructorsShouldBeFinal")
 public class Launcher {
