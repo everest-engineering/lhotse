@@ -2,7 +2,7 @@ package engineering.everest.lhotse.api.helpers;
 
 import engineering.everest.lhotse.axon.common.domain.Role;
 import engineering.everest.lhotse.axon.common.domain.User;
-import engineering.everest.lhotse.axon.security.AuthenticationContextProvider;
+import engineering.everest.lhotse.security.AuthenticationContextProvider;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;

@@ -4,7 +4,7 @@ import engineering.everest.lhotse.axon.common.domain.Identifiable;
 import engineering.everest.lhotse.axon.common.domain.User;
 import engineering.everest.lhotse.axon.common.services.ReadService;
 import engineering.everest.lhotse.axon.common.services.ReadServiceProvider;
-import engineering.everest.lhotse.axon.security.AuthenticationContextProvider;
+import engineering.everest.lhotse.security.AuthenticationContextProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

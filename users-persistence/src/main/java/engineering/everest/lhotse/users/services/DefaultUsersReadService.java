@@ -83,7 +83,7 @@ public class DefaultUsersReadService implements UsersReadService {
         if (profilePhotoFileId == null) {
             throw new NoSuchElementException("Profile photo not present");
         }
-        return fileService.stream(profilePhotoFileId);
+        return fileService.stream(profilePhotoFileId).getInputStream();
     }
 
     private User convert(PersistableUser persistableUser) {

@@ -40,9 +40,9 @@ subprojects {
 
     ext {
         axonHazelcastCommandDistributionVersion = '0.0.7'
-        mediaVersion = '0.0.7'
+        mediaVersion = '0.0.8'
         securityVersion = '0.0.7'
-        storageVersion = '0.0.7'
+        storageVersion = '0.0.8'
 
         aspectjVersion = '1.9.5'
         awsSdkVersion = '1.11.740'
@@ -68,7 +68,6 @@ subprojects {
         thumbnailatorVersion = '0.4.11'
         springBootVersion = '2.2.5.RELEASE'
 
-        flapDoodleMongoVersion = '2.2.0'
         h2Version = '1.4.200'
         hamcrestVersion = '2.2'
         mockitoVersion = '3.2.4'

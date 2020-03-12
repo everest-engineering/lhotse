@@ -1,7 +1,7 @@
-package engineering.everest.lhotse.axon.security;
+package engineering.everest.lhotse.security;
 
 import engineering.everest.lhotse.axon.common.domain.User;
-import engineering.everest.lhotse.axon.security.userdetails.AppUserDetails;
+import engineering.everest.lhotse.security.userdetails.AppUserDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

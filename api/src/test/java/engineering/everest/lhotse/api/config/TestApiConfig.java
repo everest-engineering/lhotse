@@ -5,7 +5,7 @@ import engineering.everest.lhotse.api.helpers.MockAuthenticationContextProvider;
 import engineering.everest.lhotse.api.rest.converters.DtoConverter;
 import engineering.everest.lhotse.api.rest.security.EntityPermissionEvaluator;
 import engineering.everest.lhotse.axon.common.services.ReadServiceProvider;
-import engineering.everest.lhotse.axon.security.AuthenticationContextProvider;
+import engineering.everest.lhotse.security.AuthenticationContextProvider;
 import engineering.everest.lhotse.users.services.UsersReadService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

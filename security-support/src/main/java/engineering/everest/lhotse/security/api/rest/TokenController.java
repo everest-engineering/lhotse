@@ -1,4 +1,4 @@
-package engineering.everest.lhotse.axon.security.api.rest;
+package engineering.everest.lhotse.security.api.rest;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

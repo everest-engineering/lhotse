@@ -5,6 +5,7 @@ import engineering.everest.lhotse.users.config.TestUserSessionsJpaConfig;
 import engineering.everest.lhotse.users.config.UserSessionsJpaConfig;
 import engineering.everest.lhotse.users.services.UsersReadService;
 import engineering.everest.starterkit.filestorage.FileService;
+import engineering.everest.starterkit.filestorage.InputStreamOfKnownLength;
 import engineering.everest.starterkit.media.thumbnails.ThumbnailService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -80,6 +81,7 @@ class UsersReadServiceIntegrationTest {
             USERNAME_1, false, EnumSet.of(ORG_USER, ORG_ADMIN), CREATED_ON_1, PROFILE_PHOTO_ID);
     private static final PersistableUser PERSISTABLE_ORG_1_USER_3 = new PersistableUser(ORG_1_USER_ID_3, ORGANIZATION_ID_1, USERNAME_3, USER_ENCODED_PASSWORD_3, USER_DISPLAY_NAME_3,
             true, CREATED_ON_3);
+    public static final String PROFILE_PHOTO_FILE_CONTENTS = "my profile photo";
 
     @Autowired
     private UsersRepository usersRepository;
@@ -146,8 +148,8 @@ class UsersReadServiceIntegrationTest {
 
     @Test
     void getProfilePhotoStream_WillReturnStreamForProfilePhoto() throws IOException {
-        ByteArrayInputStream inputStream = new ByteArrayInputStream("my profile photo".getBytes());
-        when(fileService.stream(PROFILE_PHOTO_ID)).thenReturn(inputStream);
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(PROFILE_PHOTO_FILE_CONTENTS.getBytes());
+        when(fileService.stream(PROFILE_PHOTO_ID)).thenReturn(new InputStreamOfKnownLength(inputStream, PROFILE_PHOTO_FILE_CONTENTS.length()));
 
         assertEquals(inputStream, usersReadService.getProfilePhotoStream(ORG_1_USER_1.getId()));
     }

@@ -1,7 +1,7 @@
 package engineering.everest.lhotse.api;
 
 import engineering.everest.lhotse.axon.common.domain.User;
-import engineering.everest.lhotse.axon.security.AuthenticationContextProvider;
+import engineering.everest.lhotse.security.AuthenticationContextProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;

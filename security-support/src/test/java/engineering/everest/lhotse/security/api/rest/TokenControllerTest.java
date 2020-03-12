@@ -1,6 +1,6 @@
-package engineering.everest.lhotse.axon.security.api.rest;
+package engineering.everest.lhotse.security.api.rest;
 
-import engineering.everest.lhotse.axon.security.userdetails.AuthServerUserDetailsService;
+import engineering.everest.lhotse.security.userdetails.AuthServerUserDetailsService;
 import engineering.everest.starterkit.security.config.AuthServerConfig;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

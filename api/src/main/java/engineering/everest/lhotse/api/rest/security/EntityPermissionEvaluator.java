@@ -3,7 +3,7 @@ package engineering.everest.lhotse.api.rest.security;
 import engineering.everest.lhotse.axon.common.domain.Identifiable;
 import engineering.everest.lhotse.axon.common.services.ReadService;
 import engineering.everest.lhotse.axon.common.services.ReadServiceProvider;
-import engineering.everest.lhotse.axon.security.AuthenticationContextProvider;
+import engineering.everest.lhotse.security.AuthenticationContextProvider;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;

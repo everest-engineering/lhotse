@@ -1,4 +1,4 @@
-package engineering.everest.lhotse.axon.security.userdetails;
+package engineering.everest.lhotse.security.userdetails;
 
 import engineering.everest.lhotse.users.authserver.AuthServerUser;
 import engineering.everest.lhotse.users.authserver.AuthServerUserReadService;

@@ -11,6 +11,7 @@ import engineering.everest.lhotse.organizations.domain.events.OrganizationAddres
 import engineering.everest.lhotse.organizations.domain.events.OrganizationContactDetailsUpdatedByAdminEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationDeregisteredByAdminEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationRegisteredByAdminEvent;
+import engineering.everest.starterkit.filestorage.InputStreamOfKnownLength;
 import org.axonframework.spring.stereotype.Aggregate;
 import org.axonframework.test.aggregate.AggregateTestFixture;
 import org.axonframework.test.aggregate.FixtureConfiguration;
@@ -55,6 +56,7 @@ class OrganizationAggregateTest {
     private static final OrganizationDeregisteredByAdminEvent ORGANIZATION_DEREGISTERED_BY_ADMIN_EVENT = new OrganizationDeregisteredByAdminEvent(ORGANIZATION_ID, ADMIN_ID);
 
     private static final UUID NETWORK_FILE_ID = randomUUID();
+    public static final String FILE_CONTENT = "file-content";
 
     private FixtureConfiguration<OrganizationAggregate> testFixture;
 
@@ -67,7 +69,8 @@ class OrganizationAggregateTest {
 
     @BeforeEach
     void setUp() throws IOException {
-        lenient().when(fileService.stream(NETWORK_FILE_ID)).thenReturn(new ByteArrayInputStream("file-content".getBytes()));
+        lenient().when(fileService.stream(NETWORK_FILE_ID)).thenReturn(new InputStreamOfKnownLength(
+                new ByteArrayInputStream(FILE_CONTENT.getBytes()), FILE_CONTENT.length()));
 
         testFixture = new AggregateTestFixture<>(OrganizationAggregate.class)
                 .registerCommandHandlerInterceptor(mockCommandValidatingMessageHandlerInterceptor(

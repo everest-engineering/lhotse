@@ -1,6 +1,6 @@
-package engineering.everest.lhotse.axon.security;
+package engineering.everest.lhotse.security;
 
-import engineering.everest.lhotse.axon.security.userdetails.AppUserDetails;
+import engineering.everest.lhotse.security.userdetails.AppUserDetails;
 import engineering.everest.lhotse.axon.common.domain.User;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;

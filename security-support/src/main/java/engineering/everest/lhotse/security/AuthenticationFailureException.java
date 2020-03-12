@@ -1,4 +1,4 @@
-package engineering.everest.lhotse.axon.security;
+package engineering.everest.lhotse.security;
 
 public class AuthenticationFailureException extends RuntimeException {
 
