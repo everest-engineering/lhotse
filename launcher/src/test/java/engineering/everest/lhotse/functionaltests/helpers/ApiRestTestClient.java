@@ -1,6 +1,7 @@
 package engineering.everest.lhotse.functionaltests.helpers;
 
 import engineering.everest.lhotse.AdminProvisionTask;
+import engineering.everest.lhotse.api.rest.requests.NewOrganizationRequest;
 import engineering.everest.lhotse.api.rest.requests.NewUserRequest;
 import engineering.everest.lhotse.api.rest.requests.UpdateUserRequest;
 import engineering.everest.lhotse.api.rest.responses.UserResponse;
@@ -57,6 +58,19 @@ public class ApiRestTestClient {
                 .exchange()
                 .expectStatus().isEqualTo(expectedHttpStatus)
                 .returnResult(UserResponse.class).getResponseBody().blockFirst();
+    }
+
+    public UUID createOrganization(NewOrganizationRequest request, HttpStatus expectedHttpStatus) {
+        ResponseSpec responseSpec = webTestClient.post().uri("/api/organizations")
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(APPLICATION_JSON)
+                .body(fromValue(request))
+                .exchange()
+                .expectStatus().isEqualTo(expectedHttpStatus);
+        if (expectedHttpStatus == CREATED) {
+            return responseSpec.returnResult(UUID.class).getResponseBody().blockFirst();
+        }
+        return null;
     }
 
     public UUID createUser(UUID organizationId, NewUserRequest request, HttpStatus expectedHttpStatus) {
