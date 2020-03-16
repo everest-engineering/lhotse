@@ -3,7 +3,6 @@ package engineering.everest.lhotse.axon.replay;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.eventhandling.DisallowReplay;
 import org.axonframework.eventhandling.EventHandler;
-import org.axonframework.eventhandling.ResetHandler;
 import org.axonframework.eventsourcing.eventstore.EventStore;
 import org.axonframework.spring.config.AxonConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,15 +29,15 @@ import static java.util.stream.Collectors.toList;
 public class ReplayEndpoint {
 
     private final AxonConfiguration axonConfiguration;
-    private final List<ReplayAware> preparations;
+    private final List<ReplayCompletionAware> resetCompletionAwares;
     private final TaskExecutor taskExecutor;
 
     @Autowired
     public ReplayEndpoint(AxonConfiguration axonConfiguration,
-                          List<ReplayAware> preparations,
+                          List<ReplayCompletionAware> resetCompletionAwares,
                           TaskExecutor taskExecutor) {
         this.axonConfiguration = axonConfiguration;
-        this.preparations = preparations;
+        this.resetCompletionAwares = resetCompletionAwares;
         this.taskExecutor = taskExecutor;
     }
 
@@ -73,12 +72,6 @@ public class ReplayEndpoint {
         }
     }
 
-    @ResetHandler
-    void onReset() {
-        LOGGER.info("Preparing for replay");
-        preparations.forEach(ReplayAware::prepareForReplay);
-    }
-
     @EventHandler
     @DisallowReplay
     void on(ReplayMarkerEvent event) {
@@ -91,9 +84,12 @@ public class ReplayEndpoint {
     }
 
     private void stopReplay() {
-        taskExecutor.execute(() -> getSwitchingEventProcessors().stream()
-                .filter(SwitchingEventProcessor::isRelaying)
-                .forEach(SwitchingEventProcessor::stopReplay));
+        taskExecutor.execute(() -> {
+            getSwitchingEventProcessors().stream()
+                    .filter(SwitchingEventProcessor::isRelaying)
+                    .forEach(SwitchingEventProcessor::stopReplay);
+            resetCompletionAwares.forEach(ReplayCompletionAware::replayCompleted);
+        });
     }
 
     private boolean isReplaying() {

@@ -1,10 +1,9 @@
 package engineering.everest.lhotse;
 
-import engineering.everest.lhotse.axon.replay.ReplayAware;
+import engineering.everest.lhotse.axon.replay.ReplayCompletionAware;
 import engineering.everest.lhotse.users.persistence.PersistableUser;
 import engineering.everest.lhotse.users.persistence.UsersRepository;
 import lombok.extern.log4j.Log4j2;
-import org.axonframework.eventhandling.EventHandler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -21,7 +20,7 @@ import static java.util.UUID.fromString;
 
 @Component
 @Log4j2
-public class AdminProvisionTask implements ReplayAware {
+public class AdminProvisionTask implements ReplayCompletionAware {
 
     private static final UUID ADMIN_ID = fromString("00000000-0000-0000-0000-000000000000");
     private static final String ADMIN_DISPLAY_NAME = "Admin";
@@ -59,7 +58,6 @@ public class AdminProvisionTask implements ReplayAware {
     }
 
     @Override
-    @EventHandler
     public void replayCompleted() {
         run();
     }

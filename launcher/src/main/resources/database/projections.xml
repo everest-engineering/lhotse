@@ -27,7 +27,7 @@
 
         <createTable tableName="users">
             <column name="id" type="uuid">
-                <constraints primaryKey="true" primaryKeyName="PK_usrs"/>
+                <constraints primaryKey="true" primaryKeyName="PK_users"/>
             </column>
             <column name="createdon" type="timestamp"/>
             <column name="disabled" type="boolean" defaultValueBoolean="false">

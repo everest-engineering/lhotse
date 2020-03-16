@@ -1,12 +1,13 @@
 package engineering.everest.lhotse.users.eventhandlers;
 
-import engineering.everest.lhotse.axon.replay.ReplayAware;
+import engineering.everest.lhotse.axon.replay.ReplayCompletionAware;
 import engineering.everest.lhotse.users.persistence.UsersRepository;
 import engineering.everest.lhotse.users.domain.events.UserCreatedByAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserProfilePhotoUploadedEvent;
 import engineering.everest.lhotse.users.domain.events.UserDetailsUpdatedByAdminEvent;
 import lombok.extern.log4j.Log4j2;
 import org.axonframework.eventhandling.EventHandler;
+import org.axonframework.eventhandling.ResetHandler;
 import org.axonframework.eventhandling.Timestamp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,7 +16,7 @@ import java.time.Instant;
 
 @Service
 @Log4j2
-public class UsersEventHandler implements ReplayAware {
+public class UsersEventHandler implements ReplayCompletionAware {
 
     private final UsersRepository usersRepository;
 
@@ -24,7 +25,7 @@ public class UsersEventHandler implements ReplayAware {
         this.usersRepository = usersRepository;
     }
 
-    @Override
+    @ResetHandler
     public void prepareForReplay() {
         LOGGER.info("{} deleting projections", UsersEventHandler.class.getSimpleName());
         usersRepository.deleteAll();

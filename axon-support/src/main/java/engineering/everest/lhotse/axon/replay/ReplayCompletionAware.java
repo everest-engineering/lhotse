@@ -1,9 +1,6 @@
 package engineering.everest.lhotse.axon.replay;
 
-public interface ReplayAware {
-
-    default void prepareForReplay() {
-    }
+public interface ReplayCompletionAware {
 
     default void replayCompleted() {
     }

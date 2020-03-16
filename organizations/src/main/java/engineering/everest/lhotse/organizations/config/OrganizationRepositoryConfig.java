@@ -1,4 +1,4 @@
-package engineering.everest.lhotse.organizations.domain.config;
+package engineering.everest.lhotse.organizations.config;
 
 import engineering.everest.lhotse.organizations.domain.OrganizationAggregate;
 import org.axonframework.common.caching.JCacheAdapter;
