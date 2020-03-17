@@ -41,8 +41,8 @@ subprojects {
     ext {
         axonHazelcastCommandDistributionVersion = '0.0.8'
         mediaVersion = '0.0.8'
-        securityVersion = '0.0.7'
-        storageVersion = '0.0.8'
+        securityVersion = '0.0.8'
+        storageVersion = '0.0.9'
 
         aspectjVersion = '1.9.5'
         awsSdkVersion = '1.11.740'
