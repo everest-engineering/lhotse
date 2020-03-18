@@ -1,5 +1,6 @@
 package engineering.everest.lhotse.config;
 
+import com.zaxxer.hikari.HikariConfig;
 import liquibase.integration.spring.SpringLiquibase;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -37,9 +38,16 @@ public class FileMappingsJpaConfig {
 
     @Bean
     @Qualifier(FILE_MAPPINGS_AUTO_CONFIG_QUALIFIER)
-    @ConfigurationProperties(prefix = FILE_MAPPINGS_AUTO_CONFIG_QUALIFIER + ".datasource")
+    @ConfigurationProperties(prefix = FILE_MAPPINGS_AUTO_CONFIG_QUALIFIER + ".datasource.hikari")
     public DataSource fileMappingsDataSource() {
         return DataSourceBuilder.create().build();
+    }
+
+    @Bean
+    @Qualifier(FILE_MAPPINGS_AUTO_CONFIG_QUALIFIER)
+    @ConfigurationProperties(prefix = FILE_MAPPINGS_AUTO_CONFIG_QUALIFIER + ".datasource.hikari")
+    public HikariConfig hikariConfig() {
+        return new HikariConfig();
     }
 
     @Bean

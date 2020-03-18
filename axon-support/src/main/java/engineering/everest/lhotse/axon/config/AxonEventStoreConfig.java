@@ -1,5 +1,6 @@
 package engineering.everest.lhotse.axon.config;
 
+import com.zaxxer.hikari.HikariConfig;
 import liquibase.integration.spring.SpringLiquibase;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.common.jdbc.PersistenceExceptionResolver;
@@ -44,9 +45,16 @@ public class AxonEventStoreConfig {
 
     @Bean
     @Qualifier(EVENT_STORE_AUTO_CONFIG_QUALIFIER)
-    @ConfigurationProperties(prefix = EVENT_STORE_AUTO_CONFIG_QUALIFIER + ".datasource")
+    @ConfigurationProperties(prefix = EVENT_STORE_AUTO_CONFIG_QUALIFIER + ".datasource.hikari")
     public DataSource eventsDataSource() {
         return DataSourceBuilder.create().build();
+    }
+
+    @Bean
+    @Qualifier(EVENT_STORE_AUTO_CONFIG_QUALIFIER)
+    @ConfigurationProperties(prefix = EVENT_STORE_AUTO_CONFIG_QUALIFIER + ".datasource.hikari")
+    public HikariConfig hikariConfig() {
+        return new HikariConfig();
     }
 
     @Bean

@@ -1,5 +1,6 @@
 package engineering.everest.lhotse.users.config;
 
+import com.zaxxer.hikari.HikariConfig;
 import liquibase.integration.spring.SpringLiquibase;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -35,9 +36,16 @@ public class UserSessionsJpaConfig {
 
     @Bean
     @Qualifier(SESSIONS_AUTO_CONFIG_QUALIFIER)
-    @ConfigurationProperties(prefix = SESSIONS_AUTO_CONFIG_QUALIFIER + ".datasource")
+    @ConfigurationProperties(prefix = SESSIONS_AUTO_CONFIG_QUALIFIER + ".datasource.hikari")
     public DataSource sessionsDataSource() {
         return DataSourceBuilder.create().build();
+    }
+
+    @Bean
+    @Qualifier(SESSIONS_AUTO_CONFIG_QUALIFIER)
+    @ConfigurationProperties(prefix = SESSIONS_AUTO_CONFIG_QUALIFIER + ".datasource.hikari")
+    public HikariConfig hikariConfig() {
+        return new HikariConfig();
     }
 
     @Bean

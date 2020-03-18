@@ -1,5 +1,6 @@
 package engineering.everest.lhotse.config;
 
+import com.zaxxer.hikari.HikariConfig;
 import liquibase.integration.spring.SpringLiquibase;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.common.jpa.EntityManagerProvider;
@@ -37,9 +38,16 @@ public class ProjectionsJpaConfig {
 
     @Bean
     @Primary
-    @ConfigurationProperties(prefix = PROJECTIONS_AUTO_CONFIG_QUALIFIER_NAME + ".datasource")
+    @ConfigurationProperties(prefix = PROJECTIONS_AUTO_CONFIG_QUALIFIER_NAME + ".datasource.hikari")
     public DataSource dataSource() {
         return DataSourceBuilder.create().build();
+    }
+
+    @Bean
+    @Qualifier(PROJECTIONS_AUTO_CONFIG_QUALIFIER_NAME)
+    @ConfigurationProperties(prefix = PROJECTIONS_AUTO_CONFIG_QUALIFIER_NAME + ".datasource.hikari")
+    public HikariConfig hikariConfig() {
+        return new HikariConfig();
     }
 
     @Bean
