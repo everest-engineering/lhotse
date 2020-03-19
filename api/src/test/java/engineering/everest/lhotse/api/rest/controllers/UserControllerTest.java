@@ -93,13 +93,19 @@ class UserControllerTest {
     @WithMockUser(username = "user@umbrella.com", roles = ROLE_ORGANIZATION_USER)
     void uploadProfilePhoto_WillPersistUploadedFile() throws Exception {
         var persistedFileId = randomUUID();
-        when(fileService.transferToPermanentStore(eq("profile-photo-file-name"), any(InputStream.class))).thenReturn(persistedFileId);
+        when(fileService.transferToPermanentStore(eq(
+                "profile-photo-file-name"),
+                eq(PROFILE_PHOTO_FILE_CONTENTS.length),
+                any(InputStream.class))).thenReturn(persistedFileId);
 
         mockMvc.perform(multipart("/api/user/profile-photo")
                 .file(new MockMultipartFile("file", "profile-photo-file-name", IMAGE_JPEG_VALUE, PROFILE_PHOTO_FILE_CONTENTS)))
                 .andExpect(status().isOk());
 
-        verify(fileService).transferToPermanentStore(eq("profile-photo-file-name"), any(InputStream.class));
+        verify(fileService).transferToPermanentStore(
+                eq("profile-photo-file-name"),
+                eq((long)PROFILE_PHOTO_FILE_CONTENTS.length),
+                any(InputStream.class));
     }
 
     @Test

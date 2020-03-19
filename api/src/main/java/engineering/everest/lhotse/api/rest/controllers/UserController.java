@@ -62,7 +62,8 @@ public class UserController {
     @PostMapping("/profile-photo")
     public void uploadProfilePhoto(User requestingUser,
                                    @RequestParam("file") MultipartFile uploadedFile) throws IOException {
-        var persistedFileId = fileService.transferToPermanentStore(uploadedFile.getOriginalFilename(), uploadedFile.getInputStream());
+        var persistedFileId = fileService.transferToPermanentStore(uploadedFile.getOriginalFilename(), uploadedFile.getSize(),
+                uploadedFile.getInputStream());
         usersService.storeProfilePhoto(requestingUser.getId(), persistedFileId);
     }
 
