@@ -76,11 +76,10 @@ public class ProjectionsJpaConfig {
     public ChainedTransactionManager platformTransactionManager(
             EntityManagerFactory entityManagerFactory,
             @Qualifier("file-mappings") PlatformTransactionManager fileMappingsTxManager,
-            @Qualifier("sessions") PlatformTransactionManager sessionsTxManager,
             @Qualifier("event-store") PlatformTransactionManager eventsTxManager) {
 
         var projectionsTxManager = new JpaTransactionManager(entityManagerFactory);
-        return new ChainedTransactionManager(eventsTxManager, projectionsTxManager, sessionsTxManager, fileMappingsTxManager);
+        return new ChainedTransactionManager(eventsTxManager, projectionsTxManager, fileMappingsTxManager);
     }
 
     @Bean
