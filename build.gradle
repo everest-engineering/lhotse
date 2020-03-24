@@ -39,7 +39,7 @@ subprojects {
     }
 
     ext {
-        axonHazelcastCommandDistributionVersion = '0.0.8'
+        axonHazelcastCommandDistributionVersion = '0.0.9'
         mediaVersion = '0.0.8'
         securityVersion = '0.0.8'
         storageVersion = '0.0.10'
