@@ -17,6 +17,11 @@ licenseReport {
     renderers = [new InventoryHtmlReportRenderer()]
 }
 
+jgitver {
+    autoIncrementPatch = false
+    useDirty = true
+}
+
 subprojects {
     group = 'everest.engineering.starter.kit'
 
