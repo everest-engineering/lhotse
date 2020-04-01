@@ -44,14 +44,14 @@ subprojects {
     }
 
     ext {
-        axonHazelcastCommandDistributionVersion = '0.0.10'
+        axonHazelcastCommandDistributionVersion = '0.0.11-0'
         mediaVersion = '0.0.11'
         securityVersion = '0.0.8'
         storageVersion = '0.0.11'
 
         aspectjVersion = '1.9.5'
         awsSdkVersion = '1.11.740'
-        axonVersion = '4.2'
+        axonVersion = '4.3.1'
         bouncyCastleVersion = '1.64'
         commonsLangVersion = '3.9'
         commonsTextVersion = '1.8'

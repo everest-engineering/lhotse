@@ -3,9 +3,7 @@ compileJava {
 }
 
 dependencies {
-    api("org.axonframework:axon-spring-boot-starter:${axonVersion}") {
-        exclude group: 'org.axonframework', module: 'axon-server-connector'
-    }
+    api "org.axonframework:axon-spring-boot-starter:${axonVersion}"
 
     implementation project(':command-validation-api')
     implementation project(':common')
