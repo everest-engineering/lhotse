@@ -1,27 +1,24 @@
-# Introduction
-This project contains a starter kit for writing event sourced web applications following domain driven design principles. 
+# Welcome!
+This is Lhotse, a starter kit for writing event sourced web applications following domain driven design principles.
+It based on [Spring Boot](https://spring.io/projects/spring-boot), [Axon](https://axoniq.io/) and 
+[Hazelcast](https://hazelcast.com/).
 
-Based on Spring Boot and the Axon framework, this starter kit offers you:
+Whether you're starting a new project or refactoring an existing one, you should consider this project if you're seeking:    
  
  * horizontal scalability via self forming clusters with distributed command processing
- * OAuth ready authorisation
+ * Spring Boot features such as OAuth ready authorisation and Prometheus integration 
+ * Axon's awesome event sourcing and CQRS features
  * role based authorisation
- * event replay capabilities
- * Prometheus integration
- * deduplicating filestore abstractions for permanent and ephemeral files
- * on demand thumbnail generation (and caching)
- 
-... all in a Kubernetes aware package.
- 
-It's the perfect way to start your next greenfield project. Like [JHipster](https://www.jhipster.tech) but with less 
-moustache.
- 
+ * deduplicating filestore abstractions for a variety of backing stores such as S3 buckets and Mongo GridFS
+  
+... without the time and effort involved in starting a new project from scratch. 
+  
 The only end user functionality provided out of the box is basic support for creating organisations and users. The 
 sample code demonstrates end-to-end command handling and event processing flows from API endpoints down to projections.  
 
-# Starter kit features
+# Features
 
-## Axon: DDD and event sourcing simplified (a little bit)
+## Axon: DDD and event sourcing
 Previously known as Axon Framework, [Axon](https://axoniq.io/) is a framework for implementing 
 [domain driven design](https://dddcommunity.org/learning-ddd/what_is_ddd/) using 
 [event sourced](https://martinfowler.com/eaaDev/EventSourcing.html) 
@@ -52,15 +49,16 @@ Axon provides the event sourcing framework. User actions of interest to a busine
 are dispatched to command handlers that, after validation, emit events.
  
 ### Distributed command handling
-Part of Axon's appeal is the ability to horizontally scale an application. A typical Axon deployment will rely on Axon 
-Server to implement command and event dispatching, and event log persistence. A commercial license of Axon Server is 
-needed, however, to fully support distributed command processing. Axon Server also adds maintenance and configuration 
-overhead to any deployment.
+Part of Axon's appeal is the ability to horizontally scale an application using Axon Server to for command and event 
+dispatching, and event log persistence. While well suited to applications that require massive scale, deploying Axon 
+Server introduces additional maintenance and configuration overhead. 
 
-We have avoided the dependency on Axon Server in the `axon-support` module by wrapping the standard Axon command gateway 
-with a custom [Hazelcast](https://hazelcast.com/) based distributed command gateway. An arbitrary number of application 
-instances started together, either on the same network or within a Kubernetes cluster, will be automatically discovered
-to form a cluster. 
+We have taken a different approach that provides a good starting point for small to medium applications while still 
+allowing migration to Axon Server in the future. Horizontal scalability is achieved via a
+[command distribution extension](https://github.com/everest-engineering/axon-command-distribution-extension) that wraps
+the standard Axon command gateway with a [Hazelcast](https://hazelcast.com/) based distributed command gateway.
+An arbitrary number of application instances started together, either on the same network or within a Kubernetes cluster, 
+will be automatically discovered to form a cluster. 
 
 Commands dispatched through the Hazelcast command gateway are deterministically routed to a single application instance 
 which, based on the aggregate identifier, has ownership of an aggregate for as long as that instance remains a member of
@@ -98,7 +96,7 @@ detect validators at application start up and register them with a command inter
 command handler method being called. This significantly reduces testing effort and human error.
 
 ### Event processing
-Axon provides two types of event processors: 
+Axon provides two types of event processors,
 [subscribing and tracking](https://docs.axoniq.io/reference-guide/configuring-infrastructure-components/event-processing/event-processors).
 
 Subscribing processors execute on the same thread that is publishing the event. This allow command dispatching to wait 
@@ -140,7 +138,7 @@ possibility of:
 The starter kit comes with programmatic support for triggering replays. To perform a replay:
  
  * disconnect the application from load balancers (don't skip this is!)
- * trigger a replay via a Spring actuator call
+ * trigger a replay via a [Spring Boot Actuator](https://spring.io/guides/gs/actuator-service/) call to `/actuator/replay`
  * monitor the state of replay via a Spring actuator endpoint 
  * reconnect the application to load balancers 
 
@@ -151,6 +149,25 @@ Behind the scenes, replays are being executed by:
  * placing a marker event into the event log that will end replays
  * starting TEP processing, and
  * changing the event processing configuration back to subscribing mode when the TEP reaches the marker event
+
+## Security support
+The [security](https://github.com/everest-engineering/lhotse-security) module builds on
+[Spring Security OAuth](https://projects.spring.io/spring-security-oauth/docs/oauth2.html). Out of the box, it sets up
+both an __authorization server__ and a __resource server__ (the main application) that facilitate an authentication and
+authorisation workflow based on [OAuth2](https://oauth.net/2/). Stateless sessions using
+[Jason Web Tokens](https://jwt.io/) (JWT) makes is easy to extract microservices.
+
+JWT tokens are issued by the authorization server which client applications include as part of the `Authorization`
+header included with every API request. The main application -- the resource server in OAuth parlance -- uses a shared
+secret to validate each request and enforces role based authorisation.
+
+Our initial set up has both authorisation and resource servers running together in a single application.  A single 
+hard-coded client, `web-app-ui`, is configured in the authorisation server to support the 
+[password grant](https://oauth.net/2/grant-types/password/) approach to exchanging credentials. Front end applications 
+need to specify this identify to perform authentication & authorisation on behalf of end users.
+
+If necessary, the authorisation server can be extracted into its own service to serve multiple resource servers. Third
+party OAuth2 providers can also be integrated with the resource server.
 
 ### User and Authentication Context
 An User object in the business domain often requires more attributes than the User object from spring security module.
@@ -180,30 +197,46 @@ by its simple class name. To help managing increasing number of `ReadService`, t
 When adding new controllers and security configurations, it is important to refer to existing patterns and ensure
 consistency. This also applies to tests where  fixtures are provided to support the necessary *automagic* behaviours. 
 
+## File support
+The [storage](https://github.com/everest-engineering/lhotse-storage) module implements two file stores: one is referred
+to as _permanent_, the other as the _ephemeral_ store. The permanent file store is for storing critical files that, such
+as user uploads, cannot be recovered. The ephemeral store is for non-critical files that can be regenerated by the system
+either dynamically or via an event replay.
+
+Our file store implementation automatically deduplicates files. Storing a file whose contents matches 
+a previous file will return a (new) file identifier mapping to the original. The most recently stored file will then be
+silently removed. 
+
+File stores need backing service such as a blob store or filesystem. This starter kit supports 
+[Mongo GridFS](https://docs.mongodb.com/manual/core/gridfs/) and AWS S3 at time of writing.
+
+#### Configuring Mongo GridFS
+Set the application property:
+```
+application.filestore.backend=mongoGridFs
+```
+
+#### Configuring AWS S3
+Set the following application properties:
+```
+application.filestore.backend=awsS3
+application.filestore.awsS3.buckets.permanent=sample-bucket-permanent
+application.filestore.awsS3.buckets.ephemeral=sample-bucket-ephemeral
+```
+
+We rely on [DefaultAWSCredentialsProviderChain](https://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/auth/DefaultAWSCredentialsProviderChain.html) 
+and [DefaultAwsRegionProviderChain](https://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/regions/DefaultAwsRegionProviderChain.html) 
+for fetching AWS credentials and the AWS region. 
+
+## Media support
+The [media](https://github.com/everest-engineering/lhotse-media) module adds additional support for managing of image and
+video updates. It generates thumbnail images on the fly, caching them in the ephemeral file store for subsequent requests.
+Thumbnail sizes are limited to prevent the system from being overwhelmed by malicious requests.
+
 ## ETag HTTP headers
 [ETag HTTP headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag) are enabled by default for all API 
 endpoints via a shallow filter. The filter is unaware of any changes made to underlying data so while clients may use the
 ETag to avoid unnecessary transfers and client side processing, there is no benefit to application server performance.
-
-# Feature request list
-Here are some ideas for future features that we'd like to support out of the box:
-
- * GDPR compliance through PII annotations and throw-away decryption keys for sensitive information
-
- * API error code enhancements to make it easier for UIs to consume error responses
-
- * Internationalisation support
-
- * (Optional) separate authorisation server out of the box 
-
- * Out of the box support for common OAuth2 providers
-
- * API rate limiting
-
- * More cloud provider file stores
-
- * Programmatic clearing of aggregate snapshots
- 
 
 # Tooling
 This project uses [Java 11](https://openjdk.java.net/projects/jdk/11/).
@@ -238,17 +271,13 @@ To see all available Gradle tasks for this project:
 
 `./gradlew tasks`
 
-To run the OWASP dependency check plugin
+To run the OWASP dependency check plugin, which will generate a report at `build/reports/dependency-check-report.html`:
 
 `./gradlew dependencyCheckAggregate`
 
-Report location `build/reports/dependency-check-report.html`
-
-To run the dependencies license plugin
+To run the dependencies license plugin, which will generate a report at `build/reports/dependency-license/index.html`:
 
 `./gradlew generateLicenseReport`
-
-Report location `build/reports/dependency-license/index.html`
 
 ## Semantic versioning
 [Semantic versioning](https://semver.org/) is automatically applied using git tags. Simply create a tag of, say, `1.2.0` 
@@ -258,12 +287,12 @@ number of commits since the `1.2.0` tag was applied. Each subsequent commit will
 
 ## Jupyter notebook
 An initial [Jupyter notebook](https://jupyter.org/) can be found in 'doc/notebook'. It acts as an interactive 
-reference for the API endpoints and should be in your development workflow. A perfect replacement for Postman! Use it to 
-try out the application, today!
+reference for the API endpoints and should be in your development workflow. Note that this requires
+[IRuby](https://github.com/sciruby/iruby).
 
-You can run the notebook in docker using `docker-compse -f doc/notebook/docker-compose.yml up`. However note that the image is around 1.7 GB in size.
+Jupyter notebook can be run as a Docker container:
 
-If you wish to run the notebook directly, setup [IRuby](https://github.com/sciruby/iruby) for Jupyter. So go ahead and get that set up first.       
+`docker-compose -f doc/notebook/docker-compose.yml up`.
 
 ## Swagger documentation
 Swagger API documentation is automatically generated by [Springfox](https://springfox.github.io/springfox/docs/current/).
@@ -272,8 +301,6 @@ API documentation is accessible when running the application locally by visiting
 [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
 
 Functional tests generate a Swagger JSON API definition at `./launcher/build/web-app-api.json`
-
-!!! TODO !!! swagger docs seem to be broken
 
 ## Checkstyle and PMD configuration
 [PMD](https://pmd.github.io/) and [Checkstyle](https://checkstyle.org/) quality checks are automatically applied to all 
