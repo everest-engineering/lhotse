@@ -1,13 +1,13 @@
 # Welcome!
 This is Lhotse, a starter kit for writing event sourced web applications following domain driven design principles.
-It based on [Spring Boot](https://spring.io/projects/spring-boot), [Axon](https://axoniq.io/) and 
+It is based on [Spring Boot](https://spring.io/projects/spring-boot), [Axon](https://axoniq.io/) and
 [Hazelcast](https://hazelcast.com/).
 
 Whether you're starting a new project or refactoring an existing one, you should consider this project if you're seeking:    
  
  * horizontal scalability via self forming clusters with distributed command processing
  * Spring Boot features such as OAuth ready authorisation and Prometheus integration 
- * Axon's awesome event sourcing and CQRS features
+ * Axon's awesome event sourcing and [CQRS](https://martinfowler.com/bliki/CQRS.html) features
  * role based authorisation
  * deduplicating filestore abstractions for a variety of backing stores such as S3 buckets and Mongo GridFS
   
@@ -49,7 +49,7 @@ Axon provides the event sourcing framework. User actions of interest to a busine
 are dispatched to command handlers that, after validation, emit events.
  
 ### Distributed command handling
-Part of Axon's appeal is the ability to horizontally scale an application using Axon Server to for command and event 
+Part of Axon's appeal is the ability to horizontally scale an application using Axon Server for command and event
 dispatching, and event log persistence. While well suited to applications that require massive scale, deploying Axon 
 Server introduces additional maintenance and configuration overhead. 
 
@@ -70,21 +70,21 @@ Hazelcast will automatically reassign aggregate ownership if an application inst
 network disconnection or other failure.
 
 Events emitted by an aggregate are passed to the application instance's local event bus. Events are persisted to the 
-event log by the instance handling the command. Subscribing event processing (the default in our configuration) guarantee 
+event log by the instance handling the command. Subscribing event processing (the default in our configuration) guarantees
 that the same instance will be performing the event handling. 
  
 ### Command validation
-Commands represent user actions that may be rejected by the system. Events, however, represent historical events and can
-not be rejected (though, they can be upcasted or ignored depending on circumstances). It is therefore vital that 
-robust command validation be performed to protect the integrity of the system.
+Commands represent user actions that may be rejected by the system. Events, however, represent historical events and
+cannot be rejected (though, they can be upcasted or ignored depending on circumstances). It is therefore vital that
+robust command validation is performed to protect the integrity of the system.
  
 If events are ever emitted in error then this creates a situation that should only be addressed by generating events
 countering the erroneous ones. This, naturally, comes with a significant cost in terms of implementation and validation
 overhead.
 
-There is an philosophical argument for defining aggregates such that all information required to validate commands is 
+There is a philosophical argument for defining aggregates such that all information required to validate commands is
 held by an aggregate in memory. In practice, however, more natural aggregates can be formed by allowing some validation 
-to be based on __projections__. We also know from experience that some validation will shared among multiple aggregates. 
+to be based on __projections__. We also know from experience that some validation will be shared among multiple aggregates.
 The amount of testing required to verify all possible command failure situations tends to grow non-linearly as the number 
 of checks that are performed inside an aggregate grows. 
 
@@ -99,14 +99,14 @@ command handler method being called. This significantly reduces testing effort a
 Axon provides two types of event processors,
 [subscribing and tracking](https://docs.axoniq.io/reference-guide/configuring-infrastructure-components/event-processing/event-processors).
 
-Subscribing processors execute on the same thread that is publishing the event. This allow command dispatching to wait 
-until the event has been both appended to the event store and all event handling as completed. Commands are queued for
+Subscribing processors execute on the same thread that is publishing the event. This allows command dispatching to wait
+until the event has been both appended to the event store and all event handling is completed. Commands are queued for
 processing on a FIFO basis. It is important, therefore, to not use them for long running tasks.  
 
 Tracking event processors (TEPs), in contrast, execute in their own thread, monitoring the event store for new events. 
 TEPs track their progress consuming events using tracking tokens persisted in the database. TEPs hold ownership of the 
 tokens, preventing multiple application instances from concurrently performing the same processing. Token ownership 
-passes to another application instance in the event that a token owner is shut down or restarted.  
+passes to another application instance in the event that a token owner is shutdown or restarted.
 
 TEPs introduce additional complexity by not guaranteeing that projections will be up to date when an API call has ended. 
 TEPs should, in our opinion, be only used for longer running processing, during replays and when preparing projections 
@@ -122,7 +122,7 @@ processing group unless explicitly assigned elsewhere.
 Event replaying takes the system back to a previous point in time in order to apply a different interpretation of what
 it means to process an event.  
 
-The simplest way of executing a replay is to wipe all projections and then reapply every event ever emitted so as to 
+The simplest way of executing a replay is to wipe all projections and then reapply every event ever emitted to
 rebuild using the latest logic. This is a valid approach for fledgling applications but may not be acceptable once the 
 system has scaled up. More advanced approaches are made possible by assigning event processors to different processing 
 groups and running a mixture of subscribing and tracking event processors. Advanced configuration opens up the 
@@ -155,10 +155,10 @@ The [security](https://github.com/everest-engineering/lhotse-security) module bu
 [Spring Security OAuth](https://projects.spring.io/spring-security-oauth/docs/oauth2.html). Out of the box, it sets up
 both an __authorization server__ and a __resource server__ (the main application) that facilitate an authentication and
 authorisation workflow based on [OAuth2](https://oauth.net/2/). Stateless sessions using
-[Jason Web Tokens](https://jwt.io/) (JWT) makes is easy to extract microservices.
+[JSON Web Tokens](https://jwt.io/) (JWT) makes it easy to extract microservices.
 
 JWT tokens are issued by the authorization server which client applications include as part of the `Authorization`
-header included with every API request. The main application -- the resource server in OAuth parlance -- uses a shared
+header for every API request. The main application -- the resource server in OAuth parlance -- uses a shared
 secret to validate each request and enforces role based authorisation.
 
 Our initial set up has both authorisation and resource servers running together in a single application.  A single 
@@ -195,7 +195,7 @@ by its simple class name. To help managing increasing number of `ReadService`, t
 `ReadServiceProvider` bean which collects all `ReadService` beans during start of the application context.
 
 When adding new controllers and security configurations, it is important to refer to existing patterns and ensure
-consistency. This also applies to tests where  fixtures are provided to support the necessary *automagic* behaviours. 
+consistency. This also applies to tests where fixtures are provided to support the necessary *automagic* behaviours.
 
 ## File support
 The [storage](https://github.com/everest-engineering/lhotse-storage) module implements two file stores: one is referred
