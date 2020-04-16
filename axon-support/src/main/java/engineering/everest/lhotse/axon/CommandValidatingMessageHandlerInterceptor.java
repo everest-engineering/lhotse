@@ -83,6 +83,9 @@ public class CommandValidatingMessageHandlerInterceptor implements MessageHandle
                 .flatMap(Collection::stream)
                 .collect(toList()));
 
+        if (commandClass.getSuperclass() != null) {
+            interfaces.addAll(0, getValidatableInterfaces(commandClass.getSuperclass()));
+        }
         return interfaces;
     }
 
