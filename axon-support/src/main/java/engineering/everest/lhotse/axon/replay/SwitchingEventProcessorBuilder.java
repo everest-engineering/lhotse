@@ -1,5 +1,6 @@
 package engineering.everest.lhotse.axon.replay;
 
+import org.axonframework.common.transaction.TransactionManager;
 import org.axonframework.config.Configuration;
 import org.axonframework.config.EventProcessingConfigurer.EventProcessorBuilder;
 import org.axonframework.config.EventProcessingModule;
@@ -16,7 +17,7 @@ import org.axonframework.spring.config.AxonConfiguration;
 public class SwitchingEventProcessorBuilder implements EventProcessorBuilder {
 
     private final EventProcessorBuilder subscribingEventProcessorBuilder;
-    private final EventProcessorBuilder trackingEventProcessorBuilder;
+    private final EventProcessorBuilder everestTrackingEventProcessorBuilder;
 
     @SuppressWarnings("unchecked")
     public SwitchingEventProcessorBuilder(AxonConfiguration axonConfiguration,
@@ -32,26 +33,36 @@ public class SwitchingEventProcessorBuilder implements EventProcessorBuilder {
                         .transactionManager(eventProcessingModule.transactionManager(name))
                         .build();
 
-        trackingEventProcessorBuilder = (name, configuration, eventHandlerInvoker) ->
-                TrackingEventProcessor.builder()
-                        .name(name)
-                        .eventHandlerInvoker(eventHandlerInvoker)
-                        .rollbackConfiguration(eventProcessingModule.rollbackConfiguration(name))
-                        .errorHandler(eventProcessingModule.errorHandler(name))
-                        .messageMonitor(eventProcessingModule.messageMonitor(TrackingEventProcessor.class, name))
-                        .messageSource((StreamableMessageSource<TrackedEventMessage<?>>) axonConfiguration.eventBus())
-                        .tokenStore(eventProcessingModule.tokenStore(name))
-                        .transactionManager(eventProcessingModule.transactionManager(name))
-                        .trackingEventProcessorConfiguration(axonConfiguration.getComponent(
-                                TrackingEventProcessorConfiguration.class,
-                                TrackingEventProcessorConfiguration::forSingleThreadedProcessing))
-                        .build();
+        everestTrackingEventProcessorBuilder = (name, configuration, eventHandlerInvoker) -> {
+            TransactionManager transactionManager = eventProcessingModule.transactionManager(name);
+            TrackingEventProcessorConfiguration trackingEventProcessorConfiguration = axonConfiguration.getComponent(
+                    TrackingEventProcessorConfiguration.class,
+                    TrackingEventProcessorConfiguration::forSingleThreadedProcessing);
+            TrackingEventProcessor trackingEventProcessor = TrackingEventProcessor.builder()
+                    .name(name)
+                    .eventHandlerInvoker(eventHandlerInvoker)
+                    .rollbackConfiguration(eventProcessingModule.rollbackConfiguration(name))
+                    .errorHandler(eventProcessingModule.errorHandler(name))
+                    .messageMonitor(eventProcessingModule.messageMonitor(TrackingEventProcessor.class, name))
+                    .messageSource((StreamableMessageSource<TrackedEventMessage<?>>) axonConfiguration.eventBus())
+                    .tokenStore(eventProcessingModule.tokenStore(name))
+                    .transactionManager(transactionManager)
+                    .trackingEventProcessorConfiguration(trackingEventProcessorConfiguration)
+                    .build();
+
+            return new EverestTrackingEventProcessor(
+                    trackingEventProcessor,
+                    transactionManager,
+                    eventProcessingModule.tokenStore(name),
+                    trackingEventProcessorConfiguration.getInitialSegmentsCount());
+        };
+
     }
 
     @Override
     public EventProcessor build(String name, Configuration configuration, EventHandlerInvoker eventHandlerInvoker) {
         return new SwitchingEventProcessor(
                 (SubscribingEventProcessor) subscribingEventProcessorBuilder.build(name, configuration, eventHandlerInvoker),
-                (TrackingEventProcessor) trackingEventProcessorBuilder.build(name, configuration, eventHandlerInvoker));
+                (EverestTrackingEventProcessor) everestTrackingEventProcessorBuilder.build(name, configuration, eventHandlerInvoker));
     }
 }
