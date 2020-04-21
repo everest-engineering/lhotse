@@ -78,5 +78,8 @@ class ReplayFunctionalTests {
         apiRestTestClient.triggerReplay(NO_CONTENT);
         assertOk(() -> assertSame(FALSE, apiRestTestClient.getReplayStatus(OK).get("isReplaying")));
         assertEquals(2, testEventHandler.getCounter().get());
+
+        // We should have 2 organisations in total
+        assertEquals(2, apiRestTestClient.getAllOrganizations(OK).size());
     }
 }
