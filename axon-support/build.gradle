@@ -24,6 +24,7 @@ dependencies {
     implementation "org.liquibase:liquibase-core:${liquibaseVersion}"
 
     testImplementation project(':command-validation-support')
+    testImplementation project(':organizations-api')
     testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
     testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
 }
