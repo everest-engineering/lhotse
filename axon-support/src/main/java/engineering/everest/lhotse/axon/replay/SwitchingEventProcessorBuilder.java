@@ -17,7 +17,7 @@ import org.axonframework.spring.config.AxonConfiguration;
 public class SwitchingEventProcessorBuilder implements EventProcessorBuilder {
 
     private final EventProcessorBuilder subscribingEventProcessorBuilder;
-    private final EventProcessorBuilder everestTrackingEventProcessorBuilder;
+    private final EventProcessorBuilder switchingAwareTrackingEventProcessorBuilder;
 
     @SuppressWarnings("unchecked")
     public SwitchingEventProcessorBuilder(AxonConfiguration axonConfiguration,
@@ -33,7 +33,7 @@ public class SwitchingEventProcessorBuilder implements EventProcessorBuilder {
                         .transactionManager(eventProcessingModule.transactionManager(name))
                         .build();
 
-        everestTrackingEventProcessorBuilder = (name, configuration, eventHandlerInvoker) -> {
+        switchingAwareTrackingEventProcessorBuilder = (name, configuration, eventHandlerInvoker) -> {
             TransactionManager transactionManager = eventProcessingModule.transactionManager(name);
             TrackingEventProcessorConfiguration trackingEventProcessorConfiguration = axonConfiguration.getComponent(
                     TrackingEventProcessorConfiguration.class,
@@ -50,7 +50,7 @@ public class SwitchingEventProcessorBuilder implements EventProcessorBuilder {
                     .trackingEventProcessorConfiguration(trackingEventProcessorConfiguration)
                     .build();
 
-            return new EverestTrackingEventProcessor(
+            return new SwitchingAwareTrackingEventProcessor(
                     trackingEventProcessor,
                     transactionManager,
                     eventProcessingModule.tokenStore(name),
@@ -62,7 +62,9 @@ public class SwitchingEventProcessorBuilder implements EventProcessorBuilder {
     @Override
     public EventProcessor build(String name, Configuration configuration, EventHandlerInvoker eventHandlerInvoker) {
         return new SwitchingEventProcessor(
-                (SubscribingEventProcessor) subscribingEventProcessorBuilder.build(name, configuration, eventHandlerInvoker),
-                (EverestTrackingEventProcessor) everestTrackingEventProcessorBuilder.build(name, configuration, eventHandlerInvoker));
+                (SubscribingEventProcessor) subscribingEventProcessorBuilder.build(
+                        name, configuration, eventHandlerInvoker),
+                (SwitchingAwareTrackingEventProcessor) switchingAwareTrackingEventProcessorBuilder.build(
+                        name, configuration, eventHandlerInvoker));
     }
 }

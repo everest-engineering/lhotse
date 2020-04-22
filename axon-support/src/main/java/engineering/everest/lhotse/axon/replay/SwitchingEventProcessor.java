@@ -19,12 +19,12 @@ import static org.axonframework.lifecycle.Phase.LOCAL_MESSAGE_HANDLER_REGISTRATI
 public class SwitchingEventProcessor implements EventProcessor {
 
     private final SubscribingEventProcessor subscribingEventProcessor;
-    private final EverestTrackingEventProcessor trackingEventProcessor;
+    private final SwitchingAwareTrackingEventProcessor trackingEventProcessor;
 
     private EventProcessor currentEventProcessor;
 
     public SwitchingEventProcessor(SubscribingEventProcessor subscribingEventProcessor,
-                                   EverestTrackingEventProcessor trackingEventProcessor) {
+                                   SwitchingAwareTrackingEventProcessor trackingEventProcessor) {
         this.subscribingEventProcessor = subscribingEventProcessor;
         this.trackingEventProcessor = trackingEventProcessor;
         this.currentEventProcessor = subscribingEventProcessor;

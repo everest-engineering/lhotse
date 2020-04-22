@@ -19,7 +19,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class EverestTrackingEventProcessorTest {
+class SwitchingAwareTrackingEventProcessorTest {
 
     private final String PROCESSOR_NAME = "default";
 
@@ -36,19 +36,19 @@ class EverestTrackingEventProcessorTest {
     @Mock
     private TrackingToken startPosition;
 
-    private EverestTrackingEventProcessor everestTrackingEventProcessor;
+    private SwitchingAwareTrackingEventProcessor switchingAwareTrackingEventProcessor;
 
     @BeforeEach
     void setUp() {
-        everestTrackingEventProcessor = new EverestTrackingEventProcessor(
+        switchingAwareTrackingEventProcessor = new SwitchingAwareTrackingEventProcessor(
                 trackingEventProcessor,
                 transactionManager,
                 tokenStore,
                 1
         );
-        when(everestTrackingEventProcessor.getName()).thenReturn(PROCESSOR_NAME);
+        when(switchingAwareTrackingEventProcessor.getName()).thenReturn(PROCESSOR_NAME);
         Mockito.<StreamableMessageSource<? extends TrackedEventMessage<?>>>when(
-                everestTrackingEventProcessor.getMessageSource()).thenReturn(streamableMessageSource);
+                switchingAwareTrackingEventProcessor.getMessageSource()).thenReturn(streamableMessageSource);
         when(streamableMessageSource.createHeadToken()).thenReturn(headToken);
         doAnswer(invocation -> {
             ((Runnable) invocation.getArgument(0)).run();
@@ -59,7 +59,7 @@ class EverestTrackingEventProcessorTest {
     @Test
     void resetTokensWillInitialiseSegmentsAndDelegate() {
         when(tokenStore.fetchSegments(PROCESSOR_NAME)).thenReturn(new int[0]);
-        everestTrackingEventProcessor.resetTokens(startPosition);
+        switchingAwareTrackingEventProcessor.resetTokens(startPosition);
         verify(tokenStore).initializeTokenSegments(PROCESSOR_NAME, 1, headToken);
         verify(trackingEventProcessor).resetTokens(startPosition);
     }
@@ -67,7 +67,7 @@ class EverestTrackingEventProcessorTest {
     @Test
     void resetTokensWillStoreHeadTokenAndDelegate() {
         when(tokenStore.fetchSegments(PROCESSOR_NAME)).thenReturn(new int[]{0});
-        everestTrackingEventProcessor.resetTokens(startPosition);
+        switchingAwareTrackingEventProcessor.resetTokens(startPosition);
         verify(tokenStore).storeToken(headToken, PROCESSOR_NAME, 0);
         verify(trackingEventProcessor).resetTokens(startPosition);
     }

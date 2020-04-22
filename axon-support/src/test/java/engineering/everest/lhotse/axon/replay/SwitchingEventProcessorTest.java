@@ -24,7 +24,7 @@ class SwitchingEventProcessorTest {
     @Mock
     private SubscribingEventProcessor subscribingEventProcessor;
     @Mock
-    private EverestTrackingEventProcessor trackingEventProcessor;
+    private SwitchingAwareTrackingEventProcessor trackingEventProcessor;
     @Mock
     private TrackingToken trackingToken;
 

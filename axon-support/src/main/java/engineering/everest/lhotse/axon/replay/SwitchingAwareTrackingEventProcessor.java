@@ -7,7 +7,7 @@ import org.axonframework.eventhandling.TrackingEventProcessor;
 import org.axonframework.eventhandling.TrackingToken;
 import org.axonframework.eventhandling.tokenstore.TokenStore;
 
-public class EverestTrackingEventProcessor implements EventProcessor {
+public class SwitchingAwareTrackingEventProcessor implements EventProcessor {
 
     @Delegate(excludes = Resettable.class)
     private final TrackingEventProcessor trackingEventProcessor;
@@ -15,10 +15,10 @@ public class EverestTrackingEventProcessor implements EventProcessor {
     private final TokenStore tokenStore;
     private final int initialSegmentsCount;
 
-    public EverestTrackingEventProcessor(TrackingEventProcessor trackingEventProcessor,
-                                         TransactionManager transactionManager,
-                                         TokenStore tokenStore,
-                                         int initialSegmentsCount) {
+    public SwitchingAwareTrackingEventProcessor(TrackingEventProcessor trackingEventProcessor,
+                                                TransactionManager transactionManager,
+                                                TokenStore tokenStore,
+                                                int initialSegmentsCount) {
         this.trackingEventProcessor = trackingEventProcessor;
         this.transactionManager = transactionManager;
         this.tokenStore = tokenStore;
