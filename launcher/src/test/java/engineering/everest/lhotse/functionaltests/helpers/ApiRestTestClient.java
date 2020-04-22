@@ -4,12 +4,14 @@ import engineering.everest.lhotse.AdminProvisionTask;
 import engineering.everest.lhotse.api.rest.requests.NewOrganizationRequest;
 import engineering.everest.lhotse.api.rest.requests.NewUserRequest;
 import engineering.everest.lhotse.api.rest.requests.UpdateUserRequest;
+import engineering.everest.lhotse.api.rest.responses.OrganizationResponse;
 import engineering.everest.lhotse.api.rest.responses.UserResponse;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.reactive.server.WebTestClient.ResponseSpec;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -71,6 +73,14 @@ public class ApiRestTestClient {
             return responseSpec.returnResult(UUID.class).getResponseBody().blockFirst();
         }
         return null;
+    }
+
+    public List<OrganizationResponse> getAllOrganizations(HttpStatus expectedHttpStatus) {
+        return webTestClient.get().uri("/api/organizations")
+                .header("Authorization", "Bearer " + accessToken)
+                .exchange()
+                .expectStatus().isEqualTo(expectedHttpStatus)
+                .returnResult(OrganizationResponse.class).getResponseBody().buffer().blockFirst();
     }
 
     public UUID createUser(UUID organizationId, NewUserRequest request, HttpStatus expectedHttpStatus) {
