@@ -1,7 +1,6 @@
 package engineering.everest.lhotse.axon.replay;
 
 import org.axonframework.eventhandling.SubscribingEventProcessor;
-import org.axonframework.eventhandling.TrackingEventProcessor;
 import org.axonframework.eventhandling.TrackingToken;
 import org.axonframework.lifecycle.ShutdownHandler;
 import org.axonframework.lifecycle.StartHandler;
@@ -25,7 +24,7 @@ class SwitchingEventProcessorTest {
     @Mock
     private SubscribingEventProcessor subscribingEventProcessor;
     @Mock
-    private TrackingEventProcessor trackingEventProcessor;
+    private SwitchingAwareTrackingEventProcessor trackingEventProcessor;
     @Mock
     private TrackingToken trackingToken;
 
