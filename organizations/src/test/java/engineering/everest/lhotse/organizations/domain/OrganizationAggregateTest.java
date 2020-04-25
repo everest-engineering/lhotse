@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.util.UUID;
 
 import static engineering.everest.lhotse.axon.AxonTestUtils.mockCommandValidatingMessageHandlerInterceptor;
+import static engineering.everest.lhotse.axon.common.domain.User.ADMIN_ID;
 import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.lenient;
@@ -35,7 +36,6 @@ import static org.mockito.Mockito.lenient;
 class OrganizationAggregateTest {
 
     private static final UUID ORGANIZATION_ID = randomUUID();
-    private static final UUID ADMIN_ID = randomUUID();
     private static final String ORGANIZATION_NAME = "organization-name";
     private static final String NO_CHANGE = null;
     private static final String MISSING_ARGUMENT = null;

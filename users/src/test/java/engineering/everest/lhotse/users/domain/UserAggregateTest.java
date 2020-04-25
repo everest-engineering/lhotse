@@ -23,6 +23,7 @@ import java.util.UUID;
 import javax.validation.ConstraintViolationException;
 
 import static engineering.everest.lhotse.axon.AxonTestUtils.mockCommandValidatingMessageHandlerInterceptor;
+import static engineering.everest.lhotse.axon.common.domain.User.ADMIN_ID;
 import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doThrow;
@@ -31,7 +32,6 @@ import static org.mockito.Mockito.doThrow;
 class UserAggregateTest {
 
     private static final UUID ORGANIZATION_ID = randomUUID();
-    private static final UUID ADMIN_ID = randomUUID();
     private static final UUID USER_ID = randomUUID();
     private static final UUID PROFILE_PHOTO_FILE_ID = randomUUID();
     private static final String USERNAME = "user@email.com";

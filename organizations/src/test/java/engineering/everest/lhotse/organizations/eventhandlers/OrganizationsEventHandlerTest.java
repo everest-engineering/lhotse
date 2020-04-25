@@ -20,6 +20,7 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
+import static engineering.everest.lhotse.axon.common.domain.User.ADMIN_ID;
 import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -31,7 +32,6 @@ class OrganizationsEventHandlerTest {
 
     private static final Instant ORG_CREATION_TIME = Instant.ofEpochSecond(6800L);
     private static final UUID ORGANIZATION_ID = randomUUID();
-    private static final UUID ADMIN_ID = randomUUID();
     private static final String ORGANIZATION_NAME = "organization name";
     private static final String ORGANIZATION_STREET = "street";
     private static final String ORGANIZATION_CITY = "city";

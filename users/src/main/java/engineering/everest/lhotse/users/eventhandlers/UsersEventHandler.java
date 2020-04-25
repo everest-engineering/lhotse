@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 
+import static engineering.everest.lhotse.axon.common.domain.User.ADMIN_ID;
+
 @Service
 @Log4j2
 public class UsersEventHandler implements ReplayCompletionAware {
@@ -28,7 +30,7 @@ public class UsersEventHandler implements ReplayCompletionAware {
     @ResetHandler
     public void prepareForReplay() {
         LOGGER.info("{} deleting projections", UsersEventHandler.class.getSimpleName());
-        usersRepository.deleteAll();
+        usersRepository.deleteByIdNot(ADMIN_ID);
     }
 
     @EventHandler

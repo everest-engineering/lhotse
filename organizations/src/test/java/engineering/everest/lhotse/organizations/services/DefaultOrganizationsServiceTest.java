@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.UUID;
 
+import static engineering.everest.lhotse.axon.common.domain.User.ADMIN_ID;
 import static java.util.UUID.randomUUID;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -22,7 +23,6 @@ class DefaultOrganizationsServiceTest {
 
     private static final UUID ORGANIZATION_ID = randomUUID();
     private static final UUID NETWORK_ID = randomUUID();
-    private static final UUID ADMIN_ID = randomUUID();
     private static final String ORGANIZATION_NAME = "organization-name";
     private static final String ORGANIZATION_STREET_1 = "street-1";
     private static final String ORGANIZATION_CITY_1 = "city-1";

@@ -14,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.UUID;
 
+import static engineering.everest.lhotse.axon.common.domain.User.ADMIN_ID;
 import static java.util.UUID.randomUUID;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -23,7 +24,6 @@ class DefaultUsersServiceTest {
 
     private static final UUID ORGANIZATION_ID = randomUUID();
     private static final UUID USER_ID = randomUUID();
-    private static final UUID ADMIN_ID = randomUUID();
     private static final UUID PROFILE_PHOTO_FILE_ID = randomUUID();
     private static final String NEW_USER_EMAIL = "new-user-email";
     private static final String NEW_USER_DISPLAY_NAME = "new-user-display-name";
