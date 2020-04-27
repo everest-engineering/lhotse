@@ -8,21 +8,19 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.EnumSet;
 import java.util.Optional;
-import java.util.UUID;
+import javax.annotation.PostConstruct;
 
 import static engineering.everest.lhotse.axon.common.domain.Role.ADMIN;
-import static java.util.UUID.fromString;
+import static engineering.everest.lhotse.axon.common.domain.User.ADMIN_ID;
 
 @Component
 @Log4j2
 public class AdminProvisionTask implements ReplayCompletionAware {
 
-    private static final UUID ADMIN_ID = fromString("00000000-0000-0000-0000-000000000000");
     private static final String ADMIN_DISPLAY_NAME = "Admin";
 
     private final Clock clock;

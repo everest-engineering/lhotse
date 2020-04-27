@@ -15,6 +15,7 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
+import static engineering.everest.lhotse.axon.common.domain.User.ADMIN_ID;
 import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
@@ -26,7 +27,6 @@ class UsersEventHandlerTest {
     private static final UUID USER_ID = randomUUID();
     private static final UUID ORGANIZATION_ID = randomUUID();
     private static final UUID PROFILE_PHOTO_FILE_ID = randomUUID();
-    private static final UUID ADMIN_ID = randomUUID();
     private static final Instant CREATION_TIME = Instant.ofEpochSecond(9999999L);
     private static final String USER_DISPLAY_NAME = "user-display-name";
     private static final String USER_USERNAME = "user-email";
@@ -48,7 +48,7 @@ class UsersEventHandlerTest {
     void prepareForReplay_willDeleteAllProjections() {
         usersEventHandler.prepareForReplay();
 
-        verify(usersRepository).deleteAll();
+        verify(usersRepository).deleteByIdNot(ADMIN_ID);
     }
 
     @Test

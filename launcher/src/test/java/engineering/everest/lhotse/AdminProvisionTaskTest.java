@@ -18,6 +18,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static engineering.everest.lhotse.axon.common.domain.Role.ADMIN;
+import static engineering.everest.lhotse.axon.common.domain.User.ADMIN_ID;
 import static java.util.UUID.fromString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -27,7 +28,6 @@ import static org.mockito.Mockito.when;
 @ExtendWith(SpringExtension.class)
 class AdminProvisionTaskTest {
 
-    private static final UUID ADMIN_ID = fromString("00000000-0000-0000-0000-000000000000");
     private static final String ADMIN_DISPLAY_NAME = "Admin";
     private static final String ADMIN_USERNAME = "admin-username";
     private static final String ADMIN_PASSWORD = "admin-raw-password";
