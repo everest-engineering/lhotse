@@ -1,9 +1,7 @@
 dependencies {
-    implementation project(':common')
     implementation project(':organizations-api')
     implementation project(':users-api')
 
-    implementation "org.axonframework:axon-spring:${axonVersion}"
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
     testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"

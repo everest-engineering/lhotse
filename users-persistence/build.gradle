@@ -1,11 +1,9 @@
 dependencies {
-    implementation project(':users-api')
+    api project(':users-api')
 
     implementation "engineering.everest.starterkit:media:${mediaVersion}"
     implementation "engineering.everest.starterkit:storage:${storageVersion}"
-    implementation "engineering.everest.starterkit:security:${securityVersion}"
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation "org.axonframework:axon-spring:${axonVersion}"
     implementation "org.liquibase:liquibase-core:${liquibaseVersion}"
 
     testImplementation 'org.springframework.boot:spring-boot-test-autoconfigure'

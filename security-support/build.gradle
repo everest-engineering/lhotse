@@ -1,10 +1,11 @@
 dependencies {
+    api "engineering.everest.starterkit:security:${securityVersion}"
+    api "org.springframework.security.oauth.boot:spring-security-oauth2-autoconfigure:${springBootVersion}"
+
     implementation project(':users-api')
 
-    implementation "engineering.everest.starterkit:security:${securityVersion}"
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation "io.springfox:springfox-swagger2:${swaggerVersion}"
-    implementation "org.springframework.security.oauth.boot:spring-security-oauth2-autoconfigure:${springBootVersion}"
 
     testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
     testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"

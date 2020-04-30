@@ -1,19 +1,17 @@
 dependencies {
+    api project(':organizations-persistence')
+    api "org.axonframework:axon-spring:${axonVersion}"
+
     implementation project(':axon-support')
     implementation project(':common')
     implementation project(':command-validation-support')
     implementation project(':organizations-api')
-    implementation project(':organizations-persistence')
     implementation project(':users-api')
 
     implementation "engineering.everest.starterkit:storage:${storageVersion}"
     implementation "engineering.everest.starterkit:axon-command-distribution-extension:${axonHazelcastCommandDistributionVersion}"
-
-    implementation "javax.validation:validation-api"
-    implementation 'org.springframework:spring-beans'
-    implementation 'org.springframework:spring-context'
+    implementation 'javax.validation:validation-api'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation "org.axonframework:axon-spring:${axonVersion}"
     implementation "org.apache.commons:commons-lang3:${commonsLangVersion}"
 
     testImplementation project(':axon-support').sourceSets.test.output

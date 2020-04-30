@@ -1,8 +1,9 @@
 dependencies {
-    implementation project(":command-validation-api")
-    api project(":common")
+    api project(':common')
+    api project(':command-validation-api')
 
-    implementation "javax.validation:validation-api"
+    api 'javax.validation:validation-api'
+
     implementation "org.axonframework:axon-modelling:${axonVersion}"
 
     testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"

@@ -3,7 +3,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath "com.avast.gradle:gradle-docker-compose-plugin:0.9.4"
+        classpath 'com.avast.gradle:gradle-docker-compose-plugin:0.9.4'
     }
 }
 
@@ -87,9 +87,11 @@ dependencies {
     implementation "io.micrometer:micrometer-registry-prometheus:${microMeterPrometheusRegistry}"
     implementation "io.prometheus:simpleclient_pushgateway:${prometheusPushGateway}"
     implementation "org.liquibase:liquibase-core:${liquibaseVersion}"
+    implementation "org.postgresql:postgresql:${postgresDriverVersion}"
     implementation "com.amazonaws:aws-java-sdk-s3:${awsSdkVersion}"
-
-    annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
+//    implementation "org.ehcache:ehcache:${ehCacheVersion}"
+//    implementation "io.kubernetes:client-java:${kubernetesClientVersion}"
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
     testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
     testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"

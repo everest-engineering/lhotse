@@ -10,7 +10,6 @@ dependencies {
     implementation project(':users-api')
 
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'org.springframework.boot:spring-boot-starter-cache'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
@@ -18,9 +17,6 @@ dependencies {
     implementation "com.hazelcast:hazelcast-kubernetes:${hazelcastKubernetesVersion}"
     implementation "javax.cache:cache-api:${javaXCacheVersion}"
     implementation "javax.persistence:javax.persistence-api:${javaXPersistenceVersion}"
-    implementation "org.postgresql:postgresql:${postgresDriverVersion}"
-    implementation "org.ehcache:ehcache:${ehCacheVersion}"
-    implementation "io.kubernetes:client-java:${kubernetesClientVersion}"
     implementation "org.liquibase:liquibase-core:${liquibaseVersion}"
 
     testImplementation project(':command-validation-support')

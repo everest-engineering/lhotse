@@ -1,9 +1,9 @@
 dependencies {
-    api project(":command-validation-api")
+    api project(':command-validation-api')
+    api project(':users-api')
 
-    implementation project(":common")
-    implementation project(":organizations-api")
-    implementation project(":users-api")
+    implementation project(':common')
+    implementation project(':organizations-api')
 
     implementation 'org.springframework:spring-context'
     implementation "org.apache.commons:commons-lang3:${commonsLangVersion}"

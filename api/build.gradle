@@ -8,13 +8,9 @@ dependencies {
     implementation "engineering.everest.starterkit:storage:${storageVersion}"
     implementation "engineering.everest.starterkit:security:${securityVersion}"
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-webflux'
-    implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.springframework:spring-messaging'
     implementation "io.springfox:springfox-swagger2:${swaggerVersion}"
     implementation "io.springfox:springfox-swagger-ui:${swaggerVersion}"
     implementation "org.axonframework:axon-modelling:${axonVersion}"
-    implementation "org.axonframework:axon-messaging:${axonVersion}"
 
     testImplementation project(':users-api').sourceSets.test.output
     testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
