@@ -39,6 +39,10 @@ public class ApiRestTestClient {
         login("admin@everest.engineering", "ac0n3x72");
     }
 
+    public String getAccessToken() {
+        return accessToken;
+    }
+
     public void login(String username, String password) {
         Map<String, String> results = webTestClient.post().uri(AUTHENTICATION_ENDPOINT)
                 .contentType(APPLICATION_FORM_URLENCODED)

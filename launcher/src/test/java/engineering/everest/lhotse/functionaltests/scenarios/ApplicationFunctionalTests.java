@@ -69,4 +69,14 @@ class ApplicationFunctionalTests {
         var userId = apiRestTestClient.createUser(organizationId, newUserRequest, CREATED);
         apiRestTestClient.getUser(organizationId, userId, OK);
     }
+
+    @Test
+    void metricsEndpointPublishesAxonMetrics() {
+        apiRestTestClient.createAdminUserAndLogin();
+
+        webTestClient.get().uri("/actuator/metrics/commandBus.successCounter")
+                .header("Authorization", "Bearer " + apiRestTestClient.getAccessToken())
+                .exchange()
+                .expectStatus().isEqualTo(OK);
+    }
 }

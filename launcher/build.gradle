@@ -84,13 +84,12 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation "com.h2database:h2:${h2Version}"
+    implementation "org.axonframework:axon-micrometer:${axonVersion}"
     implementation "io.micrometer:micrometer-registry-prometheus:${microMeterPrometheusRegistry}"
     implementation "io.prometheus:simpleclient_pushgateway:${prometheusPushGateway}"
     implementation "org.liquibase:liquibase-core:${liquibaseVersion}"
     implementation "org.postgresql:postgresql:${postgresDriverVersion}"
     implementation "com.amazonaws:aws-java-sdk-s3:${awsSdkVersion}"
-//    implementation "org.ehcache:ehcache:${ehCacheVersion}"
-//    implementation "io.kubernetes:client-java:${kubernetesClientVersion}"
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
     testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
