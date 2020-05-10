@@ -11,5 +11,7 @@ public interface ReplayableEventProcessor extends EventProcessor {
 
     boolean isReplaying();
 
-    Closeable registerReplayCompletionListener(Consumer<ReplayableEventProcessor> listener);
+    ListenerRegistry registerReplayCompletionListener(Consumer<ReplayableEventProcessor> listener);
+
+    interface ListenerRegistry extends Closeable {}
 }

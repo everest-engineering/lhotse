@@ -22,9 +22,9 @@ import org.axonframework.messaging.unitofwork.RollbackConfiguration;
 import org.axonframework.monitoring.MessageMonitor;
 import org.axonframework.spring.config.AxonConfiguration;
 
-import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -72,7 +72,7 @@ public class MarkerAwareTrackingEventProcessor extends TrackingEventProcessor im
     }
 
     @Override
-    public Closeable registerReplayCompletionListener(Consumer<ReplayableEventProcessor> listener) {
+    public ListenerRegistry registerReplayCompletionListener(Consumer<ReplayableEventProcessor> listener) {
         replayCompletionListener.add(listener);
         return () -> replayCompletionListener.remove(listener);
     }
@@ -106,7 +106,8 @@ public class MarkerAwareTrackingEventProcessor extends TrackingEventProcessor im
                 synchronized (this) {
                     LOGGER.warn("Replay completed: {}", numberOfActiveSegments);
                     targetReplayMarkerEvent = null;
-                    executorService.submit(() -> replayCompletionListener.forEach(l -> l.accept(this)));
+                    executorService.submit(() ->
+                            Collections.unmodifiableList(replayCompletionListener).forEach(l -> l.accept(this)));
                 }
             }
         }

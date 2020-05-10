@@ -10,7 +10,6 @@ import org.axonframework.lifecycle.ShutdownHandler;
 import org.axonframework.lifecycle.StartHandler;
 import org.axonframework.messaging.MessageHandlerInterceptor;
 
-import java.io.Closeable;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -63,8 +62,8 @@ public class SwitchingEventProcessor implements ReplayableEventProcessor {
     }
 
     @Override
-    public Closeable registerReplayCompletionListener(Consumer<ReplayableEventProcessor> listener) {
-        return markerAwareTrackingEventProcessor.registerReplayCompletionListener(listener);
+    public ListenerRegistry registerReplayCompletionListener(Consumer<ReplayableEventProcessor> listener) {
+        return markerAwareTrackingEventProcessor.registerReplayCompletionListener(p -> listener.accept(this));
     }
 
     @SuppressWarnings("PMD.CompareObjectsWithEquals")
