@@ -10,7 +10,9 @@ import org.axonframework.lifecycle.ShutdownHandler;
 import org.axonframework.lifecycle.StartHandler;
 import org.axonframework.messaging.MessageHandlerInterceptor;
 
+import java.io.Closeable;
 import java.util.List;
+import java.util.function.Consumer;
 
 import static org.axonframework.lifecycle.Phase.LOCAL_MESSAGE_HANDLER_REGISTRATIONS;
 
@@ -18,28 +20,29 @@ import static org.axonframework.lifecycle.Phase.LOCAL_MESSAGE_HANDLER_REGISTRATI
 public class SwitchingEventProcessor implements ReplayableEventProcessor {
 
     private final SubscribingEventProcessor subscribingEventProcessor;
-    private final MarkerAwareTrackingEventProcessor trackingEventProcessor;
+    private final MarkerAwareTrackingEventProcessor markerAwareTrackingEventProcessor;
 
     private EventProcessor currentEventProcessor;
 
     public SwitchingEventProcessor(SubscribingEventProcessor subscribingEventProcessor,
-                                   MarkerAwareTrackingEventProcessor trackingEventProcessor) {
+                                   MarkerAwareTrackingEventProcessor markerAwareTrackingEventProcessor) {
         this.subscribingEventProcessor = subscribingEventProcessor;
-        this.trackingEventProcessor = trackingEventProcessor;
+        this.markerAwareTrackingEventProcessor = markerAwareTrackingEventProcessor;
         this.currentEventProcessor = subscribingEventProcessor;
-        this.trackingEventProcessor.registerReplayCompletionListener(this::stopReplay);
+        this.markerAwareTrackingEventProcessor.registerReplayCompletionListener(p -> stopReplay());
     }
 
     @Override
-    public void startReplay(TrackingToken trackingToken, ReplayMarkerEvent replayMarkerEvent) {
+    public void startReplay(TrackingToken startPosition, ReplayMarkerEvent replayMarkerEvent) {
         synchronized (this) {
             if (isReplaying()) {
                 throw new IllegalStateException("Cannot start replay while previous replay is still ongoing");
             }
-            LOGGER.info("Starting replay and switching to {}", trackingEventProcessor.getClass().getSimpleName());
+            LOGGER.info("Starting replay and switching to {}",
+                    markerAwareTrackingEventProcessor.getClass().getSimpleName());
             currentEventProcessor.shutDown();
-            currentEventProcessor = trackingEventProcessor;
-            trackingEventProcessor.startReplay(trackingToken, replayMarkerEvent);
+            currentEventProcessor = markerAwareTrackingEventProcessor;
+            markerAwareTrackingEventProcessor.startReplay(startPosition, replayMarkerEvent);
             start();
             LOGGER.info("Started replay");
         }
@@ -59,10 +62,15 @@ public class SwitchingEventProcessor implements ReplayableEventProcessor {
         }
     }
 
+    @Override
+    public Closeable registerReplayCompletionListener(Consumer<ReplayableEventProcessor> listener) {
+        return markerAwareTrackingEventProcessor.registerReplayCompletionListener(listener);
+    }
+
     @SuppressWarnings("PMD.CompareObjectsWithEquals")
     @Override
     public boolean isReplaying() {
-        return currentEventProcessor == trackingEventProcessor;
+        return currentEventProcessor == markerAwareTrackingEventProcessor;
     }
 
     @Override

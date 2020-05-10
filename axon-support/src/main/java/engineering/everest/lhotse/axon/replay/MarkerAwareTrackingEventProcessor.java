@@ -5,7 +5,6 @@ import org.axonframework.common.AxonConfigurationException;
 import org.axonframework.common.transaction.TransactionManager;
 import org.axonframework.config.Configuration;
 import org.axonframework.config.EventProcessingConfiguration;
-import org.axonframework.config.EventProcessingConfigurer;
 import org.axonframework.config.EventProcessingConfigurer.EventProcessorBuilder;
 import org.axonframework.config.EventProcessingModule;
 import org.axonframework.eventhandling.ErrorHandler;
@@ -30,9 +29,10 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 @Slf4j
-public class MarkerAwareTrackingEventProcessor extends TrackingEventProcessor {
+public class MarkerAwareTrackingEventProcessor extends TrackingEventProcessor implements ReplayableEventProcessor {
 
     private final TransactionManager transactionManager;
     private final TokenStore tokenStore;
@@ -40,7 +40,7 @@ public class MarkerAwareTrackingEventProcessor extends TrackingEventProcessor {
     private final boolean switchingAware;
     private volatile ReplayMarkerEvent targetReplayMarkerEvent;
     private final AtomicInteger workerReplayCompletionCounter = new AtomicInteger();
-    private final List<Runnable> replayCompletionListener = new ArrayList<>();
+    private final List<Consumer<ReplayableEventProcessor>> replayCompletionListener = new ArrayList<>();
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     protected MarkerAwareTrackingEventProcessor(Builder builder) {
@@ -51,6 +51,7 @@ public class MarkerAwareTrackingEventProcessor extends TrackingEventProcessor {
         switchingAware = builder.switchingAware;
     }
 
+    @Override
     public synchronized void startReplay(TrackingToken starPosition, ReplayMarkerEvent replayMarkerEvent) {
         if (isReplaying()) {
             throw new RuntimeException("Previous replay is still running");
@@ -65,11 +66,13 @@ public class MarkerAwareTrackingEventProcessor extends TrackingEventProcessor {
         start();
     }
 
+    @Override
     public boolean isReplaying() {
         return targetReplayMarkerEvent != null;
     }
 
-    public Closeable registerReplayCompletionListener(Runnable listener) {
+    @Override
+    public Closeable registerReplayCompletionListener(Consumer<ReplayableEventProcessor> listener) {
         replayCompletionListener.add(listener);
         return () -> replayCompletionListener.remove(listener);
     }
@@ -103,7 +106,7 @@ public class MarkerAwareTrackingEventProcessor extends TrackingEventProcessor {
                 synchronized (this) {
                     LOGGER.warn("Replay completed: {}", numberOfActiveSegments);
                     targetReplayMarkerEvent = null;
-                    executorService.submit(() -> replayCompletionListener.forEach(Runnable::run));
+                    executorService.submit(() -> replayCompletionListener.forEach(l -> l.accept(this)));
                 }
             }
         }
