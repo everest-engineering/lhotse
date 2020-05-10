@@ -53,9 +53,9 @@ class SwitchingEventProcessorTest {
 
     @Test
     void willGetReplayingStatus() {
-        assertFalse(switchingEventProcessor.isRelaying());
+        assertFalse(switchingEventProcessor.isReplaying());
         switchingEventProcessor.startReplay(trackingToken);
-        assertTrue(switchingEventProcessor.isRelaying());
+        assertTrue(switchingEventProcessor.isReplaying());
     }
 
     @Test

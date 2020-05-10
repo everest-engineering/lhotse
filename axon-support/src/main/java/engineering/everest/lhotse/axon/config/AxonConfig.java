@@ -2,7 +2,7 @@ package engineering.everest.lhotse.axon.config;
 
 import engineering.everest.lhotse.axon.CommandValidatingMessageHandlerInterceptor;
 import engineering.everest.lhotse.axon.LoggingMessageHandlerInterceptor;
-import engineering.everest.lhotse.axon.replay.SwitchingEventProcessorBuilder;
+import engineering.everest.lhotse.axon.replay.CompositeEventProcessorBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.commandhandling.CommandBus;
 import org.axonframework.commandhandling.CommandMessage;
@@ -66,15 +66,25 @@ public class AxonConfig {
     }
 
     @Autowired
-    public void configure(AxonConfiguration axonConfiguration,
-                          EventProcessingModule eventProcessingModule) {
+    public void configure(
+            AxonConfiguration axonConfiguration,
+            EventProcessingModule eventProcessingModule,
+            @Value("${application.axon.event-processor.type:switching}") EventProcessorType eventProcessorType,
+            @Value("${application.axon.event-processor.segments:1}") int numberOfSegments) {
         eventProcessingModule.byDefaultAssignTo("default");
         eventProcessingModule.registerEventProcessorFactory(
-                new SwitchingEventProcessorBuilder(axonConfiguration, eventProcessingModule));
+                new CompositeEventProcessorBuilder(
+                        axonConfiguration, eventProcessingModule, eventProcessorType, numberOfSegments));
     }
 
     @Bean
     public AnnotationCommandTargetResolver annotationCommandTargetResolver() {
         return AnnotationCommandTargetResolver.builder().build();
+    }
+
+    public enum EventProcessorType {
+        SUBSCRIBING,
+        TRACKING,
+        SWITCHING,
     }
 }

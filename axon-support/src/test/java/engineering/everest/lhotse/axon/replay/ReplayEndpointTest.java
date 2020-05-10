@@ -53,7 +53,7 @@ class ReplayEndpointTest {
     void setUp() {
         lenient().when(axonConfiguration.eventProcessingConfiguration()).thenReturn(eventProcessingConfiguration);
         lenient().when(eventProcessingConfiguration.eventProcessors()).thenReturn(Map.of("default", switchingEventProcessor));
-        lenient().when(switchingEventProcessor.isRelaying()).thenReturn(false);
+        lenient().when(switchingEventProcessor.isReplaying()).thenReturn(false);
         replayEndpoint = new ReplayEndpoint(axonConfiguration, List.of(replayCompletionAware), taskExecutor);
     }
 
@@ -75,7 +75,7 @@ class ReplayEndpointTest {
 
     @Test
     void triggerReplayWillThrowIllegalStateException_WhenReplayingIsOngoing() {
-        when(switchingEventProcessor.isRelaying()).thenReturn(true);
+        when(switchingEventProcessor.isReplaying()).thenReturn(true);
         assertThrows(IllegalStateException.class, () -> replayEndpoint.startReplay(null, null));
     }
 
@@ -87,7 +87,7 @@ class ReplayEndpointTest {
 
     @Test
     void onReplayMarkerEventWillStopReplay() {
-        when(switchingEventProcessor.isRelaying()).thenReturn(true);
+        when(switchingEventProcessor.isReplaying()).thenReturn(true);
         doAnswer(invocation -> {
             ((Runnable)invocation.getArgument(0)).run();
             return null;

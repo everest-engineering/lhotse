@@ -67,8 +67,9 @@ public class ReplayEndpoint {
             var trackingToken = startTime == null
                     ? eventStore.createTailToken() : eventStore.createTokenAt(startTime.toInstant());
 
-            switchingEventProcessors.forEach(p -> p.startReplay(trackingToken));
-            axonConfiguration.eventGateway().publish(new ReplayMarkerEvent(randomUUID()));
+            ReplayMarkerEvent replayMarkerEvent = new ReplayMarkerEvent(randomUUID());
+            switchingEventProcessors.forEach(p -> p.startReplay(trackingToken, replayMarkerEvent));
+            axonConfiguration.eventGateway().publish(replayMarkerEvent);
         }
     }
 
@@ -86,7 +87,7 @@ public class ReplayEndpoint {
     private void stopReplay() {
         taskExecutor.execute(() -> {
             getSwitchingEventProcessors().stream()
-                    .filter(SwitchingEventProcessor::isRelaying)
+                    .filter(SwitchingEventProcessor::isReplaying)
                     .forEach(SwitchingEventProcessor::stopReplay);
             resetCompletionAwares.forEach(ReplayCompletionAware::replayCompleted);
         });
@@ -94,7 +95,7 @@ public class ReplayEndpoint {
 
     private boolean isReplaying() {
         return getSwitchingEventProcessors().stream()
-                .anyMatch(SwitchingEventProcessor::isRelaying);
+                .anyMatch(SwitchingEventProcessor::isReplaying);
     }
 
     private List<SwitchingEventProcessor> getSwitchingEventProcessors() {

@@ -5,7 +5,6 @@ import org.axonframework.common.Registration;
 import org.axonframework.eventhandling.EventMessage;
 import org.axonframework.eventhandling.EventProcessor;
 import org.axonframework.eventhandling.SubscribingEventProcessor;
-import org.axonframework.eventhandling.TrackingEventProcessor;
 import org.axonframework.eventhandling.TrackingToken;
 import org.axonframework.lifecycle.ShutdownHandler;
 import org.axonframework.lifecycle.StartHandler;
@@ -16,26 +15,31 @@ import java.util.List;
 import static org.axonframework.lifecycle.Phase.LOCAL_MESSAGE_HANDLER_REGISTRATIONS;
 
 @Slf4j
-public class SwitchingEventProcessor implements EventProcessor {
+public class SwitchingEventProcessor implements ReplayableEventProcessor {
 
     private final SubscribingEventProcessor subscribingEventProcessor;
-    private final SwitchingAwareTrackingEventProcessor trackingEventProcessor;
+    private final MarkerAwareTrackingEventProcessor trackingEventProcessor;
 
     private EventProcessor currentEventProcessor;
 
     public SwitchingEventProcessor(SubscribingEventProcessor subscribingEventProcessor,
-                                   SwitchingAwareTrackingEventProcessor trackingEventProcessor) {
+                                   MarkerAwareTrackingEventProcessor trackingEventProcessor) {
         this.subscribingEventProcessor = subscribingEventProcessor;
         this.trackingEventProcessor = trackingEventProcessor;
         this.currentEventProcessor = subscribingEventProcessor;
+        this.trackingEventProcessor.registerReplayCompletionListener(this::stopReplay);
     }
 
-    public void startReplay(TrackingToken trackingToken) {
+    @Override
+    public void startReplay(TrackingToken trackingToken, ReplayMarkerEvent replayMarkerEvent) {
         synchronized (this) {
-            LOGGER.info(String.format("Starting replay and switching to %s", TrackingEventProcessor.class.getSimpleName()));
+            if (isReplaying()) {
+                throw new IllegalStateException("Cannot start replay while previous replay is still ongoing");
+            }
+            LOGGER.info("Starting replay and switching to {}", trackingEventProcessor.getClass().getSimpleName());
             currentEventProcessor.shutDown();
             currentEventProcessor = trackingEventProcessor;
-            trackingEventProcessor.resetTokens(trackingToken);
+            trackingEventProcessor.startReplay(trackingToken, replayMarkerEvent);
             start();
             LOGGER.info("Started replay");
         }
@@ -43,8 +47,12 @@ public class SwitchingEventProcessor implements EventProcessor {
 
     public void stopReplay() {
         synchronized (this) {
-            LOGGER.info(String.format("Stopping replay and switching to %s", SubscribingEventProcessor.class.getSimpleName()));
+            if (!isReplaying()) {
+                throw new IllegalStateException("Received request to stop replay but not currently in replay mode");
+            }
+            LOGGER.info("Stopping replay and switching to {}", subscribingEventProcessor.getClass().getSimpleName());
             currentEventProcessor.shutDown();
+            LOGGER.info("shutdown completed");
             currentEventProcessor = subscribingEventProcessor;
             start();
             LOGGER.info("Stopped replay");
@@ -52,7 +60,8 @@ public class SwitchingEventProcessor implements EventProcessor {
     }
 
     @SuppressWarnings("PMD.CompareObjectsWithEquals")
-    public boolean isRelaying() {
+    @Override
+    public boolean isReplaying() {
         return currentEventProcessor == trackingEventProcessor;
     }
 
