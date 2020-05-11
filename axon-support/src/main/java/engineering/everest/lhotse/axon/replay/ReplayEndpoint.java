@@ -97,7 +97,13 @@ public class ReplayEndpoint {
             }
             if (replayingProcessors.size() == 0) {
                 LOGGER.info("Executing reset completion tasks");
-                taskExecutor.execute(() -> replayCompletionAwares.forEach(ReplayCompletionAware::replayCompleted));
+                taskExecutor.execute(() -> replayCompletionAwares.forEach(t -> {
+                    try {
+                        t.replayCompleted();
+                    } catch (Exception e) {
+                        LOGGER.error("Error when running replay completion aware task", e);
+                    }
+                }));
             }
         }
     }
