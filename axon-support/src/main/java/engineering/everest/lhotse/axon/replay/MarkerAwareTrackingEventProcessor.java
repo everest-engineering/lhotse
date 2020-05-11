@@ -18,11 +18,11 @@ import org.axonframework.monitoring.MessageMonitor;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 @Slf4j
@@ -32,7 +32,7 @@ public class MarkerAwareTrackingEventProcessor extends TrackingEventProcessor im
     private final TokenStore tokenStore;
     private final int initialSegmentsCount;
     private final boolean switchingAware;
-    private volatile ReplayMarkerEvent targetReplayMarkerEvent;
+    private final AtomicReference<ReplayMarkerEvent> targetMarkerEventHolder = new AtomicReference<>();
     private final AtomicInteger workerReplayCompletionCounter = new AtomicInteger();
     private final List<Consumer<ReplayableEventProcessor>> replayCompletionListener = new ArrayList<>();
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -46,23 +46,25 @@ public class MarkerAwareTrackingEventProcessor extends TrackingEventProcessor im
     }
 
     @Override
-    public synchronized void startReplay(TrackingToken startPosition, ReplayMarkerEvent replayMarkerEvent) {
-        if (isReplaying()) {
-            throw new RuntimeException("Previous replay is still running");
+    public void startReplay(TrackingToken startPosition, ReplayMarkerEvent replayMarkerEvent) {
+        synchronized (this) {
+            if (isReplaying()) {
+                throw new RuntimeException("Previous replay is still running");
+            }
+            targetMarkerEventHolder.set(replayMarkerEvent);
+            workerReplayCompletionCounter.set(0);
+            shutDown();
+            if (switchingAware) {
+                ensureCorrectStopPosition();
+            }
+            resetTokens(startPosition);
+            start();
         }
-        targetReplayMarkerEvent = replayMarkerEvent;
-        workerReplayCompletionCounter.set(0);
-        shutDown();
-        if (switchingAware) {
-            ensureCorrectStopPosition();
-        }
-        resetTokens(startPosition);
-        start();
     }
 
     @Override
     public boolean isReplaying() {
-        return targetReplayMarkerEvent != null;
+        return targetMarkerEventHolder.get() != null;
     }
 
     @Override
@@ -73,7 +75,12 @@ public class MarkerAwareTrackingEventProcessor extends TrackingEventProcessor im
 
     @Override
     protected boolean canHandle(EventMessage<?> eventMessage, Collection<Segment> segments) throws Exception {
-        maybeProcessReplayMarkerEvent(eventMessage);
+        if (ReplayMarkerEvent.class.isAssignableFrom(eventMessage.getPayloadType())) {
+            ReplayMarkerEvent targetEvent = targetMarkerEventHolder.get();
+            if (targetEvent != null && targetEvent.equals(eventMessage.getPayload())) {
+                processReplayMarkerEvent(eventMessage);
+            }
+        }
         return super.canHandle(eventMessage, segments);
     }
 
@@ -91,24 +98,21 @@ public class MarkerAwareTrackingEventProcessor extends TrackingEventProcessor im
         });
     }
 
-    private void maybeProcessReplayMarkerEvent(EventMessage<?> eventMessage) {
-        if (ReplayMarkerEvent.class.isAssignableFrom(eventMessage.getPayloadType())
-                && targetReplayMarkerEvent != null && targetReplayMarkerEvent.equals(eventMessage.getPayload())) {
-            LOGGER.info("Processing target replay marker event: {}", eventMessage.getPayload());
-            final int numberOfActiveSegments = processingStatus().size();
-            if (workerReplayCompletionCounter.incrementAndGet() == numberOfActiveSegments) {
-                synchronized (this) {
-                    LOGGER.info("Replay completed: {}", numberOfActiveSegments);
-                    targetReplayMarkerEvent = null;
-                    executorService.submit(() ->
-                            Collections.unmodifiableList(replayCompletionListener).forEach(l -> {
-                                try {
-                                    l.accept(this);
-                                } catch (Exception e) {
-                                    LOGGER.error("Error running replay completion listener", e);
-                                }
-                            }));
-                }
+    private void processReplayMarkerEvent(EventMessage<?> eventMessage) {
+        LOGGER.info("Processing target replay marker event: {}", eventMessage.getPayload());
+        final int numberOfActiveSegments = processingStatus().size();
+        if (workerReplayCompletionCounter.incrementAndGet() == numberOfActiveSegments) {
+            synchronized (this) {
+                LOGGER.info("Replay completed: {}", numberOfActiveSegments);
+                targetMarkerEventHolder.set(null);
+                executorService.submit(() ->
+                        List.copyOf(replayCompletionListener).forEach(l -> {
+                            try {
+                                l.accept(this);
+                            } catch (Exception e) {
+                                LOGGER.error("Error running replay completion listener", e);
+                            }
+                        }));
             }
         }
     }
@@ -117,6 +121,7 @@ public class MarkerAwareTrackingEventProcessor extends TrackingEventProcessor im
         return new Builder();
     }
 
+    @SuppressWarnings("PMD.AvoidFieldNameMatchingMethodName")
     public static class Builder extends TrackingEventProcessor.Builder {
 
         private TransactionManager transactionManager;
@@ -198,6 +203,7 @@ public class MarkerAwareTrackingEventProcessor extends TrackingEventProcessor im
             super.validate();
         }
 
+        @Override
         public MarkerAwareTrackingEventProcessor build() {
             return new MarkerAwareTrackingEventProcessor(this);
         }

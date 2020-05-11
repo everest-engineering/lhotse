@@ -42,7 +42,7 @@ public class SwitchingEventProcessor implements ReplayableEventProcessor {
             currentEventProcessor.shutDown();
             currentEventProcessor = markerAwareTrackingEventProcessor;
             markerAwareTrackingEventProcessor.startReplay(startPosition, replayMarkerEvent);
-            LOGGER.info("Started replay");
+            LOGGER.info("Replay started");
         }
     }
 

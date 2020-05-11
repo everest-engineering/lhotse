@@ -82,20 +82,23 @@ public class ReplayEndpoint {
         }
     }
 
-    private synchronized void onSingleProcessorReplayCompletion(ReplayableEventProcessor processor) {
-        ListenerRegistry listenerRegistry = replayingProcessors.remove(processor);
-        if (listenerRegistry == null) {
-            LOGGER.warn("Processor not registered for replaying: {}", processor);
-            return;
-        }
-        try {
-            listenerRegistry.close();
-        } catch (IOException e) {
-            LOGGER.error("cannot de-register listener for processor: {}", processor, e);
-        }
-        if (replayingProcessors.size() == 0) {
-            LOGGER.info("Executing reset completion tasks");
-            taskExecutor.execute(() -> replayCompletionAwares.forEach(ReplayCompletionAware::replayCompleted));
+    @SuppressWarnings("PMD.CloseResource")
+    private void onSingleProcessorReplayCompletion(ReplayableEventProcessor processor) {
+        synchronized (this) {
+            ListenerRegistry listenerRegistry = replayingProcessors.remove(processor);
+            if (listenerRegistry == null) {
+                LOGGER.warn("Processor not registered for replaying: {}", processor);
+                return;
+            }
+            try {
+                listenerRegistry.close();
+            } catch (IOException e) {
+                LOGGER.error("Cannot de-register listener for processor: {}", processor, e);
+            }
+            if (replayingProcessors.size() == 0) {
+                LOGGER.info("Executing reset completion tasks");
+                taskExecutor.execute(() -> replayCompletionAwares.forEach(ReplayCompletionAware::replayCompleted));
+            }
         }
     }
 
