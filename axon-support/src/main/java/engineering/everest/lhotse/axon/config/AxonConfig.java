@@ -67,7 +67,6 @@ public class AxonConfig {
 
     @Autowired
     public void configure(
-            AxonConfiguration axonConfiguration,
             EventProcessingModule eventProcessingModule,
             @Value("${application.axon.event-processor.default-group:true}") boolean defaultGroup,
             @Value("${application.axon.event-processor.type:switching}") EventProcessorType eventProcessorType,
@@ -77,7 +76,7 @@ public class AxonConfig {
         }
         eventProcessingModule.registerEventProcessorFactory(
                 new CompositeEventProcessorBuilder(
-                        axonConfiguration, eventProcessingModule, eventProcessorType, numberOfSegments));
+                        eventProcessingModule, eventProcessorType, numberOfSegments));
     }
 
     @Bean

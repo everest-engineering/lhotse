@@ -31,26 +31,27 @@ import static java.util.stream.Collectors.toList;
 public class ReplayEndpoint {
 
     private final AxonConfiguration axonConfiguration;
-    private final List<ReplayCompletionAware> resetCompletionAwares;
+    private final List<ReplayCompletionAware> replayCompletionAwares;
     private final TaskExecutor taskExecutor;
-    private final ConcurrentHashMap<ReplayableEventProcessor, ListenerRegistry> replayingProcessors = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<ReplayableEventProcessor, ListenerRegistry> replayingProcessors;
 
     @Autowired
     public ReplayEndpoint(AxonConfiguration axonConfiguration,
-                          List<ReplayCompletionAware> resetCompletionAwares,
+                          List<ReplayCompletionAware> replayCompletionAwares,
                           TaskExecutor taskExecutor) {
         this.axonConfiguration = axonConfiguration;
-        this.resetCompletionAwares = resetCompletionAwares;
+        this.replayCompletionAwares = replayCompletionAwares;
         this.taskExecutor = taskExecutor;
-        getReplayableEventProcessors().forEach(p -> p.registerReplayCompletionListener(
-                this::onSingleProcessorReplayCompletion));
+        replayingProcessors = new ConcurrentHashMap<>();
     }
 
     @ReadOperation
     public Map<String, Object> status() {
         var statusMap = new HashMap<String, Object>();
         statusMap.put("ReplayableEventProcessors", getReplayableEventProcessors().size());
-        statusMap.put("isReplaying", isReplaying());
+        final int n = replayingProcessors.size();
+        statusMap.put("currentlyReplaying", n);
+        statusMap.put("isReplaying", n > 0);
         return statusMap;
     }
 
@@ -94,7 +95,7 @@ public class ReplayEndpoint {
         }
         if (replayingProcessors.size() == 0) {
             LOGGER.info("Executing reset completion tasks");
-            taskExecutor.execute(() -> resetCompletionAwares.forEach(ReplayCompletionAware::replayCompleted));
+            taskExecutor.execute(() -> replayCompletionAwares.forEach(ReplayCompletionAware::replayCompleted));
         }
     }
 

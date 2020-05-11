@@ -1,5 +1,6 @@
 package engineering.everest.lhotse.axon.replay;
 
+import engineering.everest.lhotse.axon.replay.ReplayableEventProcessor.ListenerRegistry;
 import org.axonframework.config.EventProcessingConfiguration;
 import org.axonframework.eventhandling.TrackingToken;
 import org.axonframework.eventhandling.gateway.EventGateway;
@@ -12,18 +13,20 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.task.TaskExecutor;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
-import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -45,14 +48,17 @@ class ReplayEndpointTest {
     @Mock
     private EventGateway eventGateway;
     @Mock
-    private TrackingToken trackingToken;
+    private TrackingToken startPosition;
+    @Mock
+    private ListenerRegistry listenerRegistry;
 
     private ReplayEndpoint replayEndpoint;
 
     @BeforeEach
     void setUp() {
         lenient().when(axonConfiguration.eventProcessingConfiguration()).thenReturn(eventProcessingConfiguration);
-        lenient().when(eventProcessingConfiguration.eventProcessors()).thenReturn(Map.of("default", switchingEventProcessor));
+        lenient().when(eventProcessingConfiguration.eventProcessors()).thenReturn(Map.of("default",
+                switchingEventProcessor));
         lenient().when(switchingEventProcessor.isReplaying()).thenReturn(false);
         replayEndpoint = new ReplayEndpoint(axonConfiguration, List.of(replayCompletionAware), taskExecutor);
     }
@@ -60,45 +66,47 @@ class ReplayEndpointTest {
     @Test
     void willGetReplayStatus() {
         Map<String, Object> status = replayEndpoint.status();
-        assertEquals(Map.of("switchingEventProcessors", 1, "isReplaying", false), status);
+        assertEquals(Map.of("ReplayableEventProcessors", 1,
+                "currentlyReplaying", 0,
+                "isReplaying", false), status);
     }
 
     @Test
-    void willStartReplay() {
+    void willStartReplay() throws IOException {
         when(axonConfiguration.eventStore()).thenReturn(eventStore);
         when(axonConfiguration.eventGateway()).thenReturn(eventGateway);
-        when(eventStore.createTailToken()).thenReturn(trackingToken);
+        when(eventStore.createTailToken()).thenReturn(startPosition);
+        doAnswer(invocation -> {
+            ((Runnable) invocation.getArgument(0)).run();
+            return null;
+        }).when(taskExecutor).execute(any());
+        AtomicReference<Consumer<ReplayableEventProcessor>> listener = new AtomicReference<>();
+        doAnswer(invocation -> {
+            listener.set(invocation.getArgument(0));
+            return listenerRegistry;
+        }).when(switchingEventProcessor).registerReplayCompletionListener(any());
         replayEndpoint.startReplay(null, null);
-        verify(switchingEventProcessor).startReplay(trackingToken);
+        verify(switchingEventProcessor).startReplay(eq(startPosition), any(ReplayMarkerEvent.class));
         verify(eventGateway).publish(any(ReplayMarkerEvent.class));
-    }
 
-    @Test
-    void triggerReplayWillThrowIllegalStateException_WhenReplayingIsOngoing() {
-        when(switchingEventProcessor.isReplaying()).thenReturn(true);
+        // Another attempt to start replay before current one is completed will fail
         assertThrows(IllegalStateException.class, () -> replayEndpoint.startReplay(null, null));
+        Map<String, Object> status = replayEndpoint.status();
+        // Status should show currently replaying processors
+        assertEquals(Map.of("ReplayableEventProcessors", 1,
+                "currentlyReplaying", 1,
+                "isReplaying", true), status);
+
+        // Now complete the replay
+        listener.get().accept(switchingEventProcessor);
+        verify(listenerRegistry).close();
+        verify(replayCompletionAware).replayCompleted();
     }
 
     @Test
     void triggerReplayWillThrowIllegalStateException_WhenNoMatchingSwitchingEventProcessorFound() {
-        when(eventProcessingConfiguration.eventProcessorByProcessingGroup("foo", SwitchingEventProcessor.class)).thenReturn(Optional.empty());
+        when(eventProcessingConfiguration.eventProcessorByProcessingGroup(
+                "foo", ReplayableEventProcessor.class)).thenReturn(Optional.empty());
         assertThrows(IllegalStateException.class, () -> replayEndpoint.startReplay(Set.of("foo"), null));
-    }
-
-    @Test
-    void onReplayMarkerEventWillStopReplay() {
-        when(switchingEventProcessor.isReplaying()).thenReturn(true);
-        doAnswer(invocation -> {
-            ((Runnable)invocation.getArgument(0)).run();
-            return null;
-        }).when(taskExecutor).execute(any());
-        replayEndpoint.on(new ReplayMarkerEvent(randomUUID()));
-        verify(switchingEventProcessor).stopReplay();
-    }
-
-    @Test
-    void onReplayMarkerEventWillIgnore_WhenReplayIsNotRunning() {
-        replayEndpoint.on(new ReplayMarkerEvent(randomUUID()));
-        verify(switchingEventProcessor, never()).stopReplay();
     }
 }

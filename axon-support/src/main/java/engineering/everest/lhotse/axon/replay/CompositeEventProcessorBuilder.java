@@ -2,8 +2,8 @@ package engineering.everest.lhotse.axon.replay;
 
 import engineering.everest.lhotse.axon.config.AxonConfig.EventProcessorType;
 import org.axonframework.config.Configuration;
-import org.axonframework.config.EventProcessingConfiguration;
 import org.axonframework.config.EventProcessingConfigurer.EventProcessorBuilder;
+import org.axonframework.config.EventProcessingModule;
 import org.axonframework.eventhandling.DirectEventProcessingStrategy;
 import org.axonframework.eventhandling.EventHandlerInvoker;
 import org.axonframework.eventhandling.EventProcessor;
@@ -15,16 +15,13 @@ import org.axonframework.messaging.StreamableMessageSource;
 
 public class CompositeEventProcessorBuilder implements EventProcessorBuilder {
 
-    private final Configuration axonConfiguration;
-    private final EventProcessingConfiguration eventProcessingModule;
+    private final EventProcessingModule eventProcessingModule;
     private final EventProcessorType eventProcessorType;
     private final int numberOfSegments;
 
-    public CompositeEventProcessorBuilder(Configuration axonConfiguration,
-                                          EventProcessingConfiguration eventProcessingModule,
+    public CompositeEventProcessorBuilder(EventProcessingModule eventProcessingModule,
                                           EventProcessorType eventProcessorType,
                                           int numberOfSegments) {
-        this.axonConfiguration = axonConfiguration;
         this.eventProcessingModule = eventProcessingModule;
         this.eventProcessorType = eventProcessorType;
         this.numberOfSegments = numberOfSegments;
@@ -41,7 +38,7 @@ public class CompositeEventProcessorBuilder implements EventProcessorBuilder {
                 return buildSwitchingEventProcessor(name, configuration, eventHandlerInvoker);
             default:
                 throw new IllegalArgumentException(
-                        String.format("invalid event processor type: %s", eventProcessorType));
+                        String.format("Invalid event processor type: %s", eventProcessorType));
         }
     }
 
@@ -54,7 +51,7 @@ public class CompositeEventProcessorBuilder implements EventProcessorBuilder {
                 .eventHandlerInvoker(eventHandlerInvoker)
                 .rollbackConfiguration(eventProcessingModule.rollbackConfiguration(name))
                 .messageMonitor(eventProcessingModule.messageMonitor(SubscribingEventProcessor.class, name))
-                .messageSource(axonConfiguration.eventBus())
+                .messageSource(configuration.eventBus())
                 .processingStrategy(DirectEventProcessingStrategy.INSTANCE)
                 .transactionManager(eventProcessingModule.transactionManager(name))
                 .build();
@@ -65,7 +62,7 @@ public class CompositeEventProcessorBuilder implements EventProcessorBuilder {
             String name,
             Configuration configuration,
             EventHandlerInvoker eventHandlerInvoker) {
-        TrackingEventProcessorConfiguration trackingEventProcessorConfiguration = axonConfiguration.getComponent(
+        TrackingEventProcessorConfiguration trackingEventProcessorConfiguration = configuration.getComponent(
                 TrackingEventProcessorConfiguration.class,
                 () -> TrackingEventProcessorConfiguration.forParallelProcessing(numberOfSegments));
         return MarkerAwareTrackingEventProcessor.builder()
@@ -74,7 +71,7 @@ public class CompositeEventProcessorBuilder implements EventProcessorBuilder {
                 .rollbackConfiguration(eventProcessingModule.rollbackConfiguration(name))
                 .errorHandler(eventProcessingModule.errorHandler(name))
                 .messageMonitor(eventProcessingModule.messageMonitor(TrackingEventProcessor.class, name))
-                .messageSource((StreamableMessageSource<TrackedEventMessage<?>>) axonConfiguration.eventBus())
+                .messageSource((StreamableMessageSource<TrackedEventMessage<?>>) configuration.eventBus())
                 .tokenStore(eventProcessingModule.tokenStore(name))
                 .transactionManager(eventProcessingModule.transactionManager(name))
                 .trackingEventProcessorConfiguration(trackingEventProcessorConfiguration)
