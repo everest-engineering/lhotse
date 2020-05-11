@@ -69,9 +69,12 @@ public class AxonConfig {
     public void configure(
             AxonConfiguration axonConfiguration,
             EventProcessingModule eventProcessingModule,
+            @Value("${application.axon.event-processor.default-group:true}") boolean defaultGroup,
             @Value("${application.axon.event-processor.type:switching}") EventProcessorType eventProcessorType,
             @Value("${application.axon.event-processor.segments:1}") int numberOfSegments) {
-        eventProcessingModule.byDefaultAssignTo("default");
+        if (defaultGroup) {
+            eventProcessingModule.byDefaultAssignTo("default");
+        }
         eventProcessingModule.registerEventProcessorFactory(
                 new CompositeEventProcessorBuilder(
                         axonConfiguration, eventProcessingModule, eventProcessorType, numberOfSegments));
