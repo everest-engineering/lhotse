@@ -32,7 +32,7 @@ import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.HttpStatus.OK;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT, classes = Launcher.class)
-@ActiveProfiles({"standalone", "replay"})
+@ActiveProfiles("standalone")
 class ReplayFunctionalTests {
 
     @Autowired
@@ -53,7 +53,6 @@ class ReplayFunctionalTests {
     @Test
     void canGetReplayStatus() {
         Map<String, Object> replayStatus = apiRestTestClient.getReplayStatus(OK);
-        assertTrue((int) replayStatus.get("ReplayableEventProcessors") > 1);
         assertSame(FALSE, replayStatus.get("isReplaying"));
     }
 
