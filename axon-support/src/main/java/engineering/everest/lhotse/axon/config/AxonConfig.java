@@ -28,6 +28,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 @Configuration
 public class AxonConfig {
     @Bean
+    @SuppressWarnings("PMD.DoNotUseThreads")
     public RetryScheduler retryScheduler(@Value("${application.axon.retry.interval-milli-seconds}") int retryInterval,
                                          @Value("${application.axon.retry.max-count}") int retryMaxCount,
                                          @Value("${application.axon.retry.pool-size}") int retryPoolSize) {

@@ -85,8 +85,11 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation "com.h2database:h2:${h2Version}"
     implementation "org.axonframework:axon-micrometer:${axonVersion}"
-    implementation "io.micrometer:micrometer-registry-prometheus:${microMeterPrometheusRegistry}"
-    implementation "io.prometheus:simpleclient_pushgateway:${prometheusPushGateway}"
+    implementation "io.micrometer:micrometer-core:${microMeterPrometheusVersion}"
+    implementation "io.micrometer:micrometer-registry-prometheus:${microMeterPrometheusVersion}"
+    implementation "io.prometheus:simpleclient:${prometheusSimpleClientVersion}"
+    implementation "io.prometheus:simpleclient_hotspot:${prometheusSimpleClientVersion}"
+    implementation "io.prometheus:simpleclient_pushgateway:${prometheusSimpleClientVersion}"
     implementation "org.liquibase:liquibase-core:${liquibaseVersion}"
     implementation "org.postgresql:postgresql:${postgresDriverVersion}"
     implementation "com.amazonaws:aws-java-sdk-s3:${awsSdkVersion}"
