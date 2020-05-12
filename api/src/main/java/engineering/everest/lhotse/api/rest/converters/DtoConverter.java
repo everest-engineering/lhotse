@@ -4,7 +4,6 @@ import engineering.everest.lhotse.api.rest.responses.OrganizationResponse;
 import engineering.everest.lhotse.api.rest.responses.UserResponse;
 import engineering.everest.lhotse.axon.common.domain.User;
 import engineering.everest.lhotse.organizations.Organization;
-import engineering.everest.lhotse.organizations.OrganizationAddress;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -16,13 +15,13 @@ public class DtoConverter {
     }
 
     public OrganizationResponse convert(Organization organization) {
-        OrganizationAddress organizationAddress = organization.getOrganizationAddress();
+        var address = organization.getOrganizationAddress();
         return new OrganizationResponse(organization.getId(), organization.getOrganizationName(),
-                organizationAddress.getStreet(),
-                organizationAddress.getCity(),
-                organizationAddress.getState(),
-                organizationAddress.getCountry(),
-                organizationAddress.getPostalCode(),
+                address.getStreet(),
+                address.getCity(),
+                address.getState(),
+                address.getCountry(),
+                address.getPostalCode(),
                 organization.getWebsiteUrl(),
                 organization.getContactName(),
                 organization.getPhoneNumber(),
