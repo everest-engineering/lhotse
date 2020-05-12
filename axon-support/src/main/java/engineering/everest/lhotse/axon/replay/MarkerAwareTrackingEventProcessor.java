@@ -100,7 +100,7 @@ public class MarkerAwareTrackingEventProcessor extends TrackingEventProcessor im
 
     private void processReplayMarkerEvent(EventMessage<?> eventMessage) {
         LOGGER.info("Processing target replay marker event: {}", eventMessage.getPayload());
-        final int numberOfActiveSegments = processingStatus().size();
+        int numberOfActiveSegments = processingStatus().size();
         if (workerReplayCompletionCounter.incrementAndGet() == numberOfActiveSegments) {
             synchronized (this) {
                 LOGGER.info("Replay completed: {}", numberOfActiveSegments);

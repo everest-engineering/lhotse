@@ -83,9 +83,9 @@ public class CompositeEventProcessorBuilder implements EventProcessorBuilder {
             String name,
             Configuration configuration,
             EventHandlerInvoker eventHandlerInvoker) {
-        final SubscribingEventProcessor subscribingEventProcessor =
+        SubscribingEventProcessor subscribingEventProcessor =
                 buildSubscribingEventProcessor(name, configuration, eventHandlerInvoker);
-        final MarkerAwareTrackingEventProcessor trackingEventProcessor =
+        MarkerAwareTrackingEventProcessor trackingEventProcessor =
                 buildMarkerAwareTrackingEventProcessor(name, configuration, eventHandlerInvoker);
         return new SwitchingEventProcessor(subscribingEventProcessor, trackingEventProcessor);
     }

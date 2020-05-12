@@ -84,13 +84,13 @@ class MarkerAwareTrackingEventProcessorTest {
         switchingAwareField.setAccessible(true);
         switchingAwareField.setBoolean(processor, true);
 
-        final MarkerAwareTrackingEventProcessor markerAwareTrackingEventProcessor = spy(processor);
+        MarkerAwareTrackingEventProcessor markerAwareTrackingEventProcessor = spy(processor);
         when(markerAwareTrackingEventProcessor.processingStatus()).thenReturn(Map.of(
                 0, mock(EventTrackerStatus.class),
                 1, mock(EventTrackerStatus.class)));
 
-        final SubscribingEventProcessor subscribingEventProcessor = mock(SubscribingEventProcessor.class);
-        final SwitchingEventProcessor switchingEventProcessor =
+        SubscribingEventProcessor subscribingEventProcessor = mock(SubscribingEventProcessor.class);
+        SwitchingEventProcessor switchingEventProcessor =
                 new SwitchingEventProcessor(subscribingEventProcessor, markerAwareTrackingEventProcessor);
 
         CountDownLatch replayLatch = new CountDownLatch(1);

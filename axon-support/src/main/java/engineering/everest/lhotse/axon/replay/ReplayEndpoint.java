@@ -49,9 +49,9 @@ public class ReplayEndpoint {
     public Map<String, Object> status() {
         var statusMap = new HashMap<String, Object>();
         statusMap.put("ReplayableEventProcessors", getReplayableEventProcessors().size());
-        final int n = replayingProcessors.size();
-        statusMap.put("currentlyReplaying", n);
-        statusMap.put("isReplaying", n > 0);
+        int currentlyReplaying = replayingProcessors.size();
+        statusMap.put("currentlyReplaying", currentlyReplaying);
+        statusMap.put("isReplaying", currentlyReplaying > 0);
         return statusMap;
     }
 
@@ -70,7 +70,7 @@ public class ReplayEndpoint {
                 throw new IllegalStateException("Cannot start replay while an existing one is running");
             }
             EventStore eventStore = axonConfiguration.eventStore();
-            final TrackingToken startPosition = startTime == null
+            TrackingToken startPosition = startTime == null
                     ? eventStore.createTailToken() : eventStore.createTokenAt(startTime.toInstant());
 
             ReplayMarkerEvent replayMarkerEvent = new ReplayMarkerEvent(randomUUID());
