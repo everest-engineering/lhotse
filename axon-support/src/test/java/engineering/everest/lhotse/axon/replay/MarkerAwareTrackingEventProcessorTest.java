@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.task.TaskExecutor;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -47,6 +48,8 @@ class MarkerAwareTrackingEventProcessorTest {
     @Mock
     private EventProcessingModule eventProcessingModule;
     @Mock
+    private TaskExecutor taskExecutor;
+    @Mock
     private EventHandlerInvoker eventHandlerInvoker;
     @Mock
     private EmbeddedEventStore embeddedEventStore;
@@ -72,9 +75,14 @@ class MarkerAwareTrackingEventProcessorTest {
         when(eventProcessingModule.tokenStore(any())).thenReturn(tokenStore);
         when(eventProcessingModule.transactionManager(any())).thenReturn(transactionManager);
         when(eventHandlerInvoker.supportsReset()).thenReturn(true);
+        doAnswer(invocation -> {
+            Runnable runnable = invocation.getArgument(0);
+            runnable.run();
+            return null;
+        }).when(taskExecutor).execute(any(Runnable.class));
         processor = (MarkerAwareTrackingEventProcessor)
                 new CompositeEventProcessorBuilder(
-                        eventProcessingModule, AxonConfig.EventProcessorType.TRACKING, 2)
+                        taskExecutor, eventProcessingModule, AxonConfig.EventProcessorType.TRACKING, 2)
                         .build("default", configuration, eventHandlerInvoker);
     }
 

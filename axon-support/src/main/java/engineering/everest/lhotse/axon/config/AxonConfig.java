@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.TaskExecutor;
 
 import java.util.List;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -67,6 +68,7 @@ public class AxonConfig {
 
     @Autowired
     public void configure(
+            TaskExecutor taskExecutor,
             EventProcessingModule eventProcessingModule,
             @Value("${application.axon.event-processor.default-group:true}") boolean defaultGroup,
             @Value("${application.axon.event-processor.type:switching}") EventProcessorType eventProcessorType,
@@ -76,7 +78,7 @@ public class AxonConfig {
         }
         eventProcessingModule.registerEventProcessorFactory(
                 new CompositeEventProcessorBuilder(
-                        eventProcessingModule, eventProcessorType, numberOfSegments));
+                        taskExecutor, eventProcessingModule, eventProcessorType, numberOfSegments));
     }
 
     @Bean

@@ -15,12 +15,11 @@ import org.axonframework.eventhandling.tokenstore.TokenStore;
 import org.axonframework.messaging.StreamableMessageSource;
 import org.axonframework.messaging.unitofwork.RollbackConfiguration;
 import org.axonframework.monitoring.MessageMonitor;
+import org.springframework.core.task.TaskExecutor;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -35,7 +34,7 @@ public class MarkerAwareTrackingEventProcessor extends TrackingEventProcessor im
     private final AtomicReference<ReplayMarkerEvent> targetMarkerEventHolder = new AtomicReference<>();
     private final AtomicInteger workerReplayCompletionCounter = new AtomicInteger();
     private final List<Consumer<ReplayableEventProcessor>> replayCompletionListener = new ArrayList<>();
-    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private final TaskExecutor taskExecutor;
 
     protected MarkerAwareTrackingEventProcessor(Builder builder) {
         super(builder);
@@ -43,6 +42,7 @@ public class MarkerAwareTrackingEventProcessor extends TrackingEventProcessor im
         tokenStore = builder.tokenStore;
         initialSegmentsCount = builder.initialSegmentsCount;
         switchingAware = builder.switchingAware;
+        taskExecutor = builder.taskExecutor;
     }
 
     @Override
@@ -105,7 +105,7 @@ public class MarkerAwareTrackingEventProcessor extends TrackingEventProcessor im
             synchronized (this) {
                 LOGGER.info("Replay completed: {}", numberOfActiveSegments);
                 targetMarkerEventHolder.set(null);
-                executorService.submit(() ->
+                taskExecutor.execute(() ->
                         List.copyOf(replayCompletionListener).forEach(l -> {
                             try {
                                 l.accept(this);
@@ -128,6 +128,7 @@ public class MarkerAwareTrackingEventProcessor extends TrackingEventProcessor im
         private TokenStore tokenStore;
         private int initialSegmentsCount;
         private boolean switchingAware;
+        private TaskExecutor taskExecutor;
 
         @Override
         public Builder name(String name) {
@@ -195,6 +196,11 @@ public class MarkerAwareTrackingEventProcessor extends TrackingEventProcessor im
 
         public Builder switchingAware(boolean switchingAware) {
             this.switchingAware = switchingAware;
+            return this;
+        }
+
+        public Builder taskExecutor(TaskExecutor taskExecutor) {
+            this.taskExecutor = taskExecutor;
             return this;
         }
 

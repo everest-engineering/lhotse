@@ -12,16 +12,20 @@ import org.axonframework.eventhandling.TrackedEventMessage;
 import org.axonframework.eventhandling.TrackingEventProcessor;
 import org.axonframework.eventhandling.TrackingEventProcessorConfiguration;
 import org.axonframework.messaging.StreamableMessageSource;
+import org.springframework.core.task.TaskExecutor;
 
 public class CompositeEventProcessorBuilder implements EventProcessorBuilder {
 
+    private final TaskExecutor taskExecutor;
     private final EventProcessingModule eventProcessingModule;
     private final EventProcessorType eventProcessorType;
     private final int numberOfSegments;
 
-    public CompositeEventProcessorBuilder(EventProcessingModule eventProcessingModule,
+    public CompositeEventProcessorBuilder(TaskExecutor taskExecutor,
+                                          EventProcessingModule eventProcessingModule,
                                           EventProcessorType eventProcessorType,
                                           int numberOfSegments) {
+        this.taskExecutor = taskExecutor;
         this.eventProcessingModule = eventProcessingModule;
         this.eventProcessorType = eventProcessorType;
         this.numberOfSegments = numberOfSegments;
@@ -76,6 +80,7 @@ public class CompositeEventProcessorBuilder implements EventProcessorBuilder {
                 .transactionManager(eventProcessingModule.transactionManager(name))
                 .trackingEventProcessorConfiguration(trackingEventProcessorConfiguration)
                 .switchingAware(EventProcessorType.SWITCHING == eventProcessorType)
+                .taskExecutor(taskExecutor)
                 .build();
     }
 
