@@ -66,6 +66,14 @@ public class ApiRestTestClient {
                 .returnResult(UserResponse.class).getResponseBody().blockFirst();
     }
 
+    public List<UserResponse> getAllUsers(HttpStatus expectedHttpStatus) {
+        return webTestClient.get().uri("/api/users")
+                .header("Authorization", "Bearer " + accessToken)
+                .exchange()
+                .expectStatus().isEqualTo(expectedHttpStatus)
+                .returnResult(UserResponse.class).getResponseBody().buffer().blockFirst();
+    }
+
     public UUID createOrganization(NewOrganizationRequest request, HttpStatus expectedHttpStatus) {
         ResponseSpec responseSpec = webTestClient.post().uri("/api/organizations")
                 .header("Authorization", "Bearer " + accessToken)

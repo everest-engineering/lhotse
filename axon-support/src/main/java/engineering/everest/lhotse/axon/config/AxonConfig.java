@@ -2,7 +2,7 @@ package engineering.everest.lhotse.axon.config;
 
 import engineering.everest.lhotse.axon.CommandValidatingMessageHandlerInterceptor;
 import engineering.everest.lhotse.axon.LoggingMessageHandlerInterceptor;
-import engineering.everest.lhotse.axon.replay.SwitchingEventProcessorBuilder;
+import engineering.everest.lhotse.axon.replay.CompositeEventProcessorBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.commandhandling.CommandBus;
 import org.axonframework.commandhandling.CommandMessage;
@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.TaskExecutor;
 
 import java.util.List;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -66,15 +67,28 @@ public class AxonConfig {
     }
 
     @Autowired
-    public void configure(AxonConfiguration axonConfiguration,
-                          EventProcessingModule eventProcessingModule) {
-        eventProcessingModule.byDefaultAssignTo("default");
+    public void configure(
+            TaskExecutor taskExecutor,
+            EventProcessingModule eventProcessingModule,
+            @Value("${application.axon.event-processor.default-group:true}") boolean defaultGroup,
+            @Value("${application.axon.event-processor.type:switching}") EventProcessorType eventProcessorType,
+            @Value("${application.axon.event-processor.segments:1}") int numberOfSegments) {
+        if (defaultGroup) {
+            eventProcessingModule.byDefaultAssignTo("default");
+        }
         eventProcessingModule.registerEventProcessorFactory(
-                new SwitchingEventProcessorBuilder(axonConfiguration, eventProcessingModule));
+                new CompositeEventProcessorBuilder(
+                        taskExecutor, eventProcessingModule, eventProcessorType, numberOfSegments));
     }
 
     @Bean
     public AnnotationCommandTargetResolver annotationCommandTargetResolver() {
         return AnnotationCommandTargetResolver.builder().build();
+    }
+
+    public enum EventProcessorType {
+        SUBSCRIBING,
+        TRACKING,
+        SWITCHING,
     }
 }

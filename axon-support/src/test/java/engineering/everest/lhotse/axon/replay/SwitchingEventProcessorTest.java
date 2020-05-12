@@ -24,38 +24,32 @@ class SwitchingEventProcessorTest {
     @Mock
     private SubscribingEventProcessor subscribingEventProcessor;
     @Mock
-    private SwitchingAwareTrackingEventProcessor trackingEventProcessor;
+    private MarkerAwareTrackingEventProcessor markerAwareTrackingEventProcessor;
     @Mock
-    private TrackingToken trackingToken;
+    private TrackingToken startPosition;
+    @Mock
+    private ReplayMarkerEvent replayMarkerEvent;
 
     private SwitchingEventProcessor switchingEventProcessor;
 
     @BeforeEach
     void setUp() {
-        switchingEventProcessor = new SwitchingEventProcessor(subscribingEventProcessor, trackingEventProcessor);
+        switchingEventProcessor = new SwitchingEventProcessor(
+                subscribingEventProcessor, markerAwareTrackingEventProcessor);
     }
 
     @Test
     void willStartReplay() {
-        switchingEventProcessor.startReplay(trackingToken);
+        switchingEventProcessor.startReplay(startPosition, replayMarkerEvent);
         verify(subscribingEventProcessor).shutDown();
-        verify(trackingEventProcessor).resetTokens(trackingToken);
-        verify(trackingEventProcessor).start();
-    }
-
-    @Test
-    void willStopReplay() {
-        switchingEventProcessor.startReplay(trackingToken);
-        switchingEventProcessor.stopReplay();
-        trackingEventProcessor.shutDown();
-        subscribingEventProcessor.start();
+        verify(markerAwareTrackingEventProcessor).startReplay(startPosition, replayMarkerEvent);
     }
 
     @Test
     void willGetReplayingStatus() {
-        assertFalse(switchingEventProcessor.isRelaying());
-        switchingEventProcessor.startReplay(trackingToken);
-        assertTrue(switchingEventProcessor.isRelaying());
+        assertFalse(switchingEventProcessor.isReplaying());
+        switchingEventProcessor.startReplay(startPosition, replayMarkerEvent);
+        assertTrue(switchingEventProcessor.isReplaying());
     }
 
     @Test

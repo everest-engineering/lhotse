@@ -1,8 +1,8 @@
 package engineering.everest.lhotse.axon.replay;
 
+import engineering.everest.lhotse.axon.replay.ReplayableEventProcessor.ListenerRegistry;
 import lombok.extern.slf4j.Slf4j;
-import org.axonframework.eventhandling.DisallowReplay;
-import org.axonframework.eventhandling.EventHandler;
+import org.axonframework.eventhandling.TrackingToken;
 import org.axonframework.eventsourcing.eventstore.EventStore;
 import org.axonframework.spring.config.AxonConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,12 +13,14 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
@@ -29,85 +31,98 @@ import static java.util.stream.Collectors.toList;
 public class ReplayEndpoint {
 
     private final AxonConfiguration axonConfiguration;
-    private final List<ReplayCompletionAware> resetCompletionAwares;
+    private final List<ReplayCompletionAware> replayCompletionAwares;
     private final TaskExecutor taskExecutor;
+    private final ConcurrentHashMap<ReplayableEventProcessor, ListenerRegistry> replayingProcessors;
 
     @Autowired
     public ReplayEndpoint(AxonConfiguration axonConfiguration,
-                          List<ReplayCompletionAware> resetCompletionAwares,
+                          List<ReplayCompletionAware> replayCompletionAwares,
                           TaskExecutor taskExecutor) {
         this.axonConfiguration = axonConfiguration;
-        this.resetCompletionAwares = resetCompletionAwares;
+        this.replayCompletionAwares = replayCompletionAwares;
         this.taskExecutor = taskExecutor;
+        replayingProcessors = new ConcurrentHashMap<>();
     }
 
     @ReadOperation
     public Map<String, Object> status() {
         var statusMap = new HashMap<String, Object>();
-        statusMap.put("switchingEventProcessors", getSwitchingEventProcessors().size());
-        statusMap.put("isReplaying", isReplaying());
+        statusMap.put("ReplayableEventProcessors", getReplayableEventProcessors().size());
+        int currentlyReplaying = replayingProcessors.size();
+        statusMap.put("currentlyReplaying", currentlyReplaying);
+        statusMap.put("isReplaying", currentlyReplaying > 0);
         return statusMap;
     }
 
     @WriteOperation
     public void startReplay(@Nullable Set<String> processingGroups,
                             @Nullable OffsetDateTime startTime) {
+        var replayableEventProcessors = processingGroups == null
+                ? getReplayableEventProcessors() : getReplayableEventProcessor(processingGroups);
+
+        if (replayableEventProcessors.isEmpty()) {
+            throw new IllegalStateException("No matching replayable event processors");
+        }
+
         synchronized (this) {
             if (isReplaying()) {
                 throw new IllegalStateException("Cannot start replay while an existing one is running");
             }
-            var switchingEventProcessors = processingGroups == null
-                    ? getSwitchingEventProcessors() : getSwitchingEventProcessors(processingGroups);
-
-            if (switchingEventProcessors.isEmpty()) {
-                throw new IllegalStateException("No matching SwitchingEventProcessor");
-            }
-
             EventStore eventStore = axonConfiguration.eventStore();
-            var trackingToken = startTime == null
+            TrackingToken startPosition = startTime == null
                     ? eventStore.createTailToken() : eventStore.createTokenAt(startTime.toInstant());
 
-            switchingEventProcessors.forEach(p -> p.startReplay(trackingToken));
-            axonConfiguration.eventGateway().publish(new ReplayMarkerEvent(randomUUID()));
+            ReplayMarkerEvent replayMarkerEvent = new ReplayMarkerEvent(randomUUID());
+            replayableEventProcessors.forEach(p -> {
+                replayingProcessors.put(p, p.registerReplayCompletionListener(this::onSingleProcessorReplayCompletion));
+                p.startReplay(startPosition, replayMarkerEvent);
+            });
+            axonConfiguration.eventGateway().publish(replayMarkerEvent);
         }
     }
 
-    @EventHandler
-    @DisallowReplay
-    void on(ReplayMarkerEvent event) {
-        if (!isReplaying()) {
-            LOGGER.info("Ignoring replay marker event as we are not replaying: {}", event);
-            return;
+    @SuppressWarnings("PMD.CloseResource")
+    private void onSingleProcessorReplayCompletion(ReplayableEventProcessor processor) {
+        synchronized (this) {
+            ListenerRegistry listenerRegistry = replayingProcessors.remove(processor);
+            if (listenerRegistry == null) {
+                LOGGER.warn("Processor not registered for replaying: {}", processor);
+                return;
+            }
+            try {
+                listenerRegistry.close();
+            } catch (IOException e) {
+                LOGGER.error("Cannot de-register listener for processor: {}", processor, e);
+            }
+            if (replayingProcessors.size() == 0) {
+                LOGGER.info("Executing reset completion tasks");
+                taskExecutor.execute(() -> replayCompletionAwares.forEach(t -> {
+                    try {
+                        t.replayCompleted();
+                    } catch (Exception e) {
+                        LOGGER.error("Error when running replay completion aware task", e);
+                    }
+                }));
+            }
         }
-        LOGGER.info("Handling replay marker event: {}", event);
-        stopReplay();
-    }
-
-    private void stopReplay() {
-        taskExecutor.execute(() -> {
-            getSwitchingEventProcessors().stream()
-                    .filter(SwitchingEventProcessor::isRelaying)
-                    .forEach(SwitchingEventProcessor::stopReplay);
-            resetCompletionAwares.forEach(ReplayCompletionAware::replayCompleted);
-        });
     }
 
     private boolean isReplaying() {
-        return getSwitchingEventProcessors().stream()
-                .anyMatch(SwitchingEventProcessor::isRelaying);
+        return replayingProcessors.size() > 0;
     }
 
-    private List<SwitchingEventProcessor> getSwitchingEventProcessors() {
+    private List<ReplayableEventProcessor> getReplayableEventProcessors() {
         return axonConfiguration.eventProcessingConfiguration().eventProcessors().values().stream()
-                .filter(e -> e instanceof SwitchingEventProcessor)
-                .map(e -> (SwitchingEventProcessor) e)
+                .filter(e -> e instanceof ReplayableEventProcessor)
+                .map(e -> (ReplayableEventProcessor) e)
                 .collect(toList());
     }
 
-    private List<SwitchingEventProcessor> getSwitchingEventProcessors(Set<String> processingGroups) {
+    private List<ReplayableEventProcessor> getReplayableEventProcessor(Set<String> processingGroups) {
         return processingGroups.stream()
                 .map(e -> axonConfiguration.eventProcessingConfiguration()
-                        .eventProcessorByProcessingGroup(e, SwitchingEventProcessor.class))
+                        .eventProcessorByProcessingGroup(e, ReplayableEventProcessor.class))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(toList());
