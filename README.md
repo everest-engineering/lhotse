@@ -338,7 +338,6 @@ Thumbnail sizes are limited to prevent the system from being overwhelmed by mali
 endpoints via a shallow filter. The filter is unaware of any changes made to underlying data so while clients may use the
 ETag to avoid unnecessary transfers and client side processing, there is no benefit to application server performance.
 
-
 # Project Info
 
 ## Maintainers
@@ -352,4 +351,8 @@ You may want to view the [project board](https://github.com/orgs/everest-enginee
 [current open issues](https://github.com/everest-engineering/lhotse/issues).
 
 ## License
-[Apache License 2.0](LICENSE) © Everest Engineering
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
+[![License: EverestEngineering](https://img.shields.io/badge/Copyright%20%C2%A9-EVERESTENGINEERING-blue)](https://everest.engineering)
+
+>Talk to us `hi@everest.engineering`.
