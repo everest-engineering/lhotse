@@ -3,10 +3,10 @@ package engineering.everest.lhotse.organizations.eventhandlers;
 import engineering.everest.lhotse.organizations.OrganizationAddress;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationAddressUpdatedByAdminEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationContactDetailsUpdatedByAdminEvent;
-import engineering.everest.lhotse.organizations.domain.events.OrganizationDeregisteredByAdminEvent;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationDisabledByAdminEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationNameUpdatedByAdminEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationRegisteredByAdminEvent;
-import engineering.everest.lhotse.organizations.domain.events.OrganizationReregisteredByAdminEvent;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationEnabledByAdminEvent;
 import engineering.everest.lhotse.organizations.persistence.Address;
 import engineering.everest.lhotse.organizations.persistence.OrganizationsRepository;
 import engineering.everest.lhotse.organizations.persistence.PersistableOrganization;
@@ -90,7 +90,7 @@ class OrganizationsEventHandlerTest {
         PersistableOrganization persistableOrganization = mock(PersistableOrganization.class);
         when(organizationsRepository.findById(ORGANIZATION_ID)).thenReturn(Optional.of(persistableOrganization));
 
-        organizationsEventHandler.on(new OrganizationDeregisteredByAdminEvent(ORGANIZATION_ID, ADMIN_ID));
+        organizationsEventHandler.on(new OrganizationDisabledByAdminEvent(ORGANIZATION_ID, ADMIN_ID));
 
         verify(persistableOrganization).setDeregistered(true);
         verify(organizationsRepository).save(persistableOrganization);
@@ -101,7 +101,7 @@ class OrganizationsEventHandlerTest {
         PersistableOrganization persistableOrganization = mock(PersistableOrganization.class);
         when(organizationsRepository.findById(ORGANIZATION_ID)).thenReturn(Optional.of(persistableOrganization));
 
-        organizationsEventHandler.on(new OrganizationReregisteredByAdminEvent(ORGANIZATION_ID, ADMIN_ID));
+        organizationsEventHandler.on(new OrganizationEnabledByAdminEvent(ORGANIZATION_ID, ADMIN_ID));
 
         verify(persistableOrganization).setDeregistered(false);
         verify(organizationsRepository).save(persistableOrganization);

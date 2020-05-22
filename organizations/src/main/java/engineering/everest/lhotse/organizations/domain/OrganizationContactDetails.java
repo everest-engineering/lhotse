@@ -2,6 +2,8 @@ package engineering.everest.lhotse.organizations.domain;
 
 import engineering.everest.lhotse.organizations.domain.events.OrganizationAddressUpdatedByAdminEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationContactDetailsUpdatedByAdminEvent;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationRegisteredByAdminEvent;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationRegistrationReceivedEvent;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.axonframework.eventsourcing.EventSourcingHandler;
@@ -27,6 +29,22 @@ class OrganizationContactDetails implements Serializable {
     private String postalCode;
 
     public OrganizationContactDetails() {
+    }
+
+    @EventSourcingHandler
+    void on(OrganizationRegisteredByAdminEvent event) {
+        contactName = event.getContactName();
+        contactEmail = event.getContactEmail();
+        contactPhoneNumber = event.getContactPhoneNumber();
+        websiteUrl = event.getWebsiteUrl();
+    }
+
+    @EventSourcingHandler
+    void on(OrganizationRegistrationReceivedEvent event) {
+        contactName = event.getContactName();
+        contactEmail = event.getRegisteringContactEmail();
+        contactPhoneNumber = event.getContactPhoneNumber();
+        websiteUrl = event.getWebsiteUrl();
     }
 
     @EventSourcingHandler

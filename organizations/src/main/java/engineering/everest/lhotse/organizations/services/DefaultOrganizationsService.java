@@ -2,9 +2,10 @@ package engineering.everest.lhotse.organizations.services;
 
 
 import engineering.everest.lhotse.axon.common.RandomFieldsGenerator;
-import engineering.everest.lhotse.organizations.domain.commands.DeregisterOrganizationCommand;
+import engineering.everest.lhotse.organizations.domain.commands.CreateRegisteredOrganizationCommand;
+import engineering.everest.lhotse.organizations.domain.commands.DisableOrganizationCommand;
 import engineering.everest.lhotse.organizations.domain.commands.RegisterOrganizationCommand;
-import engineering.everest.lhotse.organizations.domain.commands.ReregisterOrganizationCommand;
+import engineering.everest.lhotse.organizations.domain.commands.EnableOrganizationCommand;
 import engineering.everest.lhotse.organizations.domain.commands.UpdateOrganizationCommand;
 import engineering.everest.starterkit.axon.HazelcastCommandGateway;
 import org.springframework.stereotype.Service;
@@ -24,13 +25,11 @@ public class DefaultOrganizationsService implements OrganizationsService {
     }
 
     @Override
-    public UUID createOrganization(UUID requestingUserId, String organizationName, String street, String city, String state,
-                                   String country, String postalCode, String websiteUrl, String contactName, String phoneNumber,
-                                   String emailAddress) {
+    public UUID registerOrganization(String organizationName, String street, String city, String state, String country,
+                                     String postalCode, String websiteUrl, String contactName, String phoneNumber, String emailAddress) {
         UUID organizationId = randomFieldsGenerator.genRandomUUID();
-        return commandGateway.sendAndWait(new RegisterOrganizationCommand(organizationId,
-                requestingUserId, organizationName, street, city, state, country, postalCode, websiteUrl, contactName,
-                phoneNumber, emailAddress));
+        return commandGateway.sendAndWait(new RegisterOrganizationCommand(organizationId, organizationName, street, city,
+                state, country, postalCode, websiteUrl, contactName, phoneNumber, emailAddress));
     }
 
     @Override
@@ -42,12 +41,22 @@ public class DefaultOrganizationsService implements OrganizationsService {
     }
 
     @Override
-    public void deregisterOrganization(UUID requestingUserId, UUID organizationId) {
-        commandGateway.sendAndWait(new DeregisterOrganizationCommand(organizationId, requestingUserId));
+    public UUID createRegisteredOrganization(UUID requestingUserId, String organizationName, String street, String city, String state,
+                                             String country, String postalCode, String websiteUrl, String contactName, String phoneNumber,
+                                             String emailAddress) {
+        UUID organizationId = randomFieldsGenerator.genRandomUUID();
+        return commandGateway.sendAndWait(new CreateRegisteredOrganizationCommand(organizationId,
+                requestingUserId, organizationName, street, city, state, country, postalCode, websiteUrl, contactName,
+                phoneNumber, emailAddress));
     }
 
     @Override
-    public void reregisterOrganization(UUID requestingUserId, UUID organizationId) {
-        commandGateway.sendAndWait(new ReregisterOrganizationCommand(organizationId, requestingUserId));
+    public void disableOrganization(UUID requestingUserId, UUID organizationId) {
+        commandGateway.sendAndWait(new DisableOrganizationCommand(organizationId, requestingUserId));
+    }
+
+    @Override
+    public void enableOrganization(UUID requestingUserId, UUID organizationId) {
+        commandGateway.sendAndWait(new EnableOrganizationCommand(organizationId, requestingUserId));
     }
 }

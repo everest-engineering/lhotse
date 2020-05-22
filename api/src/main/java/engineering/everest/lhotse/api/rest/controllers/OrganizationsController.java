@@ -1,6 +1,5 @@
 package engineering.everest.lhotse.api.rest.controllers;
 
-import engineering.everest.lhotse.api.rest.annotations.AdminOnly;
 import engineering.everest.lhotse.api.rest.annotations.AdminOrAdminOfTargetOrganization;
 import engineering.everest.lhotse.api.rest.annotations.AdminOrUserOfTargetOrganization;
 import engineering.everest.lhotse.api.rest.converters.DtoConverter;
@@ -10,14 +9,13 @@ import engineering.everest.lhotse.api.rest.requests.UpdateOrganizationRequest;
 import engineering.everest.lhotse.api.rest.responses.OrganizationResponse;
 import engineering.everest.lhotse.api.rest.responses.UserResponse;
 import engineering.everest.lhotse.axon.common.domain.User;
+import engineering.everest.lhotse.organizations.services.OrganizationsReadService;
+import engineering.everest.lhotse.organizations.services.OrganizationsService;
 import engineering.everest.lhotse.users.services.UsersReadService;
 import engineering.everest.lhotse.users.services.UsersService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import engineering.everest.lhotse.organizations.services.OrganizationsReadService;
-import engineering.everest.lhotse.organizations.services.OrganizationsService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -60,27 +58,6 @@ public class OrganizationsController {
         this.usersReadService = usersReadService;
     }
 
-    @GetMapping
-    @ResponseStatus(OK)
-    @ApiOperation(produces = APPLICATION_JSON_VALUE, value = "Retrieves details of all organizations")
-    @AdminOnly
-    public List<OrganizationResponse> getAllOrganizations() {
-        return organizationsReadService.getOrganizations().stream()
-                .map(dtoConverter::convert)
-                .collect(toList());
-    }
-
-    @PostMapping
-    @ResponseStatus(CREATED)
-    @ApiOperation("Register a new organization")
-    @AdminOnly
-    public UUID registerOrganization(User requestingUser, @RequestBody @Valid NewOrganizationRequest request) {
-        return organizationsService.createOrganization(
-                requestingUser.getId(), request.getOrganizationName(), request.getStreet(),
-                request.getCity(), request.getState(), request.getCountry(), request.getPostalCode(), request.getWebsiteUrl(),
-                request.getContactName(), request.getContactPhoneNumber(), request.getContactEmail());
-    }
-
     @SuppressWarnings("PMD.AvoidDuplicateLiterals")
     @GetMapping("/{organizationId}")
     @ResponseStatus(OK)
@@ -88,6 +65,15 @@ public class OrganizationsController {
     @AdminOrUserOfTargetOrganization
     public OrganizationResponse getOrganization(User requestingUser, @PathVariable UUID organizationId) {
         return dtoConverter.convert(organizationsReadService.getById(organizationId));
+    }
+
+    @PostMapping
+    @ResponseStatus(CREATED)
+    @ApiOperation("Register a new organization")
+    public UUID registerOrganization(User requestingUser, @RequestBody @Valid NewOrganizationRequest request) {
+        return organizationsService.registerOrganization(request.getOrganizationName(), request.getStreet(), request.getCity(),
+                request.getState(), request.getCountry(), request.getPostalCode(), request.getWebsiteUrl(),
+                request.getContactName(), request.getContactPhoneNumber(), request.getContactEmail());
     }
 
     @PutMapping("/{organizationId}")
@@ -100,22 +86,6 @@ public class OrganizationsController {
                 request.getOrganizationName(), request.getStreet(), request.getCity(), request.getState(), request.getCountry(),
                 request.getPostalCode(), request.getWebsiteUrl(), request.getContactName(), request.getPhoneNumber(),
                 request.getEmailAddress());
-    }
-
-    @DeleteMapping("/{organizationId}")
-    @ResponseStatus(OK)
-    @ApiOperation("Deregister an organization")
-    @AdminOnly
-    public void deregisterOrganization(User requestingUser, @PathVariable UUID organizationId) {
-        organizationsService.deregisterOrganization(requestingUser.getId(), organizationId);
-    }
-
-    @PostMapping("/{organizationId}")
-    @ResponseStatus(OK)
-    @ApiOperation("Re-register an organization")
-    @AdminOrAdminOfTargetOrganization
-    public void reregisterOrganization(User requestingUser, @PathVariable UUID organizationId) {
-        organizationsService.reregisterOrganization(requestingUser.getId(), organizationId);
     }
 
     @GetMapping("/{organizationId}/users")

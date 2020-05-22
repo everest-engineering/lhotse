@@ -2,15 +2,19 @@ package engineering.everest.lhotse.organizations.domain;
 
 import engineering.everest.lhotse.axon.command.validators.EmailAddressValidator;
 import engineering.everest.lhotse.axon.command.validators.UsersBelongToOrganizationValidator;
-import engineering.everest.lhotse.organizations.domain.commands.DeregisterOrganizationCommand;
-import engineering.everest.lhotse.organizations.domain.events.OrganizationNameUpdatedByAdminEvent;
-import engineering.everest.starterkit.filestorage.FileService;
+import engineering.everest.lhotse.organizations.domain.commands.CreateRegisteredOrganizationCommand;
+import engineering.everest.lhotse.organizations.domain.commands.DisableOrganizationCommand;
+import engineering.everest.lhotse.organizations.domain.commands.EnableOrganizationCommand;
 import engineering.everest.lhotse.organizations.domain.commands.RegisterOrganizationCommand;
 import engineering.everest.lhotse.organizations.domain.commands.UpdateOrganizationCommand;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationAddressUpdatedByAdminEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationContactDetailsUpdatedByAdminEvent;
-import engineering.everest.lhotse.organizations.domain.events.OrganizationDeregisteredByAdminEvent;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationDisabledByAdminEvent;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationEnabledByAdminEvent;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationNameUpdatedByAdminEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationRegisteredByAdminEvent;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationRegistrationReceivedEvent;
+import engineering.everest.starterkit.filestorage.FileService;
 import engineering.everest.starterkit.filestorage.InputStreamOfKnownLength;
 import org.axonframework.spring.stereotype.Aggregate;
 import org.axonframework.test.aggregate.AggregateTestFixture;
@@ -52,11 +56,15 @@ class OrganizationAggregateTest {
             new OrganizationRegisteredByAdminEvent(ORGANIZATION_ID, ADMIN_ID, ORGANIZATION_NAME, ORGANIZATION_WEBSITE_URL,
                     ORGANIZATION_STREET, ORGANIZATION_CITY, ORGANIZATION_STATE, ORGANIZATION_COUNTRY, ORGANIZATION_POSTAL_CODE,
                     ORGANIZATION_CONTACT_NAME, ORGANIZATION_PHONE_NUMBER, ORGANIZATION_EMAIL_ADDRESS);
+    private static final OrganizationRegistrationReceivedEvent ORGANIZATION_REGISTRATION_RECEIVED_EVENT =
+            new OrganizationRegistrationReceivedEvent(ORGANIZATION_ID, ORGANIZATION_EMAIL_ADDRESS, ORGANIZATION_NAME, ORGANIZATION_WEBSITE_URL,
+                    ORGANIZATION_STREET, ORGANIZATION_CITY, ORGANIZATION_STATE, ORGANIZATION_COUNTRY, ORGANIZATION_POSTAL_CODE,
+                    ORGANIZATION_CONTACT_NAME, ORGANIZATION_PHONE_NUMBER);
 
-    private static final OrganizationDeregisteredByAdminEvent ORGANIZATION_DEREGISTERED_BY_ADMIN_EVENT = new OrganizationDeregisteredByAdminEvent(ORGANIZATION_ID, ADMIN_ID);
+    private static final OrganizationDisabledByAdminEvent ORGANIZATION_DEREGISTERED_BY_ADMIN_EVENT = new OrganizationDisabledByAdminEvent(ORGANIZATION_ID, ADMIN_ID);
 
     private static final UUID NETWORK_FILE_ID = randomUUID();
-    public static final String FILE_CONTENT = "file-content";
+    private static final String FILE_CONTENT = "file-content";
 
     private FixtureConfiguration<OrganizationAggregate> testFixture;
 
@@ -86,17 +94,26 @@ class OrganizationAggregateTest {
     }
 
     @Test
-    void emitsOrganizationRegisteredByAdminEvent() {
+    void emitsOrganizationRegisteredByAdminEvent_WhenCreateRegisteredOrganizationCommandIsValid() {
         testFixture.givenNoPriorActivity()
-                .when(new RegisterOrganizationCommand(ORGANIZATION_ID, ADMIN_ID, ORGANIZATION_NAME, ORGANIZATION_STREET,
+                .when(new CreateRegisteredOrganizationCommand(ORGANIZATION_ID, ADMIN_ID, ORGANIZATION_NAME, ORGANIZATION_STREET,
                         ORGANIZATION_CITY, ORGANIZATION_STATE, ORGANIZATION_COUNTRY, ORGANIZATION_POSTAL_CODE,
                         ORGANIZATION_WEBSITE_URL, ORGANIZATION_CONTACT_NAME, ORGANIZATION_PHONE_NUMBER, ORGANIZATION_EMAIL_ADDRESS))
                 .expectEvents(ORGANIZATION_REGISTERED_BY_ADMIN_EVENT);
     }
 
     @Test
-    void rejectsRegisterOrganizationCommand_WhenRequestingUserIdIsNull() {
-        var command = new RegisterOrganizationCommand(ORGANIZATION_ID, null, ORGANIZATION_NAME, ORGANIZATION_STREET,
+    void organizationsCreatedByAdminAreEnabled() {
+        testFixture.given(ORGANIZATION_REGISTERED_BY_ADMIN_EVENT)
+                .when(new EnableOrganizationCommand(ORGANIZATION_ID, ADMIN_ID))
+                .expectNoEvents()
+                .expectException(IllegalStateException.class)
+                .expectExceptionMessage("Organization is already enabled");
+    }
+
+    @Test
+    void rejectsCreateRegisteredOrganizationCommand_WhenRequestingUserIdIsNull() {
+        var command = new CreateRegisteredOrganizationCommand(ORGANIZATION_ID, null, ORGANIZATION_NAME, ORGANIZATION_STREET,
                 ORGANIZATION_CITY, ORGANIZATION_STATE, ORGANIZATION_COUNTRY, ORGANIZATION_POSTAL_CODE,
                 ORGANIZATION_WEBSITE_URL, ORGANIZATION_CONTACT_NAME, ORGANIZATION_PHONE_NUMBER, ORGANIZATION_EMAIL_ADDRESS);
 
@@ -107,9 +124,9 @@ class OrganizationAggregateTest {
     }
 
     @Test
-    void rejectsRegisterOrganizationCommand_WhenOrganizationNameIsBlank() {
+    void rejectsCreateRegisteredOrganizationCommand_WhenOrganizationNameIsBlank() {
         testFixture.givenNoPriorActivity()
-                .when(new RegisterOrganizationCommand(ORGANIZATION_ID, ADMIN_ID, NO_CHANGE, ORGANIZATION_STREET,
+                .when(new CreateRegisteredOrganizationCommand(ORGANIZATION_ID, ADMIN_ID, NO_CHANGE, ORGANIZATION_STREET,
                         ORGANIZATION_CITY, ORGANIZATION_STATE, ORGANIZATION_COUNTRY, ORGANIZATION_POSTAL_CODE,
                         ORGANIZATION_WEBSITE_URL, ORGANIZATION_CONTACT_NAME, ORGANIZATION_PHONE_NUMBER, ORGANIZATION_EMAIL_ADDRESS))
                 .expectException(ConstraintViolationException.class)
@@ -117,9 +134,9 @@ class OrganizationAggregateTest {
     }
 
     @Test
-    void rejectsRegisterOrganizationCommand_WhenOrganizationNameIsNull() {
+    void rejectsCreateRegisteredOrganizationCommand_WhenOrganizationNameIsNull() {
         testFixture.givenNoPriorActivity()
-                .when(new RegisterOrganizationCommand(ORGANIZATION_ID, ADMIN_ID, MISSING_ARGUMENT, ORGANIZATION_STREET,
+                .when(new CreateRegisteredOrganizationCommand(ORGANIZATION_ID, ADMIN_ID, MISSING_ARGUMENT, ORGANIZATION_STREET,
                         ORGANIZATION_CITY, ORGANIZATION_STATE, ORGANIZATION_COUNTRY, ORGANIZATION_POSTAL_CODE,
                         ORGANIZATION_WEBSITE_URL, ORGANIZATION_CONTACT_NAME, ORGANIZATION_PHONE_NUMBER, ORGANIZATION_EMAIL_ADDRESS))
                 .expectException(ConstraintViolationException.class)
@@ -127,44 +144,114 @@ class OrganizationAggregateTest {
     }
 
     @Test
-    void emitsOrganizationDeregisteredByAdminEvent_WhenOrganizationExists() {
-        testFixture.given(ORGANIZATION_REGISTERED_BY_ADMIN_EVENT)
-                .when(new DeregisterOrganizationCommand(ORGANIZATION_ID, ADMIN_ID))
-                .expectEvents(new OrganizationDeregisteredByAdminEvent(ORGANIZATION_ID, ADMIN_ID));
+    void emitsOrganizationRegistrationReceivedEvent_WhenRegisterOrganizationCommandIsValid() {
+        testFixture.givenNoPriorActivity()
+                .when(new RegisterOrganizationCommand(ORGANIZATION_ID, ORGANIZATION_NAME, ORGANIZATION_STREET,
+                        ORGANIZATION_CITY, ORGANIZATION_STATE, ORGANIZATION_COUNTRY, ORGANIZATION_POSTAL_CODE,
+                        ORGANIZATION_WEBSITE_URL, ORGANIZATION_CONTACT_NAME, ORGANIZATION_PHONE_NUMBER, ORGANIZATION_EMAIL_ADDRESS))
+                .expectEvents(ORGANIZATION_REGISTRATION_RECEIVED_EVENT);
     }
 
     @Test
-    void rejectsOrganizationDeregisterCommand_WhenOrganizationIsAlreadyDeregistered() {
-        testFixture.given(ORGANIZATION_REGISTERED_BY_ADMIN_EVENT, ORGANIZATION_DEREGISTERED_BY_ADMIN_EVENT)
-                .when(new DeregisterOrganizationCommand(ORGANIZATION_ID, ADMIN_ID))
+    void organizationsRegisteredByUsersAreDisabled() {
+        testFixture.given(ORGANIZATION_REGISTRATION_RECEIVED_EVENT)
+                .when(new DisableOrganizationCommand(ORGANIZATION_ID, ADMIN_ID))
                 .expectNoEvents()
-                .expectException(IllegalStateException.class);
+                .expectException(IllegalStateException.class)
+                .expectExceptionMessage("Organization is already disabled");
     }
 
     @Test
-    void rejectsOrganizationDeregisteredCommand_WhenRequestingUserIdIsNull() {
-        var command = new DeregisterOrganizationCommand(ORGANIZATION_ID, null);
+    void emitsOrganizationDisabledByAdminEvent_WhenOrganizationWasEnabled() {
+        testFixture.given(ORGANIZATION_REGISTERED_BY_ADMIN_EVENT)
+                .when(new DisableOrganizationCommand(ORGANIZATION_ID, ADMIN_ID))
+                .expectEvents(new OrganizationDisabledByAdminEvent(ORGANIZATION_ID, ADMIN_ID))
+                .expectExceptionMessage("At least one organization field change must be requested");
+    }
+
+    @Test
+    void emitsOrganizationEnabledByAdminEvent_WhenOrganizationWasDisabled() {
+        testFixture.given(ORGANIZATION_REGISTERED_BY_ADMIN_EVENT,
+                new OrganizationDisabledByAdminEvent(ORGANIZATION_ID, ADMIN_ID))
+                .when(new EnableOrganizationCommand(ORGANIZATION_ID, ADMIN_ID))
+                .expectEvents(new OrganizationEnabledByAdminEvent(ORGANIZATION_ID, ADMIN_ID));
+    }
+
+    @Test
+    void rejectsEnableOrganizationCommand_WhenOrganizationIsAlreadyEnabled() {
+        testFixture.given(ORGANIZATION_REGISTERED_BY_ADMIN_EVENT)
+                .when(new EnableOrganizationCommand(ORGANIZATION_ID, ADMIN_ID))
+                .expectNoEvents()
+                .expectException(IllegalStateException.class)
+                .expectExceptionMessage("Organization is already enabled");
+    }
+
+    @Test
+    void rejectsDisableOrganizationCommand_WhenOrganizationIsAlreadyDisabled() {
+        testFixture.given(ORGANIZATION_REGISTERED_BY_ADMIN_EVENT, ORGANIZATION_DEREGISTERED_BY_ADMIN_EVENT)
+                .when(new DisableOrganizationCommand(ORGANIZATION_ID, ADMIN_ID))
+                .expectNoEvents()
+                .expectException(IllegalStateException.class)
+                .expectExceptionMessage("Organization is already disabled");
+    }
+
+    @Test
+    void rejectsDisableOrganizatioCommand_WhenRequestingUserIdIsNull() {
+        var command = new DisableOrganizationCommand(ORGANIZATION_ID, null);
 
         testFixture.given(ORGANIZATION_REGISTERED_BY_ADMIN_EVENT)
                 .when(command)
                 .expectNoEvents()
-                .expectException(ConstraintViolationException.class);
+                .expectException(ConstraintViolationException.class)
+                .expectExceptionMessage("requestingUserId: must not be null");
     }
 
     @Test
-    void updateOrganizationCommandEmits_WhenCommandAccepted() {
-        var command = new UpdateOrganizationCommand(ORGANIZATION_ID, ADMIN_ID, ORGANIZATION_NAME,
-                ORGANIZATION_STREET, ORGANIZATION_CITY, ORGANIZATION_STATE,
-                ORGANIZATION_COUNTRY, ORGANIZATION_POSTAL_CODE,
-                ORGANIZATION_WEBSITE_URL, ORGANIZATION_CONTACT_NAME, ORGANIZATION_PHONE_NUMBER, ORGANIZATION_EMAIL_ADDRESS);
+    void updateOrganizationCommandEmitsSingleEvent_WhenOnlyOrganizationNameChanged() {
+        var command = new UpdateOrganizationCommand(ORGANIZATION_ID, ADMIN_ID, "new org name",
+                NO_CHANGE, NO_CHANGE, NO_CHANGE, NO_CHANGE, NO_CHANGE, NO_CHANGE, NO_CHANGE, NO_CHANGE, NO_CHANGE);
+
+        testFixture.given(ORGANIZATION_REGISTERED_BY_ADMIN_EVENT)
+                .when(command)
+                .expectEvents(new OrganizationNameUpdatedByAdminEvent(ORGANIZATION_ID, "new org name", ADMIN_ID));
+    }
+
+    @Test
+    void updateOrganizationCommandEmitsSingleEvent_WhenOnlyOrganizationContactDetailsChanged() {
+        var command = new UpdateOrganizationCommand(ORGANIZATION_ID, ADMIN_ID, ORGANIZATION_NAME, NO_CHANGE, NO_CHANGE,
+                NO_CHANGE, NO_CHANGE, NO_CHANGE, ORGANIZATION_WEBSITE_URL, ORGANIZATION_CONTACT_NAME, ORGANIZATION_PHONE_NUMBER,
+                ORGANIZATION_EMAIL_ADDRESS);
+
         testFixture.given(ORGANIZATION_REGISTERED_BY_ADMIN_EVENT)
                 .when(command)
                 .expectEvents(
-                        new OrganizationNameUpdatedByAdminEvent(ORGANIZATION_ID, ORGANIZATION_NAME, ADMIN_ID),
-                        new OrganizationContactDetailsUpdatedByAdminEvent(ORGANIZATION_ID, ORGANIZATION_CONTACT_NAME,
-                                ORGANIZATION_PHONE_NUMBER, ORGANIZATION_EMAIL_ADDRESS, ORGANIZATION_WEBSITE_URL, ADMIN_ID),
-                        new OrganizationAddressUpdatedByAdminEvent(ORGANIZATION_ID, ORGANIZATION_STREET, ORGANIZATION_CITY, ORGANIZATION_STATE,
-                                ORGANIZATION_COUNTRY, ORGANIZATION_POSTAL_CODE, ADMIN_ID));
+                        new OrganizationContactDetailsUpdatedByAdminEvent(ORGANIZATION_ID, ORGANIZATION_CONTACT_NAME, ORGANIZATION_PHONE_NUMBER, ORGANIZATION_EMAIL_ADDRESS, ORGANIZATION_WEBSITE_URL, ADMIN_ID));
+    }
+
+    @Test
+    void updateOrganizationCommandEmitsSingleEvent_WhenOnlyOrganizationAddressChanged() {
+        var command = new UpdateOrganizationCommand(ORGANIZATION_ID, ADMIN_ID, NO_CHANGE, ORGANIZATION_STREET, ORGANIZATION_CITY,
+                ORGANIZATION_STATE, ORGANIZATION_COUNTRY, ORGANIZATION_POSTAL_CODE, NO_CHANGE, NO_CHANGE, NO_CHANGE, NO_CHANGE);
+
+        testFixture.given(ORGANIZATION_REGISTERED_BY_ADMIN_EVENT)
+                .when(command)
+                .expectEvents(
+                        new OrganizationAddressUpdatedByAdminEvent(ORGANIZATION_ID, ORGANIZATION_STREET, ORGANIZATION_CITY, ORGANIZATION_STATE, ORGANIZATION_COUNTRY, ORGANIZATION_POSTAL_CODE, ADMIN_ID));
+    }
+
+    @Test
+    void updateOrganizationCommandEmitsMultipleEvents_WhenOrganiztionNameChangedAndContactDetailsChangedAndAddressChanged() {
+        var command = new UpdateOrganizationCommand(ORGANIZATION_ID, ADMIN_ID, "new org name",
+                ORGANIZATION_STREET, ORGANIZATION_CITY, ORGANIZATION_STATE,
+                ORGANIZATION_COUNTRY, ORGANIZATION_POSTAL_CODE,
+                ORGANIZATION_WEBSITE_URL, ORGANIZATION_CONTACT_NAME, ORGANIZATION_PHONE_NUMBER, ORGANIZATION_EMAIL_ADDRESS);
+
+        testFixture.given(ORGANIZATION_REGISTERED_BY_ADMIN_EVENT)
+                .when(command)
+                .expectEvents(
+                        new OrganizationNameUpdatedByAdminEvent(ORGANIZATION_ID, "new org name", ADMIN_ID),
+                        new OrganizationContactDetailsUpdatedByAdminEvent(ORGANIZATION_ID, ORGANIZATION_CONTACT_NAME, ORGANIZATION_PHONE_NUMBER, ORGANIZATION_EMAIL_ADDRESS, ORGANIZATION_WEBSITE_URL, ADMIN_ID),
+                        new OrganizationAddressUpdatedByAdminEvent(ORGANIZATION_ID, ORGANIZATION_STREET, ORGANIZATION_CITY, ORGANIZATION_STATE, ORGANIZATION_COUNTRY, ORGANIZATION_POSTAL_CODE, ADMIN_ID));
     }
 
     @Test
@@ -177,11 +264,12 @@ class OrganizationAggregateTest {
         testFixture.given(ORGANIZATION_REGISTERED_BY_ADMIN_EVENT)
                 .when(command)
                 .expectNoEvents()
-                .expectException(ConstraintViolationException.class);
+                .expectException(ConstraintViolationException.class)
+                .expectExceptionMessage("requestingUserId: must not be null");
     }
 
     @Test
-    void rejectsUpdateOrganizationCommand_WhenOrganizationIsAlreadyDeregistered() {
+    void rejectsUpdateOrganizationCommand_WhenOrganizationIsAlreadyDisabled() {
         var command = new UpdateOrganizationCommand(ORGANIZATION_ID, ADMIN_ID, ORGANIZATION_NAME,
                 ORGANIZATION_STREET, ORGANIZATION_CITY, ORGANIZATION_STATE,
                 ORGANIZATION_COUNTRY, ORGANIZATION_POSTAL_CODE,
@@ -191,7 +279,7 @@ class OrganizationAggregateTest {
                 .when(command)
                 .expectNoEvents()
                 .expectException(IllegalStateException.class)
-                .expectExceptionMessage("Organization is already deregistered");
+                .expectExceptionMessage("Organization is already disabled");
     }
 
     @Test

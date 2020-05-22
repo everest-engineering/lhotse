@@ -6,26 +6,20 @@ import engineering.everest.lhotse.api.rest.requests.NewOrganizationRequest;
 import engineering.everest.lhotse.api.rest.requests.NewUserRequest;
 import engineering.everest.lhotse.functionaltests.helpers.ApiRestTestClient;
 import engineering.everest.lhotse.functionaltests.helpers.TestEventHandler;
-import engineering.everest.lhotse.functionaltests.helpers.TestUtils;
-import org.axonframework.eventsourcing.eventstore.EventStorageEngine;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 import static engineering.everest.lhotse.functionaltests.helpers.TestUtils.assertOk;
 import static java.lang.Boolean.FALSE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
@@ -67,7 +61,7 @@ class ReplayFunctionalTests {
     @Test
     void replayStatusWillBeSetCorrectlyForReplay() {
         // First event and replay marker event
-        UUID org1 = apiRestTestClient.createOrganization(
+        UUID org1 = apiRestTestClient.createRegisteredOrganization(
                 new NewOrganizationRequest("test org", null, null, null, null, null, null, null, null, null),
                 CREATED);
         apiRestTestClient.createUser(org1, new NewUserRequest("alice@umbrella.com", "password", "Alice"), CREATED);
@@ -76,7 +70,7 @@ class ReplayFunctionalTests {
         assertEquals(1, testEventHandler.getCounter().get());
 
         // Second event and replay again
-        UUID org2 = apiRestTestClient.createOrganization(
+        UUID org2 = apiRestTestClient.createRegisteredOrganization(
                 new NewOrganizationRequest("test org", null, null, null, null, null, null, null, null, null),
                 CREATED);
         apiRestTestClient.createUser(org2, new NewUserRequest("bob@umbrella.com", "password", "Bob"), CREATED);

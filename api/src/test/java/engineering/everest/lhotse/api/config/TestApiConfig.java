@@ -85,7 +85,7 @@ public class TestApiConfig {
                     .requestMatcher(requestMatcher)
                     .sessionManagement().sessionCreationPolicy(STATELESS).and()
                     .authorizeRequests()
-                    .antMatchers("/api/admin/**").hasRole(ADMIN.toString())
+                    .antMatchers("/admin/**").hasRole(ADMIN.toString())
                     .anyRequest().authenticated();
         }
     }

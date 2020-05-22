@@ -33,12 +33,17 @@ import static engineering.everest.lhotse.users.UserTestHelper.ADMIN_USER;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
-import static org.assertj.core.util.Lists.newArrayList;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest
 @ContextConfiguration(classes = {TestApiConfig.class, OrganizationsController.class})
@@ -78,21 +83,6 @@ class OrganizationsControllerTest {
     private UsersReadService usersReadService;
 
     @Test
-    @WithMockUser(username = ADMIN_USERNAME, roles = ROLE_ADMIN)
-    void getOrganizationsWillRetrieveListOfOrganizations_WhenRequestingUserIsAdmin() throws Exception {
-        when(organizationsReadService.getOrganizations())
-                .thenReturn(newArrayList(ORGANIZATION_1, ORGANIZATION_2));
-
-        mockMvc.perform(get("/api/organizations").contentType(APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_JSON))
-                .andExpect(jsonPath("$.[0].id", is(ORGANIZATION_1.getId().toString())))
-                .andExpect(jsonPath("$.[1].id", is(ORGANIZATION_2.getId().toString())))
-                .andExpect(jsonPath("$.[0].organizationName", is(ORGANIZATION_1.getOrganizationName())))
-                .andExpect(jsonPath("$.[1].organizationName", is(ORGANIZATION_2.getOrganizationName())));
-    }
-
-    @Test
     @WithMockUser(username = USER_USERNAME, roles = ROLE_ORGANIZATION_USER)
     void getOrganizationWillDelegate_WhenRequestingUserBelongsToOrganization() throws Exception {
         User authUser = MockAuthenticationContextProvider.getAuthUser();
@@ -108,49 +98,19 @@ class OrganizationsControllerTest {
 
     @Test
     @WithMockUser(username = ADMIN_USERNAME, roles = ROLE_ADMIN)
-    void registeringNewOrganizationWillFail_WhenNameIsEmpty() throws Exception {
+    void registerOrganizationWillDelegate() throws Exception {
+        OrganizationAddress address = ORGANIZATION_1.getOrganizationAddress();
+
         mockMvc.perform(post("/api/organizations")
                 .contentType(APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new NewOrganizationRequest("", ORGANIZATION_1.getOrganizationAddress().getStreet(),
-                        ORGANIZATION_1.getOrganizationAddress().getCity(), ORGANIZATION_1.getOrganizationAddress().getState(), ORGANIZATION_1.getOrganizationAddress().getCountry(), ORGANIZATION_1.getOrganizationAddress().getPostalCode(), ORGANIZATION_1.getWebsiteUrl(),
+                .content(objectMapper.writeValueAsString(new NewOrganizationRequest(ORGANIZATION_1.getOrganizationName(), address.getStreet(),
+                        address.getCity(), address.getState(), address.getCountry(), address.getPostalCode(), ORGANIZATION_1.getWebsiteUrl(),
                         ORGANIZATION_1.getContactName(), ORGANIZATION_1.getPhoneNumber(), ORGANIZATION_1.getEmailAddress()))))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isCreated());
 
-        verifyNoInteractions(organizationsService);
-    }
-
-    @Test
-    @WithMockUser(username = ADMIN_USERNAME, roles = ROLE_ADMIN)
-    void registeringNewOrganizationWillDelegate_WhenRequestingUserIsAdmin() throws Exception {
-        mockMvc.perform(post("/api/organizations")
-                .contentType(APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new NewOrganizationRequest(ORGANIZATION_1.getOrganizationName(), ORGANIZATION_1.getOrganizationAddress().getStreet(),
-                        ORGANIZATION_1.getOrganizationAddress().getCity(), ORGANIZATION_1.getOrganizationAddress().getState(), ORGANIZATION_1.getOrganizationAddress().getCountry(), ORGANIZATION_1.getOrganizationAddress().getPostalCode(), ORGANIZATION_1.getWebsiteUrl(),
-                        ORGANIZATION_1.getContactName(), ORGANIZATION_1.getPhoneNumber(), ORGANIZATION_1.getEmailAddress()))))
-                .andExpect(status().isCreated())
-                .andExpect(content().string(Matchers.any(String.class)));
-
-        verify(organizationsService).createOrganization(ADMIN_USER.getId(), ORGANIZATION_1.getOrganizationName(), ORGANIZATION_1.getOrganizationAddress().getStreet(),
-                ORGANIZATION_1.getOrganizationAddress().getCity(), ORGANIZATION_1.getOrganizationAddress().getState(), ORGANIZATION_1.getOrganizationAddress().getCountry(), ORGANIZATION_1.getOrganizationAddress().getPostalCode(), ORGANIZATION_1.getWebsiteUrl(),
-                ORGANIZATION_1.getContactName(), ORGANIZATION_1.getPhoneNumber(), ORGANIZATION_1.getEmailAddress());
-    }
-
-    @Test
-    @WithMockUser(username = ADMIN_USERNAME, roles = ROLE_ADMIN)
-    void deleteOrganizationWillDelegate_WhenRequestingUserIsAdmin() throws Exception {
-        mockMvc.perform(delete("/api/organizations/{organizationId}", ORGANIZATION_2.getId()))
-                .andExpect(status().isOk());
-
-        verify(organizationsService).deregisterOrganization(ADMIN_USER.getId(), ORGANIZATION_2.getId());
-    }
-
-    @Test
-    @WithMockUser(username = ADMIN_USERNAME, roles = ROLE_ADMIN)
-    void reregisterOrganizationWillDelegate_WhenRequestingUserIsAdmin() throws Exception {
-        mockMvc.perform(post("/api/organizations/{organizationId}", ORGANIZATION_2.getId()))
-                .andExpect(status().isOk());
-
-        verify(organizationsService).reregisterOrganization(ADMIN_USER.getId(), ORGANIZATION_2.getId());
+        verify(organizationsService).registerOrganization(ORGANIZATION_1.getOrganizationName(), address.getStreet(), address.getCity(), address.getState(), address.getCountry(),
+                address.getPostalCode(), ORGANIZATION_1.getWebsiteUrl(), ORGANIZATION_1.getContactName(), ORGANIZATION_1.getPhoneNumber(), ORGANIZATION_1.getEmailAddress());
+        verifyNoInteractions(usersService);
     }
 
     @Test
