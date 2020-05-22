@@ -12,21 +12,10 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpdateOrganizationCommand implements ValidatableCommand {
-
+public class EnableOrganizationCommand implements ValidatableCommand {
     @TargetAggregateIdentifier
     private UUID organizationId;
+
     @NotNull
     private UUID requestingUserId;
-    private String organizationName;
-    private String street;
-    private String city;
-    private String state;
-    private String country;
-    private String postalCode;
-    private String websiteUrl;
-    private String contactName;
-    private String phoneNumber;
-    private String emailAddress;
-
 }

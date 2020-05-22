@@ -4,10 +4,10 @@ import engineering.everest.lhotse.axon.replay.ReplayCompletionAware;
 import engineering.everest.lhotse.organizations.OrganizationAddress;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationAddressUpdatedByAdminEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationContactDetailsUpdatedByAdminEvent;
-import engineering.everest.lhotse.organizations.domain.events.OrganizationDeregisteredByAdminEvent;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationDisabledByAdminEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationNameUpdatedByAdminEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationRegisteredByAdminEvent;
-import engineering.everest.lhotse.organizations.domain.events.OrganizationReregisteredByAdminEvent;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationEnabledByAdminEvent;
 import engineering.everest.lhotse.organizations.persistence.Address;
 import engineering.everest.lhotse.organizations.persistence.OrganizationsRepository;
 import lombok.extern.log4j.Log4j2;
@@ -47,7 +47,7 @@ public class OrganizationsEventHandler implements ReplayCompletionAware {
     }
 
     @EventHandler
-    void on(OrganizationDeregisteredByAdminEvent event) {
+    void on(OrganizationDisabledByAdminEvent event) {
         LOGGER.info("Organization {} de-registered by {}", event.getOrganizationId(), event.getAdminId());
         var persistableOrganization = organizationsRepository.findById(event.getOrganizationId()).orElseThrow();
         persistableOrganization.setDeregistered(true);
@@ -55,7 +55,7 @@ public class OrganizationsEventHandler implements ReplayCompletionAware {
     }
 
     @EventHandler
-    void on(OrganizationReregisteredByAdminEvent event) {
+    void on(OrganizationEnabledByAdminEvent event) {
         LOGGER.info("Organization {} re-registered by {}", event.getOrganizationId(), event.getAdminId());
         var persistableOrganization = organizationsRepository.findById(event.getOrganizationId()).orElseThrow();
         persistableOrganization.setDeregistered(false);

@@ -1,10 +1,12 @@
 package engineering.everest.lhotse.organizations.services;
 
-import engineering.everest.lhotse.organizations.domain.commands.DeregisterOrganizationCommand;
-import engineering.everest.starterkit.axon.HazelcastCommandGateway;
 import engineering.everest.lhotse.axon.common.RandomFieldsGenerator;
+import engineering.everest.lhotse.organizations.domain.commands.CreateRegisteredOrganizationCommand;
+import engineering.everest.lhotse.organizations.domain.commands.DisableOrganizationCommand;
+import engineering.everest.lhotse.organizations.domain.commands.EnableOrganizationCommand;
 import engineering.everest.lhotse.organizations.domain.commands.RegisterOrganizationCommand;
 import engineering.everest.lhotse.organizations.domain.commands.UpdateOrganizationCommand;
+import engineering.everest.starterkit.axon.HazelcastCommandGateway;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,6 +17,7 @@ import java.util.UUID;
 
 import static engineering.everest.lhotse.axon.common.domain.User.ADMIN_ID;
 import static java.util.UUID.randomUUID;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -22,7 +25,6 @@ import static org.mockito.Mockito.when;
 class DefaultOrganizationsServiceTest {
 
     private static final UUID ORGANIZATION_ID = randomUUID();
-    private static final UUID NETWORK_ID = randomUUID();
     private static final String ORGANIZATION_NAME = "organization-name";
     private static final String ORGANIZATION_STREET_1 = "street-1";
     private static final String ORGANIZATION_CITY_1 = "city-1";
@@ -47,14 +49,33 @@ class DefaultOrganizationsServiceTest {
     }
 
     @Test
-    void registerExternalOrganisation_WillSendCommandAndWaitForCompletion() {
-        when(randomFieldsGenerator.genRandomUUID()).thenReturn(ORGANIZATION_ID, NETWORK_ID);
+    void createRegisteredOrganisation_WillSendCommandAndWaitForCompletion() {
+        var expectedCommand = new CreateRegisteredOrganizationCommand(ORGANIZATION_ID, ADMIN_ID,
+                ORGANIZATION_NAME, ORGANIZATION_STREET_1, ORGANIZATION_CITY_1, ORGANIZATION_STATE_1, ORGANIZATION_COUNTRY_1, ORGANIZATION_POSTAL_CODE_1, ORGANIZATION_WEBSITE_URL_1, ORGANIZATION_CONTACT_NAME_1, ORGANIZATION_PHONE_NUMBER_1, ORGANIZATION_EMAIL_ADDRESS_1);
 
-        defaultOrganizationService.createOrganization(ADMIN_ID, ORGANIZATION_NAME, ORGANIZATION_STREET_1, ORGANIZATION_CITY_1, ORGANIZATION_STATE_1,
+        when(randomFieldsGenerator.genRandomUUID()).thenReturn(ORGANIZATION_ID);
+        when(commandGateway.sendAndWait(expectedCommand)).thenReturn(ORGANIZATION_ID);
+
+        var newOrgId = defaultOrganizationService.createRegisteredOrganization(ADMIN_ID, ORGANIZATION_NAME, ORGANIZATION_STREET_1, ORGANIZATION_CITY_1, ORGANIZATION_STATE_1,
                 ORGANIZATION_COUNTRY_1, ORGANIZATION_POSTAL_CODE_1, ORGANIZATION_WEBSITE_URL_1, ORGANIZATION_CONTACT_NAME_1, ORGANIZATION_PHONE_NUMBER_1, ORGANIZATION_EMAIL_ADDRESS_1);
 
-        verify(commandGateway).sendAndWait(new RegisterOrganizationCommand(ORGANIZATION_ID, ADMIN_ID,
-                ORGANIZATION_NAME, ORGANIZATION_STREET_1, ORGANIZATION_CITY_1, ORGANIZATION_STATE_1, ORGANIZATION_COUNTRY_1, ORGANIZATION_POSTAL_CODE_1, ORGANIZATION_WEBSITE_URL_1, ORGANIZATION_CONTACT_NAME_1, ORGANIZATION_PHONE_NUMBER_1, ORGANIZATION_EMAIL_ADDRESS_1));
+        assertEquals(ORGANIZATION_ID, newOrgId);
+        verify(commandGateway).sendAndWait(expectedCommand);
+    }
+
+    @Test
+    void registeredOrganisation_WillSendCommandAndWaitForCompletion() {
+        var expectedCommand = new RegisterOrganizationCommand(ORGANIZATION_ID, ORGANIZATION_NAME,
+                ORGANIZATION_STREET_1, ORGANIZATION_CITY_1, ORGANIZATION_STATE_1, ORGANIZATION_COUNTRY_1, ORGANIZATION_POSTAL_CODE_1, ORGANIZATION_WEBSITE_URL_1, ORGANIZATION_CONTACT_NAME_1, ORGANIZATION_PHONE_NUMBER_1, ORGANIZATION_EMAIL_ADDRESS_1);
+
+        when(randomFieldsGenerator.genRandomUUID()).thenReturn(ORGANIZATION_ID);
+        when(commandGateway.sendAndWait(expectedCommand)).thenReturn(ORGANIZATION_ID);
+
+        var newOrgId = defaultOrganizationService.registerOrganization(ORGANIZATION_NAME, ORGANIZATION_STREET_1, ORGANIZATION_CITY_1, ORGANIZATION_STATE_1,
+                ORGANIZATION_COUNTRY_1, ORGANIZATION_POSTAL_CODE_1, ORGANIZATION_WEBSITE_URL_1, ORGANIZATION_CONTACT_NAME_1, ORGANIZATION_PHONE_NUMBER_1, ORGANIZATION_EMAIL_ADDRESS_1);
+
+        assertEquals(ORGANIZATION_ID, newOrgId);
+        verify(commandGateway).sendAndWait(expectedCommand);
     }
 
     @Test
@@ -71,9 +92,14 @@ class DefaultOrganizationsServiceTest {
     }
 
     @Test
-    void deleteOrganisation_WillSendCommandAndWaitForCompletion() {
-        defaultOrganizationService.deregisterOrganization(ADMIN_ID, ORGANIZATION_ID);
-        verify(commandGateway).sendAndWait(new DeregisterOrganizationCommand(ORGANIZATION_ID, ADMIN_ID));
+    void enableOrganisation_WillSendCommandAndWaitForCompletion() {
+        defaultOrganizationService.enableOrganization(ADMIN_ID, ORGANIZATION_ID);
+        verify(commandGateway).sendAndWait(new EnableOrganizationCommand(ORGANIZATION_ID, ADMIN_ID));
     }
 
+    @Test
+    void disableOrganisation_WillSendCommandAndWaitForCompletion() {
+        defaultOrganizationService.disableOrganization(ADMIN_ID, ORGANIZATION_ID);
+        verify(commandGateway).sendAndWait(new DisableOrganizationCommand(ORGANIZATION_ID, ADMIN_ID));
+    }
 }

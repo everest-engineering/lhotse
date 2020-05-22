@@ -58,7 +58,7 @@ public class ApiRestTestClient {
         this.accessToken = accessToken;
     }
 
-    public UserResponse getUser(UUID organizationId, UUID userId, HttpStatus expectedHttpStatus) {
+    public UserResponse getUser(UUID userId, HttpStatus expectedHttpStatus) {
         return webTestClient.get().uri("/api/users/{userId}", userId)
                 .header("Authorization", "Bearer " + accessToken)
                 .exchange()
@@ -74,8 +74,8 @@ public class ApiRestTestClient {
                 .returnResult(UserResponse.class).getResponseBody().buffer().blockFirst();
     }
 
-    public UUID createOrganization(NewOrganizationRequest request, HttpStatus expectedHttpStatus) {
-        ResponseSpec responseSpec = webTestClient.post().uri("/api/organizations")
+    public UUID createRegisteredOrganization(NewOrganizationRequest request, HttpStatus expectedHttpStatus) {
+        ResponseSpec responseSpec = webTestClient.post().uri("/api/admin/organizations")
                 .header("Authorization", "Bearer " + accessToken)
                 .contentType(APPLICATION_JSON)
                 .body(fromValue(request))
@@ -88,7 +88,7 @@ public class ApiRestTestClient {
     }
 
     public List<OrganizationResponse> getAllOrganizations(HttpStatus expectedHttpStatus) {
-        return webTestClient.get().uri("/api/organizations")
+        return webTestClient.get().uri("/api/admin/organizations")
                 .header("Authorization", "Bearer " + accessToken)
                 .exchange()
                 .expectStatus().isEqualTo(expectedHttpStatus)
@@ -108,7 +108,7 @@ public class ApiRestTestClient {
         return null;
     }
 
-    public void updateUser(UUID organizationId, UUID userId, UpdateUserRequest request, HttpStatus expectedHttpStatus) {
+    public void updateUser(UUID userId, UpdateUserRequest request, HttpStatus expectedHttpStatus) {
         webTestClient.put().uri("/api/users/{userId}", userId)
                 .header("Authorization", "Bearer " + accessToken)
                 .contentType(APPLICATION_JSON)

@@ -11,7 +11,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Revision("0")
-public class OrganizationReregisteredByAdminEvent {
+public class OrganizationDisabledByAdminEvent {
     private UUID organizationId;
     private UUID adminId;
 }

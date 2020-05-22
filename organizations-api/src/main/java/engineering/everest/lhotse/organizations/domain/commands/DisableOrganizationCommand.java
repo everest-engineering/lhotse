@@ -12,7 +12,7 @@ import javax.validation.constraints.NotNull;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DeregisterOrganizationCommand implements ValidatableCommand {
+public class DisableOrganizationCommand implements ValidatableCommand {
     @TargetAggregateIdentifier
     private UUID organizationId;
 

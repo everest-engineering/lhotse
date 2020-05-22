@@ -1,15 +1,17 @@
 package engineering.everest.lhotse.organizations.domain;
 
-import engineering.everest.lhotse.organizations.domain.events.OrganizationNameUpdatedByAdminEvent;
-import engineering.everest.lhotse.organizations.domain.commands.DeregisterOrganizationCommand;
+import engineering.everest.lhotse.organizations.domain.commands.CreateRegisteredOrganizationCommand;
+import engineering.everest.lhotse.organizations.domain.commands.DisableOrganizationCommand;
 import engineering.everest.lhotse.organizations.domain.commands.RegisterOrganizationCommand;
-import engineering.everest.lhotse.organizations.domain.commands.ReregisterOrganizationCommand;
+import engineering.everest.lhotse.organizations.domain.commands.EnableOrganizationCommand;
 import engineering.everest.lhotse.organizations.domain.commands.UpdateOrganizationCommand;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationAddressUpdatedByAdminEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationContactDetailsUpdatedByAdminEvent;
-import engineering.everest.lhotse.organizations.domain.events.OrganizationDeregisteredByAdminEvent;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationDisabledByAdminEvent;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationNameUpdatedByAdminEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationRegisteredByAdminEvent;
-import engineering.everest.lhotse.organizations.domain.events.OrganizationReregisteredByAdminEvent;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationRegistrationReceivedEvent;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationEnabledByAdminEvent;
 import org.apache.commons.lang3.Validate;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
@@ -27,15 +29,16 @@ public class OrganizationAggregate implements Serializable {
 
     @AggregateIdentifier
     private UUID id;
+    private String organizationName;
     @AggregateMember
     private OrganizationContactDetails organizationContactDetails = new OrganizationContactDetails();
-    private boolean deregistered;
+    private boolean disabled;
 
     protected OrganizationAggregate() {
     }
 
     @CommandHandler
-    public OrganizationAggregate(RegisterOrganizationCommand command) {
+    public OrganizationAggregate(CreateRegisteredOrganizationCommand command) {
         apply(new OrganizationRegisteredByAdminEvent(command.getOrganizationId(), command.getRequestingUserId(),
                 command.getOrganizationName(), command.getWebsiteUrl(), command.getStreet(), command.getCity(), command.getState(),
                 command.getCountry(), command.getPostalCode(), command.getContactName(), command.getPhoneNumber(),
@@ -43,61 +46,92 @@ public class OrganizationAggregate implements Serializable {
     }
 
     @CommandHandler
-    void handle(DeregisterOrganizationCommand command) {
-        validateOrganizationIsNotDeregistered();
-        apply(new OrganizationDeregisteredByAdminEvent(command.getOrganizationId(), command.getRequestingUserId()));
+    public OrganizationAggregate(RegisterOrganizationCommand command) {
+        apply(new OrganizationRegistrationReceivedEvent(command.getOrganizationId(), command.getEmailAddress(),
+                command.getOrganizationName(), command.getWebsiteUrl(), command.getStreet(), command.getCity(), command.getState(),
+                command.getCountry(), command.getPostalCode(), command.getContactName(), command.getPhoneNumber()));
     }
 
     @CommandHandler
-    void handle(ReregisterOrganizationCommand command) {
-        Validate.validState(deregistered, "Organization is still active");
-        apply(new OrganizationReregisteredByAdminEvent(command.getOrganizationId(), command.getRequestingUserId()));
+    void handle(DisableOrganizationCommand command) {
+        validateOrganizationIsNotDisabled();
+        apply(new OrganizationDisabledByAdminEvent(command.getOrganizationId(), command.getRequestingUserId()));
+    }
+
+    @CommandHandler
+    void handle(EnableOrganizationCommand command) {
+        Validate.validState(disabled, "Organization is already enabled");
+        apply(new OrganizationEnabledByAdminEvent(command.getOrganizationId(), command.getRequestingUserId()));
     }
 
     @CommandHandler
     public void handle(UpdateOrganizationCommand command) {
-        validateOrganizationIsNotDeregistered();
+        validateOrganizationIsNotDisabled();
         validateAtLeastOneUpdateIsMade(command);
 
-        apply(new OrganizationNameUpdatedByAdminEvent(command.getOrganizationId(), command.getOrganizationName(),
-                command.getRequestingUserId()));
-        apply(new OrganizationContactDetailsUpdatedByAdminEvent(command.getOrganizationId(), command.getContactName(),
-                command.getPhoneNumber(), command.getEmailAddress(), command.getWebsiteUrl(), command.getRequestingUserId()));
-        apply(new OrganizationAddressUpdatedByAdminEvent(command.getOrganizationId(), command.getStreet(), command.getCity(),
-                command.getState(), command.getCountry(), command.getPostalCode(), command.getRequestingUserId()));
+        if (isNameUpdated(command)) {
+            apply(new OrganizationNameUpdatedByAdminEvent(command.getOrganizationId(), command.getOrganizationName(),
+                    command.getRequestingUserId()));
+        }
+        if (areContactDetailsUpdated(command)) {
+            apply(new OrganizationContactDetailsUpdatedByAdminEvent(command.getOrganizationId(), command.getContactName(),
+                    command.getPhoneNumber(), command.getEmailAddress(), command.getWebsiteUrl(), command.getRequestingUserId()));
+        }
+        if (isAddressUpdated(command)) {
+            apply(new OrganizationAddressUpdatedByAdminEvent(command.getOrganizationId(), command.getStreet(), command.getCity(),
+                    command.getState(), command.getCountry(), command.getPostalCode(), command.getRequestingUserId()));
+        }
     }
 
     @EventSourcingHandler
     void on(OrganizationRegisteredByAdminEvent event) {
         id = event.getOrganizationId();
+        organizationName = event.getOrganizationName();
+        disabled = false;
     }
 
     @EventSourcingHandler
-    void on(OrganizationDeregisteredByAdminEvent event) {
-        deregistered = true;
+    void on(OrganizationRegistrationReceivedEvent event) {
+        id = event.getOrganizationId();
+        organizationName = event.getOrganizationName();
+        disabled = true;
     }
 
     @EventSourcingHandler
-    void on(OrganizationReregisteredByAdminEvent event) {
-        deregistered = false;
+    void on(OrganizationDisabledByAdminEvent event) {
+        disabled = true;
     }
 
-    private void validateOrganizationIsNotDeregistered() {
-        Validate.validState(!deregistered, "Organization is already deregistered");
+    @EventSourcingHandler
+    void on(OrganizationEnabledByAdminEvent event) {
+        disabled = false;
+    }
+
+    private void validateOrganizationIsNotDisabled() {
+        Validate.validState(!disabled, "Organization is already disabled");
     }
 
     private void validateAtLeastOneUpdateIsMade(UpdateOrganizationCommand command) {
-        boolean changesMade = command.getOrganizationName() != null
-                || command.getStreet() != null
-                || command.getCity() != null
-                || command.getState() != null
-                || command.getCountry() != null
-                || command.getPostalCode() != null
-                || command.getWebsiteUrl() != null
+        Validate.isTrue(isNameUpdated(command) || areContactDetailsUpdated(command) || isAddressUpdated(command),
+                "At least one organization field change must be requested");
+    }
+
+    private boolean isNameUpdated(UpdateOrganizationCommand command) {
+        return command.getOrganizationName() != null && !command.getOrganizationName().equals(organizationName);
+    }
+
+    private boolean areContactDetailsUpdated(UpdateOrganizationCommand command) {
+        return command.getWebsiteUrl() != null
                 || command.getContactName() != null
                 || command.getPhoneNumber() != null
                 || command.getEmailAddress() != null;
+    }
 
-        Validate.isTrue(changesMade, "At least one organization field change must be requested");
+    private boolean isAddressUpdated(UpdateOrganizationCommand command) {
+        return command.getStreet() != null
+                || command.getCity() != null
+                || command.getState() != null
+                || command.getCountry() != null
+                || command.getPostalCode() != null;
     }
 }

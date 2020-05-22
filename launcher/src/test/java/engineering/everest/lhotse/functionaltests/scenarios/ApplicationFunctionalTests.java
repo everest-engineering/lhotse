@@ -65,9 +65,9 @@ class ApplicationFunctionalTests {
                 "Vic", "Oz", "3000", null, null, null, null);
         var newUserRequest = new NewUserRequest("user@example.com", "password", "Captain Fancypants");
 
-        var organizationId = apiRestTestClient.createOrganization(newOrganizationRequest, CREATED);
+        var organizationId = apiRestTestClient.createRegisteredOrganization(newOrganizationRequest, CREATED);
         var userId = apiRestTestClient.createUser(organizationId, newUserRequest, CREATED);
-        apiRestTestClient.getUser(organizationId, userId, OK);
+        apiRestTestClient.getUser(userId, OK);
     }
 
     @Test
