@@ -1,4 +1,4 @@
-package engineering.everest.lhotse.users.domain.events;
+package engineering.everest.lhotse.organizations.domain.events;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,11 +11,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Revision("0")
-public class UserCreatedByAdminEvent {
-    private UUID userId;
+public class OrganizationRegistrationConfirmedEvent {
     private UUID organizationId;
-    private UUID adminId;
-    private String userDisplayName;
-    private String userEmail;
-    private String encodedPassword;
 }

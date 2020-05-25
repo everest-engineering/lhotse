@@ -22,10 +22,10 @@ public class PersistableOrganization {
     private String contactName;
     private String phoneNumber;
     private String emailAddress;
-    private boolean deregistered;
+    private boolean disabled;
 
-    public PersistableOrganization(UUID id, String organizationName, Address address, String websiteUrl,
-                                   String contactName, String phoneNumber, String emailAddress, Instant registeredOn) {
+    public PersistableOrganization(UUID id, String organizationName, Address address, String websiteUrl, String contactName,
+                                   String phoneNumber, String emailAddress, boolean isDisabled, Instant registeredOn) {
         this.id = id;
         this.organizationName = organizationName;
         this.registeredOn = registeredOn;
@@ -34,5 +34,6 @@ public class PersistableOrganization {
         this.contactName = contactName;
         this.phoneNumber = phoneNumber;
         this.emailAddress = emailAddress;
+        this.disabled = isDisabled;
     }
 }

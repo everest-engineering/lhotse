@@ -22,5 +22,5 @@ public class OrganizationResponse {
     private String contactName;
     private String contactPhoneNumber;
     private String contactEmail;
-    private boolean deregistered;
+    private boolean disabled;
 }

@@ -82,17 +82,17 @@ class OrganizationsEventHandlerTest {
                 ORGANIZATION_POSTAL_CODE, ORGANIZATION_CONTACT_NAME, ORGANIZATION_PHONE_NUMBER, ORGANIZATION_EMAIL_ADDRESS), ORG_CREATION_TIME);
 
         verify(organizationsRepository).createOrganization(ORGANIZATION_ID, ORGANIZATION_NAME, ORGANIZATION_ADDRESS, ORGANIZATION_WEBSITE_URL,
-                ORGANIZATION_CONTACT_NAME, ORGANIZATION_PHONE_NUMBER, ORGANIZATION_EMAIL_ADDRESS, ORG_CREATION_TIME);
+                ORGANIZATION_CONTACT_NAME, ORGANIZATION_PHONE_NUMBER, ORGANIZATION_EMAIL_ADDRESS, false, ORG_CREATION_TIME);
     }
 
     @Test
-    void onOrganizationDeRegisteredByAdminEvent_WillPersistChanges() {
+    void onOrganizationDisabledByAdminEvent_WillPersistChanges() {
         PersistableOrganization persistableOrganization = mock(PersistableOrganization.class);
         when(organizationsRepository.findById(ORGANIZATION_ID)).thenReturn(Optional.of(persistableOrganization));
 
         organizationsEventHandler.on(new OrganizationDisabledByAdminEvent(ORGANIZATION_ID, ADMIN_ID));
 
-        verify(persistableOrganization).setDeregistered(true);
+        verify(persistableOrganization).setDisabled(true);
         verify(organizationsRepository).save(persistableOrganization);
     }
 
@@ -103,7 +103,7 @@ class OrganizationsEventHandlerTest {
 
         organizationsEventHandler.on(new OrganizationEnabledByAdminEvent(ORGANIZATION_ID, ADMIN_ID));
 
-        verify(persistableOrganization).setDeregistered(false);
+        verify(persistableOrganization).setDisabled(false);
         verify(organizationsRepository).save(persistableOrganization);
     }
 
@@ -151,6 +151,6 @@ class OrganizationsEventHandlerTest {
 
     private PersistableOrganization createPersistableOrganization() {
         return new PersistableOrganization(ORGANIZATION_ID, ORGANIZATION_NAME, ADDRESS, ORGANIZATION_WEBSITE_URL,
-                ORGANIZATION_CONTACT_NAME, ORGANIZATION_PHONE_NUMBER, ORGANIZATION_EMAIL_ADDRESS, ORG_CREATION_TIME);
+                ORGANIZATION_CONTACT_NAME, ORGANIZATION_PHONE_NUMBER, ORGANIZATION_EMAIL_ADDRESS, false, ORG_CREATION_TIME);
     }
 }

@@ -5,9 +5,11 @@ import java.util.UUID;
 
 public interface OrganizationsService {
 
-    UUID registerOrganization(String organizationName, String street, String city, String state, String country,
-                              String postalCode, String websiteUrl, String contactName, String contactPhoneNumber,
-                              String contactEmailAddress);
+    void registerOrganization(UUID organizationId, UUID userId, String organizationName, String street, String city,
+                              String state, String country, String postalCode, String websiteUrl, String contactName,
+                              String phoneNumber, String emailAddress, String contactRawPassword);
+
+    void confirmOrganizationRegistrationEmail(UUID organizationId, UUID confirmationCode);
 
     void updateOrganization(UUID requestingUserId, UUID organizationId, String organizationName, String street,
                             String city, String state, String country, String postalCode, String websiteUrl,

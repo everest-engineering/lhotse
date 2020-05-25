@@ -11,10 +11,9 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Revision("0")
-public class UserCreatedByAdminEvent {
+public class AdminUserCreatedForNewlyRegisteredOrganizationEvent {
     private UUID userId;
     private UUID organizationId;
-    private UUID adminId;
     private String userDisplayName;
     private String userEmail;
     private String encodedPassword;

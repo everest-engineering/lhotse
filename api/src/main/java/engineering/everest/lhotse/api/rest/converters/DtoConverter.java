@@ -26,6 +26,6 @@ public class DtoConverter {
                 organization.getContactName(),
                 organization.getPhoneNumber(),
                 organization.getEmailAddress(),
-                organization.isDeregistered());
+                organization.isDisabled());
     }
 }

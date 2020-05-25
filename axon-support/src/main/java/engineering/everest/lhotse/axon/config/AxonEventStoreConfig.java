@@ -12,7 +12,7 @@ import org.axonframework.eventsourcing.eventstore.EventStorageEngine;
 import org.axonframework.eventsourcing.eventstore.jpa.JpaEventStorageEngine;
 import org.axonframework.eventsourcing.eventstore.jpa.SQLErrorCodesResolver;
 import org.axonframework.modelling.saga.repository.SagaStore;
-import org.axonframework.modelling.saga.repository.inmemory.InMemorySagaStore;
+import org.axonframework.modelling.saga.repository.jpa.JpaSagaStore;
 import org.axonframework.serialization.Serializer;
 import org.axonframework.spring.config.AxonConfiguration;
 import org.axonframework.spring.messaging.unitofwork.SpringTransactionManager;
@@ -41,75 +41,76 @@ import java.sql.SQLException;
 @Configuration
 public class AxonEventStoreConfig {
 
-    private static final String EVENT_STORE_AUTO_CONFIG_QUALIFIER = "event-store";
+    private static final String AXON_AUTO_CONFIG_QUALIFIER = "axon";
 
     @Bean
-    @Qualifier(EVENT_STORE_AUTO_CONFIG_QUALIFIER)
-    @ConfigurationProperties(prefix = EVENT_STORE_AUTO_CONFIG_QUALIFIER + ".datasource.hikari")
-    public DataSource eventsDataSource() {
+    @Qualifier(AXON_AUTO_CONFIG_QUALIFIER)
+    @ConfigurationProperties(prefix = AXON_AUTO_CONFIG_QUALIFIER + ".datasource.hikari")
+    public DataSource axonDataSource() {
         return DataSourceBuilder.create().build();
     }
 
     @Bean
-    @Qualifier(EVENT_STORE_AUTO_CONFIG_QUALIFIER)
-    @ConfigurationProperties(prefix = EVENT_STORE_AUTO_CONFIG_QUALIFIER + ".datasource.hikari")
+    @Qualifier(AXON_AUTO_CONFIG_QUALIFIER)
+    @ConfigurationProperties(prefix = AXON_AUTO_CONFIG_QUALIFIER + ".datasource.hikari")
     public HikariConfig hikariConfig() {
         return new HikariConfig();
     }
 
     @Bean
-    @Qualifier(EVENT_STORE_AUTO_CONFIG_QUALIFIER)
-    @ConfigurationProperties(prefix = EVENT_STORE_AUTO_CONFIG_QUALIFIER + ".jpa")
-    public JpaProperties eventStoreJpaProperties() {
+    @Qualifier(AXON_AUTO_CONFIG_QUALIFIER)
+    @ConfigurationProperties(prefix = AXON_AUTO_CONFIG_QUALIFIER + ".jpa")
+    public JpaProperties axonJpaProperties() {
         return new JpaProperties();
     }
 
     @Bean
-    @Qualifier(EVENT_STORE_AUTO_CONFIG_QUALIFIER)
-    public LocalContainerEntityManagerFactoryBean eventsEntityManagerFactory(
+    @Qualifier(AXON_AUTO_CONFIG_QUALIFIER)
+    public LocalContainerEntityManagerFactoryBean axonEntityManagerFactory(
             EntityManagerFactoryBuilder builder,
-            @Qualifier(EVENT_STORE_AUTO_CONFIG_QUALIFIER) DataSource dataSource,
-            @Qualifier(EVENT_STORE_AUTO_CONFIG_QUALIFIER) JpaProperties jpaProperties) {
+            @Qualifier(AXON_AUTO_CONFIG_QUALIFIER) DataSource dataSource,
+            @Qualifier(AXON_AUTO_CONFIG_QUALIFIER) JpaProperties jpaProperties) {
         return builder
                 .dataSource(dataSource)
                 .properties(jpaProperties.getProperties())
                 .packages("org.axonframework.eventsourcing.eventstore.jpa",
-                        "org.axonframework.eventhandling.tokenstore.jpa")
-                .persistenceUnit(EVENT_STORE_AUTO_CONFIG_QUALIFIER)
+                        "org.axonframework.eventhandling.tokenstore.jpa",
+                        "org.axonframework.modelling.saga.repository.jpa")
+                .persistenceUnit(AXON_AUTO_CONFIG_QUALIFIER)
                 .build();
     }
 
     @Bean
-    @Qualifier(EVENT_STORE_AUTO_CONFIG_QUALIFIER)
-    public PlatformTransactionManager eventsPlatformTransactionManager(
-            @Qualifier(EVENT_STORE_AUTO_CONFIG_QUALIFIER) EntityManagerFactory entityManagerFactory) {
+    @Qualifier(AXON_AUTO_CONFIG_QUALIFIER)
+    public PlatformTransactionManager axonPlatformTransactionManager(
+            @Qualifier(AXON_AUTO_CONFIG_QUALIFIER) EntityManagerFactory entityManagerFactory) {
         return new JpaTransactionManager(entityManagerFactory);
     }
 
     @Bean
-    @Qualifier(EVENT_STORE_AUTO_CONFIG_QUALIFIER)
-    public EntityManager eventsSharedEntityManager(
-            @Qualifier(EVENT_STORE_AUTO_CONFIG_QUALIFIER) EntityManagerFactory entityManagerFactory) {
+    @Qualifier(AXON_AUTO_CONFIG_QUALIFIER)
+    public EntityManager axonSharedEntityManager(
+            @Qualifier(AXON_AUTO_CONFIG_QUALIFIER) EntityManagerFactory entityManagerFactory) {
         return SharedEntityManagerCreator.createSharedEntityManager(entityManagerFactory);
     }
 
     @Bean
-    @Qualifier(EVENT_STORE_AUTO_CONFIG_QUALIFIER)
-    public EntityManagerProvider eventsEntityManagerProvider(
-            @Qualifier(EVENT_STORE_AUTO_CONFIG_QUALIFIER) EntityManager entityManager) {
+    @Qualifier(AXON_AUTO_CONFIG_QUALIFIER)
+    public EntityManagerProvider axonEntityManagerProvider(
+            @Qualifier(AXON_AUTO_CONFIG_QUALIFIER) EntityManager entityManager) {
         return new SimpleEntityManagerProvider(entityManager);
     }
 
     @Bean
-    @Qualifier(EVENT_STORE_AUTO_CONFIG_QUALIFIER)
-    public SpringTransactionManager eventsTransactionManager(ChainedTransactionManager transactionManager) {
+    @Qualifier(AXON_AUTO_CONFIG_QUALIFIER)
+    public SpringTransactionManager axonTransactionManager(ChainedTransactionManager transactionManager) {
         return new SpringTransactionManager(transactionManager);
     }
 
     @Bean
-    @Qualifier(EVENT_STORE_AUTO_CONFIG_QUALIFIER)
-    public PersistenceExceptionResolver eventsPersistenceExceptionResolver(
-            @Qualifier(EVENT_STORE_AUTO_CONFIG_QUALIFIER) DataSource dataSource) throws SQLException {
+    @Qualifier(AXON_AUTO_CONFIG_QUALIFIER)
+    public PersistenceExceptionResolver axonPersistenceExceptionResolver(
+            @Qualifier(AXON_AUTO_CONFIG_QUALIFIER) DataSource dataSource) throws SQLException {
         return new SQLErrorCodesResolver(dataSource);
     }
 
@@ -119,7 +120,7 @@ public class AxonEventStoreConfig {
                                                   PersistenceExceptionResolver persistenceExceptionResolver,
                                                   Serializer eventSerializer,
                                                   AxonConfiguration configuration,
-                                                  @Qualifier(EVENT_STORE_AUTO_CONFIG_QUALIFIER) EntityManagerProvider entityManagerProvider,
+                                                  @Qualifier(AXON_AUTO_CONFIG_QUALIFIER) EntityManagerProvider entityManagerProvider,
                                                   SpringTransactionManager transactionManager) {
         return JpaEventStorageEngine.builder()
                 .snapshotSerializer(defaultSerializer)
@@ -132,14 +133,18 @@ public class AxonEventStoreConfig {
     }
 
     @Bean
-    public SagaStore sagaStore() {
-        return new InMemorySagaStore();
+    public SagaStore sagaStore(Serializer defaultSerializer,
+                               @Qualifier(AXON_AUTO_CONFIG_QUALIFIER) EntityManagerProvider entityManagerProvider) {
+        return JpaSagaStore.builder()
+                .serializer(defaultSerializer)
+                .entityManagerProvider(entityManagerProvider)
+                .build();
     }
 
     @Bean
-    @Qualifier(EVENT_STORE_AUTO_CONFIG_QUALIFIER)
+    @Qualifier(AXON_AUTO_CONFIG_QUALIFIER)
     public TokenStore tokenStore(
-            @Qualifier(EVENT_STORE_AUTO_CONFIG_QUALIFIER) EntityManagerProvider entityManagerProvider,
+            @Qualifier(AXON_AUTO_CONFIG_QUALIFIER) EntityManagerProvider entityManagerProvider,
             Serializer defaultSerializer) {
 
         return JpaTokenStore.builder()
@@ -150,16 +155,16 @@ public class AxonEventStoreConfig {
     }
 
     @Bean
-    @Qualifier(EVENT_STORE_AUTO_CONFIG_QUALIFIER)
-    @ConfigurationProperties(prefix = EVENT_STORE_AUTO_CONFIG_QUALIFIER + ".liquibase")
+    @Qualifier(AXON_AUTO_CONFIG_QUALIFIER)
+    @ConfigurationProperties(prefix = AXON_AUTO_CONFIG_QUALIFIER + ".liquibase")
     public LiquibaseProperties eventsLiquibaseProperties() {
         return new LiquibaseProperties();
     }
 
     @Bean
-    @Qualifier(EVENT_STORE_AUTO_CONFIG_QUALIFIER)
-    public SpringLiquibase eventsLiquibase(@Qualifier(EVENT_STORE_AUTO_CONFIG_QUALIFIER) DataSource dataSource,
-                                           @Qualifier(EVENT_STORE_AUTO_CONFIG_QUALIFIER) LiquibaseProperties properties) {
+    @Qualifier(AXON_AUTO_CONFIG_QUALIFIER)
+    public SpringLiquibase eventsLiquibase(@Qualifier(AXON_AUTO_CONFIG_QUALIFIER) DataSource dataSource,
+                                           @Qualifier(AXON_AUTO_CONFIG_QUALIFIER) LiquibaseProperties properties) {
         SpringLiquibase liquibase = new SpringLiquibase();
         liquibase.setDataSource(dataSource);
         liquibase.setChangeLog(properties.getChangeLog());

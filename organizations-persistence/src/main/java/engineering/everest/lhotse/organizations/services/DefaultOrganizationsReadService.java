@@ -46,6 +46,6 @@ public class DefaultOrganizationsReadService implements OrganizationsReadService
         return new Organization(persistableOrganization.getId(), persistableOrganization.getOrganizationName(),
                 organizationAddress, persistableOrganization.getWebsiteUrl(), persistableOrganization.getContactName(),
                 persistableOrganization.getPhoneNumber(), persistableOrganization.getEmailAddress(),
-                persistableOrganization.isDeregistered());
+                persistableOrganization.isDisabled());
     }
 }

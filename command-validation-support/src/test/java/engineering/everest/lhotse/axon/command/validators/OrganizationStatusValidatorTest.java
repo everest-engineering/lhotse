@@ -18,10 +18,10 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class OrganizationStatusValidatorTest {
 
-    public static final UUID ORGANIZATION_ID_1 = UUID.randomUUID();
-    public static final UUID ORGANIZATION_ID_2 = UUID.randomUUID();
-    public static final Organization ORGANIZATION_IN_GOOD_STANDING = new Organization(ORGANIZATION_ID_1, "organization-name", null, null, null, null, null, false);
-    public static final Organization DEREGISTERED_ORGANIZATION = new Organization(ORGANIZATION_ID_2, "organization-name", null, null, null, null, null, true);
+    private static final UUID ORGANIZATION_ID_1 = UUID.randomUUID();
+    private static final UUID ORGANIZATION_ID_2 = UUID.randomUUID();
+    private static final Organization ORGANIZATION_IN_GOOD_STANDING = new Organization(ORGANIZATION_ID_1, "organization-name", null, null, null, null, null, false);
+    private static final Organization DISABLED_ORGANIZATION = new Organization(ORGANIZATION_ID_2, "organization-name", null, null, null, null, null, true);
 
     private OrganizationStatusValidator organizationStatusValidator;
 
@@ -34,15 +34,15 @@ class OrganizationStatusValidatorTest {
     }
 
     @Test
-    void validate_WillPass_WhenOrganizationExistsAndIsNotDeregistered() {
+    void validate_WillPass_WhenOrganizationExistsAndIsEnabled() {
         when(organizationsReadService.getById(ORGANIZATION_ID_1)).thenReturn(ORGANIZATION_IN_GOOD_STANDING);
 
         organizationStatusValidator.validate((OrganizationStatusValidatableCommand) () -> ORGANIZATION_ID_1);
     }
 
     @Test
-    void validate_WillFail_WhenOrganizationIsDeregistered() {
-        when(organizationsReadService.getById(ORGANIZATION_ID_2)).thenReturn(DEREGISTERED_ORGANIZATION);
+    void validate_WillFail_WhenOrganizationIsDisabled() {
+        when(organizationsReadService.getById(ORGANIZATION_ID_2)).thenReturn(DISABLED_ORGANIZATION);
 
         assertThrows(IllegalStateException.class, () ->
                 organizationStatusValidator.validate((OrganizationStatusValidatableCommand) () -> ORGANIZATION_ID_2));

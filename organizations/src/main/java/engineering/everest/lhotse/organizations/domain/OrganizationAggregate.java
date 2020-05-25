@@ -1,17 +1,23 @@
 package engineering.everest.lhotse.organizations.domain;
 
+import engineering.everest.lhotse.organizations.domain.commands.ConfirmOrganizationRegistrationEmailCommand;
 import engineering.everest.lhotse.organizations.domain.commands.CreateRegisteredOrganizationCommand;
 import engineering.everest.lhotse.organizations.domain.commands.DisableOrganizationCommand;
-import engineering.everest.lhotse.organizations.domain.commands.RegisterOrganizationCommand;
 import engineering.everest.lhotse.organizations.domain.commands.EnableOrganizationCommand;
+import engineering.everest.lhotse.organizations.domain.commands.RecordSentOrganizationRegistrationEmailConfirmationCommand;
+import engineering.everest.lhotse.organizations.domain.commands.RegisterOrganizationCommand;
 import engineering.everest.lhotse.organizations.domain.commands.UpdateOrganizationCommand;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationAddressUpdatedByAdminEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationContactDetailsUpdatedByAdminEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationDisabledByAdminEvent;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationEnabledByAdminEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationNameUpdatedByAdminEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationRegisteredByAdminEvent;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationRegistrationConfirmationEmailSentEvent;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationRegistrationConfirmedEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationRegistrationReceivedEvent;
-import engineering.everest.lhotse.organizations.domain.events.OrganizationEnabledByAdminEvent;
+import engineering.everest.lhotse.organizations.domain.events.UserPromotedToOrganizationAdminEvent;
+import engineering.everest.lhotse.users.domain.commands.PromoteUserToOrganizationAdminCommand;
 import org.apache.commons.lang3.Validate;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
@@ -20,6 +26,8 @@ import org.axonframework.modelling.command.AggregateMember;
 import org.axonframework.spring.stereotype.Aggregate;
 
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.axonframework.modelling.command.AggregateLifecycle.apply;
@@ -33,6 +41,8 @@ public class OrganizationAggregate implements Serializable {
     @AggregateMember
     private OrganizationContactDetails organizationContactDetails = new OrganizationContactDetails();
     private boolean disabled;
+    private Set<UUID> organizationAdminIds;
+    private UUID registrationConfirmationCode;
 
     protected OrganizationAggregate() {
     }
@@ -47,9 +57,32 @@ public class OrganizationAggregate implements Serializable {
 
     @CommandHandler
     public OrganizationAggregate(RegisterOrganizationCommand command) {
-        apply(new OrganizationRegistrationReceivedEvent(command.getOrganizationId(), command.getEmailAddress(),
+        apply(new OrganizationRegistrationReceivedEvent(command.getOrganizationId(), command.getRegisteringUserId(),
+                command.getRegistrationConfirmationCode(), command.getUserEmailAddress(), command.getUserEncodedPassword(),
                 command.getOrganizationName(), command.getWebsiteUrl(), command.getStreet(), command.getCity(), command.getState(),
                 command.getCountry(), command.getPostalCode(), command.getContactName(), command.getPhoneNumber()));
+    }
+
+    @CommandHandler
+    void handle(RecordSentOrganizationRegistrationEmailConfirmationCommand command) {
+        apply(new OrganizationRegistrationConfirmationEmailSentEvent(command.getOrganizationId(), command.getConfirmationCode(),
+                command.getRegisteringContactEmail(), command.getOrganizationName()));
+    }
+
+    @CommandHandler
+    void handle(ConfirmOrganizationRegistrationEmailCommand command) {
+        Validate.isTrue(registrationConfirmationCode.equals(command.getConfirmationCode()),
+                "Organization registration confirmation code did not match");
+
+        apply(new OrganizationRegistrationConfirmedEvent(id));
+    }
+
+    @CommandHandler
+    void handle(PromoteUserToOrganizationAdminCommand command) {
+        Validate.validState(!disabled, "Organization is disabled");
+        Validate.isTrue(!organizationAdminIds.contains(command.getPromotedUserId()), "User is already an admin of organization %s", id);
+
+        apply(new UserPromotedToOrganizationAdminEvent(command.getOrganizationId(), command.getPromotedUserId()));
     }
 
     @CommandHandler
@@ -87,6 +120,7 @@ public class OrganizationAggregate implements Serializable {
     void on(OrganizationRegisteredByAdminEvent event) {
         id = event.getOrganizationId();
         organizationName = event.getOrganizationName();
+        organizationAdminIds = new HashSet<>();
         disabled = false;
     }
 
@@ -94,7 +128,14 @@ public class OrganizationAggregate implements Serializable {
     void on(OrganizationRegistrationReceivedEvent event) {
         id = event.getOrganizationId();
         organizationName = event.getOrganizationName();
+        organizationAdminIds = new HashSet<>();
+        registrationConfirmationCode = event.getRegistrationConfirmationCode();
         disabled = true;
+    }
+
+    @EventSourcingHandler
+    void on(OrganizationRegistrationConfirmedEvent event) {
+        disabled = false;
     }
 
     @EventSourcingHandler
@@ -105,6 +146,11 @@ public class OrganizationAggregate implements Serializable {
     @EventSourcingHandler
     void on(OrganizationEnabledByAdminEvent event) {
         disabled = false;
+    }
+
+    @EventSourcingHandler
+    void on(UserPromotedToOrganizationAdminEvent event) {
+        organizationAdminIds.add(event.getPromotedUserId());
     }
 
     private void validateOrganizationIsNotDisabled() {

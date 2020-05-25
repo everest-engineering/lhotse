@@ -26,6 +26,6 @@ public class OrganizationStatusValidator implements Validates<OrganizationStatus
         } catch (NoSuchElementException e) {
             throw new IllegalStateException(String.format("Organization %s does not exist", command.getOrganizationId()), e);
         }
-        Validate.validState(!organization.isDeregistered(), "Organization %s is de-registered", command.getOrganizationId());
+        Validate.validState(!organization.isDisabled(), "Organization %s is de-registered", command.getOrganizationId());
     }
 }
