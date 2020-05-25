@@ -12,7 +12,6 @@ import java.util.UUID;
 @AllArgsConstructor
 @Revision("0")
 public class UserDetailsUpdatedByAdminEvent {
-
     private UUID userId;
     private UUID organizationId;
     private String displayNameChange;

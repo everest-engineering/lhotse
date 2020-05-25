@@ -4,9 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import engineering.everest.lhotse.api.config.TestApiConfig;
 import engineering.everest.lhotse.api.helpers.AuthContextExtension;
 import engineering.everest.lhotse.api.helpers.MockAuthenticationContextProvider;
-import engineering.everest.lhotse.api.rest.requests.NewOrganizationRequest;
 import engineering.everest.lhotse.api.rest.requests.NewUserRequest;
+import engineering.everest.lhotse.api.rest.requests.RegisterOrganizationRequest;
 import engineering.everest.lhotse.api.rest.requests.UpdateOrganizationRequest;
+import engineering.everest.lhotse.axon.common.RandomFieldsGenerator;
 import engineering.everest.lhotse.axon.common.domain.User;
 import engineering.everest.lhotse.organizations.Organization;
 import engineering.everest.lhotse.organizations.OrganizationAddress;
@@ -52,6 +53,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class OrganizationsControllerTest {
 
     private static final UUID ORGANIZATION_ID = randomUUID();
+    private static final UUID USER_ID = randomUUID();
     private static final String USER_USERNAME = "user@umbrella.com";
     private static final String ADMIN_USERNAME = "admin@umbrella.com";
     private static final String RAW_PASSWORD = "secret";
@@ -81,6 +83,8 @@ class OrganizationsControllerTest {
     private UsersService usersService;
     @MockBean
     private UsersReadService usersReadService;
+    @MockBean
+    private RandomFieldsGenerator randomFieldsGenerator;
 
     @Test
     @WithMockUser(username = USER_USERNAME, roles = ROLE_ORGANIZATION_USER)
@@ -97,20 +101,36 @@ class OrganizationsControllerTest {
     }
 
     @Test
-    @WithMockUser(username = ADMIN_USERNAME, roles = ROLE_ADMIN)
     void registerOrganizationWillDelegate() throws Exception {
+        when(randomFieldsGenerator.genRandomUUID())
+                .thenReturn(ORGANIZATION_1.getId())
+                .thenReturn(USER_ID);
+
         OrganizationAddress address = ORGANIZATION_1.getOrganizationAddress();
 
-        mockMvc.perform(post("/api/organizations")
+        mockMvc.perform(post("/api/organizations/register")
                 .contentType(APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new NewOrganizationRequest(ORGANIZATION_1.getOrganizationName(), address.getStreet(),
+                .content(objectMapper.writeValueAsString(new RegisterOrganizationRequest(ORGANIZATION_1.getOrganizationName(), address.getStreet(),
                         address.getCity(), address.getState(), address.getCountry(), address.getPostalCode(), ORGANIZATION_1.getWebsiteUrl(),
-                        ORGANIZATION_1.getContactName(), ORGANIZATION_1.getPhoneNumber(), ORGANIZATION_1.getEmailAddress()))))
-                .andExpect(status().isCreated());
+                        ORGANIZATION_1.getContactName(), ORGANIZATION_1.getPhoneNumber(), ORGANIZATION_1.getEmailAddress(), RAW_PASSWORD))))
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(APPLICATION_JSON))
+                .andExpect(jsonPath("$.newOrganizationId", is(ORGANIZATION_1.getId().toString())))
+                .andExpect(jsonPath("$.newUserId", is(USER_ID.toString())));
 
-        verify(organizationsService).registerOrganization(ORGANIZATION_1.getOrganizationName(), address.getStreet(), address.getCity(), address.getState(), address.getCountry(),
-                address.getPostalCode(), ORGANIZATION_1.getWebsiteUrl(), ORGANIZATION_1.getContactName(), ORGANIZATION_1.getPhoneNumber(), ORGANIZATION_1.getEmailAddress());
+        verify(organizationsService).registerOrganization(ORGANIZATION_1.getId(), USER_ID, ORGANIZATION_1.getOrganizationName(),
+                address.getStreet(), address.getCity(), address.getState(), address.getCountry(), address.getPostalCode(),
+                ORGANIZATION_1.getWebsiteUrl(), ORGANIZATION_1.getContactName(), ORGANIZATION_1.getPhoneNumber(), ORGANIZATION_1.getEmailAddress(), RAW_PASSWORD);
         verifyNoInteractions(usersService);
+    }
+
+    @Test
+    void confirmOrganizationRegistration() throws Exception {
+        UUID confirmationCode = randomUUID();
+        mockMvc.perform(get("/api/organizations/{organizationId}/register/{confirmationCode}", ORGANIZATION_ID, confirmationCode))
+                .andExpect(status().isOk());
+
+        verify(organizationsService).confirmOrganizationRegistrationEmail(ORGANIZATION_ID, confirmationCode);
     }
 
     @Test
@@ -136,7 +156,7 @@ class OrganizationsControllerTest {
                 .content(objectMapper.writeValueAsString(new UpdateOrganizationRequest(ORGANIZATION_1.getOrganizationName(), ORGANIZATION_1.getOrganizationAddress().getStreet(),
                         ORGANIZATION_1.getOrganizationAddress().getCity(), ORGANIZATION_1.getOrganizationAddress().getState(), ORGANIZATION_1.getOrganizationAddress().getCountry(), ORGANIZATION_1.getOrganizationAddress().getPostalCode(), ORGANIZATION_1.getWebsiteUrl(),
                         ORGANIZATION_1.getContactName(), ORGANIZATION_1.getPhoneNumber(), ORGANIZATION_1.getEmailAddress()))))
-                .andExpect(status().isMethodNotAllowed());
+                .andExpect(status().isNotFound());
 
         verifyNoInteractions(organizationsService);
     }

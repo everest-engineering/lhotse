@@ -3,9 +3,11 @@ package engineering.everest.lhotse.users.domain;
 import engineering.everest.lhotse.axon.command.validators.EmailAddressValidator;
 import engineering.everest.lhotse.axon.command.validators.OrganizationStatusValidator;
 import engineering.everest.lhotse.axon.command.validators.UsersUniqueEmailValidator;
+import engineering.everest.lhotse.users.domain.commands.CreateAdminUserForNewlyRegisteredOrganizationCommand;
 import engineering.everest.lhotse.users.domain.commands.CreateUserCommand;
 import engineering.everest.lhotse.users.domain.commands.RegisterUploadedUserProfilePhotoCommand;
 import engineering.everest.lhotse.users.domain.commands.UpdateUserDetailsCommand;
+import engineering.everest.lhotse.users.domain.events.AdminUserCreatedForNewlyRegisteredOrganizationEvent;
 import engineering.everest.lhotse.users.domain.events.UserCreatedByAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserDetailsUpdatedByAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserProfilePhotoUploadedEvent;
@@ -19,8 +21,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.UUID;
 import javax.validation.ConstraintViolationException;
+import java.util.UUID;
 
 import static engineering.everest.lhotse.axon.AxonTestUtils.mockCommandValidatingMessageHandlerInterceptor;
 import static engineering.everest.lhotse.axon.common.domain.User.ADMIN_ID;
@@ -130,14 +132,20 @@ class UserAggregateTest {
 
     @Test
     void rejectsCreateUserCommand_WhenUniqueUserEmailValidatorFails() {
-        CreateUserCommand command = new CreateUserCommand(USER_ID, ORGANIZATION_ID, ADMIN_ID, USERNAME,
-                USER_DISPLAY_NAME, USER_ENCODED_PASSWORD);
+        var command = new CreateUserCommand(USER_ID, ORGANIZATION_ID, ADMIN_ID, USERNAME, USER_DISPLAY_NAME, USER_ENCODED_PASSWORD);
         doThrow(IllegalArgumentException.class).when(usersUniqueEmailValidator).validate(command);
 
         testFixture.givenNoPriorActivity()
                 .when(command)
                 .expectNoEvents()
                 .expectException(IllegalArgumentException.class);
+    }
+
+    @Test
+    void createAdminUserForNewlyRegisteredOrganizationEmits() {
+        testFixture.givenNoPriorActivity()
+                .when(new CreateAdminUserForNewlyRegisteredOrganizationCommand(USER_ID, ORGANIZATION_ID, USERNAME, USER_ENCODED_PASSWORD, USER_DISPLAY_NAME))
+                .expectEvents(new AdminUserCreatedForNewlyRegisteredOrganizationEvent(USER_ID, ORGANIZATION_ID, USER_DISPLAY_NAME, USERNAME, USER_ENCODED_PASSWORD));
     }
 
     @Test
@@ -151,8 +159,7 @@ class UserAggregateTest {
 
     @Test
     void rejectsUpdateUserDetailsCommand_WhenEmailValidatorFails() {
-        var command = new UpdateUserDetailsCommand(USER_ID, "not-a-valid-email",
-                DISPLAY_NAME_CHANGE, ENCODED_PASSWORD_CHANGE, ADMIN_ID);
+        var command = new UpdateUserDetailsCommand(USER_ID, "not-a-valid-email", DISPLAY_NAME_CHANGE, ENCODED_PASSWORD_CHANGE, ADMIN_ID);
         doThrow(IllegalArgumentException.class).when(emailAddressValidator).validate(command);
 
         testFixture.given(USER_CREATED_BY_ADMIN_EVENT)
@@ -163,8 +170,7 @@ class UserAggregateTest {
 
     @Test
     void rejectsUpdateUserDetailsCommand_WhenRequestingUserIdIsNull() {
-        var command = new UpdateUserDetailsCommand(USER_ID, EMAIL_CHANGE,
-                DISPLAY_NAME_CHANGE, ENCODED_PASSWORD_CHANGE, null);
+        var command = new UpdateUserDetailsCommand(USER_ID, EMAIL_CHANGE, DISPLAY_NAME_CHANGE, ENCODED_PASSWORD_CHANGE, null);
 
         testFixture.given(USER_CREATED_BY_ADMIN_EVENT)
                 .when(command)
@@ -208,5 +214,4 @@ class UserAggregateTest {
                 .when(new RegisterUploadedUserProfilePhotoCommand(USER_ID, PROFILE_PHOTO_FILE_ID))
                 .expectEvents(new UserProfilePhotoUploadedEvent(USER_ID, PROFILE_PHOTO_FILE_ID));
     }
-
 }

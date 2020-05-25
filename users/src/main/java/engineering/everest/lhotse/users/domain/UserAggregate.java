@@ -1,8 +1,10 @@
 package engineering.everest.lhotse.users.domain;
 
+import engineering.everest.lhotse.users.domain.commands.CreateAdminUserForNewlyRegisteredOrganizationCommand;
 import engineering.everest.lhotse.users.domain.commands.CreateUserCommand;
 import engineering.everest.lhotse.users.domain.commands.RegisterUploadedUserProfilePhotoCommand;
 import engineering.everest.lhotse.users.domain.commands.UpdateUserDetailsCommand;
+import engineering.everest.lhotse.users.domain.events.AdminUserCreatedForNewlyRegisteredOrganizationEvent;
 import engineering.everest.lhotse.users.domain.events.UserCreatedByAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserDetailsUpdatedByAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserProfilePhotoUploadedEvent;
@@ -28,9 +30,8 @@ public class UserAggregate implements Serializable {
     private UUID userOnOrganizationId;
     private String userEmail;
     private String displayName;
-    private boolean disabled;
 
-    public UserAggregate() {
+    protected UserAggregate() {
     }
 
     @CommandHandler
@@ -41,8 +42,13 @@ public class UserAggregate implements Serializable {
     }
 
     @CommandHandler
+    public UserAggregate(CreateAdminUserForNewlyRegisteredOrganizationCommand command) {
+        apply(new AdminUserCreatedForNewlyRegisteredOrganizationEvent(command.getUserId(), command.getOrganizationId(),
+                command.getDisplayName(), command.getUserEmail(), command.getEncodedPassword()));
+    }
+
+    @CommandHandler
     void handle(UpdateUserDetailsCommand command) {
-        validateUserIsNotDisabled();
         validateAtLeastOneChangeIsBeingMade(command);
 
         if (command.getDisplayNameChange() != null) {
@@ -55,7 +61,6 @@ public class UserAggregate implements Serializable {
 
     @CommandHandler
     UUID handle(RegisterUploadedUserProfilePhotoCommand command) {
-        validateUserIsNotDisabled();
         apply(new UserProfilePhotoUploadedEvent(command.getUserId(), command.getProfilePhotoFileId()));
         return command.getProfilePhotoFileId();
     }
@@ -66,17 +71,20 @@ public class UserAggregate implements Serializable {
         userEmail = event.getUserEmail();
         displayName = event.getUserDisplayName();
         userOnOrganizationId = event.getOrganizationId();
-        disabled = false;
+    }
+
+    @EventSourcingHandler
+    void on(AdminUserCreatedForNewlyRegisteredOrganizationEvent event) {
+        userId = event.getUserId();
+        userEmail = event.getUserEmail();
+        displayName = event.getUserDisplayName();
+        userOnOrganizationId = event.getOrganizationId();
     }
 
     @EventSourcingHandler
     void on(UserDetailsUpdatedByAdminEvent event) {
         userEmail = selectDesiredState(event.getEmailChange(), userEmail);
         displayName = selectDesiredState(event.getDisplayNameChange(), displayName);
-    }
-
-    private void validateUserIsNotDisabled() {
-        Validate.validState(!disabled, "Account is disabled");
     }
 
     private void validateDisplayNameIsPresent(String displayName) {

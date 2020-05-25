@@ -1,5 +1,7 @@
 package engineering.everest.lhotse.organizations.domain.commands;
 
+import engineering.everest.lhotse.axon.command.validation.EmailAddressValidatableCommand;
+import engineering.everest.lhotse.axon.command.validation.UserUniqueEmailValidatableCommand;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.axonframework.modelling.command.TargetAggregateIdentifier;
@@ -9,10 +11,14 @@ import java.util.UUID;
 
 @Data
 @AllArgsConstructor
-public class RegisterOrganizationCommand {
+public class RegisterOrganizationCommand implements EmailAddressValidatableCommand, UserUniqueEmailValidatableCommand {
 
     @TargetAggregateIdentifier
     private UUID organizationId;
+    private UUID registeringUserId;
+    private UUID registrationConfirmationCode;
+    private String userEmailAddress;
+    private String userEncodedPassword;
     @NotBlank
     private String organizationName;
     private String street;
@@ -23,5 +29,9 @@ public class RegisterOrganizationCommand {
     private String websiteUrl;
     private String contactName;
     private String phoneNumber;
-    private String emailAddress;
+
+    @Override
+    public String getEmailAddress() {
+        return userEmailAddress;
+    }
 }

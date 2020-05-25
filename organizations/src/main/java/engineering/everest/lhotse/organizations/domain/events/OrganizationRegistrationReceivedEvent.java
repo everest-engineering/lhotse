@@ -13,7 +13,10 @@ import java.util.UUID;
 @Revision("0")
 public class OrganizationRegistrationReceivedEvent {
     private UUID organizationId;
+    private UUID registeringUserId;
+    private UUID registrationConfirmationCode;
     private String registeringContactEmail;
+    private String registeringUserEncodedPassword;
     private String organizationName;
     private String websiteUrl;
     private String street;
@@ -23,5 +26,4 @@ public class OrganizationRegistrationReceivedEvent {
     private String postalCode;
     private String contactName;
     private String contactPhoneNumber;
-
 }

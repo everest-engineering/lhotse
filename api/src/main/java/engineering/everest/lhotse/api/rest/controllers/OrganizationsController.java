@@ -3,11 +3,13 @@ package engineering.everest.lhotse.api.rest.controllers;
 import engineering.everest.lhotse.api.rest.annotations.AdminOrAdminOfTargetOrganization;
 import engineering.everest.lhotse.api.rest.annotations.AdminOrUserOfTargetOrganization;
 import engineering.everest.lhotse.api.rest.converters.DtoConverter;
-import engineering.everest.lhotse.api.rest.requests.NewOrganizationRequest;
 import engineering.everest.lhotse.api.rest.requests.NewUserRequest;
+import engineering.everest.lhotse.api.rest.requests.RegisterOrganizationRequest;
 import engineering.everest.lhotse.api.rest.requests.UpdateOrganizationRequest;
+import engineering.everest.lhotse.api.rest.responses.OrganizationRegistrationResponse;
 import engineering.everest.lhotse.api.rest.responses.OrganizationResponse;
 import engineering.everest.lhotse.api.rest.responses.UserResponse;
+import engineering.everest.lhotse.axon.common.RandomFieldsGenerator;
 import engineering.everest.lhotse.axon.common.domain.User;
 import engineering.everest.lhotse.organizations.services.OrganizationsReadService;
 import engineering.everest.lhotse.organizations.services.OrganizationsService;
@@ -44,18 +46,21 @@ public class OrganizationsController {
     private final OrganizationsReadService organizationsReadService;
     private final UsersService usersService;
     private final UsersReadService usersReadService;
+    private final RandomFieldsGenerator randomFieldsGenerator;
 
     @Autowired
     public OrganizationsController(DtoConverter dtoConverter,
                                    OrganizationsService organizationsService,
                                    OrganizationsReadService organizationsReadService,
                                    UsersService usersService,
-                                   UsersReadService usersReadService) {
+                                   UsersReadService usersReadService,
+                                   RandomFieldsGenerator randomFieldsGenerator) {
         this.dtoConverter = dtoConverter;
         this.organizationsService = organizationsService;
         this.organizationsReadService = organizationsReadService;
         this.usersService = usersService;
         this.usersReadService = usersReadService;
+        this.randomFieldsGenerator = randomFieldsGenerator;
     }
 
     @SuppressWarnings("PMD.AvoidDuplicateLiterals")
@@ -67,20 +72,32 @@ public class OrganizationsController {
         return dtoConverter.convert(organizationsReadService.getById(organizationId));
     }
 
-    @PostMapping
+    @PostMapping("/register")
     @ResponseStatus(CREATED)
     @ApiOperation("Register a new organization")
-    public UUID registerOrganization(User requestingUser, @RequestBody @Valid NewOrganizationRequest request) {
-        return organizationsService.registerOrganization(request.getOrganizationName(), request.getStreet(), request.getCity(),
-                request.getState(), request.getCountry(), request.getPostalCode(), request.getWebsiteUrl(),
-                request.getContactName(), request.getContactPhoneNumber(), request.getContactEmail());
+    public OrganizationRegistrationResponse registerOrganization(@RequestBody @Valid RegisterOrganizationRequest request) {
+        var organizationId = randomFieldsGenerator.genRandomUUID();
+        var userId = randomFieldsGenerator.genRandomUUID();
+
+        organizationsService.registerOrganization(organizationId, userId, request.getOrganizationName(), request.getStreet(),
+                request.getCity(), request.getState(), request.getCountry(), request.getPostalCode(), request.getWebsiteUrl(),
+                request.getContactName(), request.getContactPhoneNumber(), request.getContactEmail(), request.getContactPassword());
+        return new OrganizationRegistrationResponse(organizationId, userId);
+    }
+
+    @GetMapping("/{organizationId}/register/{confirmationCode}")
+    @ResponseStatus(OK)
+    @ApiOperation("Confirm the email address used to register an organization")
+    public void confirmOrganizationContactEmail(@PathVariable UUID organizationId, @PathVariable UUID confirmationCode) {
+        organizationsService.confirmOrganizationRegistrationEmail(organizationId, confirmationCode);
     }
 
     @PutMapping("/{organizationId}")
     @ResponseStatus(OK)
     @ApiOperation("Update Organization")
     @AdminOrAdminOfTargetOrganization
-    public void updateOrganization(User requestingUser, @PathVariable UUID organizationId,
+    public void updateOrganization(User requestingUser,
+                                   @PathVariable UUID organizationId,
                                    @RequestBody @Valid UpdateOrganizationRequest request) {
         organizationsService.updateOrganization(requestingUser.getId(), organizationId,
                 request.getOrganizationName(), request.getStreet(), request.getCity(), request.getState(), request.getCountry(),

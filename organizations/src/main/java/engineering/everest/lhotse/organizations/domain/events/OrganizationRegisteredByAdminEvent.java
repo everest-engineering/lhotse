@@ -12,7 +12,6 @@ import java.util.UUID;
 @AllArgsConstructor
 @Revision("0")
 public class OrganizationRegisteredByAdminEvent {
-
     private UUID organizationId;
     private UUID adminId;
     private String organizationName;

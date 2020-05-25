@@ -19,6 +19,6 @@ public class Organization implements Identifiable {
     private String contactName;
     private String phoneNumber;
     private String emailAddress;
-    private boolean deregistered;
+    private boolean disabled;
 
 }

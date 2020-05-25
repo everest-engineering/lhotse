@@ -77,7 +77,10 @@ public class TestApiConfig {
 
             AndRequestMatcher requestMatcher = new AndRequestMatcher(
                     new AntPathRequestMatcher("/api/**"),
-                    new NegatedRequestMatcher(new AntPathRequestMatcher("/api/version")));
+                    new NegatedRequestMatcher(new AntPathRequestMatcher("/api/version")),
+                    new NegatedRequestMatcher(new AntPathRequestMatcher("/api/organizations/register")),
+                    new NegatedRequestMatcher(new AntPathRequestMatcher("/api/organizations/**/register/**"))
+            );
 
             httpSecurity
                     .cors().and()

@@ -1,6 +1,7 @@
 package engineering.everest.lhotse.users.eventhandlers;
 
 import engineering.everest.lhotse.axon.replay.ReplayCompletionAware;
+import engineering.everest.lhotse.users.domain.events.AdminUserCreatedForNewlyRegisteredOrganizationEvent;
 import engineering.everest.lhotse.users.persistence.UsersRepository;
 import engineering.everest.lhotse.users.domain.events.UserCreatedByAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserProfilePhotoUploadedEvent;
@@ -35,6 +36,12 @@ public class UsersEventHandler implements ReplayCompletionAware {
 
     @EventHandler
     void on(UserCreatedByAdminEvent event, @Timestamp Instant creationTime) {
+        usersRepository.createUser(event.getUserId(), event.getOrganizationId(), event.getUserDisplayName(),
+                event.getUserEmail(), event.getEncodedPassword(), creationTime);
+    }
+
+    @EventHandler
+    void on(AdminUserCreatedForNewlyRegisteredOrganizationEvent event, @Timestamp Instant creationTime) {
         usersRepository.createUser(event.getUserId(), event.getOrganizationId(), event.getUserDisplayName(),
                 event.getUserEmail(), event.getEncodedPassword(), creationTime);
     }

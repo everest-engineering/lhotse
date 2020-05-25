@@ -15,7 +15,7 @@
             <column name="state" type="varchar(255)"/>
             <column name="street" type="varchar(255)"/>
             <column name="contactname" type="varchar(255)"/>
-            <column name="deregistered" type="boolean" defaultValueBoolean="false">
+            <column name="disabled" type="boolean" defaultValueBoolean="false">
                 <constraints nullable="false"/>
             </column>
             <column name="emailaddress" type="varchar(255)"/>

@@ -25,7 +25,7 @@ public class AuthenticationContextProvider {
     private User convert(Authentication authentication) {
         final var principal = authentication.getPrincipal();
         if (!(principal instanceof AppUserDetails)) {
-            throw new AuthenticationFailureException("Principle object is not valid");
+            throw new AuthenticationFailureException("Principal object is not valid");
         }
         return ((AppUserDetails) principal).getUser();
     }

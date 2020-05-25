@@ -5,12 +5,16 @@ import engineering.everest.lhotse.organizations.OrganizationAddress;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationAddressUpdatedByAdminEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationContactDetailsUpdatedByAdminEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationDisabledByAdminEvent;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationEnabledByAdminEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationNameUpdatedByAdminEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationRegisteredByAdminEvent;
-import engineering.everest.lhotse.organizations.domain.events.OrganizationEnabledByAdminEvent;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationRegistrationConfirmationEmailSentEvent;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationRegistrationConfirmedEvent;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationRegistrationReceivedEvent;
 import engineering.everest.lhotse.organizations.persistence.Address;
 import engineering.everest.lhotse.organizations.persistence.OrganizationsRepository;
 import lombok.extern.log4j.Log4j2;
+import org.axonframework.eventhandling.DisallowReplay;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventhandling.ResetHandler;
 import org.axonframework.eventhandling.Timestamp;
@@ -38,27 +42,52 @@ public class OrganizationsEventHandler implements ReplayCompletionAware {
 
     @EventHandler
     void on(OrganizationRegisteredByAdminEvent event, @Timestamp Instant creationTime) {
-        LOGGER.info("Creating new organization {}", event.getOrganizationId());
+        LOGGER.info("Creating new registered organization {}", event.getOrganizationId());
         var organizationAddress = new OrganizationAddress(event.getStreet(), event.getCity(), event.getState(),
                 event.getCountry(), event.getPostalCode());
         organizationsRepository.createOrganization(event.getOrganizationId(), event.getOrganizationName(),
                 organizationAddress, event.getWebsiteUrl(), event.getContactName(), event.getContactPhoneNumber(),
-                event.getContactEmail(), creationTime);
+                event.getContactEmail(), false, creationTime);
+    }
+
+    @EventHandler
+    void on(OrganizationRegistrationReceivedEvent event, @Timestamp Instant creationTime) {
+        LOGGER.info("Creating organization pending registration confirmation {}", event.getOrganizationId());
+        var organizationAddress = new OrganizationAddress(event.getStreet(), event.getCity(), event.getState(),
+                event.getCountry(), event.getPostalCode());
+        organizationsRepository.createOrganization(event.getOrganizationId(), event.getOrganizationName(),
+                organizationAddress, event.getWebsiteUrl(), event.getContactName(), event.getContactPhoneNumber(),
+                event.getRegisteringContactEmail(), true, creationTime);
+    }
+
+    @EventHandler
+    @DisallowReplay
+    void on(OrganizationRegistrationConfirmationEmailSentEvent event) {
+        LOGGER.info("Sent organization {} registration confirmation email with confirmation code {}",
+                event.getOrganizationId(), event.getConfirmationCode());
+    }
+
+    @EventHandler
+    void on(OrganizationRegistrationConfirmedEvent event) {
+        LOGGER.info("Organization {} registration confirmed, enabling it", event.getOrganizationId());
+        var persistableOrganization = organizationsRepository.findById(event.getOrganizationId()).orElseThrow();
+        persistableOrganization.setDisabled(false);
+        organizationsRepository.save(persistableOrganization);
     }
 
     @EventHandler
     void on(OrganizationDisabledByAdminEvent event) {
-        LOGGER.info("Organization {} de-registered by {}", event.getOrganizationId(), event.getAdminId());
+        LOGGER.info("Organization {} disabled by {}", event.getOrganizationId(), event.getAdminId());
         var persistableOrganization = organizationsRepository.findById(event.getOrganizationId()).orElseThrow();
-        persistableOrganization.setDeregistered(true);
+        persistableOrganization.setDisabled(true);
         organizationsRepository.save(persistableOrganization);
     }
 
     @EventHandler
     void on(OrganizationEnabledByAdminEvent event) {
-        LOGGER.info("Organization {} re-registered by {}", event.getOrganizationId(), event.getAdminId());
+        LOGGER.info("Organization {} enabled by {}", event.getOrganizationId(), event.getAdminId());
         var persistableOrganization = organizationsRepository.findById(event.getOrganizationId()).orElseThrow();
-        persistableOrganization.setDeregistered(false);
+        persistableOrganization.setDisabled(false);
         organizationsRepository.save(persistableOrganization);
     }
 
@@ -86,12 +115,12 @@ public class OrganizationsEventHandler implements ReplayCompletionAware {
         LOGGER.info("Organization {} address updated by {}", event.getOrganizationId(), event.getAdminId());
         var organization = organizationsRepository.findById(event.getOrganizationId()).orElseThrow();
         var organizationAddress = organization.getAddress();
-        String city = selectDesiredState(event.getCity(), organizationAddress.getCity());
-        String street = selectDesiredState(event.getStreet(), organizationAddress.getStreet());
-        String state = selectDesiredState(event.getState(), organizationAddress.getState());
-        String country = selectDesiredState(event.getCountry(), organizationAddress.getCountry());
-        String postalCode = selectDesiredState(event.getPostalCode(), organizationAddress.getPostalCode());
-        Address address = new Address(street, city, state, country, postalCode);
+        var city = selectDesiredState(event.getCity(), organizationAddress.getCity());
+        var street = selectDesiredState(event.getStreet(), organizationAddress.getStreet());
+        var state = selectDesiredState(event.getState(), organizationAddress.getState());
+        var country = selectDesiredState(event.getCountry(), organizationAddress.getCountry());
+        var postalCode = selectDesiredState(event.getPostalCode(), organizationAddress.getPostalCode());
+        var address = new Address(street, city, state, country, postalCode);
         organization.setAddress(address);
         organizationsRepository.save(organization);
     }
