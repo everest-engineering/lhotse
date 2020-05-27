@@ -1,6 +1,7 @@
 package engineering.everest.lhotse.registrations.eventhandlers;
 
 import engineering.everest.lhotse.axon.replay.ReplayCompletionAware;
+import engineering.everest.lhotse.registations.persistence.PendingRegistrationsRepository;
 import engineering.everest.lhotse.registrations.domain.events.OrganizationRegistrationConfirmationEmailSentEvent;
 import engineering.everest.lhotse.registrations.domain.events.OrganizationRegistrationConfirmedEvent;
 import engineering.everest.lhotse.registrations.domain.events.OrganizationRegistrationReceivedEvent;
@@ -17,14 +18,24 @@ import java.time.Instant;
 @Log4j2
 public class PendingRegistrationsEventHandler implements ReplayCompletionAware {
 
+    private final PendingRegistrationsRepository pendingRegistrationsRepository;
+
+    public PendingRegistrationsEventHandler(PendingRegistrationsRepository pendingRegistrationsRepository) {
+        this.pendingRegistrationsRepository = pendingRegistrationsRepository;
+    }
+
     @ResetHandler
     public void prepareForReplay() {
         LOGGER.info("{} deleting projections", PendingRegistrationsEventHandler.class.getSimpleName());
+        pendingRegistrationsRepository.deleteAll();
     }
 
     @EventHandler
-    void on(OrganizationRegistrationReceivedEvent event, @Timestamp Instant creationTime) {
+    void on(OrganizationRegistrationReceivedEvent event, @Timestamp Instant registrationReceivedTime) {
         LOGGER.info("Creating pending registration for organization {}", event.getOrganizationId());
+        pendingRegistrationsRepository.createPendingRegistration(event.getRegistrationConfirmationCode(),
+                event.getOrganizationId(), event.getRegisteringUserId(), event.getRegisteringContactEmail(),
+                registrationReceivedTime);
     }
 
     @EventHandler
@@ -36,6 +47,7 @@ public class PendingRegistrationsEventHandler implements ReplayCompletionAware {
 
     @EventHandler
     void on(OrganizationRegistrationConfirmedEvent event) {
-        LOGGER.info("Organization {} registration confirmed, enabling it", event.getOrganizationId());
+        LOGGER.info("Organization {} registration confirmed, removing pending registration", event.getOrganizationId());
+        pendingRegistrationsRepository.deleteById(event.getRegistrationConfirmationCode());
     }
 }

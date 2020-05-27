@@ -60,5 +60,18 @@
                                  constraintName="FK_users_roles_users_id"
                                  referencedTableName="users"
                                  referencedColumnNames="id"/>
+
+        <createTable tableName="pendingregistrations">
+            <column name="confirmationcode" type="uuid">
+                <constraints primaryKey="true" primaryKeyName="PK_pending_registrations"/>
+            </column>
+            <column name="organizationid" type="uuid"/>
+            <column name="userid" type="uuid"/>
+            <column name="useremail" type="varchar(255)"/>
+            <column name="registeredon" type="timestamp"/>
+        </createTable>
+        <createIndex tableName="pendingregistrations" indexName="INDEX_pendingregistrations_email">
+            <column name="useremail"/>
+        </createIndex>
     </changeSet>
 </databaseChangeLog>
