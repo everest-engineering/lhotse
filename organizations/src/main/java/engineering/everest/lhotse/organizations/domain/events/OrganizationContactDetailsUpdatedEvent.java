@@ -11,12 +11,12 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Revision("0")
-public class OrganizationContactDetailsUpdatedByAdminEvent {
+public class OrganizationContactDetailsUpdatedEvent {
     private UUID organizationId;
     private String contactName;
     private String phoneNumber;
     private String emailAddress;
     private String websiteUrl;
-    private UUID adminId;
+    private UUID updatingUserId;
 
 }

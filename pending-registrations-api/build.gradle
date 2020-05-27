@@ -1,0 +1,10 @@
+dependencies {
+    api project(':command-validation-api')
+    api project(':common')
+
+    implementation 'javax.validation:validation-api'
+    implementation "org.axonframework:axon-modelling:${axonVersion}"
+
+    testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
+    testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
+}

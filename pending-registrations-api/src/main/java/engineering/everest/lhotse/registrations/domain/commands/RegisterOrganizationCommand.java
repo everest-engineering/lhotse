@@ -1,4 +1,4 @@
-package engineering.everest.lhotse.organizations.domain.commands;
+package engineering.everest.lhotse.registrations.domain.commands;
 
 import engineering.everest.lhotse.axon.command.validation.EmailAddressValidatableCommand;
 import engineering.everest.lhotse.axon.command.validation.UserUniqueEmailValidatableCommand;
@@ -14,9 +14,9 @@ import java.util.UUID;
 public class RegisterOrganizationCommand implements EmailAddressValidatableCommand, UserUniqueEmailValidatableCommand {
 
     @TargetAggregateIdentifier
+    private UUID registrationConfirmationCode;
     private UUID organizationId;
     private UUID registeringUserId;
-    private UUID registrationConfirmationCode;
     private String userEmailAddress;
     private String userEncodedPassword;
     @NotBlank

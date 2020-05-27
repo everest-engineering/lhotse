@@ -1,6 +1,7 @@
 dependencies {
     implementation project(':common')
     implementation project(':organizations-api')
+    implementation project(':pending-registrations-api')
     implementation project(':users-api')
     implementation project(':security-support')
 

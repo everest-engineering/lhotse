@@ -13,6 +13,7 @@ import engineering.everest.lhotse.organizations.Organization;
 import engineering.everest.lhotse.organizations.OrganizationAddress;
 import engineering.everest.lhotse.organizations.services.OrganizationsReadService;
 import engineering.everest.lhotse.organizations.services.OrganizationsService;
+import engineering.everest.lhotse.registrations.services.PendingRegistrationsService;
 import engineering.everest.lhotse.users.services.UsersReadService;
 import engineering.everest.lhotse.users.services.UsersService;
 import org.hamcrest.Matchers;
@@ -78,6 +79,8 @@ class OrganizationsControllerTest {
     @MockBean
     private OrganizationsService organizationsService;
     @MockBean
+    private PendingRegistrationsService pendingRegistrationsService;
+    @MockBean
     private OrganizationsReadService organizationsReadService;
     @MockBean
     private UsersService usersService;
@@ -118,7 +121,7 @@ class OrganizationsControllerTest {
                 .andExpect(jsonPath("$.newOrganizationId", is(ORGANIZATION_1.getId().toString())))
                 .andExpect(jsonPath("$.newUserId", is(USER_ID.toString())));
 
-        verify(organizationsService).registerOrganization(ORGANIZATION_1.getId(), USER_ID, ORGANIZATION_1.getOrganizationName(),
+        verify(pendingRegistrationsService).registerOrganization(ORGANIZATION_1.getId(), USER_ID, ORGANIZATION_1.getOrganizationName(),
                 address.getStreet(), address.getCity(), address.getState(), address.getCountry(), address.getPostalCode(),
                 ORGANIZATION_1.getWebsiteUrl(), ORGANIZATION_1.getContactName(), ORGANIZATION_1.getPhoneNumber(), ORGANIZATION_1.getEmailAddress(), RAW_PASSWORD);
         verifyNoInteractions(usersService);
@@ -130,7 +133,7 @@ class OrganizationsControllerTest {
         mockMvc.perform(get("/api/organizations/{organizationId}/register/{confirmationCode}", ORGANIZATION_ID, confirmationCode))
                 .andExpect(status().isOk());
 
-        verify(organizationsService).confirmOrganizationRegistrationEmail(ORGANIZATION_ID, confirmationCode);
+        verify(pendingRegistrationsService).confirmOrganizationRegistrationEmail(ORGANIZATION_ID, confirmationCode);
     }
 
     @Test

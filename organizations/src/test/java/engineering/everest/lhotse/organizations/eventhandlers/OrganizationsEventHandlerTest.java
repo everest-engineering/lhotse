@@ -1,11 +1,11 @@
 package engineering.everest.lhotse.organizations.eventhandlers;
 
 import engineering.everest.lhotse.organizations.OrganizationAddress;
-import engineering.everest.lhotse.organizations.domain.events.OrganizationAddressUpdatedByAdminEvent;
-import engineering.everest.lhotse.organizations.domain.events.OrganizationContactDetailsUpdatedByAdminEvent;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationAddressUpdatedEvent;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationContactDetailsUpdatedEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationDisabledByAdminEvent;
-import engineering.everest.lhotse.organizations.domain.events.OrganizationNameUpdatedByAdminEvent;
-import engineering.everest.lhotse.organizations.domain.events.OrganizationRegisteredByAdminEvent;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationNameChangedEvent;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationRegisteredEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationEnabledByAdminEvent;
 import engineering.everest.lhotse.organizations.persistence.Address;
 import engineering.everest.lhotse.organizations.persistence.OrganizationsRepository;
@@ -77,7 +77,7 @@ class OrganizationsEventHandlerTest {
 
     @Test
     void onOrganizationRegisteredByAdminEvent_willDelegate() {
-        organizationsEventHandler.on(new OrganizationRegisteredByAdminEvent(ORGANIZATION_ID, ADMIN_ID, ORGANIZATION_NAME,
+        organizationsEventHandler.on(new OrganizationRegisteredEvent(ORGANIZATION_ID, ADMIN_ID, ORGANIZATION_NAME,
                 ORGANIZATION_WEBSITE_URL, ORGANIZATION_STREET, ORGANIZATION_CITY, ORGANIZATION_STATE, ORGANIZATION_COUNTRY,
                 ORGANIZATION_POSTAL_CODE, ORGANIZATION_CONTACT_NAME, ORGANIZATION_PHONE_NUMBER, ORGANIZATION_EMAIL_ADDRESS), ORG_CREATION_TIME);
 
@@ -113,7 +113,7 @@ class OrganizationsEventHandlerTest {
 
         when(organizationsRepository.findById(ORGANIZATION_ID)).thenReturn(Optional.of(persistableOrganization));
 
-        organizationsEventHandler.on(new OrganizationNameUpdatedByAdminEvent(ORGANIZATION_ID, ORGANIZATION_NAME_UPDATE, ADMIN_ID));
+        organizationsEventHandler.on(new OrganizationNameChangedEvent(ORGANIZATION_ID, ORGANIZATION_NAME_UPDATE, ADMIN_ID));
 
         assertEquals(ORGANIZATION_NAME_UPDATE, persistableOrganization.getOrganizationName());
         verify(organizationsRepository).save(persistableOrganization);
@@ -125,7 +125,7 @@ class OrganizationsEventHandlerTest {
 
         when(organizationsRepository.findById(ORGANIZATION_ID)).thenReturn(Optional.of(persistableOrganization));
 
-        organizationsEventHandler.on(new OrganizationContactDetailsUpdatedByAdminEvent(ORGANIZATION_ID,
+        organizationsEventHandler.on(new OrganizationContactDetailsUpdatedEvent(ORGANIZATION_ID,
                 ORGANIZATION_CONTACT_NAME_UPDATE, ORGANIZATION_PHONE_NUMBER_UPDATE, ORGANIZATION_EMAIL_UPDATE, ORGANIZATION_WEBSITE_UPDATE, ADMIN_ID));
 
         assertEquals(ORGANIZATION_CONTACT_NAME_UPDATE, persistableOrganization.getContactName());
@@ -140,7 +140,7 @@ class OrganizationsEventHandlerTest {
         var persistableOrganization = createPersistableOrganization();
         when(organizationsRepository.findById(ORGANIZATION_ID)).thenReturn(Optional.of(persistableOrganization));
 
-        organizationsEventHandler.on(new OrganizationAddressUpdatedByAdminEvent(ORGANIZATION_ID, ORGANIZATION_STREET_UPDATE,
+        organizationsEventHandler.on(new OrganizationAddressUpdatedEvent(ORGANIZATION_ID, ORGANIZATION_STREET_UPDATE,
                 ORGANIZATION_CITY_UPDATE, ORGANIZATION_STATE_UPDATE, ORGANIZATION_COUNTRY_UPDATE, ORGANIZATION_POSTAL_CODE_UPDATE, ADMIN_ID));
 
         var expectedAddress = new Address(ORGANIZATION_STREET_UPDATE, ORGANIZATION_CITY_UPDATE, ORGANIZATION_STATE_UPDATE,

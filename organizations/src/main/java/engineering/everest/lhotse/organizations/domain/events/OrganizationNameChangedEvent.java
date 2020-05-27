@@ -11,9 +11,8 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Revision("0")
-public class OrganizationRegistrationConfirmationEmailSentEvent {
+public class OrganizationNameChangedEvent {
     private UUID organizationId;
-    private UUID confirmationCode;
-    private String registeringContactEmail;
     private String organizationName;
+    private UUID updatingUserId;
 }

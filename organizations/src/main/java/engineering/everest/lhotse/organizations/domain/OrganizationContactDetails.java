@@ -1,9 +1,8 @@
 package engineering.everest.lhotse.organizations.domain;
 
-import engineering.everest.lhotse.organizations.domain.events.OrganizationAddressUpdatedByAdminEvent;
-import engineering.everest.lhotse.organizations.domain.events.OrganizationContactDetailsUpdatedByAdminEvent;
-import engineering.everest.lhotse.organizations.domain.events.OrganizationRegisteredByAdminEvent;
-import engineering.everest.lhotse.organizations.domain.events.OrganizationRegistrationReceivedEvent;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationAddressUpdatedEvent;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationContactDetailsUpdatedEvent;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationRegisteredEvent;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.axonframework.eventsourcing.EventSourcingHandler;
@@ -32,7 +31,7 @@ class OrganizationContactDetails implements Serializable {
     }
 
     @EventSourcingHandler
-    void on(OrganizationRegisteredByAdminEvent event) {
+    void on(OrganizationRegisteredEvent event) {
         contactName = event.getContactName();
         contactEmail = event.getContactEmail();
         contactPhoneNumber = event.getContactPhoneNumber();
@@ -40,15 +39,7 @@ class OrganizationContactDetails implements Serializable {
     }
 
     @EventSourcingHandler
-    void on(OrganizationRegistrationReceivedEvent event) {
-        contactName = event.getContactName();
-        contactEmail = event.getRegisteringContactEmail();
-        contactPhoneNumber = event.getContactPhoneNumber();
-        websiteUrl = event.getWebsiteUrl();
-    }
-
-    @EventSourcingHandler
-    void on(OrganizationContactDetailsUpdatedByAdminEvent event) {
+    void on(OrganizationContactDetailsUpdatedEvent event) {
         contactName = event.getContactName();
         contactEmail = event.getEmailAddress();
         contactPhoneNumber = event.getPhoneNumber();
@@ -56,7 +47,7 @@ class OrganizationContactDetails implements Serializable {
     }
 
     @EventSourcingHandler
-    void on(OrganizationAddressUpdatedByAdminEvent event) {
+    void on(OrganizationAddressUpdatedEvent event) {
         city = event.getCity();
         country = event.getCountry();
         postalCode = event.getPostalCode();
