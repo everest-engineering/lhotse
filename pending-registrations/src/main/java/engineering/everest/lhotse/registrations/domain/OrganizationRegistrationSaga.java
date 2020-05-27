@@ -7,9 +7,11 @@ import engineering.everest.lhotse.registrations.domain.events.OrganizationRegist
 import engineering.everest.lhotse.users.domain.commands.CreateUserForNewlyRegisteredOrganizationCommand;
 import engineering.everest.lhotse.users.domain.commands.PromoteUserToOrganizationAdminCommand;
 import engineering.everest.lhotse.users.domain.events.UserCreatedForNewlyRegisteredOrganizationEvent;
+import engineering.everest.starterkit.axon.HazelcastCommandGateway;
 import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.axonframework.commandhandling.gateway.CommandGateway;
+import org.axonframework.commandhandling.gateway.DefaultCommandGateway;
 import org.axonframework.modelling.saga.EndSaga;
 import org.axonframework.modelling.saga.SagaEventHandler;
 import org.axonframework.modelling.saga.StartSaga;
@@ -39,7 +41,14 @@ public class OrganizationRegistrationSaga {
     private String phoneNumber;
 
     @Autowired
-    public void setCommandGateway(CommandGateway commandGateway) {
+    public void setDefaultCommandGateway(DefaultCommandGateway commandGateway) {
+        if (this.commandGateway == null) { // Yuck
+            this.commandGateway = commandGateway;
+        }
+    }
+
+    @Autowired
+    public void setHazelcastCommandGateway(HazelcastCommandGateway commandGateway) {
         this.commandGateway = commandGateway;
     }
 
