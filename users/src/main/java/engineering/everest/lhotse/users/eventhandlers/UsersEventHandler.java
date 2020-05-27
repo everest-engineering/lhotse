@@ -36,14 +36,18 @@ public class UsersEventHandler implements ReplayCompletionAware {
 
     @EventHandler
     void on(UserCreatedByAdminEvent event, @Timestamp Instant creationTime) {
+        LOGGER.info("User {} created for admin created organization {}", event.getUserId(), event.getOrganizationId());
         usersRepository.createUser(event.getUserId(), event.getOrganizationId(), event.getUserDisplayName(),
                 event.getUserEmail(), event.getEncodedPassword(), creationTime);
     }
 
     @EventHandler
     void on(UserCreatedForNewlyRegisteredOrganizationEvent event, @Timestamp Instant creationTime) {
+        LOGGER.info("User {} created for self registered organization {}", event.getUserId(), event.getOrganizationId());
         usersRepository.createUser(event.getUserId(), event.getOrganizationId(), event.getUserDisplayName(),
                 event.getUserEmail(), event.getEncodedPassword(), creationTime);
+
+        // You may also want a non-replayable event handler for sending a welcome email to new users
     }
 
     @EventHandler

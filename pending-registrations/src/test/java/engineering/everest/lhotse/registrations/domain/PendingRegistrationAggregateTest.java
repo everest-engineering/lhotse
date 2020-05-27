@@ -1,10 +1,14 @@
 package engineering.everest.lhotse.registrations.domain;
 
 import engineering.everest.lhotse.axon.command.validators.EmailAddressValidator;
+import engineering.everest.lhotse.registrations.domain.commands.CancelConfirmedRegistrationUserEmailAlreadyInUseCommand;
+import engineering.everest.lhotse.registrations.domain.commands.CompleteOrganizationRegistrationCommand;
 import engineering.everest.lhotse.registrations.domain.commands.ConfirmOrganizationRegistrationEmailCommand;
 import engineering.everest.lhotse.registrations.domain.commands.RecordSentOrganizationRegistrationEmailConfirmationCommand;
 import engineering.everest.lhotse.registrations.domain.commands.RegisterOrganizationCommand;
+import engineering.everest.lhotse.registrations.domain.events.OrganizationRegistrationCompletedEvent;
 import engineering.everest.lhotse.registrations.domain.events.OrganizationRegistrationConfirmationEmailSentEvent;
+import engineering.everest.lhotse.registrations.domain.events.OrganizationRegistrationConfirmedAfterUserWithEmailCreatedEvent;
 import engineering.everest.lhotse.registrations.domain.events.OrganizationRegistrationConfirmedEvent;
 import engineering.everest.lhotse.registrations.domain.events.OrganizationRegistrationReceivedEvent;
 import org.axonframework.spring.stereotype.Aggregate;
@@ -28,6 +32,7 @@ class PendingRegistrationAggregateTest {
     private static final UUID ORGANIZATION_ID = randomUUID();
     private static final UUID REGISTERING_USER_ID = randomUUID();
     private static final UUID REGISTRATION_CONFIRMATION_CODE = randomUUID();
+    public static final OrganizationRegistrationConfirmedEvent ORGANIZATION_REGISTRATION_CONFIRMED_EVENT = new OrganizationRegistrationConfirmedEvent(REGISTRATION_CONFIRMATION_CODE, ORGANIZATION_ID);
     private static final String ORGANIZATION_NAME = "organization-name";
     private static final String ENCODED_PASSWORD = "encoded-password";
     private static final String ORGANIZATION_STREET = "street";
@@ -84,7 +89,7 @@ class PendingRegistrationAggregateTest {
     void emits_WhenConfirmOrganizationRegistrationEmailCommandIsValid() {
         testFixture.given(ORGANIZATION_REGISTRATION_RECEIVED_EVENT)
                 .when(new ConfirmOrganizationRegistrationEmailCommand(REGISTRATION_CONFIRMATION_CODE, ORGANIZATION_ID))
-                .expectEvents(new OrganizationRegistrationConfirmedEvent(REGISTRATION_CONFIRMATION_CODE, ORGANIZATION_ID));
+                .expectEvents(ORGANIZATION_REGISTRATION_CONFIRMED_EVENT);
     }
 
     @Test
@@ -94,5 +99,23 @@ class PendingRegistrationAggregateTest {
                 .expectNoEvents()
                 .expectException(IllegalArgumentException.class)
                 .expectExceptionMessage("Valid confirmation token for another organization");
+    }
+
+    @Test
+    void emits_WhenCompleteOrganizationRegistrationCommandIsValid() {
+        testFixture.given(
+                ORGANIZATION_REGISTRATION_RECEIVED_EVENT,
+                ORGANIZATION_REGISTRATION_CONFIRMED_EVENT)
+                .when(new CompleteOrganizationRegistrationCommand(REGISTRATION_CONFIRMATION_CODE, ORGANIZATION_ID, REGISTERING_USER_ID))
+                .expectEvents(new OrganizationRegistrationCompletedEvent(REGISTRATION_CONFIRMATION_CODE, ORGANIZATION_ID, REGISTERING_USER_ID));
+    }
+
+    @Test
+    void emits_WhenCancelConfirmedRegistrationUserEmailAlreadyInUseCommandIsValid() {
+        testFixture.given(
+                ORGANIZATION_REGISTRATION_RECEIVED_EVENT,
+                ORGANIZATION_REGISTRATION_CONFIRMED_EVENT)
+                .when(new CancelConfirmedRegistrationUserEmailAlreadyInUseCommand(REGISTRATION_CONFIRMATION_CODE, ORGANIZATION_ID, REGISTERING_USER_ID, ORGANIZATION_CONTACT_EMAIL_ADDRESS))
+                .expectEvents(new OrganizationRegistrationConfirmedAfterUserWithEmailCreatedEvent(REGISTRATION_CONFIRMATION_CODE, ORGANIZATION_ID, REGISTERING_USER_ID, ORGANIZATION_CONTACT_EMAIL_ADDRESS));
     }
 }

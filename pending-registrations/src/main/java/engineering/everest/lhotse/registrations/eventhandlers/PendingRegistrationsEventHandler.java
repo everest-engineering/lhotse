@@ -2,8 +2,9 @@ package engineering.everest.lhotse.registrations.eventhandlers;
 
 import engineering.everest.lhotse.axon.replay.ReplayCompletionAware;
 import engineering.everest.lhotse.registations.persistence.PendingRegistrationsRepository;
+import engineering.everest.lhotse.registrations.domain.events.OrganizationRegistrationCompletedEvent;
 import engineering.everest.lhotse.registrations.domain.events.OrganizationRegistrationConfirmationEmailSentEvent;
-import engineering.everest.lhotse.registrations.domain.events.OrganizationRegistrationConfirmedEvent;
+import engineering.everest.lhotse.registrations.domain.events.OrganizationRegistrationConfirmedAfterUserWithEmailCreatedEvent;
 import engineering.everest.lhotse.registrations.domain.events.OrganizationRegistrationReceivedEvent;
 import lombok.extern.log4j.Log4j2;
 import org.axonframework.eventhandling.DisallowReplay;
@@ -46,8 +47,15 @@ public class PendingRegistrationsEventHandler implements ReplayCompletionAware {
     }
 
     @EventHandler
-    void on(OrganizationRegistrationConfirmedEvent event) {
-        LOGGER.info("Organization {} registration confirmed, removing pending registration", event.getOrganizationId());
+    void on(OrganizationRegistrationCompletedEvent event) {
+        LOGGER.info("Organization {} registration completed, removing pending registration", event.getOrganizationId());
+        pendingRegistrationsRepository.deleteById(event.getRegistrationConfirmationCode());
+    }
+
+    @EventHandler
+    void on(OrganizationRegistrationConfirmedAfterUserWithEmailCreatedEvent event) {
+        LOGGER.info("Organization {} registration confirmed but user email already in use. Removing pending registration",
+                event.getOrganizationId());
         pendingRegistrationsRepository.deleteById(event.getRegistrationConfirmationCode());
     }
 }

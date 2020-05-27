@@ -1,12 +1,17 @@
 package engineering.everest.lhotse.registrations.domain;
 
 import engineering.everest.lhotse.organizations.domain.commands.CreateRegisteredOrganizationCommand;
+import engineering.everest.lhotse.registrations.domain.commands.CancelConfirmedRegistrationUserEmailAlreadyInUseCommand;
+import engineering.everest.lhotse.registrations.domain.commands.CompleteOrganizationRegistrationCommand;
 import engineering.everest.lhotse.registrations.domain.commands.RecordSentOrganizationRegistrationEmailConfirmationCommand;
+import engineering.everest.lhotse.registrations.domain.events.OrganizationRegistrationCompletedEvent;
+import engineering.everest.lhotse.registrations.domain.events.OrganizationRegistrationConfirmedAfterUserWithEmailCreatedEvent;
 import engineering.everest.lhotse.registrations.domain.events.OrganizationRegistrationConfirmedEvent;
 import engineering.everest.lhotse.registrations.domain.events.OrganizationRegistrationReceivedEvent;
 import engineering.everest.lhotse.users.domain.commands.CreateUserForNewlyRegisteredOrganizationCommand;
 import engineering.everest.lhotse.users.domain.commands.PromoteUserToOrganizationAdminCommand;
 import engineering.everest.lhotse.users.domain.events.UserCreatedForNewlyRegisteredOrganizationEvent;
+import engineering.everest.lhotse.users.services.UsersReadService;
 import engineering.everest.starterkit.axon.HazelcastCommandGateway;
 import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -24,7 +29,10 @@ import java.util.UUID;
 @Log4j2
 @NoArgsConstructor
 public class OrganizationRegistrationSaga {
+    private static final String ASSOCIATION_PROPERTY = "registrationConfirmationCode";
+
     private transient CommandGateway commandGateway;
+    private transient UsersReadService usersReadService;
 
     private UUID organizationId;
     private UUID registeringUserId;
@@ -40,6 +48,8 @@ public class OrganizationRegistrationSaga {
     private String websiteUrl;
     private String phoneNumber;
 
+    // Not implemented in this saga is deadline management handling confirmation timeouts
+
     @Autowired
     public void setDefaultCommandGateway(DefaultCommandGateway commandGateway) {
         if (this.commandGateway == null) { // Yuck
@@ -52,8 +62,13 @@ public class OrganizationRegistrationSaga {
         this.commandGateway = commandGateway;
     }
 
+    @Autowired
+    public void setUsersReadService(UsersReadService usersReadService) {
+        this.usersReadService = usersReadService;
+    }
+
     @StartSaga
-    @SagaEventHandler(associationProperty = "registrationConfirmationCode")
+    @SagaEventHandler(associationProperty = ASSOCIATION_PROPERTY)
     public void on(OrganizationRegistrationReceivedEvent event) {
         organizationId = event.getOrganizationId();
         registeringUserId = event.getRegisteringUserId();
@@ -75,18 +90,37 @@ public class OrganizationRegistrationSaga {
                 event.getOrganizationId(), event.getRegisteringContactEmail(), event.getOrganizationName()));
     }
 
-    @SagaEventHandler(associationProperty = "registrationConfirmationCode")
+    @SagaEventHandler(associationProperty = ASSOCIATION_PROPERTY)
     public void on(OrganizationRegistrationConfirmedEvent event) {
-        commandGateway.send(new CreateRegisteredOrganizationCommand(organizationId, registeringUserId, organizationName,
-                street, city, state, country, postalCode, websiteUrl, registeringUserDisplayName, phoneNumber, registeringUserEmail));
+        // The business may require that each email address be only available for registration once. In this case,
+        // the target aggregate identifier may be the user email address (possibly with an additional prefix).
+        if (usersReadService.hasUserWithEmail(registeringUserEmail)) {
+            commandGateway.send(new CancelConfirmedRegistrationUserEmailAlreadyInUseCommand(
+                    event.getRegistrationConfirmationCode(), organizationId, registeringUserId, registeringUserEmail));
+        } else {
+            commandGateway.send(new CreateRegisteredOrganizationCommand(organizationId, registeringUserId, organizationName,
+                    street, city, state, country, postalCode, websiteUrl, registeringUserDisplayName, phoneNumber, registeringUserEmail));
 
-        commandGateway.send(new CreateUserForNewlyRegisteredOrganizationCommand(registeringUserId, organizationId,
-                event.getRegistrationConfirmationCode(), registeringUserEmail, registeringUserEncodedPassword, registeringUserDisplayName));
+            commandGateway.send(new CreateUserForNewlyRegisteredOrganizationCommand(registeringUserId, organizationId,
+                    event.getRegistrationConfirmationCode(), registeringUserEmail, registeringUserEncodedPassword,
+                    registeringUserDisplayName));
+        }
+    }
+
+    @SagaEventHandler(associationProperty = ASSOCIATION_PROPERTY)
+    public void on(UserCreatedForNewlyRegisteredOrganizationEvent event) {
+        commandGateway.send(new PromoteUserToOrganizationAdminCommand(organizationId, registeringUserId));
+        commandGateway.send(new CompleteOrganizationRegistrationCommand(event.getRegistrationConfirmationCode(),
+                organizationId, registeringUserId));
     }
 
     @EndSaga
-    @SagaEventHandler(associationProperty = "registrationConfirmationCode")
-    public void on(UserCreatedForNewlyRegisteredOrganizationEvent event) {
-        commandGateway.send(new PromoteUserToOrganizationAdminCommand(organizationId, registeringUserId));
+    @SagaEventHandler(associationProperty = ASSOCIATION_PROPERTY)
+    public void on(OrganizationRegistrationCompletedEvent event) {
+    }
+
+    @EndSaga
+    @SagaEventHandler(associationProperty = ASSOCIATION_PROPERTY)
+    public void on(OrganizationRegistrationConfirmedAfterUserWithEmailCreatedEvent event) {
     }
 }
