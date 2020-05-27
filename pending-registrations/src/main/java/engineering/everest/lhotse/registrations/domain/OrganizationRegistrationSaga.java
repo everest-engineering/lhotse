@@ -12,16 +12,15 @@ import engineering.everest.lhotse.users.domain.commands.CreateUserForNewlyRegist
 import engineering.everest.lhotse.users.domain.commands.PromoteUserToOrganizationAdminCommand;
 import engineering.everest.lhotse.users.domain.events.UserCreatedForNewlyRegisteredOrganizationEvent;
 import engineering.everest.lhotse.users.services.UsersReadService;
-import engineering.everest.starterkit.axon.HazelcastCommandGateway;
 import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.axonframework.commandhandling.gateway.CommandGateway;
-import org.axonframework.commandhandling.gateway.DefaultCommandGateway;
 import org.axonframework.modelling.saga.EndSaga;
 import org.axonframework.modelling.saga.SagaEventHandler;
 import org.axonframework.modelling.saga.StartSaga;
 import org.axonframework.spring.stereotype.Saga;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.UUID;
 
@@ -48,17 +47,11 @@ public class OrganizationRegistrationSaga {
     private String websiteUrl;
     private String phoneNumber;
 
-    // Not implemented in this saga is deadline management handling confirmation timeouts
+    // Not implemented: deadline management for handling confirmation timeouts
 
     @Autowired
-    public void setDefaultCommandGateway(DefaultCommandGateway commandGateway) {
-        if (this.commandGateway == null) { // Yuck
-            this.commandGateway = commandGateway;
-        }
-    }
-
-    @Autowired
-    public void setHazelcastCommandGateway(HazelcastCommandGateway commandGateway) {
+    @Qualifier("hazelcastCommandGateway")
+    public void setCommandGateway(CommandGateway commandGateway) {
         this.commandGateway = commandGateway;
     }
 
