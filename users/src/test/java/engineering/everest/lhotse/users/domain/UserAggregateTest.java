@@ -3,11 +3,11 @@ package engineering.everest.lhotse.users.domain;
 import engineering.everest.lhotse.axon.command.validators.EmailAddressValidator;
 import engineering.everest.lhotse.axon.command.validators.OrganizationStatusValidator;
 import engineering.everest.lhotse.axon.command.validators.UsersUniqueEmailValidator;
-import engineering.everest.lhotse.users.domain.commands.CreateAdminUserForNewlyRegisteredOrganizationCommand;
+import engineering.everest.lhotse.users.domain.commands.CreateUserForNewlyRegisteredOrganizationCommand;
 import engineering.everest.lhotse.users.domain.commands.CreateUserCommand;
 import engineering.everest.lhotse.users.domain.commands.RegisterUploadedUserProfilePhotoCommand;
 import engineering.everest.lhotse.users.domain.commands.UpdateUserDetailsCommand;
-import engineering.everest.lhotse.users.domain.events.AdminUserCreatedForNewlyRegisteredOrganizationEvent;
+import engineering.everest.lhotse.users.domain.events.UserCreatedForNewlyRegisteredOrganizationEvent;
 import engineering.everest.lhotse.users.domain.events.UserCreatedByAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserDetailsUpdatedByAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserProfilePhotoUploadedEvent;
@@ -47,6 +47,7 @@ class UserAggregateTest {
 
     private static final UserCreatedByAdminEvent USER_CREATED_BY_ADMIN_EVENT =
             new UserCreatedByAdminEvent(USER_ID, ORGANIZATION_ID, ADMIN_ID, USER_DISPLAY_NAME, USERNAME, USER_ENCODED_PASSWORD);
+    public static final UUID CONFIRMATION_CODE = randomUUID();
 
     private FixtureConfiguration<UserAggregate> testFixture;
 
@@ -144,8 +145,8 @@ class UserAggregateTest {
     @Test
     void createAdminUserForNewlyRegisteredOrganizationEmits() {
         testFixture.givenNoPriorActivity()
-                .when(new CreateAdminUserForNewlyRegisteredOrganizationCommand(USER_ID, ORGANIZATION_ID, USERNAME, USER_ENCODED_PASSWORD, USER_DISPLAY_NAME))
-                .expectEvents(new AdminUserCreatedForNewlyRegisteredOrganizationEvent(USER_ID, ORGANIZATION_ID, USER_DISPLAY_NAME, USERNAME, USER_ENCODED_PASSWORD));
+                .when(new CreateUserForNewlyRegisteredOrganizationCommand(USER_ID, ORGANIZATION_ID, CONFIRMATION_CODE, USERNAME, USER_ENCODED_PASSWORD, USER_DISPLAY_NAME))
+                .expectEvents(new UserCreatedForNewlyRegisteredOrganizationEvent(USER_ID, ORGANIZATION_ID, CONFIRMATION_CODE, USER_DISPLAY_NAME, USERNAME, USER_ENCODED_PASSWORD));
     }
 
     @Test

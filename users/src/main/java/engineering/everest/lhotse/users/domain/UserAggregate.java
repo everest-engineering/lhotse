@@ -1,10 +1,10 @@
 package engineering.everest.lhotse.users.domain;
 
-import engineering.everest.lhotse.users.domain.commands.CreateAdminUserForNewlyRegisteredOrganizationCommand;
+import engineering.everest.lhotse.users.domain.commands.CreateUserForNewlyRegisteredOrganizationCommand;
 import engineering.everest.lhotse.users.domain.commands.CreateUserCommand;
 import engineering.everest.lhotse.users.domain.commands.RegisterUploadedUserProfilePhotoCommand;
 import engineering.everest.lhotse.users.domain.commands.UpdateUserDetailsCommand;
-import engineering.everest.lhotse.users.domain.events.AdminUserCreatedForNewlyRegisteredOrganizationEvent;
+import engineering.everest.lhotse.users.domain.events.UserCreatedForNewlyRegisteredOrganizationEvent;
 import engineering.everest.lhotse.users.domain.events.UserCreatedByAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserDetailsUpdatedByAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserProfilePhotoUploadedEvent;
@@ -42,9 +42,9 @@ public class UserAggregate implements Serializable {
     }
 
     @CommandHandler
-    public UserAggregate(CreateAdminUserForNewlyRegisteredOrganizationCommand command) {
-        apply(new AdminUserCreatedForNewlyRegisteredOrganizationEvent(command.getUserId(), command.getOrganizationId(),
-                command.getDisplayName(), command.getUserEmail(), command.getEncodedPassword()));
+    public UserAggregate(CreateUserForNewlyRegisteredOrganizationCommand command) {
+        apply(new UserCreatedForNewlyRegisteredOrganizationEvent(command.getUserId(), command.getOrganizationId(),
+                command.getRegistrationConfirmationCode(), command.getDisplayName(), command.getUserEmail(), command.getEncodedPassword()));
     }
 
     @CommandHandler
@@ -74,7 +74,7 @@ public class UserAggregate implements Serializable {
     }
 
     @EventSourcingHandler
-    void on(AdminUserCreatedForNewlyRegisteredOrganizationEvent event) {
+    void on(UserCreatedForNewlyRegisteredOrganizationEvent event) {
         userId = event.getUserId();
         userEmail = event.getUserEmail();
         displayName = event.getUserDisplayName();

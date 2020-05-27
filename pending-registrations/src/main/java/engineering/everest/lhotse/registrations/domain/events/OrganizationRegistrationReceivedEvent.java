@@ -1,4 +1,4 @@
-package engineering.everest.lhotse.organizations.domain.events;
+package engineering.everest.lhotse.registrations.domain.events;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,9 +11,12 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Revision("0")
-public class OrganizationRegisteredByAdminEvent {
+public class OrganizationRegistrationReceivedEvent {
     private UUID organizationId;
-    private UUID adminId;
+    private UUID registeringUserId;
+    private UUID registrationConfirmationCode;
+    private String registeringContactEmail;
+    private String registeringUserEncodedPassword;
     private String organizationName;
     private String websiteUrl;
     private String street;
@@ -23,5 +26,4 @@ public class OrganizationRegisteredByAdminEvent {
     private String postalCode;
     private String contactName;
     private String contactPhoneNumber;
-    private String contactEmail;
 }

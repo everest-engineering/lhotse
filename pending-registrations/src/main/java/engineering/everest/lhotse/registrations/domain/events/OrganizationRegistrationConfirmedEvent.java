@@ -1,4 +1,4 @@
-package engineering.everest.lhotse.organizations.domain.events;
+package engineering.everest.lhotse.registrations.domain.events;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,5 +12,6 @@ import java.util.UUID;
 @AllArgsConstructor
 @Revision("0")
 public class OrganizationRegistrationConfirmedEvent {
+    private UUID registrationConfirmationCode;
     private UUID organizationId;
 }

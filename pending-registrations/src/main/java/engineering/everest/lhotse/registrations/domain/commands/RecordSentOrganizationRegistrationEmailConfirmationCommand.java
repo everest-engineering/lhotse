@@ -1,4 +1,4 @@
-package engineering.everest.lhotse.organizations.domain.commands;
+package engineering.everest.lhotse.registrations.domain.commands;
 
 import engineering.everest.lhotse.axon.command.validation.ValidatableCommand;
 import lombok.AllArgsConstructor;
@@ -9,8 +9,11 @@ import java.util.UUID;
 
 @Data
 @AllArgsConstructor
-public class ConfirmOrganizationRegistrationEmailCommand implements ValidatableCommand {
+public class RecordSentOrganizationRegistrationEmailConfirmationCommand implements ValidatableCommand {
+
     @TargetAggregateIdentifier
+    private final UUID registrationConfirmationCode;
     private final UUID organizationId;
-    private final UUID confirmationCode;
+    private final String registeringContactEmail;
+    private final String organizationName;
 }

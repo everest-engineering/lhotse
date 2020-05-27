@@ -11,19 +11,13 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Revision("0")
-public class OrganizationRegistrationReceivedEvent {
+public class OrganizationAddressUpdatedEvent {
     private UUID organizationId;
-    private UUID registeringUserId;
-    private UUID registrationConfirmationCode;
-    private String registeringContactEmail;
-    private String registeringUserEncodedPassword;
-    private String organizationName;
-    private String websiteUrl;
     private String street;
     private String city;
     private String state;
     private String country;
     private String postalCode;
-    private String contactName;
-    private String contactPhoneNumber;
+    private UUID updatingUserId;
+
 }

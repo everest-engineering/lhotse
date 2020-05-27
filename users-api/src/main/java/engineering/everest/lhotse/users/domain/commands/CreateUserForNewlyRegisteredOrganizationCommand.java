@@ -9,10 +9,11 @@ import java.util.UUID;
 
 @Data
 @AllArgsConstructor
-public class CreateAdminUserForNewlyRegisteredOrganizationCommand implements ValidatableCommand {
+public class CreateUserForNewlyRegisteredOrganizationCommand implements ValidatableCommand {
     @TargetAggregateIdentifier
     UUID userId;
     UUID organizationId;
+    UUID registrationConfirmationCode;
     String userEmail;
     String encodedPassword;
     String displayName;

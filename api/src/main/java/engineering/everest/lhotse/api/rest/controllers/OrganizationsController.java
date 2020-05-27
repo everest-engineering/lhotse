@@ -13,6 +13,7 @@ import engineering.everest.lhotse.axon.common.RandomFieldsGenerator;
 import engineering.everest.lhotse.axon.common.domain.User;
 import engineering.everest.lhotse.organizations.services.OrganizationsReadService;
 import engineering.everest.lhotse.organizations.services.OrganizationsService;
+import engineering.everest.lhotse.registrations.services.PendingRegistrationsService;
 import engineering.everest.lhotse.users.services.UsersReadService;
 import engineering.everest.lhotse.users.services.UsersService;
 import io.swagger.annotations.Api;
@@ -44,6 +45,7 @@ public class OrganizationsController {
     private final DtoConverter dtoConverter;
     private final OrganizationsService organizationsService;
     private final OrganizationsReadService organizationsReadService;
+    private final PendingRegistrationsService pendingRegistrationsService;
     private final UsersService usersService;
     private final UsersReadService usersReadService;
     private final RandomFieldsGenerator randomFieldsGenerator;
@@ -52,18 +54,19 @@ public class OrganizationsController {
     public OrganizationsController(DtoConverter dtoConverter,
                                    OrganizationsService organizationsService,
                                    OrganizationsReadService organizationsReadService,
+                                   PendingRegistrationsService pendingRegistrationsService,
                                    UsersService usersService,
                                    UsersReadService usersReadService,
                                    RandomFieldsGenerator randomFieldsGenerator) {
         this.dtoConverter = dtoConverter;
         this.organizationsService = organizationsService;
         this.organizationsReadService = organizationsReadService;
+        this.pendingRegistrationsService = pendingRegistrationsService;
         this.usersService = usersService;
         this.usersReadService = usersReadService;
         this.randomFieldsGenerator = randomFieldsGenerator;
     }
 
-    @SuppressWarnings("PMD.AvoidDuplicateLiterals")
     @GetMapping("/{organizationId}")
     @ResponseStatus(OK)
     @ApiOperation("Get information for an organization")
@@ -79,7 +82,7 @@ public class OrganizationsController {
         var organizationId = randomFieldsGenerator.genRandomUUID();
         var userId = randomFieldsGenerator.genRandomUUID();
 
-        organizationsService.registerOrganization(organizationId, userId, request.getOrganizationName(), request.getStreet(),
+        pendingRegistrationsService.registerOrganization(organizationId, userId, request.getOrganizationName(), request.getStreet(),
                 request.getCity(), request.getState(), request.getCountry(), request.getPostalCode(), request.getWebsiteUrl(),
                 request.getContactName(), request.getContactPhoneNumber(), request.getContactEmail(), request.getContactPassword());
         return new OrganizationRegistrationResponse(organizationId, userId);
@@ -89,7 +92,7 @@ public class OrganizationsController {
     @ResponseStatus(OK)
     @ApiOperation("Confirm the email address used to register an organization")
     public void confirmOrganizationContactEmail(@PathVariable UUID organizationId, @PathVariable UUID confirmationCode) {
-        organizationsService.confirmOrganizationRegistrationEmail(organizationId, confirmationCode);
+        pendingRegistrationsService.confirmOrganizationRegistrationEmail(organizationId, confirmationCode);
     }
 
     @PutMapping("/{organizationId}")
