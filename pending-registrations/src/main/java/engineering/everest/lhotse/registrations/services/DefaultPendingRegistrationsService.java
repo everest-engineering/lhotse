@@ -37,6 +37,9 @@ public class DefaultPendingRegistrationsService implements PendingRegistrationsS
 
     @Override
     public void confirmOrganizationRegistrationEmail(UUID organizationId, UUID confirmationCode) {
+        // This service could verify that a previous requests to register the same organization hasn't been
+        // confirmed yet. (It would be a cleaner experience for users). However, let's leave it so that the saga can
+        // be used to demonstrate how the process might be modelled.
         commandGateway.sendAndWait(new ConfirmOrganizationRegistrationEmailCommand(confirmationCode, organizationId));
     }
 

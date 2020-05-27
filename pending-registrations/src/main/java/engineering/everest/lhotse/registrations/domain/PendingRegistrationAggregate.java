@@ -1,9 +1,13 @@
 package engineering.everest.lhotse.registrations.domain;
 
+import engineering.everest.lhotse.registrations.domain.commands.CancelConfirmedRegistrationUserEmailAlreadyInUseCommand;
+import engineering.everest.lhotse.registrations.domain.commands.CompleteOrganizationRegistrationCommand;
 import engineering.everest.lhotse.registrations.domain.commands.ConfirmOrganizationRegistrationEmailCommand;
 import engineering.everest.lhotse.registrations.domain.commands.RecordSentOrganizationRegistrationEmailConfirmationCommand;
 import engineering.everest.lhotse.registrations.domain.commands.RegisterOrganizationCommand;
+import engineering.everest.lhotse.registrations.domain.events.OrganizationRegistrationCompletedEvent;
 import engineering.everest.lhotse.registrations.domain.events.OrganizationRegistrationConfirmationEmailSentEvent;
+import engineering.everest.lhotse.registrations.domain.events.OrganizationRegistrationConfirmedAfterUserWithEmailCreatedEvent;
 import engineering.everest.lhotse.registrations.domain.events.OrganizationRegistrationConfirmedEvent;
 import engineering.everest.lhotse.registrations.domain.events.OrganizationRegistrationReceivedEvent;
 import org.apache.commons.lang3.Validate;
@@ -49,6 +53,17 @@ public class PendingRegistrationAggregate implements Serializable {
         apply(new OrganizationRegistrationConfirmedEvent(registrationConfirmationCode, organizationId));
     }
 
+    @CommandHandler
+    void handle(CompleteOrganizationRegistrationCommand command) {
+        apply(new OrganizationRegistrationCompletedEvent(registrationConfirmationCode, organizationId, command.getRegisteringUserId()));
+    }
+
+    @CommandHandler
+    void handle(CancelConfirmedRegistrationUserEmailAlreadyInUseCommand command) {
+        apply(new OrganizationRegistrationConfirmedAfterUserWithEmailCreatedEvent(registrationConfirmationCode,
+                command.getOrganizationId(), command.getRegisteringUserId(), command.getRegisteringUserEmail()));
+    }
+
     @EventSourcingHandler
     void on(OrganizationRegistrationReceivedEvent event) {
         registrationConfirmationCode = event.getRegistrationConfirmationCode();
@@ -56,7 +71,7 @@ public class PendingRegistrationAggregate implements Serializable {
     }
 
     @EventSourcingHandler
-    void on(OrganizationRegistrationConfirmedEvent event) {
+    void on(OrganizationRegistrationCompletedEvent event) {
         markDeleted();
     }
 }
