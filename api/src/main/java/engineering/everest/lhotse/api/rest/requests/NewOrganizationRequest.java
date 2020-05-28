@@ -23,5 +23,6 @@ public class NewOrganizationRequest {
     private String websiteUrl;
     private String contactName;
     private String contactPhoneNumber;
+    @NotBlank
     private String contactEmail;
 }

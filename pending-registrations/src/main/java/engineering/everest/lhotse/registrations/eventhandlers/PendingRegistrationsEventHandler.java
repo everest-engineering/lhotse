@@ -1,11 +1,11 @@
 package engineering.everest.lhotse.registrations.eventhandlers;
 
 import engineering.everest.lhotse.axon.replay.ReplayCompletionAware;
-import engineering.everest.lhotse.registations.persistence.PendingRegistrationsRepository;
 import engineering.everest.lhotse.registrations.domain.events.OrganizationRegistrationCompletedEvent;
 import engineering.everest.lhotse.registrations.domain.events.OrganizationRegistrationConfirmationEmailSentEvent;
 import engineering.everest.lhotse.registrations.domain.events.OrganizationRegistrationConfirmedAfterUserWithEmailCreatedEvent;
 import engineering.everest.lhotse.registrations.domain.events.OrganizationRegistrationReceivedEvent;
+import engineering.everest.lhotse.registrations.persistence.PendingRegistrationsRepository;
 import lombok.extern.log4j.Log4j2;
 import org.axonframework.eventhandling.DisallowReplay;
 import org.axonframework.eventhandling.EventHandler;

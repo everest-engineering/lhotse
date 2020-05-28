@@ -75,7 +75,7 @@ class AdminOrganizationsControllerTest {
         when(organizationsReadService.getOrganizations())
                 .thenReturn(newArrayList(ORGANIZATION_1, ORGANIZATION_2));
 
-        mockMvc.perform(get("/api/admin/organizations").contentType(APPLICATION_JSON))
+        mockMvc.perform(get("/admin/organizations").contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$.[0].id", is(ORGANIZATION_1.getId().toString())))
@@ -87,7 +87,7 @@ class AdminOrganizationsControllerTest {
     @Test
     @WithMockUser(username = ADMIN_USERNAME, roles = ROLE_ADMIN)
     void creatingRegisteredOrganizationWillFail_WhenNameIsEmpty() throws Exception {
-        mockMvc.perform(post("/api/admin/organizations")
+        mockMvc.perform(post("/admin/organizations")
                 .contentType(APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(new NewOrganizationRequest("", ORGANIZATION_1.getOrganizationAddress().getStreet(),
                         ORGANIZATION_1.getOrganizationAddress().getCity(), ORGANIZATION_1.getOrganizationAddress().getState(), ORGANIZATION_1.getOrganizationAddress().getCountry(), ORGANIZATION_1.getOrganizationAddress().getPostalCode(), ORGANIZATION_1.getWebsiteUrl(),
@@ -100,7 +100,7 @@ class AdminOrganizationsControllerTest {
     @Test
     @WithMockUser(username = ADMIN_USERNAME, roles = ROLE_ADMIN)
     void creatingRegisteredOrganizationWillDelegate_WhenRequestingUserIsAdmin() throws Exception {
-        mockMvc.perform(post("/api/admin/organizations")
+        mockMvc.perform(post("/admin/organizations")
                 .contentType(APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(new NewOrganizationRequest(ORGANIZATION_1.getOrganizationName(), ORGANIZATION_1.getOrganizationAddress().getStreet(),
                         ORGANIZATION_1.getOrganizationAddress().getCity(), ORGANIZATION_1.getOrganizationAddress().getState(), ORGANIZATION_1.getOrganizationAddress().getCountry(), ORGANIZATION_1.getOrganizationAddress().getPostalCode(), ORGANIZATION_1.getWebsiteUrl(),
@@ -116,7 +116,7 @@ class AdminOrganizationsControllerTest {
     @Test
     @WithMockUser(username = ADMIN_USERNAME, roles = ROLE_ADMIN)
     void disableOrganizationWillDelegate_WhenRequestingUserIsAdmin() throws Exception {
-        mockMvc.perform(delete("/api/admin/organizations/{organizationId}", ORGANIZATION_2.getId()))
+        mockMvc.perform(delete("/admin/organizations/{organizationId}", ORGANIZATION_2.getId()))
                 .andExpect(status().isOk());
 
         verify(organizationsService).disableOrganization(ADMIN_USER.getId(), ORGANIZATION_2.getId());
@@ -125,7 +125,7 @@ class AdminOrganizationsControllerTest {
     @Test
     @WithMockUser(username = ADMIN_USERNAME, roles = ROLE_ADMIN)
     void enableOrganizationWillDelegate_WhenRequestingUserIsAdmin() throws Exception {
-        mockMvc.perform(post("/api/admin/organizations/{organizationId}", ORGANIZATION_2.getId()))
+        mockMvc.perform(post("/admin/organizations/{organizationId}", ORGANIZATION_2.getId()))
                 .andExpect(status().isOk());
 
         verify(organizationsService).enableOrganization(ADMIN_USER.getId(), ORGANIZATION_2.getId());

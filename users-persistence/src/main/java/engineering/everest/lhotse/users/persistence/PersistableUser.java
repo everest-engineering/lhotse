@@ -39,7 +39,7 @@ public class PersistableUser {
 
     private boolean disabled;
     @ElementCollection(fetch = EAGER)
-    private Set<Role> roles =  EnumSet.noneOf(Role.class);
+    private Set<Role> roles = EnumSet.noneOf(Role.class);
     private Instant createdOn;
     private UUID profilePhotoFileId;
 

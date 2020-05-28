@@ -29,5 +29,6 @@ public class CreateRegisteredOrganizationCommand implements ValidatableCommand {
     private String websiteUrl;
     private String contactName;
     private String phoneNumber;
+    @NotBlank
     private String emailAddress;
 }

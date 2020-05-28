@@ -54,7 +54,7 @@ class SecurityFunctionalTests {
 
     @Test
     void retrievingOrganizationListWillFail_WhenUserIsNotAuthenticated() {
-        webClient.get().uri("/api/admin/organization")
+        webClient.get().uri("/admin/organization")
                 .exchange()
                 .expectStatus().isUnauthorized();
     }

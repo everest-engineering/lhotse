@@ -1,11 +1,12 @@
 package engineering.everest.lhotse.users.eventhandlers;
 
 import engineering.everest.lhotse.axon.replay.ReplayCompletionAware;
-import engineering.everest.lhotse.users.domain.events.UserCreatedForNewlyRegisteredOrganizationEvent;
-import engineering.everest.lhotse.users.persistence.UsersRepository;
+import engineering.everest.lhotse.organizations.domain.events.UserPromotedToOrganizationAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserCreatedByAdminEvent;
-import engineering.everest.lhotse.users.domain.events.UserProfilePhotoUploadedEvent;
+import engineering.everest.lhotse.users.domain.events.UserCreatedForNewlyRegisteredOrganizationEvent;
 import engineering.everest.lhotse.users.domain.events.UserDetailsUpdatedByAdminEvent;
+import engineering.everest.lhotse.users.domain.events.UserProfilePhotoUploadedEvent;
+import engineering.everest.lhotse.users.persistence.UsersRepository;
 import lombok.extern.log4j.Log4j2;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventhandling.ResetHandler;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 
+import static engineering.everest.lhotse.axon.common.domain.Role.ORG_ADMIN;
 import static engineering.everest.lhotse.axon.common.domain.User.ADMIN_ID;
 
 @Service
@@ -65,6 +67,14 @@ public class UsersEventHandler implements ReplayCompletionAware {
         LOGGER.info("User {} uploaded photo with fileId {}", event.getUserId(), event.getProfilePhotoFileId());
         var persistableUser = usersRepository.findById(event.getUserId()).orElseThrow();
         persistableUser.setProfilePhotoFileId(event.getProfilePhotoFileId());
+        usersRepository.save(persistableUser);
+    }
+
+    @EventHandler
+    void on(UserPromotedToOrganizationAdminEvent event) {
+        LOGGER.info("Adding role {} to user {}", ORG_ADMIN, event.getPromotedUserId());
+        var persistableUser = usersRepository.findById(event.getPromotedUserId()).orElseThrow();
+        persistableUser.addRole(ORG_ADMIN);
         usersRepository.save(persistableUser);
     }
 

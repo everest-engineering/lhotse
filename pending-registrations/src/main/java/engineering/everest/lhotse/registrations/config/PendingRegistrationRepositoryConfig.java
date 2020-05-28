@@ -24,7 +24,6 @@ public class PendingRegistrationRepositoryConfig {
     @Bean
     public Repository<PendingRegistrationAggregate> repositoryForPendingRegistration(EventStore eventStore,
                                                                                      JCacheAdapter cacheAdapter) {
-
         return CachingEventSourcingRepository.builder(PendingRegistrationAggregate.class)
                 .aggregateFactory(new GenericAggregateFactory<>(PendingRegistrationAggregate.class))
                 .parameterResolverFactory(parameterResolverFactory)

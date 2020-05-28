@@ -51,7 +51,8 @@ public class OrganizationAggregate implements Serializable {
     @CommandHandler
     void handle(PromoteUserToOrganizationAdminCommand command) {
         validateOrganizationIsEnabled();
-        Validate.isTrue(!organizationAdminIds.contains(command.getPromotedUserId()), "User is already an admin of organization %s", id);
+        Validate.isTrue(!organizationAdminIds.contains(command.getPromotedUserId()),
+                "User %s is already an admin of organization %s", command.getPromotedUserId(), id);
 
         apply(new UserPromotedToOrganizationAdminEvent(command.getOrganizationId(), command.getPromotedUserId()));
     }
@@ -120,7 +121,7 @@ public class OrganizationAggregate implements Serializable {
     }
 
     private boolean isNameUpdated(UpdateOrganizationCommand command) {
-        return command.getOrganizationName() != null && !command.getOrganizationName().equals(organizationName);
+        return command.getOrganizationName() != null;
     }
 
     private boolean areContactDetailsUpdated(UpdateOrganizationCommand command) {

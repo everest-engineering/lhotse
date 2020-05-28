@@ -62,7 +62,7 @@ class ReplayFunctionalTests {
     void replayStatusWillBeSetCorrectlyForReplay() {
         // First event and replay marker event
         UUID org1 = apiRestTestClient.createRegisteredOrganization(
-                new NewOrganizationRequest("test org", null, null, null, null, null, null, null, null, null),
+                new NewOrganizationRequest("test org", null, null, null, null, null, null, null, null, "admin@example.com"),
                 CREATED);
         apiRestTestClient.createUser(org1, new NewUserRequest("alice@umbrella.com", "password", "Alice"), CREATED);
         apiRestTestClient.triggerReplay(NO_CONTENT);
@@ -71,7 +71,7 @@ class ReplayFunctionalTests {
 
         // Second event and replay again
         UUID org2 = apiRestTestClient.createRegisteredOrganization(
-                new NewOrganizationRequest("test org", null, null, null, null, null, null, null, null, null),
+                new NewOrganizationRequest("test org", null, null, null, null, null, null, null, null, "admin2@example.com"),
                 CREATED);
         apiRestTestClient.createUser(org2, new NewUserRequest("bob@umbrella.com", "password", "Bob"), CREATED);
         apiRestTestClient.triggerReplay(NO_CONTENT);

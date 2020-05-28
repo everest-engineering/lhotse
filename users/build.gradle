@@ -5,6 +5,7 @@ dependencies {
     implementation project(':axon-support')
     implementation project(':common')
     implementation project(':command-validation-support')
+    implementation project(':organizations-api')
     implementation project(':users-persistence')
 
     implementation "engineering.everest.starterkit:axon-command-distribution-extension:${axonHazelcastCommandDistributionVersion}"

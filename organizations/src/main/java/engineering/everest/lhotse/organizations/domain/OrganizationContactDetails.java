@@ -4,6 +4,7 @@ import engineering.everest.lhotse.organizations.domain.events.OrganizationAddres
 import engineering.everest.lhotse.organizations.domain.events.OrganizationContactDetailsUpdatedEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationRegisteredEvent;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.modelling.command.EntityId;
@@ -13,6 +14,7 @@ import java.util.UUID;
 
 @EqualsAndHashCode
 @ToString
+@NoArgsConstructor
 class OrganizationContactDetails implements Serializable {
 
     @EntityId
@@ -26,9 +28,6 @@ class OrganizationContactDetails implements Serializable {
     private String state;
     private String country;
     private String postalCode;
-
-    public OrganizationContactDetails() {
-    }
 
     @EventSourcingHandler
     void on(OrganizationRegisteredEvent event) {

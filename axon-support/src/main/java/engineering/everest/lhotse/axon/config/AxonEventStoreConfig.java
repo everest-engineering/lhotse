@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.axonframework.common.jdbc.PersistenceExceptionResolver;
 import org.axonframework.common.jpa.EntityManagerProvider;
 import org.axonframework.common.jpa.SimpleEntityManagerProvider;
+import org.axonframework.common.transaction.TransactionManager;
 import org.axonframework.eventhandling.tokenstore.TokenStore;
 import org.axonframework.eventhandling.tokenstore.jpa.JpaTokenStore;
 import org.axonframework.eventsourcing.eventstore.EventStorageEngine;
@@ -41,7 +42,7 @@ import java.sql.SQLException;
 @Configuration
 public class AxonEventStoreConfig {
 
-    private static final String AXON_AUTO_CONFIG_QUALIFIER = "axon";
+    static final String AXON_AUTO_CONFIG_QUALIFIER = "axon";
 
     @Bean
     @Qualifier(AXON_AUTO_CONFIG_QUALIFIER)
@@ -103,7 +104,7 @@ public class AxonEventStoreConfig {
 
     @Bean
     @Qualifier(AXON_AUTO_CONFIG_QUALIFIER)
-    public SpringTransactionManager axonTransactionManager(ChainedTransactionManager transactionManager) {
+    public TransactionManager axonTransactionManager(ChainedTransactionManager transactionManager) {
         return new SpringTransactionManager(transactionManager);
     }
 
@@ -121,7 +122,7 @@ public class AxonEventStoreConfig {
                                                   Serializer eventSerializer,
                                                   AxonConfiguration configuration,
                                                   @Qualifier(AXON_AUTO_CONFIG_QUALIFIER) EntityManagerProvider entityManagerProvider,
-                                                  SpringTransactionManager transactionManager) {
+                                                  @Qualifier(AXON_AUTO_CONFIG_QUALIFIER) TransactionManager transactionManager) {
         return JpaEventStorageEngine.builder()
                 .snapshotSerializer(defaultSerializer)
                 .upcasterChain(configuration.upcasterChain())
@@ -133,8 +134,8 @@ public class AxonEventStoreConfig {
     }
 
     @Bean
-    public SagaStore sagaStore(Serializer defaultSerializer,
-                               @Qualifier(AXON_AUTO_CONFIG_QUALIFIER) EntityManagerProvider entityManagerProvider) {
+    public SagaStore globalSagaStore(Serializer defaultSerializer,
+                                     @Qualifier(AXON_AUTO_CONFIG_QUALIFIER) EntityManagerProvider entityManagerProvider) {
         return JpaSagaStore.builder()
                 .serializer(defaultSerializer)
                 .entityManagerProvider(entityManagerProvider)
