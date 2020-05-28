@@ -1,16 +1,11 @@
 package engineering.everest.lhotse.api.rest.requests;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Getter
-@Setter
-@ToString
-@EqualsAndHashCode
+@Data
+@NoArgsConstructor
 public class UpdateOrganizationRequest {
-
     private String organizationName;
     private String street;
     private String city;
@@ -21,9 +16,6 @@ public class UpdateOrganizationRequest {
     private String contactName;
     private String phoneNumber;
     private String emailAddress;
-
-    public UpdateOrganizationRequest() {
-    }
 
     public UpdateOrganizationRequest(String organizationName, String street, String city, String state, String country,
                                      String postalCode, String websiteUrl, String contactName, String phoneNumber,

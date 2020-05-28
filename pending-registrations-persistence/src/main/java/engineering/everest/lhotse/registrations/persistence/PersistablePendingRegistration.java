@@ -1,4 +1,4 @@
-package engineering.everest.lhotse.registations.persistence;
+package engineering.everest.lhotse.registrations.persistence;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

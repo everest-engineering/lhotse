@@ -43,7 +43,7 @@ subprojects {
     ext {
         axonHazelcastCommandDistributionVersion = '0.0.15'
         mediaVersion = '0.0.13'
-        securityVersion = '0.0.11'
+        securityVersion = '0.0.12'
         storageVersion = '0.0.13'
 
         aspectjVersion = '1.9.5'
@@ -103,8 +103,12 @@ subprojects {
 
     test {
         useJUnitPlatform()
-        testLogging {
-            events "skipped", "failed"
+        test {
+            testLogging {
+                events "skipped", "failed"
+                exceptionFormat "full"
+                showStandardStreams = false
+            }
         }
     }
 

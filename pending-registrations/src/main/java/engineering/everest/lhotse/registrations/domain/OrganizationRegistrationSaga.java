@@ -10,7 +10,6 @@ import engineering.everest.lhotse.registrations.domain.events.OrganizationRegist
 import engineering.everest.lhotse.registrations.domain.events.OrganizationRegistrationReceivedEvent;
 import engineering.everest.lhotse.users.domain.commands.CreateUserForNewlyRegisteredOrganizationCommand;
 import engineering.everest.lhotse.users.domain.commands.PromoteUserToOrganizationAdminCommand;
-import engineering.everest.lhotse.users.domain.events.UserCreatedForNewlyRegisteredOrganizationEvent;
 import engineering.everest.lhotse.users.services.UsersReadService;
 import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -18,6 +17,7 @@ import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.modelling.saga.EndSaga;
 import org.axonframework.modelling.saga.SagaEventHandler;
 import org.axonframework.modelling.saga.StartSaga;
+import org.axonframework.serialization.Revision;
 import org.axonframework.spring.stereotype.Saga;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -25,10 +25,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import java.util.UUID;
 
 @Saga
+@Revision("0")
 @Log4j2
 @NoArgsConstructor
 public class OrganizationRegistrationSaga {
-    private static final String ASSOCIATION_PROPERTY = "registrationConfirmationCode";
+    private static final String CONFIRMATION_CODE = "registrationConfirmationCode";
 
     private transient CommandGateway commandGateway;
     private transient UsersReadService usersReadService;
@@ -61,7 +62,7 @@ public class OrganizationRegistrationSaga {
     }
 
     @StartSaga
-    @SagaEventHandler(associationProperty = ASSOCIATION_PROPERTY)
+    @SagaEventHandler(associationProperty = CONFIRMATION_CODE)
     public void on(OrganizationRegistrationReceivedEvent event) {
         organizationId = event.getOrganizationId();
         registeringUserId = event.getRegisteringUserId();
@@ -83,7 +84,7 @@ public class OrganizationRegistrationSaga {
                 event.getOrganizationId(), event.getRegisteringContactEmail(), event.getOrganizationName()));
     }
 
-    @SagaEventHandler(associationProperty = ASSOCIATION_PROPERTY)
+    @SagaEventHandler(associationProperty = CONFIRMATION_CODE)
     public void on(OrganizationRegistrationConfirmedEvent event) {
         // The business may require that each email address be only available for registration once. In this case,
         // the target aggregate identifier may be the user email address (possibly with an additional prefix).
@@ -91,29 +92,29 @@ public class OrganizationRegistrationSaga {
             commandGateway.send(new CancelConfirmedRegistrationUserEmailAlreadyInUseCommand(
                     event.getRegistrationConfirmationCode(), organizationId, registeringUserId, registeringUserEmail));
         } else {
-            commandGateway.send(new CreateRegisteredOrganizationCommand(organizationId, registeringUserId, organizationName,
-                    street, city, state, country, postalCode, websiteUrl, registeringUserDisplayName, phoneNumber, registeringUserEmail));
-
-            commandGateway.send(new CreateUserForNewlyRegisteredOrganizationCommand(registeringUserId, organizationId,
+            var registeredOrganizationCommand = new CreateRegisteredOrganizationCommand(organizationId, registeringUserId, organizationName,
+                    street, city, state, country, postalCode, websiteUrl, registeringUserDisplayName, phoneNumber, registeringUserEmail);
+            var createUserCommand = new CreateUserForNewlyRegisteredOrganizationCommand(registeringUserId, organizationId,
                     event.getRegistrationConfirmationCode(), registeringUserEmail, registeringUserEncodedPassword,
-                    registeringUserDisplayName));
+                    registeringUserDisplayName);
+            var promoteUserToOrganizationAdminCommand = new PromoteUserToOrganizationAdminCommand(organizationId, registeringUserId);
+            var completeRegistrationCommand = new CompleteOrganizationRegistrationCommand(event.getRegistrationConfirmationCode(),
+                    organizationId, registeringUserId);
+
+            commandGateway.sendAndWait(registeredOrganizationCommand);
+            commandGateway.sendAndWait(createUserCommand);
+            commandGateway.sendAndWait(promoteUserToOrganizationAdminCommand);
+            commandGateway.send(completeRegistrationCommand);
         }
     }
 
-    @SagaEventHandler(associationProperty = ASSOCIATION_PROPERTY)
-    public void on(UserCreatedForNewlyRegisteredOrganizationEvent event) {
-        commandGateway.send(new PromoteUserToOrganizationAdminCommand(organizationId, registeringUserId));
-        commandGateway.send(new CompleteOrganizationRegistrationCommand(event.getRegistrationConfirmationCode(),
-                organizationId, registeringUserId));
-    }
-
     @EndSaga
-    @SagaEventHandler(associationProperty = ASSOCIATION_PROPERTY)
+    @SagaEventHandler(associationProperty = CONFIRMATION_CODE)
     public void on(OrganizationRegistrationCompletedEvent event) {
     }
 
     @EndSaga
-    @SagaEventHandler(associationProperty = ASSOCIATION_PROPERTY)
+    @SagaEventHandler(associationProperty = CONFIRMATION_CODE)
     public void on(OrganizationRegistrationConfirmedAfterUserWithEmailCreatedEvent event) {
     }
 }

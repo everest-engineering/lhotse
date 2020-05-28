@@ -17,6 +17,7 @@ public class RegisterOrganizationCommand implements EmailAddressValidatableComma
     private UUID registrationConfirmationCode;
     private UUID organizationId;
     private UUID registeringUserId;
+    @NotBlank
     private String userEmailAddress;
     private String userEncodedPassword;
     @NotBlank

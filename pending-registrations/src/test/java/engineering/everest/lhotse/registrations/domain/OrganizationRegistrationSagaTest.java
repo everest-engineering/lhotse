@@ -73,10 +73,12 @@ class OrganizationRegistrationSagaTest {
         var expectedCreateOrganizationCommand = new CreateRegisteredOrganizationCommand(ORGANIZATION_ID, REGISTERING_USER_ID, ORGANIZATION_NAME, ORGANIZATION_STREET,
                 ORGANIZATION_CITY, ORGANIZATION_STATE, ORGANIZATION_COUNTRY, ORGANIZATION_POST_CODE, ORGANIZATION_WEBSITE_URL, CONTACT_NAME, CONTACT_PHONE_NUMBER, REGISTERING_USER_EMAIL);
         var expectedCreateUserCommand = new CreateUserForNewlyRegisteredOrganizationCommand(REGISTERING_USER_ID, ORGANIZATION_ID, CONFIRMATION_CODE, REGISTERING_USER_EMAIL, ENCODED_PASSWORD, CONTACT_NAME);
+        var expectedPromoteUserCommand = new PromoteUserToOrganizationAdminCommand(ORGANIZATION_ID, REGISTERING_USER_ID);
+        var expectedCompleteRegistrationCommand = new CompleteOrganizationRegistrationCommand(CONFIRMATION_CODE, ORGANIZATION_ID, REGISTERING_USER_ID);
 
         testFixture.givenAggregate(CONFIRMATION_CODE_STRING).published(ORGANIZATION_REGISTRATION_RECEIVED_EVENT)
                 .whenAggregate(CONFIRMATION_CODE_STRING).publishes(ORGANIZATION_REGISTRATION_CONFIRMED_EVENT)
-                .expectDispatchedCommands(expectedCreateOrganizationCommand, expectedCreateUserCommand)
+                .expectDispatchedCommands(expectedCreateOrganizationCommand, expectedCreateUserCommand, expectedPromoteUserCommand, expectedCompleteRegistrationCommand)
                 .expectActiveSagas(1);
     }
 
@@ -89,19 +91,6 @@ class OrganizationRegistrationSagaTest {
         testFixture.givenAggregate(CONFIRMATION_CODE_STRING).published(ORGANIZATION_REGISTRATION_RECEIVED_EVENT)
                 .whenAggregate(CONFIRMATION_CODE_STRING).publishes(ORGANIZATION_REGISTRATION_CONFIRMED_EVENT)
                 .expectDispatchedCommands(expectedCommand)
-                .expectActiveSagas(1);
-    }
-
-    @Test
-    void userCreatedForNewlyRegisteredOrganizationEvent_WillDispatchCommandToPromoteUserToOrganizationAdmin() {
-        var expectedPromotionCommand = new PromoteUserToOrganizationAdminCommand(ORGANIZATION_ID, REGISTERING_USER_ID);
-        var expectedCompletionCommand = new CompleteOrganizationRegistrationCommand(CONFIRMATION_CODE, ORGANIZATION_ID, REGISTERING_USER_ID);
-
-        testFixture.givenAggregate(CONFIRMATION_CODE_STRING).published(
-                ORGANIZATION_REGISTRATION_RECEIVED_EVENT,
-                ORGANIZATION_REGISTRATION_CONFIRMED_EVENT)
-                .whenAggregate(CONFIRMATION_CODE_STRING).publishes(USER_CREATED_FOR_NEWLY_REGISTERED_ORGANIZATION_EVENT)
-                .expectDispatchedCommands(expectedPromotionCommand, expectedCompletionCommand)
                 .expectActiveSagas(1);
     }
 

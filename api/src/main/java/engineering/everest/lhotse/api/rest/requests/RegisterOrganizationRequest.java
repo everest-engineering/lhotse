@@ -22,6 +22,7 @@ public class RegisterOrganizationRequest {
         private String websiteUrl;
         private String contactName;
         private String contactPhoneNumber;
+        @NotBlank
         private String contactEmail;
         private String contactPassword;
 }

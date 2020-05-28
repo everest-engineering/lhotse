@@ -1,4 +1,4 @@
-package engineering.everest.lhotse.registations.persistence;
+package engineering.everest.lhotse.registrations.persistence;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -17,4 +17,6 @@ public interface PendingRegistrationsRepository extends JpaRepository<Persistabl
         save(new PersistablePendingRegistration(registrationConfirmationCode, registeringOrganizationId, registeringUserId,
                 registeringUserEmail, registeredOn));
     }
+
+    PersistablePendingRegistration findByOrganizationId(UUID organizationId);
 }

@@ -29,7 +29,7 @@ import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @RestController
-@RequestMapping("/api/admin/organizations")
+@RequestMapping("/admin/organizations")
 @Api(consumes = APPLICATION_JSON_VALUE, tags = "Organizations")
 public class AdminOrganizationsController {
 
@@ -60,7 +60,7 @@ public class AdminOrganizationsController {
     @ResponseStatus(CREATED)
     @ApiOperation("Register a new organization")
     @AdminOnly
-    public UUID registerOrganization(User requestingUser, @RequestBody @Valid NewOrganizationRequest request) {
+    public UUID newOrganization(User requestingUser, @RequestBody @Valid NewOrganizationRequest request) {
         return organizationsService.createRegisteredOrganization(requestingUser.getId(), request.getOrganizationName(),
                 request.getStreet(), request.getCity(), request.getState(), request.getCountry(), request.getPostalCode(),
                 request.getWebsiteUrl(), request.getContactName(), request.getContactPhoneNumber(), request.getContactEmail());

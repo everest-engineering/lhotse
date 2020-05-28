@@ -3,7 +3,9 @@ package engineering.everest.lhotse.functionaltests.helpers;
 import engineering.everest.lhotse.AdminProvisionTask;
 import engineering.everest.lhotse.api.rest.requests.NewOrganizationRequest;
 import engineering.everest.lhotse.api.rest.requests.NewUserRequest;
+import engineering.everest.lhotse.api.rest.requests.RegisterOrganizationRequest;
 import engineering.everest.lhotse.api.rest.requests.UpdateUserRequest;
+import engineering.everest.lhotse.api.rest.responses.OrganizationRegistrationResponse;
 import engineering.everest.lhotse.api.rest.responses.OrganizationResponse;
 import engineering.everest.lhotse.api.rest.responses.UserResponse;
 import org.springframework.core.ParameterizedTypeReference;
@@ -58,6 +60,10 @@ public class ApiRestTestClient {
         this.accessToken = accessToken;
     }
 
+    public void logout() {
+        this.accessToken = null;
+    }
+
     public UserResponse getUser(UUID userId, HttpStatus expectedHttpStatus) {
         return webTestClient.get().uri("/api/users/{userId}", userId)
                 .header("Authorization", "Bearer " + accessToken)
@@ -75,7 +81,7 @@ public class ApiRestTestClient {
     }
 
     public UUID createRegisteredOrganization(NewOrganizationRequest request, HttpStatus expectedHttpStatus) {
-        ResponseSpec responseSpec = webTestClient.post().uri("/api/admin/organizations")
+        ResponseSpec responseSpec = webTestClient.post().uri("/admin/organizations")
                 .header("Authorization", "Bearer " + accessToken)
                 .contentType(APPLICATION_JSON)
                 .body(fromValue(request))
@@ -87,8 +93,26 @@ public class ApiRestTestClient {
         return null;
     }
 
+    public OrganizationRegistrationResponse registerNewOrganization(RegisterOrganizationRequest request, HttpStatus expectedHttpStatus) {
+        ResponseSpec responseSpec = webTestClient.post().uri("/api/organizations/register")
+                .contentType(APPLICATION_JSON)
+                .body(fromValue(request))
+                .exchange()
+                .expectStatus().isEqualTo(expectedHttpStatus);
+        if (expectedHttpStatus == CREATED) {
+            return responseSpec.returnResult(OrganizationRegistrationResponse.class).getResponseBody().blockFirst();
+        }
+        return null;
+    }
+
+    public void confirmOrganizationRegistration(UUID organizationId, UUID confirmationCode, HttpStatus expectedHttpStatus) {
+        webTestClient.get().uri("/api/organizations/{organizationId}/register/{confirmationCode}", organizationId, confirmationCode)
+                .exchange()
+                .expectStatus().isEqualTo(expectedHttpStatus);
+    }
+
     public List<OrganizationResponse> getAllOrganizations(HttpStatus expectedHttpStatus) {
-        return webTestClient.get().uri("/api/admin/organizations")
+        return webTestClient.get().uri("/admin/organizations")
                 .header("Authorization", "Bearer " + accessToken)
                 .exchange()
                 .expectStatus().isEqualTo(expectedHttpStatus)

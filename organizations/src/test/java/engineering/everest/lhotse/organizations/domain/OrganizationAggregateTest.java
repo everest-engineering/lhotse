@@ -28,14 +28,13 @@ import java.util.UUID;
 
 import static engineering.everest.lhotse.axon.AxonTestUtils.mockCommandValidatingMessageHandlerInterceptor;
 import static engineering.everest.lhotse.axon.common.domain.User.ADMIN_ID;
-import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
 class OrganizationAggregateTest {
 
     private static final UUID ORGANIZATION_ID = UUID.fromString("3e1d8663-6bb1-45e6-8d4a-8dce9f95fe2a");
-    private static final UUID REGISTERING_USER_ID = randomUUID();
+    private static final UUID REGISTERING_USER_ID = UUID.fromString("bd4c08da-8ce7-4ef4-af57-cc407c3cb848");
     private static final String ORGANIZATION_NAME = "organization-name";
     private static final String NO_CHANGE = null;
     private static final String MISSING_ARGUMENT = null;
@@ -182,7 +181,7 @@ class OrganizationAggregateTest {
 
     @Test
     void updateOrganizationCommandEmitsSingleEvent_WhenOnlyOrganizationContactDetailsChanged() {
-        var command = new UpdateOrganizationCommand(ORGANIZATION_ID, ADMIN_ID, ORGANIZATION_NAME, NO_CHANGE, NO_CHANGE,
+        var command = new UpdateOrganizationCommand(ORGANIZATION_ID, ADMIN_ID, NO_CHANGE, NO_CHANGE, NO_CHANGE,
                 NO_CHANGE, NO_CHANGE, NO_CHANGE, ORGANIZATION_WEBSITE_URL, ORGANIZATION_CONTACT_NAME, ORGANIZATION_CONTACT_PHONE_NUMBER,
                 ORGANIZATION_CONTACT_EMAIL_ADDRESS);
 
@@ -280,6 +279,6 @@ class OrganizationAggregateTest {
                 .when(new PromoteUserToOrganizationAdminCommand(ORGANIZATION_ID, REGISTERING_USER_ID))
                 .expectNoEvents()
                 .expectException(IllegalArgumentException.class)
-                .expectExceptionMessage("User is already an admin of organization 3e1d8663-6bb1-45e6-8d4a-8dce9f95fe2a");
+                .expectExceptionMessage("User bd4c08da-8ce7-4ef4-af57-cc407c3cb848 is already an admin of organization 3e1d8663-6bb1-45e6-8d4a-8dce9f95fe2a");
     }
 }

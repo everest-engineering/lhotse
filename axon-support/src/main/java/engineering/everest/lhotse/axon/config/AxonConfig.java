@@ -17,6 +17,7 @@ import org.axonframework.messaging.interceptors.CorrelationDataInterceptor;
 import org.axonframework.modelling.command.AnnotationCommandTargetResolver;
 import org.axonframework.spring.config.AxonConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,6 +25,8 @@ import org.springframework.core.task.TaskExecutor;
 
 import java.util.List;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+
+import static engineering.everest.lhotse.axon.config.AxonEventStoreConfig.AXON_AUTO_CONFIG_QUALIFIER;
 
 @Slf4j
 @Configuration
@@ -52,7 +55,7 @@ public class AxonConfig {
     }
 
     @Bean
-    public SimpleCommandBus commandBus(TransactionManager txManager,
+    public SimpleCommandBus commandBus(@Qualifier(AXON_AUTO_CONFIG_QUALIFIER) TransactionManager txManager,
                                        AxonConfiguration axonConfiguration,
                                        CommandValidatingMessageHandlerInterceptor commandValidatingMessageHandlerInterceptor,
                                        LoggingMessageHandlerInterceptor loggingMessageHandlerInterceptor) {

@@ -88,7 +88,7 @@ public class OrganizationsController {
         return new OrganizationRegistrationResponse(organizationId, userId);
     }
 
-    @GetMapping("/{organizationId}/register/{confirmationCode}")
+    @GetMapping("/{organizationId}/register/{confirmationCode}")   // Can't easily POST from an email link
     @ResponseStatus(OK)
     @ApiOperation("Confirm the email address used to register an organization")
     public void confirmOrganizationContactEmail(@PathVariable UUID organizationId, @PathVariable UUID confirmationCode) {
