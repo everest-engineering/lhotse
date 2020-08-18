@@ -9,6 +9,7 @@ dependencies {
     implementation "engineering.everest.starterkit:storage:${storageVersion}"
     implementation "engineering.everest.starterkit:security:${securityVersion}"
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation "io.springfox:springfox-swagger2:${swaggerVersion}"
     implementation "io.springfox:springfox-swagger-ui:${swaggerVersion}"
     implementation "org.axonframework:axon-modelling:${axonVersion}"
