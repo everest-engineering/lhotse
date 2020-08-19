@@ -12,6 +12,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_DB: default
       POSTGRES_PASSWORD: postgres
+
   mongo-db:
     image: mongo:4
     container_name: mongo-db
@@ -20,6 +21,7 @@ services:
       - 27017:27017
     environment:
       MONGO_INITDB_DATABASE: test
+
   mongo-express:
     image: mongo-express
     container_name: mongo-express

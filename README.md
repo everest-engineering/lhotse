@@ -68,13 +68,21 @@ To build the entire application, including running unit and functional tests:
 (Note that functional tests share the same port number for embedded database as for the containerised database, if
 tests fail try running `./gradlew composeDown` first).
 
-To run the application server, including starting up containers Postgres and MongoDB:
+Start up containers for Postgres and MongoDB:
+
+`docker-compose -f launcher/docker-compose.yml up`
+
+To run the application server using Gradle:
 
 `./gradlew bootRun`
 
 To create a docker image:
 
-`./gradlew dockerBuild`
+`./gradlew bootBuildImage`
+
+To run the application server container with a TTY attached, allocating 2GiB memory and applying the `prod` Spring profile:
+
+`docker run -t -m 2G --network host -e "SPRING_PROFILES_ACTIVE=prod" your.organisation.here/lhotse:$BUILD_VERSION`
 
 To see all available Gradle tasks for this project:
 
