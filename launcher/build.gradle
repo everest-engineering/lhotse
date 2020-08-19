@@ -16,7 +16,6 @@ bootBuildInfo.mustRunAfter processResources
 
 bootBuildImage {
     imageName = "your.organisation.here/$rootProject.name:$project.version"
-    environment = ['JAVA_OPTS': '-Dspring.profiles.active=prod']
 }
 
 compileJava.dependsOn(processResources)
