@@ -5,7 +5,7 @@ dependencies {
     implementation project(':users-api')
 
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation "io.springfox:springfox-swagger2:${swaggerVersion}"
+    implementation "io.springfox:springfox-boot-starter:${swaggerVersion}"
 
     testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
     testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
