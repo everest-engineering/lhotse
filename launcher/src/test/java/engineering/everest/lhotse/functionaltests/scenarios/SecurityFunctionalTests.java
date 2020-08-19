@@ -4,7 +4,6 @@ import engineering.everest.lhotse.Launcher;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -24,9 +23,6 @@ class SecurityFunctionalTests {
     @Autowired
     private WebTestClient webClient;
 
-    @Value("${springfox.documentation.swagger.v2.path}")
-    private String swaggerApiDocPath;
-
     @Test
     @WithAnonymousUser
     void applicationIsAbleToStart() {
@@ -40,7 +36,7 @@ class SecurityFunctionalTests {
     @EnabledIfSystemProperty(named = "org.gradle.project.buildDir", matches = ".+")
     @WithAnonymousUser
     void swaggerApiDocIsAccessible() throws IOException {
-        String apiContent = webClient.get().uri(swaggerApiDocPath + "?group=internal")
+        String apiContent = webClient.get().uri("/api/doc")
                 .exchange()
                 .expectStatus().isOk()
                 .returnResult(String.class).getResponseBody().blockFirst();

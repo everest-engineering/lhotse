@@ -44,7 +44,7 @@ subprojects {
     ext {
         axonHazelcastCommandDistributionVersion = '0.0.16'
         mediaVersion = '0.0.14'
-        securityVersion = '0.0.13-1-ga5278fe.dirty'
+        securityVersion = '0.0.14'
         storageVersion = '0.0.14'
 
         aspectjVersion = '1.9.6'
@@ -55,7 +55,6 @@ subprojects {
         commonsTextVersion = '1.8'
         commonsValidatorVersion = '1.6'
         ehCacheVersion = '3.8.1'
-        guavaVersion = '29.0-jre'
         hazelcastKubernetesVersion = '1.5.3'
         hazelcastVersion = '3.12.7'
         javaXCacheVersion = '1.1.1'
