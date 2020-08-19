@@ -1,6 +1,5 @@
 package engineering.everest.lhotse.api.config;
 
-import com.google.common.base.Predicate;
 import io.swagger.annotations.SwaggerDefinition;
 import io.swagger.annotations.Tag;
 import org.springframework.context.annotation.Bean;
@@ -12,14 +11,13 @@ import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
-import static com.google.common.base.Predicates.or;
+import java.util.function.Predicate;
+
 import static springfox.documentation.builders.PathSelectors.regex;
 
 @Profile("!prod")
 @Configuration
-@EnableSwagger2
 @ComponentScan({"engineering.everest.lhotse.api"})
 @PropertySource("swagger.properties")
 @SwaggerDefinition(tags = {
@@ -33,21 +31,16 @@ public class SwaggerConfig {
     @Bean
     public Docket apiDocumentation() {
         return new Docket(DocumentationType.SWAGGER_2)
-                .groupName("internal")
                 .apiInfo(internalApiInfo())
                 .select()
                 .paths(pathsToDocument())
                 .build();
     }
 
-    @SuppressWarnings("Guava")
     private Predicate<String> pathsToDocument() {
-        //noinspection unchecked
-        return or(
-                regex("/api/.*"),
-                regex("/oauth/.*"),
-                regex("/tokens/.*")
-        );
+        return regex("/api/.*")
+                .or(regex("/oauth/.*"))
+                .or(regex("/tokens/.*"));
     }
 
     private ApiInfo internalApiInfo() {

@@ -44,7 +44,7 @@ subprojects {
     ext {
         axonHazelcastCommandDistributionVersion = '0.0.16'
         mediaVersion = '0.0.14'
-        securityVersion = '0.0.13'
+        securityVersion = '0.0.13-1-ga5278fe.dirty'
         storageVersion = '0.0.14'
 
         aspectjVersion = '1.9.6'
@@ -65,7 +65,7 @@ subprojects {
         microMeterPrometheusVersion = '1.5.4'
         postgresDriverVersion = '42.2.8'
         prometheusSimpleClientVersion = '0.7.0'
-        swaggerVersion = '2.9.2'
+        swaggerVersion = '3.0.0'
         thumbnailatorVersion = '0.4.11'
         springBootVersion = '2.3.3.RELEASE'
 
