@@ -15,7 +15,7 @@ springBoot {
 bootBuildInfo.mustRunAfter processResources
 
 bootBuildImage {
-    imageName = "your.organisation.here/$rootProject.name:$project.version"
+    imageName = "$organisation/$rootProject.name:$project.version"
 }
 
 compileJava.dependsOn(processResources)
