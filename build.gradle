@@ -14,6 +14,10 @@ version = gitVersion()
 
 allprojects {
     apply plugin: 'idea'
+
+    ext {
+       organisation = 'com.myorganisation'
+    }
 }
 
 licenseReport {
