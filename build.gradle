@@ -20,6 +20,10 @@ allprojects {
     }
 }
 
+dependencyCheck {
+   formats = ['ALL']
+}
+
 licenseReport {
     renderers = [new InventoryHtmlReportRenderer()]
 }
