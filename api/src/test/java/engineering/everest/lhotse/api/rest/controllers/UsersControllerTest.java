@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import engineering.everest.lhotse.api.config.TestApiConfig;
 import engineering.everest.lhotse.api.helpers.AuthContextExtension;
 import engineering.everest.lhotse.api.helpers.MockAuthenticationContextProvider;
+import engineering.everest.lhotse.api.rest.requests.DeleteAndForgetUserRequest;
 import engineering.everest.lhotse.api.rest.requests.UpdateUserRequest;
 import engineering.everest.lhotse.axon.common.domain.Identifiable;
 import engineering.everest.lhotse.axon.common.domain.User;
@@ -35,6 +36,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -199,17 +201,16 @@ class UsersControllerTest {
     }
 
     @Test
-    void willGetAllUsers_WhenRequestingUserIsAdmin() {
-        // TODO
-    }
+    @WithMockUser(username = ADMIN_USERNAME, roles = ROLE_ADMIN)
+    void deleteAndForgetUser_WillDelegate() throws Exception {
+        User authUser = MockAuthenticationContextProvider.getAuthUser();
+        UUID targetUserId = randomUUID();
 
-    @Test
-    void willGetUsersOfOrganization_WhenRequestingUserIsNotAdmin() {
-        // TODO
-    }
+        mockMvc.perform(post("/api/users/{userId}/forget", targetUserId)
+                .contentType(APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(new DeleteAndForgetUserRequest("Submitted GDPR request"))))
+                .andExpect(status().isOk());
 
-    @Test
-    void updateUserAccountStatus_WillDelegate() {
-        // TODO
+        verify(usersService).deleteAndForget(authUser.getId(), targetUserId, "Submitted GDPR request");
     }
 }

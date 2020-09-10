@@ -1,5 +1,7 @@
 package engineering.everest.lhotse.registrations.domain;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import engineering.everest.lhotse.organizations.domain.commands.CreateRegisteredOrganizationCommand;
 import engineering.everest.lhotse.registrations.domain.commands.CancelConfirmedRegistrationUserEmailAlreadyInUseCommand;
 import engineering.everest.lhotse.registrations.domain.commands.CompleteOrganizationRegistrationCommand;
@@ -11,7 +13,8 @@ import engineering.everest.lhotse.registrations.domain.events.OrganizationRegist
 import engineering.everest.lhotse.users.domain.commands.CreateUserForNewlyRegisteredOrganizationCommand;
 import engineering.everest.lhotse.users.domain.commands.PromoteUserToOrganizationAdminCommand;
 import engineering.everest.lhotse.users.services.UsersReadService;
-import lombok.NoArgsConstructor;
+import engineering.everest.starterkit.axon.cryptoshredding.annotations.EncryptedField;
+import engineering.everest.starterkit.axon.cryptoshredding.annotations.EncryptionKeyIdentifier;
 import lombok.extern.log4j.Log4j2;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.modelling.saga.EndSaga;
@@ -27,25 +30,37 @@ import java.util.UUID;
 @Saga
 @Revision("0")
 @Log4j2
-@NoArgsConstructor
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY) // TODO there might be a cleaner way
 public class OrganizationRegistrationSaga {
     private static final String CONFIRMATION_CODE = "registrationConfirmationCode";
 
+    @JsonIgnore
     private transient CommandGateway commandGateway;
+    @JsonIgnore
     private transient UsersReadService usersReadService;
 
     private UUID organizationId;
+    @EncryptionKeyIdentifier
     private UUID registeringUserId;
+    @EncryptedField
     private String registeringUserEmail;
     private String registeringUserEncodedPassword;
+    @EncryptedField
     private String registeringUserDisplayName;
     private String organizationName;
+    @EncryptedField
     private String street;
+    @EncryptedField
     private String city;
+    @EncryptedField
     private String state;
+    @EncryptedField
     private String country;
+    @EncryptedField
     private String postalCode;
+    @EncryptedField
     private String websiteUrl;
+    @EncryptedField
     private String phoneNumber;
 
     // Not implemented: deadline management for handling confirmation timeouts
@@ -81,7 +96,7 @@ public class OrganizationRegistrationSaga {
         // Add an email to your outbound queue.... maybe record the message ID in the command
 
         commandGateway.send(new RecordSentOrganizationRegistrationEmailConfirmationCommand(event.getRegistrationConfirmationCode(),
-                event.getOrganizationId(), event.getRegisteringContactEmail(), event.getOrganizationName()));
+                event.getOrganizationId(), event.getRegisteringContactEmail(), event.getOrganizationName(), event.getRegisteringUserId()));
     }
 
     @SagaEventHandler(associationProperty = CONFIRMATION_CODE)

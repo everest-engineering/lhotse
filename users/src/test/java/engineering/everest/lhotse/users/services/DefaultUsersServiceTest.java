@@ -2,6 +2,7 @@ package engineering.everest.lhotse.users.services;
 
 import engineering.everest.lhotse.axon.common.RandomFieldsGenerator;
 import engineering.everest.lhotse.users.domain.commands.CreateUserCommand;
+import engineering.everest.lhotse.users.domain.commands.DeleteAndForgetUserCommand;
 import engineering.everest.lhotse.users.domain.commands.RegisterUploadedUserProfilePhotoCommand;
 import engineering.everest.lhotse.users.domain.commands.UpdateUserDetailsCommand;
 import engineering.everest.starterkit.axon.HazelcastCommandGateway;
@@ -56,7 +57,6 @@ class DefaultUsersServiceTest {
     @Test
     void createNewUser_WillSendCommandAndWaitForCompletion() {
         when(passwordEncoder.encode("raw-password")).thenReturn("encoded-password");
-
         when(randomFieldsGenerator.genRandomUUID()).thenReturn(USER_ID);
 
         defaultUsersService.createUser(ADMIN_ID, ORGANIZATION_ID, NEW_USER_EMAIL, NEW_USER_DISPLAY_NAME, "raw-password");
@@ -68,5 +68,11 @@ class DefaultUsersServiceTest {
     void storeProfilePhoto_WillSendCommandAndWaitForCompletion() {
         defaultUsersService.storeProfilePhoto(USER_ID, PROFILE_PHOTO_FILE_ID);
         verify(commandGateway).sendAndWait(new RegisterUploadedUserProfilePhotoCommand(USER_ID, PROFILE_PHOTO_FILE_ID));
+    }
+
+    @Test
+    void deleteAndForget_WillSendCommandAndWaitForCompletion() {
+        defaultUsersService.deleteAndForget(ADMIN_ID, USER_ID, "User requested and we do the right thing");
+        verify(commandGateway).sendAndWait(new DeleteAndForgetUserCommand(USER_ID, ADMIN_ID, "User requested and we do the right thing"));
     }
 }

@@ -7,7 +7,7 @@ services:
     ports:
       - 5432:5432
     volumes:
-      - ./db-scripts:/docker-entrypoint-initdb.d
+      - ./launcher/db-scripts:/docker-entrypoint-initdb.d
     environment:
       POSTGRES_USER: postgres
       POSTGRES_DB: default
@@ -30,3 +30,4 @@ services:
       - 'mongo-db:mongo'
     ports:
       - 8081:8081
+

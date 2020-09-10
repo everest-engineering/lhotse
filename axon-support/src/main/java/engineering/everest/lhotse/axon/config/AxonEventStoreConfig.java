@@ -1,6 +1,7 @@
 package engineering.everest.lhotse.axon.config;
 
 import com.zaxxer.hikari.HikariConfig;
+import engineering.everest.starterkit.axon.cryptoshredding.CryptoShreddingSerializer;
 import liquibase.integration.spring.SpringLiquibase;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.common.jdbc.PersistenceExceptionResolver;
@@ -26,6 +27,7 @@ import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.transaction.ChainedTransactionManager;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -40,6 +42,11 @@ import java.sql.SQLException;
 
 @Slf4j
 @Configuration
+@EnableJpaRepositories(
+        entityManagerFactoryRef = "axonEntityManagerFactory",
+        transactionManagerRef = "axonPlatformTransactionManager",
+        basePackages = {"engineering.everest.starterkit.axon"}
+)
 public class AxonEventStoreConfig {
 
     static final String AXON_AUTO_CONFIG_QUALIFIER = "axon";
@@ -76,7 +83,8 @@ public class AxonEventStoreConfig {
                 .properties(jpaProperties.getProperties())
                 .packages("org.axonframework.eventsourcing.eventstore.jpa",
                         "org.axonframework.eventhandling.tokenstore.jpa",
-                        "org.axonframework.modelling.saga.repository.jpa")
+                        "org.axonframework.modelling.saga.repository.jpa",
+                        "engineering.everest.starterkit.axon.cryptoshredding")
                 .persistenceUnit(AXON_AUTO_CONFIG_QUALIFIER)
                 .build();
     }
@@ -119,25 +127,25 @@ public class AxonEventStoreConfig {
     @Primary
     public EventStorageEngine eventsStorageEngine(Serializer defaultSerializer,
                                                   PersistenceExceptionResolver persistenceExceptionResolver,
-                                                  Serializer eventSerializer,
                                                   AxonConfiguration configuration,
+                                                  CryptoShreddingSerializer cryptoShreddingEventSerializer,
                                                   @Qualifier(AXON_AUTO_CONFIG_QUALIFIER) EntityManagerProvider entityManagerProvider,
                                                   @Qualifier(AXON_AUTO_CONFIG_QUALIFIER) TransactionManager transactionManager) {
         return JpaEventStorageEngine.builder()
                 .snapshotSerializer(defaultSerializer)
                 .upcasterChain(configuration.upcasterChain())
                 .persistenceExceptionResolver(persistenceExceptionResolver)
-                .eventSerializer(eventSerializer)
+                .eventSerializer(cryptoShreddingEventSerializer)
                 .entityManagerProvider(entityManagerProvider)
                 .transactionManager(transactionManager)
                 .build();
     }
 
     @Bean
-    public SagaStore globalSagaStore(Serializer defaultSerializer,
-                                     @Qualifier(AXON_AUTO_CONFIG_QUALIFIER) EntityManagerProvider entityManagerProvider) {
+    public SagaStore globalSagaStore(@Qualifier(AXON_AUTO_CONFIG_QUALIFIER) EntityManagerProvider entityManagerProvider,
+                                     CryptoShreddingSerializer cryptoShreddingEventSerializer) {
         return JpaSagaStore.builder()
-                .serializer(defaultSerializer)
+                .serializer(cryptoShreddingEventSerializer)
                 .entityManagerProvider(entityManagerProvider)
                 .build();
     }

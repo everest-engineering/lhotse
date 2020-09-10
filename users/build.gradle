@@ -8,6 +8,7 @@ dependencies {
     implementation project(':organizations-api')
     implementation project(':users-persistence')
 
+    implementation "engineering.everest.starterkit:axon-crypto-shredding-extension:${axonCryptoShreddingVersion}"
     implementation "engineering.everest.starterkit:axon-command-distribution-extension:${axonHazelcastCommandDistributionVersion}"
     implementation "engineering.everest.starterkit:security:${securityVersion}"
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'

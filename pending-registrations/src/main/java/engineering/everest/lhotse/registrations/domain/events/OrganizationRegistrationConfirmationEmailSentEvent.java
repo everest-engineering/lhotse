@@ -1,5 +1,7 @@
 package engineering.everest.lhotse.registrations.domain.events;
 
+import engineering.everest.starterkit.axon.cryptoshredding.annotations.EncryptedField;
+import engineering.everest.starterkit.axon.cryptoshredding.annotations.EncryptionKeyIdentifier;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,6 +16,9 @@ import java.util.UUID;
 public class OrganizationRegistrationConfirmationEmailSentEvent {
     private UUID registrationConfirmationCode;
     private UUID organizationId;
+    @EncryptedField
     private String registeringContactEmail;
     private String organizationName;
+    @EncryptionKeyIdentifier
+    private UUID registeringUserId;
 }

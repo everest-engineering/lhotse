@@ -81,8 +81,8 @@ class PendingRegistrationAggregateTest {
     @Test
     void emits_WhenRecordSentOrganizationRegistrationEmailConfirmationCommandIsValid() {
         testFixture.given(ORGANIZATION_REGISTRATION_RECEIVED_EVENT)
-                .when(new RecordSentOrganizationRegistrationEmailConfirmationCommand(REGISTRATION_CONFIRMATION_CODE, ORGANIZATION_ID, ORGANIZATION_CONTACT_EMAIL_ADDRESS, ORGANIZATION_NAME))
-                .expectEvents(new OrganizationRegistrationConfirmationEmailSentEvent(REGISTRATION_CONFIRMATION_CODE, ORGANIZATION_ID, ORGANIZATION_CONTACT_EMAIL_ADDRESS, ORGANIZATION_NAME));
+                .when(new RecordSentOrganizationRegistrationEmailConfirmationCommand(REGISTRATION_CONFIRMATION_CODE, ORGANIZATION_ID, ORGANIZATION_CONTACT_EMAIL_ADDRESS, ORGANIZATION_NAME, REGISTERING_USER_ID))
+                .expectEvents(new OrganizationRegistrationConfirmationEmailSentEvent(REGISTRATION_CONFIRMATION_CODE, ORGANIZATION_ID, ORGANIZATION_CONTACT_EMAIL_ADDRESS, ORGANIZATION_NAME, REGISTERING_USER_ID));
     }
 
     @Test

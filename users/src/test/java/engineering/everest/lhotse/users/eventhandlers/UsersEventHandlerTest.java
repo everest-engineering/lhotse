@@ -1,10 +1,14 @@
 package engineering.everest.lhotse.users.eventhandlers;
 
+import engineering.everest.lhotse.organizations.domain.events.UserPromotedToOrganizationAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserCreatedByAdminEvent;
+import engineering.everest.lhotse.users.domain.events.UserCreatedForNewlyRegisteredOrganizationEvent;
+import engineering.everest.lhotse.users.domain.events.UserDeletedAndForgottenEvent;
 import engineering.everest.lhotse.users.domain.events.UserDetailsUpdatedByAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserProfilePhotoUploadedEvent;
 import engineering.everest.lhotse.users.persistence.PersistableUser;
 import engineering.everest.lhotse.users.persistence.UsersRepository;
+import engineering.everest.starterkit.axon.cryptoshredding.CryptoShreddingKeyService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,8 +17,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
+import static engineering.everest.lhotse.axon.common.domain.Role.ORG_ADMIN;
 import static engineering.everest.lhotse.axon.common.domain.User.ADMIN_ID;
 import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -38,10 +44,12 @@ class UsersEventHandlerTest {
 
     @Mock
     private UsersRepository usersRepository;
+    @Mock
+    private CryptoShreddingKeyService cryptoShreddingKeyService;
 
     @BeforeEach
     void setUp() {
-        usersEventHandler = new UsersEventHandler(usersRepository);
+        usersEventHandler = new UsersEventHandler(usersRepository, cryptoShreddingKeyService);
     }
 
     @Test
@@ -54,6 +62,15 @@ class UsersEventHandlerTest {
     @Test
     void onUserCreatedByAdminEvent_WillDelegate() {
         usersEventHandler.on(new UserCreatedByAdminEvent(USER_ID, ORGANIZATION_ID, ADMIN_ID,
+                USER_DISPLAY_NAME, USER_USERNAME, ENCODED_PASSWORD), CREATION_TIME);
+
+        verify(usersRepository).createUser(USER_ID, ORGANIZATION_ID, USER_DISPLAY_NAME, USER_USERNAME, ENCODED_PASSWORD, CREATION_TIME);
+    }
+
+    @Test
+    void onUserCreatedForNewlyRegisteredOrganizationEvent_WillDelegate() {
+        var registrationConfirmationCode = randomUUID();
+        usersEventHandler.on(new UserCreatedForNewlyRegisteredOrganizationEvent(USER_ID, ORGANIZATION_ID, registrationConfirmationCode,
                 USER_DISPLAY_NAME, USER_USERNAME, ENCODED_PASSWORD), CREATION_TIME);
 
         verify(usersRepository).createUser(USER_ID, ORGANIZATION_ID, USER_DISPLAY_NAME, USER_USERNAME, ENCODED_PASSWORD, CREATION_TIME);
@@ -117,6 +134,26 @@ class UsersEventHandlerTest {
 
         assertEquals(PROFILE_PHOTO_FILE_ID, persistableUser.getProfilePhotoFileId());
         verify(usersRepository).save(persistableUser);
+    }
+
+    @Test
+    void onUserPromotedToOrganizationAdminEvent_WillAddOrgAdminRoleToPromotedUser() {
+        PersistableUser persistableUser = createPersistableUser();
+
+        when(usersRepository.findById(USER_ID)).thenReturn(Optional.of(persistableUser));
+
+        usersEventHandler.on(new UserPromotedToOrganizationAdminEvent(ORGANIZATION_ID, USER_ID));
+
+        assertEquals(Set.of(ORG_ADMIN), persistableUser.getRoles());
+        verify(usersRepository).save(persistableUser);
+    }
+
+    @Test
+    void onUserDeletedAndForgottenEvent_WillDeleteUserAndDiscardSecretKey() {
+        usersEventHandler.on(new UserDeletedAndForgottenEvent(USER_ID, ADMIN_ID, "It's the right thing to do"));
+
+        verify(usersRepository).deleteById(USER_ID);
+        verify(cryptoShreddingKeyService).deleteSecretKey(USER_ID.toString());
     }
 
     private static PersistableUser createPersistableUser() {
