@@ -88,7 +88,7 @@ class ApplicationFunctionalTests {
     }
 
     @Test
-    void newUsersCanRegisterTheirOrganizationAndCreateNewUsersInTheirOrganization() throws InterruptedException {
+    void newUsersCanRegisterTheirOrganizationAndCreateNewUsersInTheirOrganization() {
         apiRestTestClient.logout();
         var registerOrganizationRequest = new RegisterOrganizationRequest("Alice's Art Artefactory", "123 Any Street", "Melbourne", "Victoria", "Australia", "3000", "http://alicesartartefactory.com", "Alice", "+61 422 123 456", "alice@example.com", "alicerocks");
         var organizationRegistrationResponse =  apiRestTestClient.registerNewOrganization(registerOrganizationRequest, CREATED);

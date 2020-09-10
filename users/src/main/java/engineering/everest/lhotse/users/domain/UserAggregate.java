@@ -1,12 +1,14 @@
 package engineering.everest.lhotse.users.domain;
 
-import engineering.everest.lhotse.users.domain.commands.CreateUserForNewlyRegisteredOrganizationCommand;
 import engineering.everest.lhotse.users.domain.commands.CreateUserCommand;
+import engineering.everest.lhotse.users.domain.commands.CreateUserForNewlyRegisteredOrganizationCommand;
+import engineering.everest.lhotse.users.domain.commands.DeleteAndForgetUserCommand;
 import engineering.everest.lhotse.users.domain.commands.RegisterUploadedUserProfilePhotoCommand;
 import engineering.everest.lhotse.users.domain.commands.UpdateUserDetailsCommand;
-import engineering.everest.lhotse.users.domain.events.UserCreatedForNewlyRegisteredOrganizationEvent;
 import engineering.everest.lhotse.users.domain.events.UserCreatedByAdminEvent;
+import engineering.everest.lhotse.users.domain.events.UserCreatedForNewlyRegisteredOrganizationEvent;
 import engineering.everest.lhotse.users.domain.events.UserDetailsUpdatedByAdminEvent;
+import engineering.everest.lhotse.users.domain.events.UserDeletedAndForgottenEvent;
 import engineering.everest.lhotse.users.domain.events.UserProfilePhotoUploadedEvent;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.Validate;
@@ -20,6 +22,7 @@ import java.util.UUID;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.axonframework.modelling.command.AggregateLifecycle.apply;
+import static org.axonframework.modelling.command.AggregateLifecycle.markDeleted;
 
 @Aggregate(repository = "repositoryForUser")
 @Log4j2
@@ -65,6 +68,11 @@ public class UserAggregate implements Serializable {
         return command.getProfilePhotoFileId();
     }
 
+    @CommandHandler
+    void handle(DeleteAndForgetUserCommand command) {
+        apply(new UserDeletedAndForgottenEvent(command.getUserId(), command.getRequestingUserId(), command.getRequestReason()));
+    }
+
     @EventSourcingHandler
     void on(UserCreatedByAdminEvent event) {
         userId = event.getUserId();
@@ -85,6 +93,13 @@ public class UserAggregate implements Serializable {
     void on(UserDetailsUpdatedByAdminEvent event) {
         userEmail = selectDesiredState(event.getEmailChange(), userEmail);
         displayName = selectDesiredState(event.getDisplayNameChange(), displayName);
+    }
+
+    @EventSourcingHandler
+    void on(UserDeletedAndForgottenEvent event) {
+        userEmail = "";
+        displayName = "";
+        markDeleted();
     }
 
     private void validateDisplayNameIsPresent(String displayName) {

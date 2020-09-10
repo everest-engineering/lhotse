@@ -33,6 +33,7 @@ sample code demonstrates end-to-end command handling and event processing flows 
     - [Command validation](#command-validation)
     - [Event processing](#event-processing)
     - [Event replays](#event-replays)
+    - [Crypto shredding](#crypto-shredding)
     - [Security support](#security-support)
         - [User and Authentication Context](#user-and-authentication-context)
         - [Endpoint access control](#endpoint-access-control)
@@ -70,7 +71,7 @@ tests fail try running `./gradlew composeDown` first).
 
 Start up containers for Postgres and MongoDB:
 
-`docker-compose -f launcher/docker-compose.yml up`
+`docker-compose up`
 
 To run the application server using Gradle:
 
@@ -257,6 +258,14 @@ Behind the scenes, replays are being executed by:
  * placing a marker event into the event log that will end replays
  * starting TEP processing, and
  * changing the event processing configuration back to subscribing mode when the TEP reaches the marker event
+
+## Crypto shredding
+Crypto shredding is a technique for disabling access to sensitive information by discarding encryption keys. You might use 
+this on the behest of a user or when retention is no longer justified in order to comply with the European Union's General 
+Data Protection Regulation (GDPR) without compromising the append-only nature of your event log.
+
+Documentation in the [crypto shredding](https://github.com/everest-engineering/axon-crypto-shredding) repository explains 
+how it works, its limitations and an important caveat.
 
 ## Security support
 The [security](https://github.com/everest-engineering/lhotse-security) module builds on

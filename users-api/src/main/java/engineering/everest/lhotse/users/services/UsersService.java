@@ -10,4 +10,6 @@ public interface UsersService {
                     String displayNameChange, String passwordChange);
 
     void storeProfilePhoto(UUID requestingUserId, UUID profilePhotoFileId);
+
+    void deleteAndForget(UUID requestingUserId, UUID userId, String requestReason);
 }

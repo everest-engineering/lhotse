@@ -1,8 +1,12 @@
 package engineering.everest.lhotse.axon.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import engineering.everest.lhotse.axon.CommandValidatingMessageHandlerInterceptor;
 import engineering.everest.lhotse.axon.LoggingMessageHandlerInterceptor;
 import engineering.everest.lhotse.axon.replay.CompositeEventProcessorBuilder;
+import engineering.everest.starterkit.axon.cryptoshredding.CryptoShreddingKeyService;
+import engineering.everest.starterkit.axon.cryptoshredding.CryptoShreddingSerializer;
+import engineering.everest.starterkit.axon.cryptoshredding.encryption.AesEncrypterDecrypterFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.commandhandling.CommandBus;
 import org.axonframework.commandhandling.CommandMessage;
@@ -15,6 +19,7 @@ import org.axonframework.config.EventProcessingModule;
 import org.axonframework.messaging.MessageDispatchInterceptor;
 import org.axonframework.messaging.interceptors.CorrelationDataInterceptor;
 import org.axonframework.modelling.command.AnnotationCommandTargetResolver;
+import org.axonframework.serialization.json.JacksonSerializer;
 import org.axonframework.spring.config.AxonConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -82,6 +87,14 @@ public class AxonConfig {
         eventProcessingModule.registerEventProcessorFactory(
                 new CompositeEventProcessorBuilder(
                         taskExecutor, eventProcessingModule, eventProcessorType, numberOfSegments));
+    }
+
+    @Qualifier("eventSerializer")
+    @Bean
+    public CryptoShreddingSerializer eventSerializer(CryptoShreddingKeyService cryptoShreddingKeyService,
+                                                     AesEncrypterDecrypterFactory aesEncrypterDecrypterFactory) {
+        return new CryptoShreddingSerializer(JacksonSerializer.defaultSerializer(),
+                cryptoShreddingKeyService, aesEncrypterDecrypterFactory, new ObjectMapper());
     }
 
     @Bean

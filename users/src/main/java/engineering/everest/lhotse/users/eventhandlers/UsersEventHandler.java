@@ -5,8 +5,10 @@ import engineering.everest.lhotse.organizations.domain.events.UserPromotedToOrga
 import engineering.everest.lhotse.users.domain.events.UserCreatedByAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserCreatedForNewlyRegisteredOrganizationEvent;
 import engineering.everest.lhotse.users.domain.events.UserDetailsUpdatedByAdminEvent;
+import engineering.everest.lhotse.users.domain.events.UserDeletedAndForgottenEvent;
 import engineering.everest.lhotse.users.domain.events.UserProfilePhotoUploadedEvent;
 import engineering.everest.lhotse.users.persistence.UsersRepository;
+import engineering.everest.starterkit.axon.cryptoshredding.CryptoShreddingKeyService;
 import lombok.extern.log4j.Log4j2;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventhandling.ResetHandler;
@@ -24,10 +26,12 @@ import static engineering.everest.lhotse.axon.common.domain.User.ADMIN_ID;
 public class UsersEventHandler implements ReplayCompletionAware {
 
     private final UsersRepository usersRepository;
+    private final CryptoShreddingKeyService cryptoShreddingKeyService;
 
     @Autowired
-    public UsersEventHandler(UsersRepository usersRepository) {
+    public UsersEventHandler(UsersRepository usersRepository, CryptoShreddingKeyService cryptoShreddingKeyService) {
         this.usersRepository = usersRepository;
+        this.cryptoShreddingKeyService = cryptoShreddingKeyService;
     }
 
     @ResetHandler
@@ -39,8 +43,9 @@ public class UsersEventHandler implements ReplayCompletionAware {
     @EventHandler
     void on(UserCreatedByAdminEvent event, @Timestamp Instant creationTime) {
         LOGGER.info("User {} created for admin created organization {}", event.getUserId(), event.getOrganizationId());
+        var userEmail = event.getUserEmail() == null ? String.format("%s@deleted", event.getUserId()) : event.getUserEmail();
         usersRepository.createUser(event.getUserId(), event.getOrganizationId(), event.getUserDisplayName(),
-                event.getUserEmail(), event.getEncodedPassword(), creationTime);
+                userEmail, event.getEncodedPassword(), creationTime);
     }
 
     @EventHandler
@@ -76,6 +81,13 @@ public class UsersEventHandler implements ReplayCompletionAware {
         var persistableUser = usersRepository.findById(event.getPromotedUserId()).orElseThrow();
         persistableUser.addRole(ORG_ADMIN);
         usersRepository.save(persistableUser);
+    }
+
+    @EventHandler
+    void on(UserDeletedAndForgottenEvent event) {
+        LOGGER.info("Deleting user {}", event.getDeletedUserId());
+        usersRepository.deleteById(event.getDeletedUserId());
+        cryptoShreddingKeyService.deleteSecretKey(event.getDeletedUserId().toString());
     }
 
     private String selectDesiredState(String desiredState, String currentState) {

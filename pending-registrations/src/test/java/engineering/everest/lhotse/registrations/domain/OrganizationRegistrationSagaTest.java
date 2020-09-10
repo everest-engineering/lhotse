@@ -61,7 +61,7 @@ class OrganizationRegistrationSagaTest {
 
     @Test
     void organizationRegistrationReceivedEvent_WillSendEmailToConfirmRegistration_AndDispatchRecordSentOrganizationRegistrationEmailConfirmationCommand() {
-        var expectedCommand = new RecordSentOrganizationRegistrationEmailConfirmationCommand(CONFIRMATION_CODE, ORGANIZATION_ID, REGISTERING_USER_EMAIL, ORGANIZATION_NAME);
+        var expectedCommand = new RecordSentOrganizationRegistrationEmailConfirmationCommand(CONFIRMATION_CODE, ORGANIZATION_ID, REGISTERING_USER_EMAIL, ORGANIZATION_NAME, REGISTERING_USER_ID);
         testFixture.givenNoPriorActivity()
                 .whenAggregate(CONFIRMATION_CODE_STRING).publishes(ORGANIZATION_REGISTRATION_RECEIVED_EVENT)
                 .expectDispatchedCommands(expectedCommand)

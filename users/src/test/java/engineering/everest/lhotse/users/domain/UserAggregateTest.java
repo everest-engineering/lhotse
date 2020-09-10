@@ -3,15 +3,18 @@ package engineering.everest.lhotse.users.domain;
 import engineering.everest.lhotse.axon.command.validators.EmailAddressValidator;
 import engineering.everest.lhotse.axon.command.validators.OrganizationStatusValidator;
 import engineering.everest.lhotse.axon.command.validators.UsersUniqueEmailValidator;
-import engineering.everest.lhotse.users.domain.commands.CreateUserForNewlyRegisteredOrganizationCommand;
 import engineering.everest.lhotse.users.domain.commands.CreateUserCommand;
+import engineering.everest.lhotse.users.domain.commands.CreateUserForNewlyRegisteredOrganizationCommand;
+import engineering.everest.lhotse.users.domain.commands.DeleteAndForgetUserCommand;
 import engineering.everest.lhotse.users.domain.commands.RegisterUploadedUserProfilePhotoCommand;
 import engineering.everest.lhotse.users.domain.commands.UpdateUserDetailsCommand;
-import engineering.everest.lhotse.users.domain.events.UserCreatedForNewlyRegisteredOrganizationEvent;
 import engineering.everest.lhotse.users.domain.events.UserCreatedByAdminEvent;
+import engineering.everest.lhotse.users.domain.events.UserCreatedForNewlyRegisteredOrganizationEvent;
+import engineering.everest.lhotse.users.domain.events.UserDeletedAndForgottenEvent;
 import engineering.everest.lhotse.users.domain.events.UserDetailsUpdatedByAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserProfilePhotoUploadedEvent;
 import engineering.everest.lhotse.users.services.UsersReadService;
+import org.axonframework.eventsourcing.AggregateDeletedException;
 import org.axonframework.spring.stereotype.Aggregate;
 import org.axonframework.test.aggregate.AggregateTestFixture;
 import org.axonframework.test.aggregate.FixtureConfiguration;
@@ -35,6 +38,7 @@ class UserAggregateTest {
 
     private static final UUID ORGANIZATION_ID = randomUUID();
     private static final UUID USER_ID = randomUUID();
+    public static final UserDeletedAndForgottenEvent USER_DELETED_AND_FORGOTTEN_EVENT = new UserDeletedAndForgottenEvent(USER_ID, ADMIN_ID, "It's the right thing to do");
     private static final UUID PROFILE_PHOTO_FILE_ID = randomUUID();
     private static final String USERNAME = "user@email.com";
     private static final String USER_DISPLAY_NAME = "user-display-name";
@@ -214,5 +218,20 @@ class UserAggregateTest {
         testFixture.given(USER_CREATED_BY_ADMIN_EVENT)
                 .when(new RegisterUploadedUserProfilePhotoCommand(USER_ID, PROFILE_PHOTO_FILE_ID))
                 .expectEvents(new UserProfilePhotoUploadedEvent(USER_ID, PROFILE_PHOTO_FILE_ID));
+    }
+
+    @Test
+    void emitsUserDeletedAndForgottenEvent_WhenUserIsDeletedAndForgotten() {
+        testFixture.given(USER_CREATED_BY_ADMIN_EVENT)
+                .when(new DeleteAndForgetUserCommand(USER_ID, ADMIN_ID, "It's the right thing to do"))
+                .expectEvents(USER_DELETED_AND_FORGOTTEN_EVENT);
+    }
+
+    @Test
+    void rejectsDeleteAndForgetUserCommand_WhenUserHasAlreadyBeenDeleted() {
+        testFixture.given(USER_CREATED_BY_ADMIN_EVENT, USER_DELETED_AND_FORGOTTEN_EVENT)
+                .when(new DeleteAndForgetUserCommand(USER_ID, ADMIN_ID, "It's the right thing to do"))
+                .expectNoEvents()
+                .expectException(AggregateDeletedException.class);
     }
 }

@@ -1,27 +1,29 @@
 package engineering.everest.lhotse.api.rest.controllers;
 
+import engineering.everest.lhotse.api.rest.annotations.AdminOnly;
+import engineering.everest.lhotse.api.rest.converters.DtoConverter;
+import engineering.everest.lhotse.api.rest.requests.DeleteAndForgetUserRequest;
+import engineering.everest.lhotse.api.rest.requests.UpdateUserRequest;
+import engineering.everest.lhotse.api.rest.responses.UserResponse;
 import engineering.everest.lhotse.axon.common.domain.User;
 import engineering.everest.lhotse.users.services.UsersReadService;
 import engineering.everest.lhotse.users.services.UsersService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import engineering.everest.lhotse.api.rest.annotations.AdminOnly;
-import engineering.everest.lhotse.api.rest.converters.DtoConverter;
-import engineering.everest.lhotse.api.rest.requests.UpdateUserRequest;
-import engineering.everest.lhotse.api.rest.responses.UserResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.UUID;
-import javax.validation.Valid;
 
 import static java.util.stream.Collectors.toList;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -51,6 +53,15 @@ public class UsersController {
         return usersReadService.getUsers().stream()
                 .map(dtoConverter::convert)
                 .collect(toList());
+    }
+
+    @PostMapping("/{userId}/forget")
+    @ApiOperation(produces = APPLICATION_JSON_VALUE, value = "Handle a GDPR request to delete an account and scrub personal information")
+    @AdminOnly
+    public void deleteUser(User requestinguser,
+                           @PathVariable UUID userId,
+                           @RequestBody @Valid DeleteAndForgetUserRequest request) {
+        usersService.deleteAndForget(requestinguser.getId(), userId, request.getRequestReason());
     }
 
     @GetMapping("/{userId}")

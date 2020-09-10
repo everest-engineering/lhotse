@@ -79,7 +79,8 @@
                 <constraints nullable="false"/>
             </column>
             <column name="eventidentifier" type="varchar(255)">
-                <constraints nullable="false" unique="true" uniqueConstraintName="UK_snapshot_event_entry_event_identifier"/>
+                <constraints nullable="false" unique="true"
+                             uniqueConstraintName="UK_snapshot_event_entry_event_identifier"/>
             </column>
             <column name="metadata" type="blob"/>
             <column name="payload" type="blob">
@@ -87,7 +88,7 @@
             </column>
             <column name="payloadrevision" type="varchar(255)"/>
             <column name="payloadtype" type="varchar(255)">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="timestamp" type="varchar(255)">
                 <constraints nullable="false"/>
@@ -110,5 +111,19 @@
             <column name="tokentype" type="varchar(255)"/>
         </createTable>
         <addPrimaryKey tableName="tokenentry" columnNames="processorname, segment"/>
+    </changeSet>
+
+    <changeSet id="2" author="Lhotse starter kit">
+        <createTable tableName="cryptoshreddingkeys">
+            <column name="keyid" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="keytype" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="key" type="blob"/>
+            <column name="algorithm" type="varchar(64)"/>
+        </createTable>
+        <addPrimaryKey tableName="cryptoshreddingkeys" columnNames="keyid, keytype"/>
     </changeSet>
 </databaseChangeLog>

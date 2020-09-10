@@ -2,6 +2,7 @@ package engineering.everest.lhotse.users.services;
 
 import engineering.everest.lhotse.axon.common.RandomFieldsGenerator;
 import engineering.everest.lhotse.users.domain.commands.CreateUserCommand;
+import engineering.everest.lhotse.users.domain.commands.DeleteAndForgetUserCommand;
 import engineering.everest.lhotse.users.domain.commands.RegisterUploadedUserProfilePhotoCommand;
 import engineering.everest.lhotse.users.domain.commands.UpdateUserDetailsCommand;
 import engineering.everest.starterkit.axon.HazelcastCommandGateway;
@@ -44,6 +45,11 @@ public class DefaultUsersService implements UsersService {
     @Override
     public void storeProfilePhoto(UUID requestingUserId, UUID profilePhotoFileId) {
         commandGateway.sendAndWait(new RegisterUploadedUserProfilePhotoCommand(requestingUserId, profilePhotoFileId));
+    }
+
+    @Override
+    public void deleteAndForget(UUID requestingUserId, UUID userId, String requestReason) {
+        commandGateway.sendAndWait(new DeleteAndForgetUserCommand(userId, requestingUserId, requestReason));
     }
 
     private String encodePasswordIfNotBlank(String passwordChange) {

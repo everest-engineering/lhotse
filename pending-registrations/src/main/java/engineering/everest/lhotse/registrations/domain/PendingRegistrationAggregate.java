@@ -43,7 +43,7 @@ public class PendingRegistrationAggregate implements Serializable {
     @CommandHandler
     void handle(RecordSentOrganizationRegistrationEmailConfirmationCommand command) {
         apply(new OrganizationRegistrationConfirmationEmailSentEvent(registrationConfirmationCode, organizationId,
-                command.getRegisteringContactEmail(), command.getOrganizationName()));
+                command.getRegisteringContactEmail(), command.getOrganizationName(), command.getRegisteringUserId()));
     }
 
     @CommandHandler
