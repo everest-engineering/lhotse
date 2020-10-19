@@ -6,7 +6,7 @@ import engineering.everest.lhotse.axon.LoggingMessageHandlerInterceptor;
 import engineering.everest.lhotse.axon.replay.CompositeEventProcessorBuilder;
 import engineering.everest.starterkit.axon.cryptoshredding.CryptoShreddingKeyService;
 import engineering.everest.starterkit.axon.cryptoshredding.CryptoShreddingSerializer;
-import engineering.everest.starterkit.axon.cryptoshredding.encryption.AesEncrypterDecrypterFactory;
+import engineering.everest.starterkit.axon.cryptoshredding.encryption.EncrypterDecrypterFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.commandhandling.CommandBus;
 import org.axonframework.commandhandling.CommandMessage;
@@ -92,7 +92,7 @@ public class AxonConfig {
     @Qualifier("eventSerializer")
     @Bean
     public CryptoShreddingSerializer eventSerializer(CryptoShreddingKeyService cryptoShreddingKeyService,
-                                                     AesEncrypterDecrypterFactory aesEncrypterDecrypterFactory) {
+                                                     EncrypterDecrypterFactory aesEncrypterDecrypterFactory) {
         return new CryptoShreddingSerializer(JacksonSerializer.defaultSerializer(),
                 cryptoShreddingKeyService, aesEncrypterDecrypterFactory, new ObjectMapper());
     }
