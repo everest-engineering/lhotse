@@ -22,17 +22,11 @@ public class OrganizationRegistrationReceivedEvent {
     private String registeringContactEmail;
     private String registeringUserEncodedPassword;
     private String organizationName;
-    @EncryptedField
     private String websiteUrl;
-    @EncryptedField
     private String street;
-    @EncryptedField
     private String city;
-    @EncryptedField
     private String state;
-    @EncryptedField
     private String country;
-    @EncryptedField
     private String postalCode;
     @EncryptedField
     private String contactName;

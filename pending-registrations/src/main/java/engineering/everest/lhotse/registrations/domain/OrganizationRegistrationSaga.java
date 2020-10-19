@@ -48,17 +48,11 @@ public class OrganizationRegistrationSaga {
     @EncryptedField
     private String registeringUserDisplayName;
     private String organizationName;
-    @EncryptedField
     private String street;
-    @EncryptedField
     private String city;
-    @EncryptedField
     private String state;
-    @EncryptedField
     private String country;
-    @EncryptedField
     private String postalCode;
-    @EncryptedField
     private String websiteUrl;
     @EncryptedField
     private String phoneNumber;
