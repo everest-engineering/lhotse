@@ -264,8 +264,8 @@ Crypto shredding is a technique for disabling access to sensitive information by
 this on the behest of a user or when retention is no longer justified in order to comply with the European Union's General 
 Data Protection Regulation (GDPR) without compromising the append-only nature of your event log.
 
-Documentation in the [crypto shredding](https://github.com/everest-engineering/axon-crypto-shredding) repository explains 
-how it works, its limitations and an important caveat.
+Documentation in the [crypto shredding](https://github.com/everest-engineering/axon-crypto-shredding-extension) repository
+explains how it works, its limitations and an important caveat.
 
 ## Security support
 The [security](https://github.com/everest-engineering/lhotse-security) module builds on
