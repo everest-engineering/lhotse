@@ -1,16 +1,4 @@
-include 'api'
-include 'axon-support'
-include 'command-validation-api'
-include 'command-validation-support'
-include 'common'
-include 'launcher'
-include 'organizations'
-include 'organizations-api'
-include 'organizations-persistence'
-include 'pending-registrations'
-include 'pending-registrations-api'
-include 'pending-registrations-persistence'
-include 'security-support'
-include 'users'
-include 'users-api'
-include 'users-persistence'
+file("src").eachDir { p ->
+    include p.name
+    project(":${p.name}").projectDir = p
+}
