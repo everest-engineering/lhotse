@@ -3,6 +3,7 @@ package engineering.everest.lhotse.users.domain;
 import engineering.everest.lhotse.axon.command.validators.EmailAddressValidator;
 import engineering.everest.lhotse.axon.command.validators.OrganizationStatusValidator;
 import engineering.everest.lhotse.axon.command.validators.UsersUniqueEmailValidator;
+import engineering.everest.lhotse.i18n.exceptions.TranslatableIllegalArgumentException;
 import engineering.everest.lhotse.users.domain.commands.CreateUserCommand;
 import engineering.everest.lhotse.users.domain.commands.CreateUserForNewlyRegisteredOrganizationCommand;
 import engineering.everest.lhotse.users.domain.commands.DeleteAndForgetUserCommand;
@@ -188,8 +189,8 @@ class UserAggregateTest {
         testFixture.given(USER_CREATED_BY_ADMIN_EVENT)
                 .when(new UpdateUserDetailsCommand(USER_ID, NO_CHANGE, NO_CHANGE, NO_CHANGE, ADMIN_ID))
                 .expectNoEvents()
-                .expectException(IllegalArgumentException.class)
-                .expectExceptionMessage("At least one user field change must be requested");
+                .expectException(TranslatableIllegalArgumentException.class)
+                .expectExceptionMessage("USER_UPDATE_NO_FIELDS_CHANGED");
     }
 
     @Test
@@ -197,8 +198,8 @@ class UserAggregateTest {
         testFixture.given(USER_CREATED_BY_ADMIN_EVENT)
                 .when(new UpdateUserDetailsCommand(USER_ID, NO_CHANGE, BLANK_FIELD, NO_CHANGE, ADMIN_ID))
                 .expectNoEvents()
-                .expectException(IllegalArgumentException.class)
-                .expectExceptionMessage("User display name is required");
+                .expectException(TranslatableIllegalArgumentException.class)
+                .expectExceptionMessage("USER_DISPLAY_NAME_MISSING");
     }
 
     @Test

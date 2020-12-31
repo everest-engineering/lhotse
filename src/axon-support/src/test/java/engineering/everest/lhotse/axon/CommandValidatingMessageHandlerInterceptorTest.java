@@ -3,6 +3,7 @@ package engineering.everest.lhotse.axon;
 import engineering.everest.lhotse.axon.command.validators.EmailAddressValidator;
 import engineering.everest.lhotse.axon.command.validators.OrganizationStatusValidator;
 import engineering.everest.lhotse.axon.command.validators.UsersUniqueEmailValidator;
+import engineering.everest.lhotse.i18n.exceptions.TranslatableIllegalStateException;
 import engineering.everest.lhotse.organizations.Organization;
 import engineering.everest.lhotse.organizations.services.OrganizationsReadService;
 import engineering.everest.lhotse.users.domain.commands.CreateUserCommand;
@@ -56,11 +57,8 @@ class CommandValidatingMessageHandlerInterceptorTest {
     private OrganizationsReadService organizationsReadService;
 
     private EmailAddressValidator emailAddressValidator;
-
     private UsersUniqueEmailValidator usersUniqueEmailValidator;
-
     private OrganizationStatusValidator organizationStatusValidator;
-
     private CommandValidatingMessageHandlerInterceptor commandValidatingMessageHandlerInterceptor;
 
     @BeforeEach
@@ -87,11 +85,10 @@ class CommandValidatingMessageHandlerInterceptorTest {
         when(createUserSubClassCommand.getOrganizationId()).thenReturn(ORGANIZATION_ID);
         when(organizationsReadService.getById(ORGANIZATION_ID)).thenThrow(NoSuchElementException.class);
 
-        var exception = assertThrows(IllegalStateException.class,
+        var exception = assertThrows(TranslatableIllegalStateException.class,
                 () -> commandValidatingMessageHandlerInterceptor.handle(unitOfWork, interceptorChain));
 
-        assertEquals(String.format("Organization %s does not exist", ORGANIZATION_ID),
-                exception.getMessage());
+        assertEquals("ORGANIZATION_DOES_NOT_EXIST", exception.getMessage());
     }
 
     @Test

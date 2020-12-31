@@ -1,6 +1,7 @@
 package engineering.everest.lhotse.axon.command.validators;
 
 import engineering.everest.lhotse.axon.command.validation.UserUniqueEmailValidatableCommand;
+import engineering.everest.lhotse.i18n.exceptions.TranslatableIllegalArgumentException;
 import engineering.everest.lhotse.users.services.UsersReadService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,7 +32,7 @@ public class UserUniqueEmailValidatorTest {
     void validate_WillFail_WhenUserWithEmailAlreadyExists() {
         when(usersReadService.hasUserWithEmail(EXISTING_USER_EMAIL_1)).thenReturn(true);
 
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(TranslatableIllegalArgumentException.class, () -> {
             usersUniqueEmailValidator.validate((UserUniqueEmailValidatableCommand) () -> EXISTING_USER_EMAIL_1);
         });
     }

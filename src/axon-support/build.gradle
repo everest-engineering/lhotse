@@ -7,6 +7,7 @@ dependencies {
 
     implementation project(':command-validation-api')
     implementation project(':common')
+    implementation project(':i18n-support')
     implementation project(':users-api')
 
     implementation "engineering.everest.starterkit:axon-crypto-shredding-extension:${axonCryptoShreddingVersion}"

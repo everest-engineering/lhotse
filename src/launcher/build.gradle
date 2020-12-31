@@ -29,19 +29,11 @@ test {
 }
 
 dependencies {
-    implementation project(':api')
-    implementation project(':axon-support')
-    implementation project(':common')
-    implementation project(':command-validation-support')
-    implementation project(':organizations')
-    implementation project(':organizations-api')
-    implementation project(':organizations-persistence')
-    implementation project(':pending-registrations')
-    implementation project(':pending-registrations-api')
-    implementation project(':pending-registrations-persistence')
-    implementation project(':users')
-    implementation project(':users-api')
-    implementation project(':users-persistence')
+    file("../").eachDir { p ->
+        if (p.name != "launcher") {
+            implementation project(":${p.name}")
+        }
+    }
 
     implementation "engineering.everest.starterkit:axon-crypto-shredding-extension:${axonCryptoShreddingVersion}"
     implementation "engineering.everest.starterkit:axon-command-distribution-extension:${axonHazelcastCommandDistributionVersion}"

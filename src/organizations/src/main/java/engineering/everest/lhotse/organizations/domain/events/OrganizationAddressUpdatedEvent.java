@@ -19,5 +19,4 @@ public class OrganizationAddressUpdatedEvent {
     private String country;
     private String postalCode;
     private UUID updatingUserId;
-
 }

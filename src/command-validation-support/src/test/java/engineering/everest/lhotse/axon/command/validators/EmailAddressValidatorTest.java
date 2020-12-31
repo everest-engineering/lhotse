@@ -1,5 +1,6 @@
 package engineering.everest.lhotse.axon.command.validators;
 
+import engineering.everest.lhotse.i18n.exceptions.TranslatableIllegalArgumentException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -26,26 +27,26 @@ class EmailAddressValidatorTest {
 
     @Test
     void validator_WillFail_WhenEmailIsBlank() {
-        assertThrows(IllegalArgumentException.class, () -> emailAddressValidator.validate(() -> ""));
+        assertThrows(TranslatableIllegalArgumentException.class, () -> emailAddressValidator.validate(() -> ""));
     }
 
     @Test
     void validator_WillFail_WhenEmailIsAddressedLocally() {
-        assertThrows(IllegalArgumentException.class, () -> emailAddressValidator.validate(() -> "bob@localhost"));
+        assertThrows(TranslatableIllegalArgumentException.class, () -> emailAddressValidator.validate(() -> "bob@localhost"));
     }
 
     @Test
     void validator_WillFail_WhenEmailContainsSpaces() {
-        assertThrows(IllegalArgumentException.class, () -> emailAddressValidator.validate(() -> "bob @ my.com"));
+        assertThrows(TranslatableIllegalArgumentException.class, () -> emailAddressValidator.validate(() -> "bob @ my.com"));
     }
 
     @Test
     void validator_WillFail_WhenEmailIsMissingHostname() {
-        assertThrows(IllegalArgumentException.class, () -> emailAddressValidator.validate(() -> "bob@"));
+        assertThrows(TranslatableIllegalArgumentException.class, () -> emailAddressValidator.validate(() -> "bob@"));
     }
 
     @Test
     void validator_WillFail_WhenHostnameIsAToplevelDomain() {
-        assertThrows(IllegalArgumentException.class, () -> emailAddressValidator.validate(() -> "bob@engineering"));
+        assertThrows(TranslatableIllegalArgumentException.class, () -> emailAddressValidator.validate(() -> "bob@engineering"));
     }
 }

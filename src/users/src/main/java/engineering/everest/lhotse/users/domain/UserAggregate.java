@@ -1,5 +1,6 @@
 package engineering.everest.lhotse.users.domain;
 
+import engineering.everest.lhotse.i18n.TranslatingValidator;
 import engineering.everest.lhotse.users.domain.commands.CreateUserCommand;
 import engineering.everest.lhotse.users.domain.commands.CreateUserForNewlyRegisteredOrganizationCommand;
 import engineering.everest.lhotse.users.domain.commands.DeleteAndForgetUserCommand;
@@ -7,11 +8,10 @@ import engineering.everest.lhotse.users.domain.commands.RegisterUploadedUserProf
 import engineering.everest.lhotse.users.domain.commands.UpdateUserDetailsCommand;
 import engineering.everest.lhotse.users.domain.events.UserCreatedByAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserCreatedForNewlyRegisteredOrganizationEvent;
-import engineering.everest.lhotse.users.domain.events.UserDetailsUpdatedByAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserDeletedAndForgottenEvent;
+import engineering.everest.lhotse.users.domain.events.UserDetailsUpdatedByAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserProfilePhotoUploadedEvent;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.Validate;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.modelling.command.AggregateIdentifier;
@@ -103,14 +103,14 @@ public class UserAggregate implements Serializable {
     }
 
     private void validateDisplayNameIsPresent(String displayName) {
-        Validate.isTrue(!isBlank(displayName), "User display name is required");
+        TranslatingValidator.isTrue(!isBlank(displayName), "USER_DISPLAY_NAME_MISSING");
     }
 
     private void validateAtLeastOneChangeIsBeingMade(UpdateUserDetailsCommand command) {
         boolean changesMade = command.getDisplayNameChange() != null
                 || command.getEmailChange() != null
                 || command.getPasswordChange() != null;
-        Validate.isTrue(changesMade, "At least one user field change must be requested");
+        TranslatingValidator.isTrue(changesMade, "USER_UPDATE_NO_FIELDS_CHANGED");
     }
 
     private String selectDesiredState(String desiredState, String currentState) {

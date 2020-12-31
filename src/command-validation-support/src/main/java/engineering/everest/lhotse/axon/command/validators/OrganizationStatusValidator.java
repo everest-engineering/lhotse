@@ -2,12 +2,14 @@ package engineering.everest.lhotse.axon.command.validators;
 
 import engineering.everest.lhotse.axon.command.validation.OrganizationStatusValidatableCommand;
 import engineering.everest.lhotse.axon.command.validation.Validates;
+import engineering.everest.lhotse.i18n.exceptions.TranslatableIllegalStateException;
 import engineering.everest.lhotse.organizations.Organization;
 import engineering.everest.lhotse.organizations.services.OrganizationsReadService;
-import org.apache.commons.lang3.Validate;
 import org.springframework.stereotype.Component;
 
 import java.util.NoSuchElementException;
+
+import static engineering.everest.lhotse.i18n.TranslatingValidator.isValidState;
 
 @Component
 public class OrganizationStatusValidator implements Validates<OrganizationStatusValidatableCommand> {
@@ -24,8 +26,8 @@ public class OrganizationStatusValidator implements Validates<OrganizationStatus
         try {
             organization = organizationsReadService.getById(command.getOrganizationId());
         } catch (NoSuchElementException e) {
-            throw new IllegalStateException(String.format("Organization %s does not exist", command.getOrganizationId()), e);
+            throw new TranslatableIllegalStateException("ORGANIZATION_DOES_NOT_EXIST", e, command.getOrganizationId());
         }
-        Validate.validState(!organization.isDisabled(), "Organization %s is de-registered", command.getOrganizationId());
+        isValidState(!organization.isDisabled(), "ORGANIZATION_IS_DEREGISTERED", command.getOrganizationId());
     }
 }

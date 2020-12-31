@@ -12,7 +12,6 @@ import engineering.everest.lhotse.organizations.domain.events.OrganizationNameCh
 import engineering.everest.lhotse.organizations.domain.events.OrganizationRegisteredEvent;
 import engineering.everest.lhotse.organizations.domain.events.UserPromotedToOrganizationAdminEvent;
 import engineering.everest.lhotse.users.domain.commands.PromoteUserToOrganizationAdminCommand;
-import org.apache.commons.lang3.Validate;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.modelling.command.AggregateIdentifier;
@@ -24,6 +23,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import static engineering.everest.lhotse.i18n.TranslatingValidator.isTrue;
+import static engineering.everest.lhotse.i18n.TranslatingValidator.isValidState;
 import static org.axonframework.modelling.command.AggregateLifecycle.apply;
 
 @Aggregate(repository = "repositoryForOrganization")
@@ -51,8 +52,8 @@ public class OrganizationAggregate implements Serializable {
     @CommandHandler
     void handle(PromoteUserToOrganizationAdminCommand command) {
         validateOrganizationIsEnabled();
-        Validate.isTrue(!organizationAdminIds.contains(command.getPromotedUserId()),
-                "User %s is already an admin of organization %s", command.getPromotedUserId(), id);
+        isTrue(!organizationAdminIds.contains(command.getPromotedUserId()),
+                "USER_ALREADY_ORGANIZATION_ADMIN", command.getPromotedUserId(), id);
 
         apply(new UserPromotedToOrganizationAdminEvent(command.getOrganizationId(), command.getPromotedUserId()));
     }
@@ -65,7 +66,7 @@ public class OrganizationAggregate implements Serializable {
 
     @CommandHandler
     void handle(EnableOrganizationCommand command) {
-        Validate.validState(disabled, "Organization %s is already enabled", id);
+        isValidState(disabled, "ORGANIZATION_ALREADY_ENABLED", id);
         apply(new OrganizationEnabledByAdminEvent(command.getOrganizationId(), command.getRequestingUserId()));
     }
 
@@ -112,12 +113,12 @@ public class OrganizationAggregate implements Serializable {
     }
 
     private void validateOrganizationIsEnabled() {
-        Validate.validState(!disabled, "Organization %s is disabled", id);
+        isValidState(!disabled, "ORGANIZATION_IS_DISABLED", id);
     }
 
     private void validateAtLeastOneUpdateIsMade(UpdateOrganizationCommand command) {
-        Validate.isTrue(isNameUpdated(command) || areContactDetailsUpdated(command) || isAddressUpdated(command),
-                "At least one organization field change must be requested");
+        isTrue(isNameUpdated(command) || areContactDetailsUpdated(command) || isAddressUpdated(command),
+                "ORGANIZATION_UPDATE_NO_FIELDS_CHANGED");
     }
 
     private boolean isNameUpdated(UpdateOrganizationCommand command) {

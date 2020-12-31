@@ -4,6 +4,7 @@ dependencies {
 
     implementation project(':axon-support')
     implementation project(':common')
+    implementation project(':i18n-support')
     implementation project(':command-validation-support')
     implementation project(':organizations-api')
     implementation project(':pending-registrations-api')
@@ -14,7 +15,6 @@ dependencies {
     implementation "engineering.everest.starterkit:storage:${storageVersion}"
     implementation 'javax.validation:validation-api'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation "org.apache.commons:commons-lang3:${commonsLangVersion}"
 
     testImplementation project(':axon-support').sourceSets.test.output
     testImplementation project(':users-api').sourceSets.test.output

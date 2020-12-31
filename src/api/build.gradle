@@ -1,5 +1,6 @@
 dependencies {
     implementation project(':common')
+    implementation project(':i18n-support')
     implementation project(':organizations-api')
     implementation project(':pending-registrations-api')
     implementation project(':users-api')

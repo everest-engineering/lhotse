@@ -1,6 +1,7 @@
 package engineering.everest.lhotse.axon.command.validators;
 
 import engineering.everest.lhotse.axon.command.validation.OrganizationStatusValidatableCommand;
+import engineering.everest.lhotse.i18n.exceptions.TranslatableIllegalStateException;
 import engineering.everest.lhotse.organizations.Organization;
 import engineering.everest.lhotse.organizations.services.OrganizationsReadService;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,7 +45,7 @@ class OrganizationStatusValidatorTest {
     void validate_WillFail_WhenOrganizationIsDisabled() {
         when(organizationsReadService.getById(ORGANIZATION_ID_2)).thenReturn(DISABLED_ORGANIZATION);
 
-        assertThrows(IllegalStateException.class, () ->
+        assertThrows(TranslatableIllegalStateException.class, () ->
                 organizationStatusValidator.validate((OrganizationStatusValidatableCommand) () -> ORGANIZATION_ID_2));
     }
 
@@ -52,7 +53,7 @@ class OrganizationStatusValidatorTest {
     void validate_WillFail_WhenOrganizationDoesNotExist() {
         when(organizationsReadService.getById(ORGANIZATION_ID_1)).thenThrow(NoSuchElementException.class);
 
-        assertThrows(IllegalStateException.class, () ->
+        assertThrows(TranslatableIllegalStateException.class, () ->
                 organizationStatusValidator.validate((OrganizationStatusValidatableCommand) () -> ORGANIZATION_ID_1));
     }
 }
