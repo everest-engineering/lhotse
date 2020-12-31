@@ -3,6 +3,7 @@ dependencies {
     api project(':users-api')
 
     implementation project(':common')
+    implementation project(':i18n-support')
     implementation project(':organizations-api')
 
     implementation 'org.springframework:spring-context'

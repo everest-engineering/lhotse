@@ -2,6 +2,7 @@ package engineering.everest.lhotse.api.rest;
 
 import engineering.everest.lhotse.api.rest.responses.ApiErrorResponse;
 import engineering.everest.lhotse.axon.common.exceptions.RemoteCommandExecutionException;
+import engineering.everest.lhotse.i18n.exceptions.TranslatableException;
 import org.axonframework.modelling.command.AggregateNotFoundException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -30,32 +31,22 @@ public class ExceptionHandlingControllerAdvice extends ResponseEntityExceptionHa
         this.clock = clock;
     }
 
-    @ExceptionHandler(AggregateNotFoundException.class)
-    public ResponseEntity<Object> handleNotFoundException(AggregateNotFoundException exception) {
-        return new ResponseEntity<>(createResponseBody(exception.getMessage(), NOT_FOUND), new HttpHeaders(), NOT_FOUND);
-    }
-
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<Object> handleRuntimeException(RuntimeException exception) {
-        return new ResponseEntity<>(createResponseBody(exception.getMessage(), BAD_REQUEST), new HttpHeaders(), BAD_REQUEST);
-    }
-
-    @ExceptionHandler(ExecutionException.class)
-    public ResponseEntity<Object> handleExecutionException(ExecutionException exception) {
-        var cause = exception.getCause();
-        var message = cause instanceof IllegalArgumentException || cause instanceof IllegalStateException
-                ? cause.getMessage()
-                : exception.getMessage();
-        return new ResponseEntity<>(createResponseBody(message, BAD_REQUEST), new HttpHeaders(), BAD_REQUEST);
-    }
-
-    @ExceptionHandler(RemoteCommandExecutionException.class)
-    public ResponseEntity<Object> handleRemoteCommandExecutionException(RemoteCommandExecutionException exception) {
-        var cause = exception.getCause();
-        if (cause instanceof ExecutionException) {
-            return handleExecutionException((ExecutionException)cause);
+    @ExceptionHandler
+    public ResponseEntity<Object> handleExceptions(Exception exception) {
+        if (exception instanceof TranslatableException) {
+            return handleTranslatableException((TranslatableException) exception);
         }
-        return new ResponseEntity<>(createResponseBody(cause.getMessage(), BAD_REQUEST), new HttpHeaders(), BAD_REQUEST);
+        if (exception instanceof AggregateNotFoundException) {
+            return handleNotFoundException((AggregateNotFoundException) exception);
+        }
+        if (exception instanceof ExecutionException) {
+            return handleExecutionException((ExecutionException) exception);
+        }
+        if (exception instanceof RemoteCommandExecutionException) {
+            return handleRemoteCommandExecutionException((RemoteCommandExecutionException) exception);
+        }
+
+        return handleGenericException(exception);
     }
 
     @Override
@@ -67,6 +58,37 @@ public class ExceptionHandlingControllerAdvice extends ResponseEntityExceptionHa
                 .map(x -> String.format("%s: %s", x.getField(), x.getDefaultMessage()))
                 .collect(joining("; "));
         return new ResponseEntity<>(createResponseBody(errors, BAD_REQUEST), new HttpHeaders(), BAD_REQUEST);
+    }
+
+    private ResponseEntity<Object> handleTranslatableException(TranslatableException exception) {
+        return new ResponseEntity<>(createResponseBody(exception.getLocalizedMessage(), BAD_REQUEST), new HttpHeaders(), BAD_REQUEST);
+    }
+
+    private ResponseEntity<Object> handleNotFoundException(AggregateNotFoundException exception) {
+        return new ResponseEntity<>(createResponseBody(exception.getMessage(), NOT_FOUND), new HttpHeaders(), NOT_FOUND);
+    }
+
+    private ResponseEntity<Object> handleExecutionException(ExecutionException exception) {
+        var cause = exception.getCause();
+        var message = cause instanceof IllegalArgumentException || cause instanceof IllegalStateException
+                ? cause.getMessage()
+                : exception.getMessage();
+        if (cause instanceof TranslatableException) {
+            message = cause.getLocalizedMessage();
+        }
+        return new ResponseEntity<>(createResponseBody(message, BAD_REQUEST), new HttpHeaders(), BAD_REQUEST);
+    }
+
+    private ResponseEntity<Object> handleRemoteCommandExecutionException(RemoteCommandExecutionException exception) {
+        var cause = exception.getCause();
+        if (cause instanceof ExecutionException) {
+            return handleExecutionException((ExecutionException) cause);
+        }
+        return new ResponseEntity<>(createResponseBody(cause.getMessage(), BAD_REQUEST), new HttpHeaders(), BAD_REQUEST);
+    }
+
+    private ResponseEntity<Object> handleGenericException(Exception exception) {
+        return new ResponseEntity<>(createResponseBody(exception.getMessage(), BAD_REQUEST), new HttpHeaders(), BAD_REQUEST);
     }
 
     private ApiErrorResponse createResponseBody(String message, HttpStatus badRequest) {

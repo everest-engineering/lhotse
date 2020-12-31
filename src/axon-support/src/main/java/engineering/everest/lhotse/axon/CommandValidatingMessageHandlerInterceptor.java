@@ -16,12 +16,12 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static java.util.Collections.unmodifiableMap;
 import static java.util.stream.Collectors.toList;
 
 @Component
@@ -42,7 +42,7 @@ public class CommandValidatingMessageHandlerInterceptor implements MessageHandle
                     .findFirst().orElseThrow();
             m.put((Class<?>) validatableCommandType, validator);
         }
-        validatorLookup = Collections.unmodifiableMap(m);
+        validatorLookup = unmodifiableMap(m);
     }
 
     @Override

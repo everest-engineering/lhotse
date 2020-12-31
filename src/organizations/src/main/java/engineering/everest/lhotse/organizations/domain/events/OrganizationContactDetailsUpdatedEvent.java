@@ -18,5 +18,4 @@ public class OrganizationContactDetailsUpdatedEvent {
     private String emailAddress;
     private String websiteUrl;
     private UUID updatingUserId;
-
 }

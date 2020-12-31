@@ -1,5 +1,6 @@
 package engineering.everest.lhotse.registrations.domain;
 
+import engineering.everest.lhotse.i18n.TranslatingValidator;
 import engineering.everest.lhotse.registrations.domain.commands.CancelConfirmedRegistrationUserEmailAlreadyInUseCommand;
 import engineering.everest.lhotse.registrations.domain.commands.CompleteOrganizationRegistrationCommand;
 import engineering.everest.lhotse.registrations.domain.commands.ConfirmOrganizationRegistrationEmailCommand;
@@ -10,7 +11,6 @@ import engineering.everest.lhotse.registrations.domain.events.OrganizationRegist
 import engineering.everest.lhotse.registrations.domain.events.OrganizationRegistrationConfirmedAfterUserWithEmailCreatedEvent;
 import engineering.everest.lhotse.registrations.domain.events.OrganizationRegistrationConfirmedEvent;
 import engineering.everest.lhotse.registrations.domain.events.OrganizationRegistrationReceivedEvent;
-import org.apache.commons.lang3.Validate;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.modelling.command.AggregateIdentifier;
@@ -48,7 +48,8 @@ public class PendingRegistrationAggregate implements Serializable {
 
     @CommandHandler
     void handle(ConfirmOrganizationRegistrationEmailCommand command) {
-        Validate.isTrue(organizationId.equals(command.getOrganizationId()), "Valid confirmation token for another organization");
+        TranslatingValidator.isTrue(organizationId.equals(command.getOrganizationId()),
+                "ORGANIZATION_REGISTRATION_TOKEN_FOR_ANOTHER_ORG");
 
         apply(new OrganizationRegistrationConfirmedEvent(registrationConfirmationCode, organizationId));
     }

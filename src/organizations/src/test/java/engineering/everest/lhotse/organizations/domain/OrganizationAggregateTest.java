@@ -2,6 +2,8 @@ package engineering.everest.lhotse.organizations.domain;
 
 import engineering.everest.lhotse.axon.command.validators.EmailAddressValidator;
 import engineering.everest.lhotse.axon.command.validators.UsersBelongToOrganizationValidator;
+import engineering.everest.lhotse.i18n.exceptions.TranslatableIllegalArgumentException;
+import engineering.everest.lhotse.i18n.exceptions.TranslatableIllegalStateException;
 import engineering.everest.lhotse.organizations.domain.commands.CreateRegisteredOrganizationCommand;
 import engineering.everest.lhotse.organizations.domain.commands.DisableOrganizationCommand;
 import engineering.everest.lhotse.organizations.domain.commands.EnableOrganizationCommand;
@@ -89,8 +91,8 @@ class OrganizationAggregateTest {
         testFixture.given(ORGANIZATION_REGISTERED_BY_ADMIN_EVENT)
                 .when(new EnableOrganizationCommand(ORGANIZATION_ID, ADMIN_ID))
                 .expectNoEvents()
-                .expectException(IllegalStateException.class)
-                .expectExceptionMessage("Organization 3e1d8663-6bb1-45e6-8d4a-8dce9f95fe2a is already enabled");
+                .expectException(TranslatableIllegalStateException.class)
+                .expectExceptionMessage("ORGANIZATION_ALREADY_ENABLED");
     }
 
     @Test
@@ -145,8 +147,8 @@ class OrganizationAggregateTest {
         testFixture.given(ORGANIZATION_REGISTERED_BY_ADMIN_EVENT)
                 .when(new EnableOrganizationCommand(ORGANIZATION_ID, ADMIN_ID))
                 .expectNoEvents()
-                .expectException(IllegalStateException.class)
-                .expectExceptionMessage("Organization 3e1d8663-6bb1-45e6-8d4a-8dce9f95fe2a is already enabled");
+                .expectException(TranslatableIllegalStateException.class)
+                .expectExceptionMessage("ORGANIZATION_ALREADY_ENABLED");
     }
 
     @Test
@@ -154,8 +156,8 @@ class OrganizationAggregateTest {
         testFixture.given(ORGANIZATION_REGISTERED_BY_ADMIN_EVENT, ORGANIZATION_DISABLED_BY_ADMIN_EVENT)
                 .when(new DisableOrganizationCommand(ORGANIZATION_ID, ADMIN_ID))
                 .expectNoEvents()
-                .expectException(IllegalStateException.class)
-                .expectExceptionMessage("Organization 3e1d8663-6bb1-45e6-8d4a-8dce9f95fe2a is disabled");
+                .expectException(TranslatableIllegalStateException.class)
+                .expectExceptionMessage("ORGANIZATION_IS_DISABLED");
     }
 
     @Test
@@ -241,8 +243,8 @@ class OrganizationAggregateTest {
         testFixture.given(ORGANIZATION_REGISTERED_BY_ADMIN_EVENT, ORGANIZATION_DISABLED_BY_ADMIN_EVENT)
                 .when(command)
                 .expectNoEvents()
-                .expectException(IllegalStateException.class)
-                .expectExceptionMessage("Organization 3e1d8663-6bb1-45e6-8d4a-8dce9f95fe2a is disabled");
+                .expectException(TranslatableIllegalStateException.class)
+                .expectExceptionMessage("ORGANIZATION_IS_DISABLED");
     }
 
     @Test
@@ -253,8 +255,8 @@ class OrganizationAggregateTest {
         testFixture.given(ORGANIZATION_REGISTERED_BY_ADMIN_EVENT)
                 .when(command)
                 .expectNoEvents()
-                .expectException(IllegalArgumentException.class)
-                .expectExceptionMessage("At least one organization field change must be requested");
+                .expectException(TranslatableIllegalArgumentException.class)
+                .expectExceptionMessage("ORGANIZATION_UPDATE_NO_FIELDS_CHANGED");
     }
 
     @Test
@@ -269,8 +271,8 @@ class OrganizationAggregateTest {
         testFixture.given(ORGANIZATION_REGISTERED_BY_ADMIN_EVENT, new OrganizationDisabledByAdminEvent(ORGANIZATION_ID, ADMIN_ID))
                 .when(new PromoteUserToOrganizationAdminCommand(ORGANIZATION_ID, REGISTERING_USER_ID))
                 .expectNoEvents()
-                .expectException(IllegalStateException.class)
-                .expectExceptionMessage("Organization 3e1d8663-6bb1-45e6-8d4a-8dce9f95fe2a is disabled");
+                .expectException(TranslatableIllegalStateException.class)
+                .expectExceptionMessage("ORGANIZATION_IS_DISABLED");
     }
 
     @Test
@@ -278,7 +280,7 @@ class OrganizationAggregateTest {
         testFixture.given(ORGANIZATION_REGISTERED_BY_ADMIN_EVENT, new UserPromotedToOrganizationAdminEvent(ORGANIZATION_ID, REGISTERING_USER_ID))
                 .when(new PromoteUserToOrganizationAdminCommand(ORGANIZATION_ID, REGISTERING_USER_ID))
                 .expectNoEvents()
-                .expectException(IllegalArgumentException.class)
-                .expectExceptionMessage("User bd4c08da-8ce7-4ef4-af57-cc407c3cb848 is already an admin of organization 3e1d8663-6bb1-45e6-8d4a-8dce9f95fe2a");
+                .expectException(TranslatableIllegalArgumentException.class)
+                .expectExceptionMessage("USER_ALREADY_ORGANIZATION_ADMIN");
     }
 }

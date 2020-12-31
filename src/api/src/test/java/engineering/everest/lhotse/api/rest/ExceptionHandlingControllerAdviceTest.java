@@ -2,6 +2,7 @@ package engineering.everest.lhotse.api.rest;
 
 import engineering.everest.lhotse.api.rest.responses.ApiErrorResponse;
 import engineering.everest.lhotse.axon.common.exceptions.RemoteCommandExecutionException;
+import engineering.everest.lhotse.i18n.exceptions.TranslatableException;
 import org.axonframework.modelling.command.AggregateNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,18 +14,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import java.lang.reflect.Method;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -49,12 +47,6 @@ class ExceptionHandlingControllerAdviceTest {
     }
 
     @Test
-    void annotatedWithExceptionHandlerForAggregateNotFoundException() throws NoSuchMethodException {
-        var handleNotFoundException = controllerAdvice.getClass().getMethod("handleNotFoundException", AggregateNotFoundException.class);
-        assertDoesNotThrow(() -> handleNotFoundException.getAnnotation(ExceptionHandler.class));
-    }
-
-    @Test
     void willMapAggregateNotFoundExceptions() {
         var exception = new AggregateNotFoundException("aggregate-id", "not found here");
         var expectedResponse = ApiErrorResponse.builder()
@@ -63,13 +55,7 @@ class ExceptionHandlingControllerAdviceTest {
                 .timeStamp(Instant.now(clock))
                 .build();
 
-        assertEquals(new ResponseEntity<>(expectedResponse, new HttpHeaders(), NOT_FOUND), controllerAdvice.handleNotFoundException(exception));
-    }
-
-    @Test
-    void annotatedWithExceptionHandlerForRuntimeException() throws NoSuchMethodException {
-        var handleRuntimeException = controllerAdvice.getClass().getMethod("handleRuntimeException", RuntimeException.class);
-        assertDoesNotThrow(() -> handleRuntimeException.getAnnotation(ExceptionHandler.class));
+        assertEquals(new ResponseEntity<>(expectedResponse, new HttpHeaders(), NOT_FOUND), controllerAdvice.handleExceptions(exception));
     }
 
     @Test
@@ -81,13 +67,7 @@ class ExceptionHandlingControllerAdviceTest {
                 .timeStamp(Instant.now(clock))
                 .build();
 
-        assertEquals(new ResponseEntity<>(expectedResponse, new HttpHeaders(), BAD_REQUEST), controllerAdvice.handleRuntimeException(exception));
-    }
-
-    @Test
-    void annotatedWithExceptionHandlerForExecutionException() throws NoSuchMethodException {
-        Method handleRemoteCommandExecutionException = controllerAdvice.getClass().getMethod("handleExecutionException", ExecutionException.class);
-        assertDoesNotThrow(() -> handleRemoteCommandExecutionException.getAnnotation(ExceptionHandler.class));
+        assertEquals(new ResponseEntity<>(expectedResponse, new HttpHeaders(), BAD_REQUEST), controllerAdvice.handleExceptions(exception));
     }
 
     @Test
@@ -99,7 +79,7 @@ class ExceptionHandlingControllerAdviceTest {
                 .timeStamp(Instant.now(clock))
                 .build();
 
-        assertEquals(new ResponseEntity<>(expectedResponse, new HttpHeaders(), BAD_REQUEST), controllerAdvice.handleExecutionException(exception));
+        assertEquals(new ResponseEntity<>(expectedResponse, new HttpHeaders(), BAD_REQUEST), controllerAdvice.handleExceptions(exception));
     }
 
     @Test
@@ -111,7 +91,7 @@ class ExceptionHandlingControllerAdviceTest {
                 .timeStamp(Instant.now(clock))
                 .build();
 
-        assertEquals(new ResponseEntity<>(expectedResponse, new HttpHeaders(), BAD_REQUEST), controllerAdvice.handleExecutionException(exception));
+        assertEquals(new ResponseEntity<>(expectedResponse, new HttpHeaders(), BAD_REQUEST), controllerAdvice.handleExceptions(exception));
     }
 
     @Test
@@ -123,13 +103,7 @@ class ExceptionHandlingControllerAdviceTest {
                 .timeStamp(Instant.now(clock))
                 .build();
 
-        assertEquals(new ResponseEntity<>(expectedResponse, new HttpHeaders(), BAD_REQUEST), controllerAdvice.handleExecutionException(exception));
-    }
-
-    @Test
-    void annotatedWithExceptionHandlerForRemoteCommandExecutionException() throws NoSuchMethodException {
-        Method handleRemoteCommandExecutionException = controllerAdvice.getClass().getMethod("handleRemoteCommandExecutionException", RemoteCommandExecutionException.class);
-        assertDoesNotThrow(() -> handleRemoteCommandExecutionException.getAnnotation(ExceptionHandler.class));
+        assertEquals(new ResponseEntity<>(expectedResponse, new HttpHeaders(), BAD_REQUEST), controllerAdvice.handleExceptions(exception));
     }
 
     @Test
@@ -141,7 +115,7 @@ class ExceptionHandlingControllerAdviceTest {
                 .timeStamp(Instant.now(clock))
                 .build();
 
-        assertEquals(new ResponseEntity<>(expectedResponse, new HttpHeaders(), BAD_REQUEST), controllerAdvice.handleRemoteCommandExecutionException(exception));
+        assertEquals(new ResponseEntity<>(expectedResponse, new HttpHeaders(), BAD_REQUEST), controllerAdvice.handleExceptions(exception));
     }
 
     @Test
@@ -153,7 +127,19 @@ class ExceptionHandlingControllerAdviceTest {
                 .timeStamp(Instant.now(clock))
                 .build();
 
-        assertEquals(new ResponseEntity<>(expectedResponse, new HttpHeaders(), BAD_REQUEST), controllerAdvice.handleRemoteCommandExecutionException(exception));
+        assertEquals(new ResponseEntity<>(expectedResponse, new HttpHeaders(), BAD_REQUEST), controllerAdvice.handleExceptions(exception));
+    }
+
+    @Test
+    void willMapRemoteCommandExecutionExceptionWithNestedTranslatableException() {
+        var exception = new RemoteCommandExecutionException(new ExecutionException(new TranslatableException("USER_DISPLAY_NAME_MISSING")));
+        var expectedResponse = ApiErrorResponse.builder()
+                .status(BAD_REQUEST)
+                .message("User display name is required")
+                .timeStamp(Instant.now(clock))
+                .build();
+
+        assertEquals(new ResponseEntity<>(expectedResponse, new HttpHeaders(), BAD_REQUEST), controllerAdvice.handleExceptions(exception));
     }
 
     @Test
@@ -165,7 +151,7 @@ class ExceptionHandlingControllerAdviceTest {
                 .timeStamp(Instant.now(clock))
                 .build();
 
-        assertEquals(new ResponseEntity<>(expectedResponse, new HttpHeaders(), BAD_REQUEST), controllerAdvice.handleRemoteCommandExecutionException(exception));
+        assertEquals(new ResponseEntity<>(expectedResponse, new HttpHeaders(), BAD_REQUEST), controllerAdvice.handleExceptions(exception));
     }
 
     @Test
@@ -183,5 +169,17 @@ class ExceptionHandlingControllerAdviceTest {
                 .timeStamp(Instant.now(clock))
                 .build();
         assertEquals(new ResponseEntity<>(expectedResponse, new HttpHeaders(), BAD_REQUEST), controllerAdvice.handleException(ex, mock(WebRequest.class)));
+    }
+
+    @Test
+    void willMapTranslatableExceptions() {
+        var exception = new TranslatableException("EMAIL_ADDRESS_ALREADY_EXISTS");
+        var expectedResponse = ApiErrorResponse.builder()
+                .status(BAD_REQUEST)
+                .message("Email address already exists")
+                .timeStamp(Instant.now(clock))
+                .build();
+
+        assertEquals(new ResponseEntity<>(expectedResponse, new HttpHeaders(), BAD_REQUEST), controllerAdvice.handleExceptions(exception));
     }
 }

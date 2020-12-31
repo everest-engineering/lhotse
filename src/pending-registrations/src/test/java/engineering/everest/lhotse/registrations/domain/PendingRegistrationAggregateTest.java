@@ -1,6 +1,7 @@
 package engineering.everest.lhotse.registrations.domain;
 
 import engineering.everest.lhotse.axon.command.validators.EmailAddressValidator;
+import engineering.everest.lhotse.i18n.exceptions.TranslatableIllegalArgumentException;
 import engineering.everest.lhotse.registrations.domain.commands.CancelConfirmedRegistrationUserEmailAlreadyInUseCommand;
 import engineering.everest.lhotse.registrations.domain.commands.CompleteOrganizationRegistrationCommand;
 import engineering.everest.lhotse.registrations.domain.commands.ConfirmOrganizationRegistrationEmailCommand;
@@ -97,8 +98,8 @@ class PendingRegistrationAggregateTest {
         testFixture.given(ORGANIZATION_REGISTRATION_RECEIVED_EVENT)
                 .when(new ConfirmOrganizationRegistrationEmailCommand(REGISTRATION_CONFIRMATION_CODE, randomUUID()))
                 .expectNoEvents()
-                .expectException(IllegalArgumentException.class)
-                .expectExceptionMessage("Valid confirmation token for another organization");
+                .expectException(TranslatableIllegalArgumentException.class)
+                .expectExceptionMessage("ORGANIZATION_REGISTRATION_TOKEN_FOR_ANOTHER_ORG");
     }
 
     @Test

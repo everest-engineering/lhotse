@@ -2,6 +2,7 @@ package engineering.everest.lhotse.axon.command.validators;
 
 import engineering.everest.lhotse.axon.command.validation.UsersBelongToOrganizationValidatableCommand;
 import engineering.everest.lhotse.axon.common.domain.User;
+import engineering.everest.lhotse.i18n.exceptions.TranslatableIllegalArgumentException;
 import engineering.everest.lhotse.users.services.UsersReadService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,7 +49,7 @@ class UsersBelongToOrganizationValidatorTest {
 
     @Test
     void validate_WillFail_WhenAnyEveryUserBelongsToDifferentOrganization() {
-        assertThrows(IllegalArgumentException.class, () ->
+        assertThrows(TranslatableIllegalArgumentException.class, () ->
                 usersBelongToOrganizationValidator.validate(createValidatableCommand(Set.of(USER_ID_1, USER_ID_2, USER_ID_3))));
     }
 
