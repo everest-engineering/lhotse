@@ -93,7 +93,7 @@ subprojects {
     }
 
     checkstyle {
-        toolVersion = '8.32'
+        toolVersion = '8.39'
         maxWarnings = 0
         configFile = file("${project.rootDir}/build-config/checkstyle/checkstyle.xml")
         sourceSets = [sourceSets.main]
