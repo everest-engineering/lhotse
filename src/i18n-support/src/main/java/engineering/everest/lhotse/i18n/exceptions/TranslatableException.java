@@ -3,6 +3,8 @@ package engineering.everest.lhotse.i18n.exceptions;
 import engineering.everest.lhotse.i18n.TranslationService;
 import org.springframework.context.NoSuchMessageException;
 
+import static org.springframework.context.i18n.LocaleContextHolder.getLocale;
+
 public class TranslatableException extends RuntimeException {
 
     private final String i18nMessageKey;
@@ -33,7 +35,7 @@ public class TranslatableException extends RuntimeException {
     @Override
     public String getLocalizedMessage() {
         try {
-            return TranslationService.getInstance().translate(i18nMessageKey, args);
+            return TranslationService.getInstance().translate(getLocale(), i18nMessageKey, args);
         } catch (NoSuchMessageException ignored) {
             return getMessage();
         }
