@@ -1,8 +1,8 @@
 package engineering.everest.lhotse.api.rest;
 
 import engineering.everest.lhotse.api.rest.responses.ApiErrorResponse;
-import engineering.everest.lhotse.axon.common.exceptions.RemoteCommandExecutionException;
 import engineering.everest.lhotse.i18n.exceptions.TranslatableException;
+import engineering.everest.starterkit.axon.exceptions.RemoteCommandExecutionException;
 import org.axonframework.modelling.command.AggregateNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -132,7 +132,7 @@ class ExceptionHandlingControllerAdviceTest {
 
     @Test
     void willMapRemoteCommandExecutionExceptionWithNestedTranslatableException() {
-        var exception = new RemoteCommandExecutionException(new ExecutionException(new TranslatableException("USER_DISPLAY_NAME_MISSING")));
+        var exception = new RemoteCommandExecutionException(new ExecutionException(new ExecutionException(new TranslatableException("USER_DISPLAY_NAME_MISSING"))));
         var expectedResponse = ApiErrorResponse.builder()
                 .status(BAD_REQUEST)
                 .message("User display name is required")

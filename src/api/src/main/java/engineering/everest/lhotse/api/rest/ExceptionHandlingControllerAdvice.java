@@ -1,8 +1,8 @@
 package engineering.everest.lhotse.api.rest;
 
 import engineering.everest.lhotse.api.rest.responses.ApiErrorResponse;
-import engineering.everest.lhotse.axon.common.exceptions.RemoteCommandExecutionException;
 import engineering.everest.lhotse.i18n.exceptions.TranslatableException;
+import engineering.everest.starterkit.axon.exceptions.RemoteCommandExecutionException;
 import org.axonframework.modelling.command.AggregateNotFoundException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -33,7 +33,7 @@ public class ExceptionHandlingControllerAdvice extends ResponseEntityExceptionHa
 
     @ExceptionHandler
     public ResponseEntity<Object> handleExceptions(Exception exception) {
-        if (exception instanceof TranslatableException) {
+        if (TranslatableException.class.isAssignableFrom(exception.getClass())) {
             return handleTranslatableException((TranslatableException) exception);
         }
         if (exception instanceof AggregateNotFoundException) {
@@ -70,11 +70,11 @@ public class ExceptionHandlingControllerAdvice extends ResponseEntityExceptionHa
 
     private ResponseEntity<Object> handleExecutionException(ExecutionException exception) {
         var cause = exception.getCause();
-        var message = cause instanceof IllegalArgumentException || cause instanceof IllegalStateException
-                ? cause.getMessage()
-                : exception.getMessage();
-        if (cause instanceof TranslatableException) {
-            message = cause.getLocalizedMessage();
+        String message = exception.getMessage();
+        if (cause instanceof IllegalArgumentException || cause instanceof IllegalStateException) {
+            message = cause.getMessage();
+        } else if (cause.getCause() instanceof TranslatableException) {
+            message = cause.getCause().getLocalizedMessage();
         }
         return new ResponseEntity<>(createResponseBody(message, BAD_REQUEST), new HttpHeaders(), BAD_REQUEST);
     }
