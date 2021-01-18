@@ -3,8 +3,9 @@ package engineering.everest.lhotse.i18n;
 
 import org.springframework.context.support.ResourceBundleMessageSource;
 
+import java.util.Locale;
+
 import static java.lang.Thread.currentThread;
-import static org.springframework.context.i18n.LocaleContextHolder.getLocale;
 
 public class TranslationService {
     private static final TranslationService INSTANCE = new TranslationService();
@@ -17,8 +18,8 @@ public class TranslationService {
         this.resourceBundleMessageSource.setBundleClassLoader(currentThread().getContextClassLoader());
     }
 
-    public String translate(String key, Object... args) {
-        return resourceBundleMessageSource.getMessage(key, args, getLocale());
+    public String translate(Locale locale, String key, Object... args) {
+        return resourceBundleMessageSource.getMessage(key, args, locale);
     }
 
     public static TranslationService getInstance() {

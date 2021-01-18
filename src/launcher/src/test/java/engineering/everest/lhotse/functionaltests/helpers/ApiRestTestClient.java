@@ -120,7 +120,7 @@ public class ApiRestTestClient {
     }
 
     public UUID createUser(UUID organizationId, NewUserRequest request, HttpStatus expectedHttpStatus) {
-        ResponseSpec responseSpec = webTestClient.post().uri("/api/organizations/{organizationId}/users", organizationId)
+        var responseSpec = webTestClient.post().uri("/api/organizations/{organizationId}/users", organizationId)
                 .header("Authorization", "Bearer " + accessToken)
                 .contentType(APPLICATION_JSON)
                 .body(fromValue(request))
