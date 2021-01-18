@@ -13,6 +13,7 @@ public class TranslationService {
     public TranslationService() {
         this.resourceBundleMessageSource = new ResourceBundleMessageSource();
         this.resourceBundleMessageSource.addBasenames("messages");
+        this.resourceBundleMessageSource.setBundleClassLoader(TranslationService.class.getClassLoader());
     }
 
     public String translate(String key, Object... args) {
