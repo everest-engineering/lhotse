@@ -15,6 +15,7 @@
             <column name="nativestoragetype" type="integer"/>
             <column name="sha256" type="char(64)"/>
             <column name="sha512" type="char(128)"/>
+            <column name="markedfordeletion" type="boolean" defaultValueBoolean="false"/>
         </createTable>
         <createIndex tableName="filemapping" indexName="INDEX_file_mapping_sha256_sha512">
             <column name="sha256"/>
