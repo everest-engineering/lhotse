@@ -1,6 +1,6 @@
 package engineering.everest.lhotse.i18n.config;
 
-import engineering.everest.lhotse.i18n.AcceptHeaderFallbackLocaleResolver;
+import engineering.everest.lhotse.i18n.RequestParameterAcceptHeaderLocaleResolver;
 import engineering.everest.lhotse.i18n.TranslationService;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcProperties;
 import org.springframework.context.annotation.Bean;
@@ -13,7 +13,7 @@ public class InternationalizationConfig implements WebMvcConfigurer {
 
     @Bean
     public AcceptHeaderLocaleResolver localeResolver(WebMvcProperties webMvcProperties) {
-        return new AcceptHeaderFallbackLocaleResolver();
+        return new RequestParameterAcceptHeaderLocaleResolver();
     }
 
     @Bean

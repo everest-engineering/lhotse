@@ -102,7 +102,7 @@ class CommandValidatingMessageHandlerInterceptorTest {
         commandValidatingMessageHandlerInterceptor.handle(unitOfWork, interceptorChain);
 
         verify(createUserCommand, times(2)).getEmailAddress();
-        verify(createUserCommand, times(2)).getOrganizationId();
+        verify(createUserCommand, times(1)).getOrganizationId();
     }
 
     @Test
@@ -128,6 +128,6 @@ class CommandValidatingMessageHandlerInterceptorTest {
         commandValidatingMessageHandlerInterceptor.handle(unitOfWork, interceptorChain);
 
         verify(createUserSubclassCommand, times(2)).getEmailAddress();
-        verify(createUserSubclassCommand, times(4)).getOrganizationId();
+        verify(createUserSubclassCommand, times(2)).getOrganizationId();
     }
 }

@@ -33,7 +33,7 @@ public class ExceptionHandlingControllerAdvice extends ResponseEntityExceptionHa
 
     @ExceptionHandler
     public ResponseEntity<Object> handleExceptions(Exception exception) {
-        if (TranslatableException.class.isAssignableFrom(exception.getClass())) {
+        if (exception instanceof TranslatableException) {
             return handleTranslatableException((TranslatableException) exception);
         }
         if (exception instanceof AggregateNotFoundException) {
@@ -91,9 +91,9 @@ public class ExceptionHandlingControllerAdvice extends ResponseEntityExceptionHa
         return new ResponseEntity<>(createResponseBody(exception.getMessage(), BAD_REQUEST), new HttpHeaders(), BAD_REQUEST);
     }
 
-    private ApiErrorResponse createResponseBody(String message, HttpStatus badRequest) {
+    private ApiErrorResponse createResponseBody(String message, HttpStatus httpStatus) {
         return ApiErrorResponse.builder()
-                .status(badRequest)
+                .status(httpStatus)
                 .message(message)
                 .timeStamp(Instant.now(clock))
                 .build();
