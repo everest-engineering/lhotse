@@ -1,6 +1,6 @@
 package engineering.everest.lhotse.users.domain;
 
-import engineering.everest.lhotse.i18n.TranslatingValidator;
+import engineering.everest.lhotse.i18n.TranslatableExceptionFactory;
 import engineering.everest.lhotse.users.domain.commands.CreateUserCommand;
 import engineering.everest.lhotse.users.domain.commands.CreateUserForNewlyRegisteredOrganizationCommand;
 import engineering.everest.lhotse.users.domain.commands.DeleteAndForgetUserCommand;
@@ -20,6 +20,8 @@ import org.axonframework.spring.stereotype.Aggregate;
 import java.io.Serializable;
 import java.util.UUID;
 
+import static engineering.everest.lhotse.i18n.MessageKeys.USER_DISPLAY_NAME_MISSING;
+import static engineering.everest.lhotse.i18n.MessageKeys.USER_UPDATE_NO_FIELDS_CHANGED;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.axonframework.modelling.command.AggregateLifecycle.apply;
 import static org.axonframework.modelling.command.AggregateLifecycle.markDeleted;
@@ -103,14 +105,18 @@ public class UserAggregate implements Serializable {
     }
 
     private void validateDisplayNameIsPresent(String displayName) {
-        TranslatingValidator.isTrue(!isBlank(displayName), "USER_DISPLAY_NAME_MISSING");
+        if (isBlank(displayName)) {
+            TranslatableExceptionFactory.throwForKey(USER_DISPLAY_NAME_MISSING);
+        }
     }
 
     private void validateAtLeastOneChangeIsBeingMade(UpdateUserDetailsCommand command) {
         boolean changesMade = command.getDisplayNameChange() != null
                 || command.getEmailChange() != null
                 || command.getPasswordChange() != null;
-        TranslatingValidator.isTrue(changesMade, "USER_UPDATE_NO_FIELDS_CHANGED");
+        if (!changesMade) {
+            TranslatableExceptionFactory.throwForKey(USER_UPDATE_NO_FIELDS_CHANGED);
+        }
     }
 
     private String selectDesiredState(String desiredState, String currentState) {

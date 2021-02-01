@@ -1,5 +1,6 @@
 package engineering.everest.lhotse.organizations.domain;
 
+import engineering.everest.lhotse.i18n.TranslatableExceptionFactory;
 import engineering.everest.lhotse.organizations.domain.commands.CreateRegisteredOrganizationCommand;
 import engineering.everest.lhotse.organizations.domain.commands.DisableOrganizationCommand;
 import engineering.everest.lhotse.organizations.domain.commands.EnableOrganizationCommand;
@@ -23,8 +24,10 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-import static engineering.everest.lhotse.i18n.TranslatingValidator.isTrue;
-import static engineering.everest.lhotse.i18n.TranslatingValidator.isValidState;
+import static engineering.everest.lhotse.i18n.MessageKeys.ORGANIZATION_ALREADY_ENABLED;
+import static engineering.everest.lhotse.i18n.MessageKeys.ORGANIZATION_IS_DISABLED;
+import static engineering.everest.lhotse.i18n.MessageKeys.ORGANIZATION_UPDATE_NO_FIELDS_CHANGED;
+import static engineering.everest.lhotse.i18n.MessageKeys.USER_ALREADY_ORGANIZATION_ADMIN;
 import static org.axonframework.modelling.command.AggregateLifecycle.apply;
 
 @Aggregate(repository = "repositoryForOrganization")
@@ -44,16 +47,17 @@ public class OrganizationAggregate implements Serializable {
     @CommandHandler
     public OrganizationAggregate(CreateRegisteredOrganizationCommand command) {
         apply(new OrganizationRegisteredEvent(command.getOrganizationId(), command.getRequestingUserId(),
-                command.getOrganizationName(), command.getWebsiteUrl(), command.getStreet(), command.getCity(), command.getState(),
-                command.getCountry(), command.getPostalCode(), command.getContactName(), command.getPhoneNumber(),
-                command.getEmailAddress()));
+                command.getOrganizationName(), command.getWebsiteUrl(), command.getStreet(), command.getCity(),
+                command.getState(), command.getCountry(), command.getPostalCode(), command.getContactName(),
+                command.getPhoneNumber(), command.getEmailAddress()));
     }
 
     @CommandHandler
     void handle(PromoteUserToOrganizationAdminCommand command) {
         validateOrganizationIsEnabled();
-        isTrue(!organizationAdminIds.contains(command.getPromotedUserId()),
-                "USER_ALREADY_ORGANIZATION_ADMIN", command.getPromotedUserId(), id);
+        if (organizationAdminIds.contains(command.getPromotedUserId())) {
+            TranslatableExceptionFactory.throwForKey(USER_ALREADY_ORGANIZATION_ADMIN, command.getPromotedUserId(), id);
+        }
 
         apply(new UserPromotedToOrganizationAdminEvent(command.getOrganizationId(), command.getPromotedUserId()));
     }
@@ -66,12 +70,14 @@ public class OrganizationAggregate implements Serializable {
 
     @CommandHandler
     void handle(EnableOrganizationCommand command) {
-        isValidState(disabled, "ORGANIZATION_ALREADY_ENABLED", id);
+        if (!disabled) {
+            TranslatableExceptionFactory.throwForKey(ORGANIZATION_ALREADY_ENABLED, id);
+        }
         apply(new OrganizationEnabledByAdminEvent(command.getOrganizationId(), command.getRequestingUserId()));
     }
 
     @CommandHandler
-    public void handle(UpdateOrganizationCommand command) {
+    public void handle(UpdateOrganizationCommand command) throws Throwable {
         validateOrganizationIsEnabled();
         validateAtLeastOneUpdateIsMade(command);
 
@@ -113,12 +119,16 @@ public class OrganizationAggregate implements Serializable {
     }
 
     private void validateOrganizationIsEnabled() {
-        isValidState(!disabled, "ORGANIZATION_IS_DISABLED", id);
+        if (disabled) {
+            TranslatableExceptionFactory.throwForKey(ORGANIZATION_IS_DISABLED, id);
+        }
     }
 
-    private void validateAtLeastOneUpdateIsMade(UpdateOrganizationCommand command) {
-        isTrue(isNameUpdated(command) || areContactDetailsUpdated(command) || isAddressUpdated(command),
-                "ORGANIZATION_UPDATE_NO_FIELDS_CHANGED");
+    private void validateAtLeastOneUpdateIsMade(UpdateOrganizationCommand command) throws Throwable {
+        var isChangeMade = isNameUpdated(command) || areContactDetailsUpdated(command) || isAddressUpdated(command);
+        if (!isChangeMade) {
+            TranslatableExceptionFactory.throwForKey(ORGANIZATION_UPDATE_NO_FIELDS_CHANGED);
+        }
     }
 
     private boolean isNameUpdated(UpdateOrganizationCommand command) {

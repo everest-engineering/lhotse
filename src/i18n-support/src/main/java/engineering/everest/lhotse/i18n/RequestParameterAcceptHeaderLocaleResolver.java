@@ -7,9 +7,9 @@ import java.util.Locale;
 
 import static org.springframework.util.StringUtils.parseLocaleString;
 
-public class AcceptHeaderFallbackLocaleResolver extends AcceptHeaderLocaleResolver {
+public class RequestParameterAcceptHeaderLocaleResolver extends AcceptHeaderLocaleResolver {
 
-    public AcceptHeaderFallbackLocaleResolver() {
+    public RequestParameterAcceptHeaderLocaleResolver() {
         super();
         super.setDefaultLocale(Locale.getDefault());
     }

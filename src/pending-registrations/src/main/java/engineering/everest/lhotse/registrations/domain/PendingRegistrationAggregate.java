@@ -1,6 +1,6 @@
 package engineering.everest.lhotse.registrations.domain;
 
-import engineering.everest.lhotse.i18n.TranslatingValidator;
+import engineering.everest.lhotse.i18n.TranslatableExceptionFactory;
 import engineering.everest.lhotse.registrations.domain.commands.CancelConfirmedRegistrationUserEmailAlreadyInUseCommand;
 import engineering.everest.lhotse.registrations.domain.commands.CompleteOrganizationRegistrationCommand;
 import engineering.everest.lhotse.registrations.domain.commands.ConfirmOrganizationRegistrationEmailCommand;
@@ -19,6 +19,7 @@ import org.axonframework.spring.stereotype.Aggregate;
 import java.io.Serializable;
 import java.util.UUID;
 
+import static engineering.everest.lhotse.i18n.MessageKeys.ORGANIZATION_REGISTRATION_TOKEN_FOR_ANOTHER_ORG;
 import static org.axonframework.modelling.command.AggregateLifecycle.apply;
 import static org.axonframework.modelling.command.AggregateLifecycle.markDeleted;
 
@@ -48,8 +49,9 @@ public class PendingRegistrationAggregate implements Serializable {
 
     @CommandHandler
     void handle(ConfirmOrganizationRegistrationEmailCommand command) {
-        TranslatingValidator.isTrue(organizationId.equals(command.getOrganizationId()),
-                "ORGANIZATION_REGISTRATION_TOKEN_FOR_ANOTHER_ORG");
+        if (!organizationId.equals(command.getOrganizationId())) {
+            TranslatableExceptionFactory.throwForKey(ORGANIZATION_REGISTRATION_TOKEN_FOR_ANOTHER_ORG);
+        }
 
         apply(new OrganizationRegistrationConfirmedEvent(registrationConfirmationCode, organizationId));
     }

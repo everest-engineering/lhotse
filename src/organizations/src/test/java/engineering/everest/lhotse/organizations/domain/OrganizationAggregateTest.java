@@ -280,7 +280,7 @@ class OrganizationAggregateTest {
         testFixture.given(ORGANIZATION_REGISTERED_BY_ADMIN_EVENT, new UserPromotedToOrganizationAdminEvent(ORGANIZATION_ID, REGISTERING_USER_ID))
                 .when(new PromoteUserToOrganizationAdminCommand(ORGANIZATION_ID, REGISTERING_USER_ID))
                 .expectNoEvents()
-                .expectException(TranslatableIllegalArgumentException.class)
+                .expectException(TranslatableIllegalStateException.class)
                 .expectExceptionMessage("USER_ALREADY_ORGANIZATION_ADMIN");
     }
 }
