@@ -8,11 +8,12 @@ It is based on [Spring Boot](https://spring.io/projects/spring-boot), [Axon](htt
 Whether you're starting a new project or refactoring an existing one, you should consider this project if you're seeking:    
  
  * horizontal scalability via self forming clusters with distributed command processing
- * Spring Boot features such as OAuth ready authorisation and Prometheus integration 
+ * crypto-shredding support for your event log to address privacy regulations such as the GDPR
  * Axon's awesome event sourcing and [CQRS](https://martinfowler.com/bliki/CQRS.html) features
- * role based authorisation
  * deduplicating filestore abstractions for a variety of backing stores such as S3 buckets and Mongo GridFS
-  
+ * role based authorisation
+ * Spring Boot features such as OAuth ready authorisation and Prometheus integration
+
 ... without the time and effort involved in starting a new project from scratch. 
   
 The only end user functionality provided out of the box is basic support for creating organisations and users. The 
