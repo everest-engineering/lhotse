@@ -3,9 +3,7 @@ package engineering.everest.lhotse.tasks;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.cp.CPSubsystem;
 import com.hazelcast.cp.lock.FencedLock;
-import engineering.everest.starterkit.filestorage.EphemeralDeduplicatingFileStore;
-import engineering.everest.starterkit.filestorage.PersistedFileIdentifier;
-import engineering.everest.starterkit.filestorage.persistence.FileMappingRepository;
+import engineering.everest.starterkit.filestorage.FileService;
 import engineering.everest.starterkit.filestorage.persistence.PersistableFileMapping;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,7 +17,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 
 import java.lang.reflect.Method;
 import java.time.Duration;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -27,9 +24,6 @@ import static engineering.everest.starterkit.filestorage.FileStoreType.EPHEMERAL
 import static engineering.everest.starterkit.filestorage.NativeStorageType.MONGO_GRID_FS;
 import static java.time.Duration.parse;
 import static java.util.Arrays.stream;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.emptySet;
-import static java.util.Collections.singletonList;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -40,7 +34,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class DeletedFileCleanupTaskTest {
+public class PeriodicFilesMarkedForDeletionRemovalTaskTest {
 
     private static final UUID FILE_ID = UUID.randomUUID();
     private static final String FILE_IDENTIFIER = "FILE_IDENTIFIER";
@@ -48,16 +42,12 @@ public class DeletedFileCleanupTaskTest {
     private static final String SHA_512 = "SHA_512";
     private static final String TEMPORARY_FILE_CONTENTS = "TEMPORARY_FILE_CONTENTS";
     private static final Long FILE_SIZE = (long) TEMPORARY_FILE_CONTENTS.length();
+    private static final int BATCH_SIZE = 50;
 
-    private static final PersistableFileMapping PERSISTABLE_FILE_MAPPING =
-            new PersistableFileMapping(FILE_ID, EPHEMERAL, MONGO_GRID_FS, FILE_IDENTIFIER, SHA_256, SHA_512, FILE_SIZE, true);
-
-    private DeletedFileCleanupTask deletedFileCleanupTask;
+    private PeriodicFilesMarkedForDeletionRemovalTask periodicFilesMarkedForDeletionRemovalTask;
 
     @Mock
-    private EphemeralDeduplicatingFileStore fileStore;
-    @Mock
-    private FileMappingRepository fileMappingRepository;
+    private FileService fileService;
     @Mock
     private HazelcastInstance hazelcastInstance;
     @Mock
@@ -68,16 +58,16 @@ public class DeletedFileCleanupTaskTest {
     @BeforeEach
     void setUp() {
         when(hazelcastInstance.getCPSubsystem()).thenReturn(cpSubsystem);
-        when(cpSubsystem.getLock(DeletedFileCleanupTask.class.getSimpleName())).thenReturn(singleAppNodeExecutionLock);
+        when(cpSubsystem.getLock(PeriodicFilesMarkedForDeletionRemovalTask.class.getSimpleName())).thenReturn(singleAppNodeExecutionLock);
         lenient().when(singleAppNodeExecutionLock.isLockedByCurrentThread()).thenReturn(true);
 
-        deletedFileCleanupTask = new DeletedFileCleanupTask(fileMappingRepository, fileStore, hazelcastInstance);
+        periodicFilesMarkedForDeletionRemovalTask = new PeriodicFilesMarkedForDeletionRemovalTask(hazelcastInstance, fileService, BATCH_SIZE);
     }
 
     @Test
-    void checkForDeletedFilesToCleanUp_IsAnnotatedToRunPeriodically() {
-        Method checkForFilesToDeleteMethod = stream(DeletedFileCleanupTask.class.getDeclaredMethods())
-                .filter(method -> method.getName().equals("checkForDeletedFilesToCleanUp"))
+    void checkForFilesMarkedForDeletionToCleanUp_IsAnnotatedToRunPeriodically() {
+        Method checkForFilesToDeleteMethod = stream(PeriodicFilesMarkedForDeletionRemovalTask.class.getDeclaredMethods())
+                .filter(method -> method.getName().equals("checkForFilesMarkedForDeletionToCleanUp"))
                 .findFirst().orElseThrow();
 
         Scheduled schedule = checkForFilesToDeleteMethod.getAnnotation(Scheduled.class);
@@ -87,8 +77,8 @@ public class DeletedFileCleanupTaskTest {
     @ParameterizedTest
     @MethodSource("exampleTimeStrings")
     void expiryDetectionPeriodCheckRate_WillHandleArbitraryTimeUnits(String input, Duration expectedDuration) {
-        Method checkForTimedOutHelpSessionsMethod = stream(DeletedFileCleanupTask.class.getDeclaredMethods())
-                .filter(method -> method.getName().equals("checkForDeletedFilesToCleanUp"))
+        Method checkForTimedOutHelpSessionsMethod = stream(PeriodicFilesMarkedForDeletionRemovalTask.class.getDeclaredMethods())
+                .filter(method -> method.getName().equals("checkForFilesMarkedForDeletionToCleanUp"))
                 .findFirst().orElseThrow();
         Scheduled schedule = checkForTimedOutHelpSessionsMethod.getAnnotation(Scheduled.class);
 
@@ -97,51 +87,47 @@ public class DeletedFileCleanupTaskTest {
     }
 
     @Test
-    void checkForDeletedFilesToCleanUp_WillHaveNoInteractionsIfThereAreNoFilesToDelete() {
-        when(fileMappingRepository.findTop500ByMarkedForDeletionTrue()).thenReturn(emptyList());
+    void checkForFilesMarkedForDeletionToCleanUp_WillDelegateToFileServiceForDeletion() {
+        periodicFilesMarkedForDeletionRemovalTask.checkForFilesMarkedForDeletionToCleanUp();
 
-        deletedFileCleanupTask.checkForDeletedFilesToCleanUp();
-
-        verify(fileStore).deleteFiles(emptySet());
+        verify(fileService).deleteFileBatch(BATCH_SIZE);
     }
 
     @Test
-    void checkForDeletedFilesToCleanUp_WillDeleteFilesFromFileStoreIfThereAreFilesMarkedForDeletion() {
-        when(fileMappingRepository.findTop500ByMarkedForDeletionTrue()).thenReturn(singletonList(PERSISTABLE_FILE_MAPPING));
-
-        deletedFileCleanupTask.checkForDeletedFilesToCleanUp();
-
-        verify(fileStore).deleteFiles(Set.of(new PersistedFileIdentifier(FILE_ID, EPHEMERAL, MONGO_GRID_FS, FILE_IDENTIFIER)));
-    }
-
-    @Test
-    void checkForDeletedFilesToCleanUp_WillObtainDistributedExecutionLockWhenLockIsNotAcquired() {
+    void checkForFilesMarkedForDeletionToCleanUp_WillObtainDistributedExecutionLockWhenLockIsNotAcquired() {
         when(singleAppNodeExecutionLock.isLockedByCurrentThread()).thenReturn(false);
         when(singleAppNodeExecutionLock.isLocked()).thenReturn(false);
 
-        deletedFileCleanupTask.checkForDeletedFilesToCleanUp();
+        periodicFilesMarkedForDeletionRemovalTask.checkForFilesMarkedForDeletionToCleanUp();
 
         verify(singleAppNodeExecutionLock).tryLock(5, SECONDS);
     }
 
     @Test
-    void checkForDeletedFilesToCleanUp_WillNotTryAndObtainLockWhenThisInstanceAlreadyOwnsTheLock() {
+    void checkForFilesMarkedForDeletionToCleanUp_WillNotTryAndObtainLockWhenThisInstanceAlreadyOwnsTheLock() {
         when(singleAppNodeExecutionLock.isLockedByCurrentThread()).thenReturn(true);
 
-        deletedFileCleanupTask.checkForDeletedFilesToCleanUp();
+        periodicFilesMarkedForDeletionRemovalTask.checkForFilesMarkedForDeletionToCleanUp();
 
         verify(singleAppNodeExecutionLock, never()).tryLock(5, SECONDS);
     }
 
     @Test
-    void checkForDeletedFilesToCleanUp_WillDoNothingWhenAnotherInstanceHasAcquiredLock() {
+    void checkForFilesMarkedForDeletionToCleanUp_WillDoNothingWhenAnotherInstanceHasAcquiredLock() {
         when(singleAppNodeExecutionLock.isLockedByCurrentThread()).thenReturn(false);
         when(singleAppNodeExecutionLock.isLocked()).thenReturn(true);
 
-        deletedFileCleanupTask.checkForDeletedFilesToCleanUp();
+        periodicFilesMarkedForDeletionRemovalTask.checkForFilesMarkedForDeletionToCleanUp();
 
         verify(singleAppNodeExecutionLock, never()).tryLock(5, SECONDS);
-        verifyNoInteractions(fileStore);
+        verifyNoInteractions(fileService);
+    }
+
+    @Test
+    void replayCompleted_WillDelegateToFileServiceToMarkAllFilesForDeletion() {
+        periodicFilesMarkedForDeletionRemovalTask.replayCompleted();
+
+        verify(fileService).markAllFilesForDeletion();
     }
 
     private static Stream<Arguments> exampleTimeStrings() {

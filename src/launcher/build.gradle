@@ -78,4 +78,5 @@ dependencies {
     testImplementation "org.springframework.security:spring-security-test"
     testImplementation "org.apache.commons:commons-text:${commonsTextVersion}"
     testImplementation "org.bouncycastle:bcpkix-jdk15on:${bouncyCastleVersion}"
+    testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo'
 }
