@@ -1,0 +1,22 @@
+if-release: &if-release
+    if: build.tag =~ /^[0-9]+\.[0-9]+\.[0-9]+$/
+
+steps:
+  - label: ':hammer: build & test'
+    agents:
+      java: 11
+    commands:
+      - ./gradlew build
+
+  - wait:
+    <<: *if-release
+
+  - label: ':rocket: publish'
+    <<: *if-release
+    key: bintray-publish
+    agents:
+      java: 11    
+    commands:
+      - git fetch --tags
+      - ./gradlew bintrayPublish bintrayUpload
+

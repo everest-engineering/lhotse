@@ -1,5 +1,5 @@
 # Welcome!
-[![Build Status](https://travis-ci.com/everest-engineering/lhotse.svg?branch=master)](https://travis-ci.com/everest-engineering/lhotse)
+[![Build status](https://badge.buildkite.com/b44f55806fca0e349ecc8d470fe0fdcea8f49c1375f33e86d5.svg)](https://buildkite.com/everest-engineering/lhotse)
 
 This is Lhotse, a starter kit for writing event sourced web applications following domain driven design principles.
 It is based on [Spring Boot](https://spring.io/projects/spring-boot), [Axon](https://axoniq.io/) and
