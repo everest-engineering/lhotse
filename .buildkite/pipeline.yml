@@ -6,7 +6,7 @@ steps:
     agents:
       java: 11
     commands:
-      - ./gradlew build
+      - ./gradlew build --console plain
 
   - wait:
     <<: *if-release
@@ -18,5 +18,5 @@ steps:
       java: 11    
     commands:
       - git fetch --tags
-      - ./gradlew bintrayPublish bintrayUpload
+      - ./gradlew bintrayPublish bintrayUpload --console plain
 
