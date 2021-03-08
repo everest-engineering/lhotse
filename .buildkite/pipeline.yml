@@ -1,12 +1,22 @@
 if-release: &if-release
     if: build.tag =~ /^[0-9]+\.[0-9]+\.[0-9]+$/
 
+if-our-repo: &if-our-repo
+    if: pipeline.repository =~ /^https:\/\/github.com\/everest-engineering\//
+
 steps:
   - label: ':hammer: build & test'
     agents:
       java: 11
     commands:
       - ./gradlew build --console plain
+
+  - label: ':sonarqube: Quality reporting'
+    <<: *if-our-repo
+    agents:
+      java: 11
+    commands:
+      - ./gradlew sonarqube
 
   - wait:
     <<: *if-release
