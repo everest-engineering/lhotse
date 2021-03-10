@@ -1,3 +1,5 @@
+apply plugin: 'jacoco'
+
 dependencies {
     api project(':pending-registrations-persistence')
     api "org.axonframework:axon-spring:${axonVersion}"

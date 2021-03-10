@@ -34,7 +34,7 @@ public class CommandValidatingMessageHandlerInterceptor implements MessageHandle
     public CommandValidatingMessageHandlerInterceptor(List<Validates> validators, Validator javaBeanValidator) {
         this.javaBeanValidator = javaBeanValidator;
         Map<Class<?>, Validates<?>> m = new ConcurrentHashMap<>();
-        for (Validates validator : validators) {
+        for (Validates<?> validator : validators) {
             Type validatableCommandType = Arrays.stream(validator.getClass().getGenericInterfaces())
                     .map(e -> (ParameterizedType) e)
                     .filter(e -> Validates.class == e.getRawType())

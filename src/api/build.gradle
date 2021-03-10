@@ -1,3 +1,5 @@
+apply plugin: 'jacoco'
+
 dependencies {
     implementation project(':common')
     implementation project(':i18n-support')

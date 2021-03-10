@@ -25,6 +25,6 @@ public class VersionController {
     @GetMapping("/version")
     @ApiOperation("Version of the service")
     public String getVersion() {
-        return buildProperties.getVersion().replaceAll("'", "");
+        return buildProperties.getVersion().replace("'", "");
     }
 }

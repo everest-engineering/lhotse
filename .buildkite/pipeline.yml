@@ -4,8 +4,11 @@ if-release: &if-release
 if-our-repo: &if-our-repo
     if: pipeline.repository =~ /^https:\/\/github.com\/everest-engineering\//
 
+if-main-branch: &if-main-branch
+    if: build.branch == 'main'
+
 steps:
-  - label: ':hammer: build & test'
+  - label: ':hammer: Build & test'
     agents:
       java: 11
     commands:
@@ -13,10 +16,11 @@ steps:
 
   - label: ':sonarqube: Quality reporting'
     <<: *if-our-repo
+    <<: *if-main-branch
     agents:
       java: 11
     commands:
-      - ./gradlew sonarqube
+      - ./gradlew clean codeCoverageReport sonarqube --console plain
 
   - wait:
     <<: *if-release
@@ -29,4 +33,3 @@ steps:
     commands:
       - git fetch --tags
       - ./gradlew bintrayPublish bintrayUpload --console plain
-

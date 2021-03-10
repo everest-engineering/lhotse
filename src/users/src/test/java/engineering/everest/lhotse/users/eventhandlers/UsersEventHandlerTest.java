@@ -9,6 +9,7 @@ import engineering.everest.lhotse.users.domain.events.UserProfilePhotoUploadedEv
 import engineering.everest.lhotse.users.persistence.PersistableUser;
 import engineering.everest.lhotse.users.persistence.UsersRepository;
 import engineering.everest.starterkit.axon.cryptoshredding.CryptoShreddingKeyService;
+import engineering.everest.starterkit.axon.cryptoshredding.TypeDifferentiatedSecretKeyId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -98,8 +99,7 @@ class UsersEventHandlerTest {
 
         when(usersRepository.findById(USER_ID)).thenReturn(Optional.of(persistableUser));
 
-        usersEventHandler.on(new UserDetailsUpdatedByAdminEvent(USER_ID, ORGANIZATION_ID, NO_CHANGE,
-                NO_CHANGE, NO_CHANGE, ADMIN_ID));
+        usersEventHandler.on(new UserDetailsUpdatedByAdminEvent(USER_ID, ORGANIZATION_ID, NO_CHANGE, NO_CHANGE, NO_CHANGE, ADMIN_ID));
 
         assertEquals("old-display-name", persistableUser.getDisplayName());
         assertEquals("old-email", persistableUser.getEmail());
@@ -114,8 +114,7 @@ class UsersEventHandlerTest {
 
         when(usersRepository.findById(USER_ID)).thenReturn(Optional.of(persistableUser));
 
-        usersEventHandler.on(new UserDetailsUpdatedByAdminEvent(USER_ID, ORGANIZATION_ID, BLANK_FIELD,
-                BLANK_FIELD, BLANK_FIELD, ADMIN_ID));
+        usersEventHandler.on(new UserDetailsUpdatedByAdminEvent(USER_ID, ORGANIZATION_ID, BLANK_FIELD, BLANK_FIELD, BLANK_FIELD, ADMIN_ID));
 
         assertEquals(BLANK_FIELD, persistableUser.getDisplayName());
         assertEquals(BLANK_FIELD, persistableUser.getEmail());
@@ -153,7 +152,7 @@ class UsersEventHandlerTest {
         usersEventHandler.on(new UserDeletedAndForgottenEvent(USER_ID, ADMIN_ID, "It's the right thing to do"));
 
         verify(usersRepository).deleteById(USER_ID);
-        verify(cryptoShreddingKeyService).deleteSecretKey(USER_ID.toString());
+        verify(cryptoShreddingKeyService).deleteSecretKey(new TypeDifferentiatedSecretKeyId(USER_ID.toString(), ""));
     }
 
     private static PersistableUser createPersistableUser() {

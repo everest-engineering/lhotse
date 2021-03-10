@@ -8,6 +8,8 @@ plugins {
     id 'org.springframework.boot'
 }
 
+apply plugin: 'jacoco'
+
 springBoot {
     buildInfo()
 }

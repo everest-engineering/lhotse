@@ -1,3 +1,5 @@
+apply plugin: 'jacoco'
+
 dependencies {
     api project(':users-api')
     api "org.axonframework:axon-spring:${axonVersion}"

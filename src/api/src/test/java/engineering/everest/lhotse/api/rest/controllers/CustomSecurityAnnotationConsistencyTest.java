@@ -20,7 +20,7 @@ import java.util.UUID;
 
 import static java.util.stream.Collectors.toList;
 
-public class CustomSecurityAnnotationConsistencyTest {
+class CustomSecurityAnnotationConsistencyTest {
 
     private static final String REQUESTING_USER = "requestingUser";
     private static final String ORGANIZATION_ID = "organizationId";

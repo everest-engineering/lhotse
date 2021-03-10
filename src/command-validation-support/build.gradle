@@ -1,3 +1,5 @@
+apply plugin: 'jacoco'
+
 dependencies {
     api project(':command-validation-api')
     api project(':users-api')

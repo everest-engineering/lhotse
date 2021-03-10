@@ -1,7 +1,6 @@
 package engineering.everest.lhotse.axon.replay;
 
 import lombok.extern.slf4j.Slf4j;
-import org.axonframework.common.AxonConfigurationException;
 import org.axonframework.common.transaction.TransactionManager;
 import org.axonframework.eventhandling.ErrorHandler;
 import org.axonframework.eventhandling.EventHandlerInvoker;
@@ -202,11 +201,6 @@ public class MarkerAwareTrackingEventProcessor extends TrackingEventProcessor im
         public Builder taskExecutor(TaskExecutor taskExecutor) {
             this.taskExecutor = taskExecutor;
             return this;
-        }
-
-        @Override
-        protected void validate() throws AxonConfigurationException {
-            super.validate();
         }
 
         @Override

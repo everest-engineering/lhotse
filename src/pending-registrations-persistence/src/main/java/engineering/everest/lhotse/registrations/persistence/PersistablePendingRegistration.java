@@ -1,5 +1,6 @@
 package engineering.everest.lhotse.registrations.persistence;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,7 +11,9 @@ import java.util.UUID;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 @Entity(name = "pendingregistrations")
+
 public class PersistablePendingRegistration {
 
     @Id
@@ -19,13 +22,4 @@ public class PersistablePendingRegistration {
     private UUID userId;
     private String userEmail;
     private Instant registeredOn;
-
-    public PersistablePendingRegistration(UUID confirmationCode, UUID organizationId, UUID userId, String userEmail,
-                                          Instant registeredOn) {
-        this.confirmationCode = confirmationCode;
-        this.organizationId = organizationId;
-        this.userId = userId;
-        this.userEmail = userEmail;
-        this.registeredOn = registeredOn;
-    }
 }

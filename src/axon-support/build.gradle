@@ -1,3 +1,5 @@
+apply plugin: 'jacoco'
+
 compileJava {
     options.compilerArgs << '-parameters'
 }

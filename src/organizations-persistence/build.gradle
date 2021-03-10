@@ -1,3 +1,5 @@
+apply plugin: 'jacoco'
+
 dependencies {
     implementation project(':organizations-api')
     implementation project(':users-api')

@@ -1,3 +1,5 @@
+apply plugin: 'jacoco'
+
 dependencies {
     api project(':organizations-persistence')
     api "org.axonframework:axon-spring:${axonVersion}"

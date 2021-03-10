@@ -42,6 +42,9 @@ public class TranslatableExceptionFactory {
             new AbstractMap.SimpleEntry<>(USER_UPDATE_NO_FIELDS_CHANGED, TranslatableIllegalArgumentException.class))
             .collect(toConcurrentMap(Map.Entry::getKey, Map.Entry::getValue));
 
+    private TranslatableExceptionFactory() {
+    }
+
     public static void throwForKey(String i18nMessageKey) {
         Class<?> clazz = KEY_TO_EXCEPTION_MAPPING.get(i18nMessageKey);
         throwGenericExceptionIfMessageKeyIsInvalid(i18nMessageKey, clazz);

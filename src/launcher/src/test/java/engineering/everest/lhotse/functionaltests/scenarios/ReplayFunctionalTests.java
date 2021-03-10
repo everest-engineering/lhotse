@@ -7,6 +7,7 @@ import engineering.everest.lhotse.api.rest.requests.NewUserRequest;
 import engineering.everest.lhotse.functionaltests.helpers.ApiRestTestClient;
 import engineering.everest.lhotse.functionaltests.helpers.TestEventHandler;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

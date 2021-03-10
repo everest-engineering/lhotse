@@ -9,6 +9,7 @@ import engineering.everest.lhotse.users.domain.events.UserDeletedAndForgottenEve
 import engineering.everest.lhotse.users.domain.events.UserProfilePhotoUploadedEvent;
 import engineering.everest.lhotse.users.persistence.UsersRepository;
 import engineering.everest.starterkit.axon.cryptoshredding.CryptoShreddingKeyService;
+import engineering.everest.starterkit.axon.cryptoshredding.TypeDifferentiatedSecretKeyId;
 import lombok.extern.log4j.Log4j2;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventhandling.ResetHandler;
@@ -87,7 +88,7 @@ public class UsersEventHandler implements ReplayCompletionAware {
     void on(UserDeletedAndForgottenEvent event) {
         LOGGER.info("Deleting user {}", event.getDeletedUserId());
         usersRepository.deleteById(event.getDeletedUserId());
-        cryptoShreddingKeyService.deleteSecretKey(event.getDeletedUserId().toString());
+        cryptoShreddingKeyService.deleteSecretKey(new TypeDifferentiatedSecretKeyId(event.getDeletedUserId().toString(), ""));
     }
 
     private String selectDesiredState(String desiredState, String currentState) {

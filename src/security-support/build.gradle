@@ -1,3 +1,5 @@
+apply plugin: 'jacoco'
+
 dependencies {
     api "engineering.everest.starterkit:security:${securityVersion}"
     api "org.springframework.security.oauth.boot:spring-security-oauth2-autoconfigure:${springBootVersion}"

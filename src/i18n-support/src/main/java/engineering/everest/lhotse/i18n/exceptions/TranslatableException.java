@@ -8,11 +8,12 @@ import static org.springframework.context.i18n.LocaleContextHolder.getLocale;
 public class TranslatableException extends RuntimeException {
 
     private final String i18nMessageKey;
-    private Object[] args;
+    private final Object[] args;
 
     public TranslatableException(String i18nMessageKey) {
         super(i18nMessageKey);
         this.i18nMessageKey = i18nMessageKey;
+        this.args = new Object[0];
     }
 
     public TranslatableException(String i18nMessageKey, Object... args) {
@@ -24,6 +25,7 @@ public class TranslatableException extends RuntimeException {
     public TranslatableException(String i18nMessageKey, Throwable cause) {
         super(i18nMessageKey, cause);
         this.i18nMessageKey = i18nMessageKey;
+        this.args = new Object[0];
     }
 
     public TranslatableException(String i18nMessageKey, Throwable cause, Object... args) {
