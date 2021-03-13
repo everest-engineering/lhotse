@@ -1,12 +1,12 @@
 package engineering.everest.lhotse.organizations.services;
 
 
+import engineering.everest.axon.HazelcastCommandGateway;
 import engineering.everest.lhotse.axon.common.RandomFieldsGenerator;
 import engineering.everest.lhotse.organizations.domain.commands.CreateRegisteredOrganizationCommand;
 import engineering.everest.lhotse.organizations.domain.commands.DisableOrganizationCommand;
 import engineering.everest.lhotse.organizations.domain.commands.EnableOrganizationCommand;
 import engineering.everest.lhotse.organizations.domain.commands.UpdateOrganizationCommand;
-import engineering.everest.starterkit.axon.HazelcastCommandGateway;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;

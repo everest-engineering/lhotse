@@ -1,15 +1,15 @@
 package engineering.everest.lhotse.users.eventhandlers;
 
+import engineering.everest.axon.cryptoshredding.CryptoShreddingKeyService;
+import engineering.everest.axon.cryptoshredding.TypeDifferentiatedSecretKeyId;
 import engineering.everest.lhotse.axon.replay.ReplayCompletionAware;
 import engineering.everest.lhotse.organizations.domain.events.UserPromotedToOrganizationAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserCreatedByAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserCreatedForNewlyRegisteredOrganizationEvent;
-import engineering.everest.lhotse.users.domain.events.UserDetailsUpdatedByAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserDeletedAndForgottenEvent;
+import engineering.everest.lhotse.users.domain.events.UserDetailsUpdatedByAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserProfilePhotoUploadedEvent;
 import engineering.everest.lhotse.users.persistence.UsersRepository;
-import engineering.everest.starterkit.axon.cryptoshredding.CryptoShreddingKeyService;
-import engineering.everest.starterkit.axon.cryptoshredding.TypeDifferentiatedSecretKeyId;
 import lombok.extern.log4j.Log4j2;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventhandling.ResetHandler;

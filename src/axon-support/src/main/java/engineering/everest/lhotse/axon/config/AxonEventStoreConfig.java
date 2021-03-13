@@ -1,7 +1,7 @@
 package engineering.everest.lhotse.axon.config;
 
 import com.zaxxer.hikari.HikariConfig;
-import engineering.everest.starterkit.axon.cryptoshredding.CryptoShreddingSerializer;
+import engineering.everest.axon.cryptoshredding.CryptoShreddingSerializer;
 import liquibase.integration.spring.SpringLiquibase;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.common.jdbc.PersistenceExceptionResolver;
@@ -45,7 +45,7 @@ import java.sql.SQLException;
 @EnableJpaRepositories(
         entityManagerFactoryRef = "axonEntityManagerFactory",
         transactionManagerRef = "axonPlatformTransactionManager",
-        basePackages = {"engineering.everest.starterkit.axon"}
+        basePackages = {"engineering.everest.axon"}
 )
 public class AxonEventStoreConfig {
 
@@ -84,7 +84,7 @@ public class AxonEventStoreConfig {
                 .packages("org.axonframework.eventsourcing.eventstore.jpa",
                         "org.axonframework.eventhandling.tokenstore.jpa",
                         "org.axonframework.modelling.saga.repository.jpa",
-                        "engineering.everest.starterkit.axon.cryptoshredding")
+                        "engineering.everest.axon.cryptoshredding")
                 .persistenceUnit(AXON_AUTO_CONFIG_QUALIFIER)
                 .build();
     }

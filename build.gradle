@@ -22,7 +22,8 @@ allprojects {
 }
 
 repositories {
-    jcenter()
+    mavenCentral()
+    mavenLocal()
 }
 
 subprojects {
@@ -39,19 +40,16 @@ subprojects {
     version = gitVersion()
 
     repositories {
+        mavenCentral()
         mavenLocal()
-        jcenter()
-        maven {
-            url "https://dl.bintray.com/everestengineering/starterkit"
-        }
     }
 
     ext {
-        axonCryptoShreddingVersion = '0.9.4'
-        axonHazelcastCommandDistributionVersion = '0.9.3'
-        mediaVersion = '0.9.2'
-        securityVersion = '0.9.2'
-        storageVersion = '0.9.2'
+        axonCryptoShreddingVersion = '0.9.5'
+        axonHazelcastCommandDistributionVersion = '0.9.4'
+        mediaVersion = '0.9.3'
+        securityVersion = '0.9.3'
+        storageVersion = '0.9.5'
 
         aspectjVersion = '1.9.6'
         awsSdkVersion = '1.11.887'
@@ -129,34 +127,4 @@ licenseReport {
     renderers = [new InventoryHtmlReportRenderer()]
 }
 
-tasks.register("codeCoverageReport", JacocoReport) {
-    subprojects { subproject ->
-        subproject.plugins.withType(JacocoPlugin).configureEach {
-            subproject.tasks.matching({ t -> t.extensions.findByType(JacocoTaskExtension) }).configureEach { testTask ->
-                sourceSets subproject.sourceSets.main
-                executionData(testTask)
-            }
-
-            subproject.tasks.matching({ t -> t.extensions.findByType(JacocoTaskExtension) }).forEach {
-                rootProject.tasks.codeCoverageReport.dependsOn(it)
-                it.finalizedBy(jacocoTestReport)
-            }
-        }
-    }
-
-    reports {
-        xml.enabled true
-        html.enabled true
-    }
-}
-
-sonarqube {
-    properties {
-        property 'sonar.projectName', 'Lhotse'
-        property 'sonar.projectKey', 'everest-engineering_lhotse'
-        property 'sonar.organization', 'everestengineering'
-        property 'sonar.host.url', 'https://sonarcloud.io'
-        property 'sonar.coverage.jacoco.xmlReportPaths', ["${project.rootDir}/build/reports/jacoco/codeCoverageReport/codeCoverageReport.xml"]
-        property 'sonar.test.exclusions', '**/*Test.java'
-    }
-}
+apply from: 'sonar.gradle'

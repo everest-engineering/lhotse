@@ -2,6 +2,8 @@ package engineering.everest.lhotse.registrations.domain;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import engineering.everest.axon.cryptoshredding.annotations.EncryptedField;
+import engineering.everest.axon.cryptoshredding.annotations.EncryptionKeyIdentifier;
 import engineering.everest.lhotse.organizations.domain.commands.CreateRegisteredOrganizationCommand;
 import engineering.everest.lhotse.registrations.domain.commands.CancelConfirmedRegistrationUserEmailAlreadyInUseCommand;
 import engineering.everest.lhotse.registrations.domain.commands.CompleteOrganizationRegistrationCommand;
@@ -13,8 +15,6 @@ import engineering.everest.lhotse.registrations.domain.events.OrganizationRegist
 import engineering.everest.lhotse.users.domain.commands.CreateUserForNewlyRegisteredOrganizationCommand;
 import engineering.everest.lhotse.users.domain.commands.PromoteUserToOrganizationAdminCommand;
 import engineering.everest.lhotse.users.services.UsersReadService;
-import engineering.everest.starterkit.axon.cryptoshredding.annotations.EncryptedField;
-import engineering.everest.starterkit.axon.cryptoshredding.annotations.EncryptionKeyIdentifier;
 import lombok.extern.log4j.Log4j2;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.modelling.saga.EndSaga;

@@ -12,7 +12,7 @@ dependencies {
     implementation project(':pending-registrations-api')
     implementation project(':users-api')
 
-    implementation "engineering.everest.starterkit:axon-command-distribution-extension:${axonHazelcastCommandDistributionVersion}"
+    implementation "engineering.everest.axon:command-distribution-extension:${axonHazelcastCommandDistributionVersion}"
     implementation "engineering.everest.starterkit:security:${securityVersion}"
     implementation "engineering.everest.starterkit:storage:${storageVersion}"
     implementation 'javax.validation:validation-api'

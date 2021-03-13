@@ -8,7 +8,7 @@ dependencies {
     implementation project(':users-api')
     implementation project(':security-support')
 
-    implementation "engineering.everest.starterkit:axon-command-distribution-extension:${axonHazelcastCommandDistributionVersion}"
+    implementation "engineering.everest.axon:command-distribution-extension:${axonHazelcastCommandDistributionVersion}"
     implementation "engineering.everest.starterkit:media:${mediaVersion}"
     implementation "engineering.everest.starterkit:storage:${storageVersion}"
     implementation "engineering.everest.starterkit:security:${securityVersion}"

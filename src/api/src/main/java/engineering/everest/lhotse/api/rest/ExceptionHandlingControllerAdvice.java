@@ -1,8 +1,8 @@
 package engineering.everest.lhotse.api.rest;
 
+import engineering.everest.axon.exceptions.RemoteCommandExecutionException;
 import engineering.everest.lhotse.api.rest.responses.ApiErrorResponse;
 import engineering.everest.lhotse.i18n.exceptions.TranslatableException;
-import engineering.everest.starterkit.axon.exceptions.RemoteCommandExecutionException;
 import org.axonframework.modelling.command.AggregateNotFoundException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

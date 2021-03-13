@@ -1,0 +1,33 @@
+
+tasks.register("codeCoverageReport", JacocoReport) {
+    subprojects { subproject ->
+        subproject.plugins.withType(JacocoPlugin).configureEach {
+            subproject.tasks.matching({ t -> t.extensions.findByType(JacocoTaskExtension) }).configureEach { testTask ->
+                sourceSets subproject.sourceSets.main
+                executionData(testTask)
+            }
+
+            subproject.tasks.matching({ t -> t.extensions.findByType(JacocoTaskExtension) }).forEach {
+                rootProject.tasks.codeCoverageReport.dependsOn(it)
+                it.finalizedBy(jacocoTestReport)
+            }
+        }
+    }
+
+    reports {
+        xml.enabled true
+        html.enabled true
+    }
+}
+
+sonarqube {
+    properties {
+        property 'sonar.projectName', 'Lhotse'
+        property 'sonar.projectKey', 'everest-engineering_lhotse'
+        property 'sonar.organization', 'everestengineering'
+        property 'sonar.host.url', 'https://sonarcloud.io'
+        property 'sonar.coverage.jacoco.xmlReportPaths', ["${project.rootDir}/build/reports/jacoco/codeCoverageReport/codeCoverageReport.xml"]
+        property 'sonar.test.exclusions', '**/*Test.java'
+    }
+}
+

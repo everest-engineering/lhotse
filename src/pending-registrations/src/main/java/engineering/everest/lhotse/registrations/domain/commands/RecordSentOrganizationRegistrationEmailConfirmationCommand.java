@@ -1,7 +1,7 @@
 package engineering.everest.lhotse.registrations.domain.commands;
 
 import engineering.everest.lhotse.axon.command.validation.ValidatableCommand;
-import engineering.everest.starterkit.axon.cryptoshredding.annotations.EncryptionKeyIdentifier;
+import engineering.everest.axon.cryptoshredding.annotations.EncryptionKeyIdentifier;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.axonframework.modelling.command.TargetAggregateIdentifier;

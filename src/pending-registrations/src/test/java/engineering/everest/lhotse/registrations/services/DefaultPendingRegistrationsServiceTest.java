@@ -1,9 +1,9 @@
 package engineering.everest.lhotse.registrations.services;
 
+import engineering.everest.axon.HazelcastCommandGateway;
 import engineering.everest.lhotse.axon.common.RandomFieldsGenerator;
 import engineering.everest.lhotse.registrations.domain.commands.ConfirmOrganizationRegistrationEmailCommand;
 import engineering.everest.lhotse.registrations.domain.commands.RegisterOrganizationCommand;
-import engineering.everest.starterkit.axon.HazelcastCommandGateway;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

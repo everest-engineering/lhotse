@@ -4,7 +4,7 @@ dependencies {
 
     api 'javax.validation:validation-api'
 
-    implementation "engineering.everest.starterkit:axon-crypto-shredding-extension:${axonCryptoShreddingVersion}"
+    implementation "engineering.everest.axon:crypto-shredding-extension:${axonCryptoShreddingVersion}"
     implementation "org.axonframework:axon-modelling:${axonVersion}"
 
     testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"

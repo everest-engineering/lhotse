@@ -1,12 +1,12 @@
 package engineering.everest.lhotse.axon.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import engineering.everest.axon.cryptoshredding.CryptoShreddingKeyService;
+import engineering.everest.axon.cryptoshredding.CryptoShreddingSerializer;
+import engineering.everest.axon.cryptoshredding.encryption.EncrypterDecrypterFactory;
 import engineering.everest.lhotse.axon.CommandValidatingMessageHandlerInterceptor;
 import engineering.everest.lhotse.axon.LoggingMessageHandlerInterceptor;
 import engineering.everest.lhotse.axon.replay.CompositeEventProcessorBuilder;
-import engineering.everest.starterkit.axon.cryptoshredding.CryptoShreddingKeyService;
-import engineering.everest.starterkit.axon.cryptoshredding.CryptoShreddingSerializer;
-import engineering.everest.starterkit.axon.cryptoshredding.encryption.EncrypterDecrypterFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.commandhandling.CommandBus;
 import org.axonframework.commandhandling.CommandMessage;
