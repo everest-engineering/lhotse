@@ -42,7 +42,7 @@ class OrganizationRegistrationSagaTest {
     private static final String CONTACT_NAME = "Major Tom";
     private static final String CONTACT_PHONE_NUMBER = "555-12345";
     private static final String ENCODED_PASSWORD = "encoded-password";
-    private static final UserCreatedForNewlyRegisteredOrganizationEvent USER_CREATED_FOR_NEWLY_REGISTERED_ORGANIZATION_EVENT = new UserCreatedForNewlyRegisteredOrganizationEvent(REGISTERING_USER_ID, ORGANIZATION_ID, CONFIRMATION_CODE, CONTACT_NAME, REGISTERING_USER_EMAIL, ENCODED_PASSWORD);
+    private static final UserCreatedForNewlyRegisteredOrganizationEvent USER_CREATED_FOR_NEWLY_REGISTERED_ORGANIZATION_EVENT = new UserCreatedForNewlyRegisteredOrganizationEvent(REGISTERING_USER_ID, ORGANIZATION_ID, CONTACT_NAME, REGISTERING_USER_EMAIL, ENCODED_PASSWORD);
     private static final OrganizationRegistrationReceivedEvent ORGANIZATION_REGISTRATION_RECEIVED_EVENT =
             new OrganizationRegistrationReceivedEvent(ORGANIZATION_ID, REGISTERING_USER_ID, CONFIRMATION_CODE, REGISTERING_USER_EMAIL, ENCODED_PASSWORD, ORGANIZATION_NAME, ORGANIZATION_WEBSITE_URL, ORGANIZATION_STREET, ORGANIZATION_CITY, ORGANIZATION_STATE,
                     ORGANIZATION_COUNTRY, ORGANIZATION_POST_CODE, CONTACT_NAME, CONTACT_PHONE_NUMBER);
@@ -72,7 +72,7 @@ class OrganizationRegistrationSagaTest {
     void organizationRegistrationConfirmedEvent_WillDispatchCommandsToCreateOrganizationAndUser() {
         var expectedCreateOrganizationCommand = new CreateRegisteredOrganizationCommand(ORGANIZATION_ID, REGISTERING_USER_ID, ORGANIZATION_NAME, ORGANIZATION_STREET,
                 ORGANIZATION_CITY, ORGANIZATION_STATE, ORGANIZATION_COUNTRY, ORGANIZATION_POST_CODE, ORGANIZATION_WEBSITE_URL, CONTACT_NAME, CONTACT_PHONE_NUMBER, REGISTERING_USER_EMAIL);
-        var expectedCreateUserCommand = new CreateUserForNewlyRegisteredOrganizationCommand(REGISTERING_USER_ID, ORGANIZATION_ID, CONFIRMATION_CODE, REGISTERING_USER_EMAIL, ENCODED_PASSWORD, CONTACT_NAME);
+        var expectedCreateUserCommand = new CreateUserForNewlyRegisteredOrganizationCommand(REGISTERING_USER_ID, ORGANIZATION_ID, REGISTERING_USER_EMAIL, ENCODED_PASSWORD, CONTACT_NAME);
         var expectedPromoteUserCommand = new PromoteUserToOrganizationAdminCommand(ORGANIZATION_ID, REGISTERING_USER_ID);
         var expectedCompleteRegistrationCommand = new CompleteOrganizationRegistrationCommand(CONFIRMATION_CODE, ORGANIZATION_ID, REGISTERING_USER_ID);
 
@@ -99,7 +99,7 @@ class OrganizationRegistrationSagaTest {
         testFixture.givenAggregate(CONFIRMATION_CODE_STRING).published(
                 ORGANIZATION_REGISTRATION_RECEIVED_EVENT,
                 ORGANIZATION_REGISTRATION_CONFIRMED_EVENT)
-                .whenAggregate(CONFIRMATION_CODE_STRING).publishes(new OrganizationRegistrationConfirmedAfterUserWithEmailCreatedEvent(CONFIRMATION_CODE, ORGANIZATION_ID, REGISTERING_USER_ID, REGISTERING_USER_EMAIL))
+                .whenAggregate(CONFIRMATION_CODE_STRING).publishes(new OrganizationRegistrationConfirmedAfterUserWithEmailCreatedEvent(ORGANIZATION_ID, REGISTERING_USER_ID, REGISTERING_USER_EMAIL))
                 .expectNoDispatchedCommands()
                 .expectActiveSagas(0);
     }
@@ -110,7 +110,7 @@ class OrganizationRegistrationSagaTest {
                 ORGANIZATION_REGISTRATION_RECEIVED_EVENT,
                 ORGANIZATION_REGISTRATION_CONFIRMED_EVENT,
                 USER_CREATED_FOR_NEWLY_REGISTERED_ORGANIZATION_EVENT)
-                .whenAggregate(CONFIRMATION_CODE_STRING).publishes(new OrganizationRegistrationCompletedEvent(CONFIRMATION_CODE, ORGANIZATION_ID, REGISTERING_USER_ID))
+                .whenAggregate(CONFIRMATION_CODE_STRING).publishes(new OrganizationRegistrationCompletedEvent(ORGANIZATION_ID, REGISTERING_USER_ID))
                 .expectNoDispatchedCommands()
                 .expectActiveSagas(0);
     }

@@ -58,13 +58,13 @@ public class PendingRegistrationAggregate implements Serializable {
 
     @CommandHandler
     void handle(CompleteOrganizationRegistrationCommand command) {
-        apply(new OrganizationRegistrationCompletedEvent(registrationConfirmationCode, organizationId, command.getRegisteringUserId()));
+        apply(new OrganizationRegistrationCompletedEvent(organizationId, command.getRegisteringUserId()));
     }
 
     @CommandHandler
     void handle(CancelConfirmedRegistrationUserEmailAlreadyInUseCommand command) {
-        apply(new OrganizationRegistrationConfirmedAfterUserWithEmailCreatedEvent(registrationConfirmationCode,
-                command.getOrganizationId(), command.getRegisteringUserId(), command.getRegisteringUserEmail()));
+        apply(new OrganizationRegistrationConfirmedAfterUserWithEmailCreatedEvent(command.getOrganizationId(),
+                command.getRegisteringUserId(), command.getRegisteringUserEmail()));
     }
 
     @EventSourcingHandler
@@ -75,6 +75,11 @@ public class PendingRegistrationAggregate implements Serializable {
 
     @EventSourcingHandler
     void on(OrganizationRegistrationCompletedEvent event) {
+        markDeleted();
+    }
+
+    @EventSourcingHandler
+    void on(OrganizationRegistrationConfirmedAfterUserWithEmailCreatedEvent event) {
         markDeleted();
     }
 }

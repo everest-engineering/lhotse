@@ -34,9 +34,8 @@ public class PendingRegistrationsEventHandler implements ReplayCompletionAware {
     @EventHandler
     void on(OrganizationRegistrationReceivedEvent event, @Timestamp Instant registrationReceivedTime) {
         LOGGER.info("Creating pending registration for organization {}", event.getOrganizationId());
-        pendingRegistrationsRepository.createPendingRegistration(event.getRegistrationConfirmationCode(),
-                event.getOrganizationId(), event.getRegisteringUserId(), event.getRegisteringContactEmail(),
-                registrationReceivedTime);
+        pendingRegistrationsRepository.createPendingRegistration(event.getOrganizationId(), event.getRegistrationConfirmationCode(),
+                event.getRegisteringUserId(), event.getRegisteringContactEmail(), registrationReceivedTime);
     }
 
     @EventHandler
@@ -49,13 +48,13 @@ public class PendingRegistrationsEventHandler implements ReplayCompletionAware {
     @EventHandler
     void on(OrganizationRegistrationCompletedEvent event) {
         LOGGER.info("Organization {} registration completed, removing pending registration", event.getOrganizationId());
-        pendingRegistrationsRepository.deleteById(event.getRegistrationConfirmationCode());
+        pendingRegistrationsRepository.deleteById(event.getOrganizationId());
     }
 
     @EventHandler
     void on(OrganizationRegistrationConfirmedAfterUserWithEmailCreatedEvent event) {
         LOGGER.info("Organization {} registration confirmed but user email already in use. Removing pending registration",
                 event.getOrganizationId());
-        pendingRegistrationsRepository.deleteById(event.getRegistrationConfirmationCode());
+        pendingRegistrationsRepository.deleteById(event.getOrganizationId());
     }
 }

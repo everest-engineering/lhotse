@@ -108,7 +108,7 @@ class PendingRegistrationAggregateTest {
                 ORGANIZATION_REGISTRATION_RECEIVED_EVENT,
                 ORGANIZATION_REGISTRATION_CONFIRMED_EVENT)
                 .when(new CompleteOrganizationRegistrationCommand(REGISTRATION_CONFIRMATION_CODE, ORGANIZATION_ID, REGISTERING_USER_ID))
-                .expectEvents(new OrganizationRegistrationCompletedEvent(REGISTRATION_CONFIRMATION_CODE, ORGANIZATION_ID, REGISTERING_USER_ID));
+                .expectEvents(new OrganizationRegistrationCompletedEvent(ORGANIZATION_ID, REGISTERING_USER_ID));
     }
 
     @Test
@@ -117,6 +117,6 @@ class PendingRegistrationAggregateTest {
                 ORGANIZATION_REGISTRATION_RECEIVED_EVENT,
                 ORGANIZATION_REGISTRATION_CONFIRMED_EVENT)
                 .when(new CancelConfirmedRegistrationUserEmailAlreadyInUseCommand(REGISTRATION_CONFIRMATION_CODE, ORGANIZATION_ID, REGISTERING_USER_ID, ORGANIZATION_CONTACT_EMAIL_ADDRESS))
-                .expectEvents(new OrganizationRegistrationConfirmedAfterUserWithEmailCreatedEvent(REGISTRATION_CONFIRMATION_CODE, ORGANIZATION_ID, REGISTERING_USER_ID, ORGANIZATION_CONTACT_EMAIL_ADDRESS));
+                .expectEvents(new OrganizationRegistrationConfirmedAfterUserWithEmailCreatedEvent(ORGANIZATION_ID, REGISTERING_USER_ID, ORGANIZATION_CONTACT_EMAIL_ADDRESS));
     }
 }

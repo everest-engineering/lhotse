@@ -17,8 +17,8 @@ import java.util.UUID;
 public class PersistablePendingRegistration {
 
     @Id
-    private UUID confirmationCode;
     private UUID organizationId;
+    private UUID confirmationCode;
     private UUID userId;
     private String userEmail;
     private Instant registeredOn;

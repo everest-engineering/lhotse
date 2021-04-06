@@ -150,8 +150,8 @@ class UserAggregateTest {
     @Test
     void createAdminUserForNewlyRegisteredOrganizationEmits() {
         testFixture.givenNoPriorActivity()
-                .when(new CreateUserForNewlyRegisteredOrganizationCommand(USER_ID, ORGANIZATION_ID, CONFIRMATION_CODE, USERNAME, USER_ENCODED_PASSWORD, USER_DISPLAY_NAME))
-                .expectEvents(new UserCreatedForNewlyRegisteredOrganizationEvent(USER_ID, ORGANIZATION_ID, CONFIRMATION_CODE, USER_DISPLAY_NAME, USERNAME, USER_ENCODED_PASSWORD));
+                .when(new CreateUserForNewlyRegisteredOrganizationCommand(USER_ID, ORGANIZATION_ID, USERNAME, USER_ENCODED_PASSWORD, USER_DISPLAY_NAME))
+                .expectEvents(new UserCreatedForNewlyRegisteredOrganizationEvent(USER_ID, ORGANIZATION_ID, USER_DISPLAY_NAME, USERNAME, USER_ENCODED_PASSWORD));
     }
 
     @Test

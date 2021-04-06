@@ -14,7 +14,6 @@ import java.util.UUID;
 @AllArgsConstructor
 @Revision("0")
 public class OrganizationRegistrationConfirmedAfterUserWithEmailCreatedEvent {
-    private UUID registrationConfirmationCode;
     private UUID organizationId;
     @EncryptionKeyIdentifier
     private UUID registeringUserId;

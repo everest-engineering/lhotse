@@ -13,7 +13,6 @@ public class CreateUserForNewlyRegisteredOrganizationCommand implements Validata
     @TargetAggregateIdentifier
     UUID userId;
     UUID organizationId;
-    UUID registrationConfirmationCode;
     String userEmail;
     String encodedPassword;
     String displayName;

@@ -70,9 +70,8 @@ class UsersEventHandlerTest {
 
     @Test
     void onUserCreatedForNewlyRegisteredOrganizationEvent_WillDelegate() {
-        var registrationConfirmationCode = randomUUID();
-        usersEventHandler.on(new UserCreatedForNewlyRegisteredOrganizationEvent(USER_ID, ORGANIZATION_ID, registrationConfirmationCode,
-                USER_DISPLAY_NAME, USER_USERNAME, ENCODED_PASSWORD), CREATION_TIME);
+        usersEventHandler.on(new UserCreatedForNewlyRegisteredOrganizationEvent(USER_ID, ORGANIZATION_ID, USER_DISPLAY_NAME,
+                USER_USERNAME, ENCODED_PASSWORD), CREATION_TIME);
 
         verify(usersRepository).createUser(USER_ID, ORGANIZATION_ID, USER_DISPLAY_NAME, USER_USERNAME, ENCODED_PASSWORD, CREATION_TIME);
     }

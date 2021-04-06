@@ -9,14 +9,12 @@ import java.util.UUID;
 @Repository
 public interface PendingRegistrationsRepository extends JpaRepository<PersistablePendingRegistration, UUID> {
 
-    default void createPendingRegistration(UUID registrationConfirmationCode,
-                                           UUID registeringOrganizationId,
+    default void createPendingRegistration(UUID registeringOrganizationId,
+                                           UUID confirmationCode,
                                            UUID registeringUserId,
                                            String registeringUserEmail,
                                            Instant registeredOn) {
-        save(new PersistablePendingRegistration(registrationConfirmationCode, registeringOrganizationId, registeringUserId,
-                registeringUserEmail, registeredOn));
+        save(new PersistablePendingRegistration(registeringOrganizationId, confirmationCode,
+                registeringUserId, registeringUserEmail, registeredOn));
     }
-
-    PersistablePendingRegistration findByOrganizationId(UUID organizationId);
 }

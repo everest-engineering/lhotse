@@ -49,7 +49,7 @@ public class UserAggregate implements Serializable {
     @CommandHandler
     public UserAggregate(CreateUserForNewlyRegisteredOrganizationCommand command) {
         apply(new UserCreatedForNewlyRegisteredOrganizationEvent(command.getUserId(), command.getOrganizationId(),
-                command.getRegistrationConfirmationCode(), command.getDisplayName(), command.getUserEmail(), command.getEncodedPassword()));
+                command.getDisplayName(), command.getUserEmail(), command.getEncodedPassword()));
     }
 
     @CommandHandler
