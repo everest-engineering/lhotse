@@ -17,7 +17,6 @@ public class UserCreatedForNewlyRegisteredOrganizationEvent {
     @EncryptionKeyIdentifier
     private UUID userId;
     private UUID organizationId;
-    private UUID registrationConfirmationCode;
     @EncryptedField
     private String userDisplayName;
     @EncryptedField

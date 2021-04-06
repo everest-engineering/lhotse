@@ -12,7 +12,6 @@ import java.util.UUID;
 @AllArgsConstructor
 @Revision("0")
 public class OrganizationRegistrationCompletedEvent {
-    private UUID registrationConfirmationCode;
     private UUID organizationId;
     private UUID registeringUserId;
 }

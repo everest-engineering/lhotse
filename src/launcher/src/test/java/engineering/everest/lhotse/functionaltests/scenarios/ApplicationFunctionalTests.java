@@ -1,6 +1,5 @@
 package engineering.everest.lhotse.functionaltests.scenarios;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.hazelcast.core.HazelcastInstance;
 import engineering.everest.lhotse.AdminProvisionTask;
 import engineering.everest.lhotse.Launcher;
@@ -101,11 +100,12 @@ class ApplicationFunctionalTests {
     void newUsersCanRegisterTheirOrganizationAndCreateNewUsersInTheirOrganization() {
         apiRestTestClient.logout();
         var registerOrganizationRequest = new RegisterOrganizationRequest("Alice's Art Artefactory", "123 Any Street", "Melbourne", "Victoria", "Australia", "3000", "http://alicesartartefactory.com", "Alice", "+61 422 123 456", "alice@example.com", "alicerocks");
-        var organizationRegistrationResponse =  apiRestTestClient.registerNewOrganization(registerOrganizationRequest, CREATED);
+        var organizationRegistrationResponse = apiRestTestClient.registerNewOrganization(registerOrganizationRequest, CREATED);
         var newOrganizationId = organizationRegistrationResponse.getNewOrganizationId();
-        var pendingRegistration = pendingRegistrationsRepository.findByOrganizationId(newOrganizationId); // Confirmation code is "emailed", but we can cheat and pull it from the DB.
+        // Confirmation code is "emailed", but we can cheat and pull it from the DB.
+        var pendingRegistration = pendingRegistrationsRepository.findById(newOrganizationId);
 
-        apiRestTestClient.confirmOrganizationRegistration(newOrganizationId, pendingRegistration.getConfirmationCode(), OK);
+        apiRestTestClient.confirmOrganizationRegistration(newOrganizationId, pendingRegistration.orElseThrow().getConfirmationCode(), OK);
         apiRestTestClient.login("alice@example.com", "alicerocks");
         var newUserRequest = new NewUserRequest("bob@example.com", "bobalsorocks", "My name is Bob");
         apiRestTestClient.createUser(newOrganizationId, newUserRequest, CREATED);
@@ -121,7 +121,7 @@ class ApplicationFunctionalTests {
     }
 
     @Test
-    void jsr303errorMessagesAreInternationalized() throws JsonProcessingException {
+    void jsr303errorMessagesAreInternationalized() {
         apiRestTestClient.createAdminUserAndLogin();
 
         var newOrganizationRequest = new NewOrganizationRequest("ACME", "123 King St", "Melbourne",
@@ -142,7 +142,7 @@ class ApplicationFunctionalTests {
     }
 
     @Test
-    void domainValidationErrorMessagesAreInternationalized() throws JsonProcessingException {
+    void domainValidationErrorMessagesAreInternationalized() {
         apiRestTestClient.createAdminUserAndLogin();
 
         var newOrganizationRequest = new NewOrganizationRequest("ACME", "123 King St", "Melbourne",
