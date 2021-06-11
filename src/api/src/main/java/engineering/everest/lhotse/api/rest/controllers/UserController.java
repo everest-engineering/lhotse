@@ -1,14 +1,14 @@
 package engineering.everest.lhotse.api.rest.controllers;
 
-import engineering.everest.lhotse.axon.common.domain.User;
-import engineering.everest.starterkit.filestorage.FileService;
-import engineering.everest.lhotse.users.services.UsersReadService;
-import engineering.everest.lhotse.users.services.UsersService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import engineering.everest.lhotse.api.rest.converters.DtoConverter;
 import engineering.everest.lhotse.api.rest.requests.UpdateUserRequest;
 import engineering.everest.lhotse.api.rest.responses.UserResponse;
+import engineering.everest.lhotse.axon.common.domain.User;
+import engineering.everest.lhotse.users.services.UsersReadService;
+import engineering.everest.lhotse.users.services.UsersService;
+import engineering.everest.starterkit.filestorage.FileService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,13 +23,12 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 
 import java.io.IOException;
 
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM;
 import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
 
 @RestController
 @RequestMapping("/api/user")
-@Api(consumes = APPLICATION_JSON_VALUE, tags = "Users")
+@Api(tags = "Users")
 public class UserController {
 
     private final DtoConverter dtoConverter;
@@ -47,7 +46,7 @@ public class UserController {
     }
 
     @GetMapping
-    @ApiOperation(produces = APPLICATION_JSON_VALUE, value = "Get currently authenticated user information")
+    @ApiOperation("Get currently authenticated user information")
     public UserResponse getUser(User user) {
         return dtoConverter.convert(user);
     }

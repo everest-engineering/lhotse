@@ -109,7 +109,7 @@ public class OrganizationsController {
     }
 
     @GetMapping("/{organizationId}/users")
-    @ApiOperation(produces = APPLICATION_JSON_VALUE, value = "Retrieve a list of users for an organization")
+    @ApiOperation("Retrieve a list of users for an organization")
     @AdminOrUserOfTargetOrganization
     public List<UserResponse> listOrganizationUsers(User requestingUser, @PathVariable UUID organizationId) {
         return usersReadService.getUsersForOrganization(organizationId).stream()
@@ -118,7 +118,7 @@ public class OrganizationsController {
     }
 
     @PostMapping("/{organizationId}/users")
-    @ApiOperation(produces = APPLICATION_JSON_VALUE, value = "Create a new user for an organization")
+    @ApiOperation("Create a new user for an organization")
     @ResponseStatus(CREATED)
     @AdminOrAdminOfTargetOrganization
     public UUID createUser(User requestingUser, @PathVariable UUID organizationId, @RequestBody @Valid NewUserRequest request) {

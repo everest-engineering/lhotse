@@ -26,11 +26,10 @@ import java.util.List;
 import java.util.UUID;
 
 import static java.util.stream.Collectors.toList;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @RestController
 @RequestMapping("/api/users")
-@Api(consumes = APPLICATION_JSON_VALUE, tags = "Users")
+@Api(tags = "Users")
 public class UsersController {
 
     private final DtoConverter dtoConverter;
@@ -47,8 +46,9 @@ public class UsersController {
     }
 
     @GetMapping
-    @ApiOperation(produces = APPLICATION_JSON_VALUE, value = "Retrieves entire user list for all organisations")
+    @ApiOperation("Retrieves entire user list for all organisations")
     @AdminOnly
+
     public List<UserResponse> getAllUsers() {
         return usersReadService.getUsers().stream()
                 .map(dtoConverter::convert)
@@ -56,7 +56,7 @@ public class UsersController {
     }
 
     @PostMapping("/{userId}/forget")
-    @ApiOperation(produces = APPLICATION_JSON_VALUE, value = "Handle a GDPR request to delete an account and scrub personal information")
+    @ApiOperation("Handle a GDPR request to delete an account and scrub personal information")
     @AdminOnly
     public void deleteUser(User requestinguser,
                            @PathVariable UUID userId,
@@ -65,7 +65,7 @@ public class UsersController {
     }
 
     @GetMapping("/{userId}")
-    @ApiOperation(produces = APPLICATION_JSON_VALUE, value = "Retrieves user details")
+    @ApiOperation("Retrieves user details")
     @PostAuthorize("hasRole('ADMIN') or returnObject.organizationId == #requestingUser.organizationId")
     public UserResponse getUser(User requestingUser, @PathVariable UUID userId) {
         return dtoConverter.convert(usersReadService.getById(userId));

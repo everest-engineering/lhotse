@@ -48,7 +48,7 @@ subprojects {
         axonCryptoShreddingVersion = '0.9.5'
         axonHazelcastCommandDistributionVersion = '0.9.4'
         mediaVersion = '0.9.3'
-        securityVersion = '0.9.3'
+        securityVersion = '0.9.4'
         storageVersion = '0.9.6'
 
         aspectjVersion = '1.9.6'

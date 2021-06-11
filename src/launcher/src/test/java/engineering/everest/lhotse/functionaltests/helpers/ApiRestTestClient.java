@@ -48,7 +48,7 @@ public class ApiRestTestClient {
     public void login(String username, String password) {
         Map<String, String> results = webTestClient.post().uri(AUTHENTICATION_ENDPOINT)
                 .contentType(APPLICATION_FORM_URLENCODED)
-                .body(fromValue(String.format("grant_type=password&username=%s&password=%s&client_id=web-app-ui", username, password)))
+                .body(fromValue(String.format("grant_type=password&username=%s&password=%s&client_id=web-app-ui&client_secret=replace-me", username, password)))
                 .exchange()
                 .expectStatus().isEqualTo(OK)
                 .returnResult(new ParameterizedTypeReference<Map<String, String>>() {
