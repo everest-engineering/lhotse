@@ -2,12 +2,11 @@ import com.github.jk1.license.render.*
 
 plugins {
     id 'com.palantir.git-version' version '0.12.3'
-    id 'io.spring.dependency-management' version '1.0.10.RELEASE'
-    id 'org.springframework.boot' version '2.4.0' apply false
-    id 'io.freefair.lombok' version '5.1.1'
-    id 'org.owasp.dependencycheck' version '6.0.3'
-    id 'com.github.jk1.dependency-license-report' version '1.14'
-    id 'org.sonarqube' version '3.1.1'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'org.springframework.boot' version '2.4.8' apply false
+    id 'org.owasp.dependencycheck' version '6.2.2'
+    id 'com.github.jk1.dependency-license-report' version '1.16'
+    id 'org.sonarqube' version '3.3'
     id 'jacoco'
 }
 
@@ -33,7 +32,6 @@ subprojects {
     apply plugin: 'java-library'
     apply plugin: 'checkstyle'
     apply plugin: 'pmd'
-    apply plugin: 'io.freefair.lombok'
 
     sourceCompatibility = 1.11
     targetCompatibility = 1.11
@@ -45,34 +43,34 @@ subprojects {
     }
 
     ext {
-        axonCryptoShreddingVersion = '0.9.5'
-        axonHazelcastCommandDistributionVersion = '0.9.4'
-        mediaVersion = '0.9.3'
-        securityVersion = '0.9.4'
-        storageVersion = '0.9.6'
+        axonCryptoShreddingVersion = '0.9.6'
+        axonHazelcastCommandDistributionVersion = '0.9.5'
+        mediaVersion = '0.9.4'
+        securityVersion = '0.9.5'
+        storageVersion = '0.9.7'
 
-        aspectjVersion = '1.9.6'
         awsSdkVersion = '1.11.887'
-        axonVersion = '4.4.5'
-        bouncyCastleVersion = '1.68'
-        commonsLangVersion = '3.11'
+        axonVersion = '4.5.1'
+        bouncyCastleVersion = '1.69'
+        commonsLangVersion = '3.12.0'
         commonsTextVersion = '1.9'
         commonsValidatorVersion = '1.7'
-        hazelcastKubernetesVersion = '2.0.2'
-        hazelcastVersion = '4.0.3'
+        hazelcastKubernetesVersion = '2.2.3'
+        hazelcastVersion = '4.2.1'
         javaXCacheVersion = '1.1.1'
         javaXPersistenceVersion = '2.2'
-        liquibaseVersion = '4.2.2'
-        microMeterPrometheusVersion = '1.6.2'
+        liquibaseVersion = '4.4.0'
+        lombokVersion = '1.18.20'
+        microMeterPrometheusVersion = '1.7.1'
         postgresDriverVersion = '42.2.18'
-        prometheusSimpleClientVersion = '0.9.0'
+        prometheusSimpleClientVersion = '0.11.0'
         swaggerVersion = '3.0.0'
-        springBootVersion = '2.4.0'
+        springBootVersion = '2.4.8'
 
         h2Version = '1.4.200'
         hamcrestVersion = '2.2'
-        junitVersion = '5.7.0'
-        mockitoVersion = '3.5.15'
+        junitVersion = '5.7.2'
+        mockitoVersion = '3.11.2'
     }
 
     dependencyManagement {
@@ -81,21 +79,23 @@ subprojects {
         }
     }
 
-    lombok {
-        version = "1.18.16"
-        generateLombokConfig.enabled = false
-        config['lombok.addLombokGeneratedAnnotation'] = 'true'
+    dependencies {
+        compileOnly "org.projectlombok:lombok:${lombokVersion}"
+        annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+
+        testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
+        testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
     }
 
     checkstyle {
-        toolVersion = '8.39'
+        toolVersion = '8.44'
         maxWarnings = 0
         configFile = file("${project.rootDir}/build-config/checkstyle/checkstyle.xml")
         sourceSets = [sourceSets.main]
     }
 
     pmd {
-        toolVersion = '6.23.0'
+        toolVersion = '6.36.0'
         incrementalAnalysis = true
         ruleSets = []
         ruleSetFiles = files("${project.rootDir}/build-config/pmd/pmd-ruleset.xml")

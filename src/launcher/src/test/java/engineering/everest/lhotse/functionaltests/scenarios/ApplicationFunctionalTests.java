@@ -1,6 +1,5 @@
 package engineering.everest.lhotse.functionaltests.scenarios;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.hazelcast.core.HazelcastInstance;
 import engineering.everest.lhotse.AdminProvisionTask;
 import engineering.everest.lhotse.Launcher;
@@ -117,11 +116,11 @@ class ApplicationFunctionalTests {
     static class ErrorResponse {
         private HttpStatus status;
         private String message;
-        private Map<String, String> timeStamp;
+        private Map<String, String> timestamp;
     }
 
     @Test
-    void jsr303errorMessagesAreInternationalized() throws JsonProcessingException {
+    void jsr303errorMessagesAreInternationalized() {
         apiRestTestClient.createAdminUserAndLogin();
 
         var newOrganizationRequest = new NewOrganizationRequest("ACME", "123 King St", "Melbourne",
@@ -142,7 +141,7 @@ class ApplicationFunctionalTests {
     }
 
     @Test
-    void domainValidationErrorMessagesAreInternationalized() throws JsonProcessingException {
+    void domainValidationErrorMessagesAreInternationalized() {
         apiRestTestClient.createAdminUserAndLogin();
 
         var newOrganizationRequest = new NewOrganizationRequest("ACME", "123 King St", "Melbourne",
