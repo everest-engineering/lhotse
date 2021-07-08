@@ -35,7 +35,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @SpringBootTest(webEnvironment = RANDOM_PORT, classes = Launcher.class)
 @ActiveProfiles("standalone")
 @Transactional
-public class FileStoreFunctionalTests {
+class FileStoreFunctionalTests {
 
     @Autowired
     private FileService fileService;
