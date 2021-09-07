@@ -95,7 +95,7 @@ public class ExceptionHandlingControllerAdvice extends ResponseEntityExceptionHa
         return ApiErrorResponse.builder()
                 .status(httpStatus)
                 .message(message)
-                .timeStamp(Instant.now(clock))
+                .timestamp(Instant.now(clock))
                 .build();
     }
 }

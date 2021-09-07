@@ -117,7 +117,7 @@ class ApplicationFunctionalTests {
     static class ErrorResponse {
         private HttpStatus status;
         private String message;
-        private Map<String, String> timeStamp;
+        private Map<String, String> timestamp;
     }
 
     @Test

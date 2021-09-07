@@ -37,6 +37,7 @@ dependencies {
         }
     }
 
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     implementation "engineering.everest.axon:crypto-shredding-extension:${axonCryptoShreddingVersion}"
     implementation "engineering.everest.axon:command-distribution-extension:${axonHazelcastCommandDistributionVersion}"
     implementation "engineering.everest.starterkit:security:${securityVersion}"
@@ -64,12 +65,10 @@ dependencies {
         implementation("org.bouncycastle:bcpkix-jdk15on:${bouncyCastleVersion}") {
             because 'Force transitive upgrade to avoid CVE'
         }
-        implementation("com.thoughtworks.xstream:xstream:1.4.15") {
+        implementation("org.bouncycastle:bcprov-ext-jdk15on:${bouncyCastleVersion}") {
             because 'Force transitive upgrade to avoid CVE'
         }
     }
-
-    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
     testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
     testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"

@@ -12,5 +12,5 @@ public class ApiErrorResponse {
 
     private final HttpStatus status;
     private final String message;
-    private final Instant timeStamp;
+    private final Instant timestamp;
 }

@@ -30,7 +30,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @RestController
 @RequestMapping("/admin/organizations")
-@Api(consumes = APPLICATION_JSON_VALUE, tags = "Organizations")
+@Api(consumes = APPLICATION_JSON_VALUE, tags = "Admin: Organizations")
 public class AdminOrganizationsController {
 
     private final DtoConverter dtoConverter;
@@ -48,7 +48,7 @@ public class AdminOrganizationsController {
 
     @GetMapping
     @ResponseStatus(OK)
-    @ApiOperation(produces = APPLICATION_JSON_VALUE, value = "Retrieves details of all organizations")
+    @ApiOperation("Retrieves details of all organizations")
     @AdminOnly
     public List<OrganizationResponse> getAllOrganizations() {
         return organizationsReadService.getOrganizations().stream()

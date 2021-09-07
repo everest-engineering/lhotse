@@ -52,7 +52,7 @@ class ExceptionHandlingControllerAdviceTest {
         var expectedResponse = ApiErrorResponse.builder()
                 .status(NOT_FOUND)
                 .message("not found here")
-                .timeStamp(Instant.now(clock))
+                .timestamp(Instant.now(clock))
                 .build();
 
         assertEquals(new ResponseEntity<>(expectedResponse, new HttpHeaders(), NOT_FOUND), controllerAdvice.handleExceptions(exception));
@@ -64,7 +64,7 @@ class ExceptionHandlingControllerAdviceTest {
         var expectedResponse = ApiErrorResponse.builder()
                 .status(BAD_REQUEST)
                 .message("kaboom")
-                .timeStamp(Instant.now(clock))
+                .timestamp(Instant.now(clock))
                 .build();
 
         assertEquals(new ResponseEntity<>(expectedResponse, new HttpHeaders(), BAD_REQUEST), controllerAdvice.handleExceptions(exception));
@@ -76,7 +76,7 @@ class ExceptionHandlingControllerAdviceTest {
         var expectedResponse = ApiErrorResponse.builder()
                 .status(BAD_REQUEST)
                 .message("outer exception")
-                .timeStamp(Instant.now(clock))
+                .timestamp(Instant.now(clock))
                 .build();
 
         assertEquals(new ResponseEntity<>(expectedResponse, new HttpHeaders(), BAD_REQUEST), controllerAdvice.handleExceptions(exception));
@@ -88,7 +88,7 @@ class ExceptionHandlingControllerAdviceTest {
         var expectedResponse = ApiErrorResponse.builder()
                 .status(BAD_REQUEST)
                 .message("widget disabled")
-                .timeStamp(Instant.now(clock))
+                .timestamp(Instant.now(clock))
                 .build();
 
         assertEquals(new ResponseEntity<>(expectedResponse, new HttpHeaders(), BAD_REQUEST), controllerAdvice.handleExceptions(exception));
@@ -100,7 +100,7 @@ class ExceptionHandlingControllerAdviceTest {
         var expectedResponse = ApiErrorResponse.builder()
                 .status(BAD_REQUEST)
                 .message("bad argument")
-                .timeStamp(Instant.now(clock))
+                .timestamp(Instant.now(clock))
                 .build();
 
         assertEquals(new ResponseEntity<>(expectedResponse, new HttpHeaders(), BAD_REQUEST), controllerAdvice.handleExceptions(exception));
@@ -112,7 +112,7 @@ class ExceptionHandlingControllerAdviceTest {
         var expectedResponse = ApiErrorResponse.builder()
                 .status(BAD_REQUEST)
                 .message("bad argument")
-                .timeStamp(Instant.now(clock))
+                .timestamp(Instant.now(clock))
                 .build();
 
         assertEquals(new ResponseEntity<>(expectedResponse, new HttpHeaders(), BAD_REQUEST), controllerAdvice.handleExceptions(exception));
@@ -124,7 +124,7 @@ class ExceptionHandlingControllerAdviceTest {
         var expectedResponse = ApiErrorResponse.builder()
                 .status(BAD_REQUEST)
                 .message("inner exception")
-                .timeStamp(Instant.now(clock))
+                .timestamp(Instant.now(clock))
                 .build();
 
         assertEquals(new ResponseEntity<>(expectedResponse, new HttpHeaders(), BAD_REQUEST), controllerAdvice.handleExceptions(exception));
@@ -136,7 +136,7 @@ class ExceptionHandlingControllerAdviceTest {
         var expectedResponse = ApiErrorResponse.builder()
                 .status(BAD_REQUEST)
                 .message("User display name is required")
-                .timeStamp(Instant.now(clock))
+                .timestamp(Instant.now(clock))
                 .build();
 
         assertEquals(new ResponseEntity<>(expectedResponse, new HttpHeaders(), BAD_REQUEST), controllerAdvice.handleExceptions(exception));
@@ -148,7 +148,7 @@ class ExceptionHandlingControllerAdviceTest {
         var expectedResponse = ApiErrorResponse.builder()
                 .status(BAD_REQUEST)
                 .message("inner exception")
-                .timeStamp(Instant.now(clock))
+                .timestamp(Instant.now(clock))
                 .build();
 
         assertEquals(new ResponseEntity<>(expectedResponse, new HttpHeaders(), BAD_REQUEST), controllerAdvice.handleExceptions(exception));
@@ -166,7 +166,7 @@ class ExceptionHandlingControllerAdviceTest {
         var expectedResponse = ApiErrorResponse.builder()
                 .status(BAD_REQUEST)
                 .message("first-field-name: must be provided; second-field-name: not an integer")
-                .timeStamp(Instant.now(clock))
+                .timestamp(Instant.now(clock))
                 .build();
         assertEquals(new ResponseEntity<>(expectedResponse, new HttpHeaders(), BAD_REQUEST), controllerAdvice.handleException(ex, mock(WebRequest.class)));
     }
@@ -177,7 +177,7 @@ class ExceptionHandlingControllerAdviceTest {
         var expectedResponse = ApiErrorResponse.builder()
                 .status(BAD_REQUEST)
                 .message("Email address already exists")
-                .timeStamp(Instant.now(clock))
+                .timestamp(Instant.now(clock))
                 .build();
 
         assertEquals(new ResponseEntity<>(expectedResponse, new HttpHeaders(), BAD_REQUEST), controllerAdvice.handleExceptions(exception));

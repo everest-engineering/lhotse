@@ -94,6 +94,16 @@ public class SwitchingEventProcessor implements ReplayableEventProcessor {
     }
 
     @Override
+    public boolean isRunning() {
+        return currentEventProcessor.isRunning();
+    }
+
+    @Override
+    public boolean isError() {
+        return currentEventProcessor.isError();
+    }
+
+    @Override
     public Registration registerHandlerInterceptor(MessageHandlerInterceptor<? super EventMessage<?>> handlerInterceptor) {
         return currentEventProcessor.registerHandlerInterceptor(handlerInterceptor);
     }
