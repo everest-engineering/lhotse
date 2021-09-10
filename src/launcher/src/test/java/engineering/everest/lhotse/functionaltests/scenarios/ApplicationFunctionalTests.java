@@ -97,11 +97,12 @@ class ApplicationFunctionalTests {
     }
 
     @Test
-    void newUsersCanRegisterTheirOrganizationAndCreateNewUsersInTheirOrganization() {
+    void newUsersCanRegisterTheirOrganizationAndCreateNewUsersInTheirOrganization() throws InterruptedException {
         apiRestTestClient.logout();
         var registerOrganizationRequest = new RegisterOrganizationRequest("Alice's Art Artefactory", "123 Any Street", "Melbourne", "Victoria", "Australia", "3000", "http://alicesartartefactory.com", "Alice", "+61 422 123 456", "alice@example.com", "alicerocks");
         var organizationRegistrationResponse = apiRestTestClient.registerNewOrganization(registerOrganizationRequest, CREATED);
         var newOrganizationId = organizationRegistrationResponse.getNewOrganizationId();
+        Thread.sleep(2000); // Default is now tracking event processor
         // Confirmation code is "emailed", but we can cheat and pull it from the DB.
         var pendingRegistration = pendingRegistrationsRepository.findById(newOrganizationId);
 

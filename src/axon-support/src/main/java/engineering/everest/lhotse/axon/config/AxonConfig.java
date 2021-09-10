@@ -79,7 +79,7 @@ public class AxonConfig {
             TaskExecutor taskExecutor,
             EventProcessingModule eventProcessingModule,
             @Value("${application.axon.event-processor.default-group:true}") boolean defaultGroup,
-            @Value("${application.axon.event-processor.type:switching}") EventProcessorType eventProcessorType,
+            @Value("${application.axon.event-processor.type:tracking}") EventProcessorType eventProcessorType,
             @Value("${application.axon.event-processor.segments:1}") int numberOfSegments) {
         if (defaultGroup) {
             eventProcessingModule.byDefaultAssignTo("default");
@@ -104,7 +104,6 @@ public class AxonConfig {
 
     public enum EventProcessorType {
         SUBSCRIBING,
-        TRACKING,
-        SWITCHING,
+        TRACKING
     }
 }

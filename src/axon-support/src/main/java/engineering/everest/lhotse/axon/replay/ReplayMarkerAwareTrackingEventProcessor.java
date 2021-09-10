@@ -24,23 +24,21 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 @Slf4j
-public class MarkerAwareTrackingEventProcessor extends TrackingEventProcessor implements ReplayableEventProcessor {
+public class ReplayMarkerAwareTrackingEventProcessor extends TrackingEventProcessor implements ReplayableEventProcessor {
 
     private final TransactionManager transactionManager;
     private final TokenStore tokenStore;
     private final int initialSegmentsCount;
-    private final boolean switchingAware;
     private final AtomicReference<ReplayMarkerEvent> targetMarkerEventHolder = new AtomicReference<>();
     private final AtomicInteger workerReplayCompletionCounter = new AtomicInteger();
     private final List<Consumer<ReplayableEventProcessor>> replayCompletionListener = new ArrayList<>();
     private final TaskExecutor taskExecutor;
 
-    protected MarkerAwareTrackingEventProcessor(Builder builder) {
+    protected ReplayMarkerAwareTrackingEventProcessor(Builder builder) {
         super(builder);
         transactionManager = builder.transactionManager;
         tokenStore = builder.tokenStore;
         initialSegmentsCount = builder.initialSegmentsCount;
-        switchingAware = builder.switchingAware;
         taskExecutor = builder.taskExecutor;
     }
 
@@ -53,9 +51,6 @@ public class MarkerAwareTrackingEventProcessor extends TrackingEventProcessor im
             targetMarkerEventHolder.set(replayMarkerEvent);
             workerReplayCompletionCounter.set(0);
             shutDown();
-            if (switchingAware) {
-                ensureCorrectStopPosition();
-            }
             resetTokens(startPosition);
             start();
         }
@@ -75,26 +70,12 @@ public class MarkerAwareTrackingEventProcessor extends TrackingEventProcessor im
     @Override
     protected boolean canHandle(EventMessage<?> eventMessage, Collection<Segment> segments) throws Exception {
         if (ReplayMarkerEvent.class.isAssignableFrom(eventMessage.getPayloadType())) {
-            ReplayMarkerEvent targetEvent = targetMarkerEventHolder.get();
+            var targetEvent = targetMarkerEventHolder.get();
             if (targetEvent != null && targetEvent.equals(eventMessage.getPayload())) {
                 processReplayMarkerEvent(eventMessage);
             }
         }
         return super.canHandle(eventMessage, segments);
-    }
-
-    private void ensureCorrectStopPosition() {
-        TrackingToken headToken = getMessageSource().createHeadToken();
-        transactionManager.executeInTransaction(() -> {
-            int[] segments = tokenStore.fetchSegments(getName());
-            if (segments.length > 0) {
-                for (int segment : segments) {
-                    tokenStore.storeToken(headToken, getName(), segment);
-                }
-            } else {
-                tokenStore.initializeTokenSegments(getName(), initialSegmentsCount, headToken);
-            }
-        });
     }
 
     private void processReplayMarkerEvent(EventMessage<?> eventMessage) {
@@ -126,7 +107,6 @@ public class MarkerAwareTrackingEventProcessor extends TrackingEventProcessor im
         private TransactionManager transactionManager;
         private TokenStore tokenStore;
         private int initialSegmentsCount;
-        private boolean switchingAware;
         private TaskExecutor taskExecutor;
 
         @Override
@@ -187,25 +167,14 @@ public class MarkerAwareTrackingEventProcessor extends TrackingEventProcessor im
             return this;
         }
 
-        @Override
-        public Builder storingTokensAfterProcessing() {
-            super.storingTokensAfterProcessing();
-            return this;
-        }
-
-        public Builder switchingAware(boolean switchingAware) {
-            this.switchingAware = switchingAware;
-            return this;
-        }
-
         public Builder taskExecutor(TaskExecutor taskExecutor) {
             this.taskExecutor = taskExecutor;
             return this;
         }
 
         @Override
-        public MarkerAwareTrackingEventProcessor build() {
-            return new MarkerAwareTrackingEventProcessor(this);
+        public ReplayMarkerAwareTrackingEventProcessor build() {
+            return new ReplayMarkerAwareTrackingEventProcessor(this);
         }
     }
 }
