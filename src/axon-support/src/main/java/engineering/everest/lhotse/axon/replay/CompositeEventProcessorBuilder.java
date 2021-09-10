@@ -37,9 +37,7 @@ public class CompositeEventProcessorBuilder implements EventProcessorBuilder {
             case SUBSCRIBING:
                 return buildSubscribingEventProcessor(name, configuration, eventHandlerInvoker);
             case TRACKING:
-                return buildMarkerAwareTrackingEventProcessor(name, configuration, eventHandlerInvoker);
-            case SWITCHING:
-                return buildSwitchingEventProcessor(name, configuration, eventHandlerInvoker);
+                return buildReplayMarkerAwareTrackingEventProcessor(name, configuration, eventHandlerInvoker);
             default:
                 throw new IllegalArgumentException(
                         String.format("Invalid event processor type: %s", eventProcessorType));
@@ -62,14 +60,15 @@ public class CompositeEventProcessorBuilder implements EventProcessorBuilder {
     }
 
     @SuppressWarnings("unchecked")
-    private MarkerAwareTrackingEventProcessor buildMarkerAwareTrackingEventProcessor(
+    private ReplayMarkerAwareTrackingEventProcessor buildReplayMarkerAwareTrackingEventProcessor(
             String name,
             Configuration configuration,
             EventHandlerInvoker eventHandlerInvoker) {
-        TrackingEventProcessorConfiguration trackingEventProcessorConfiguration = configuration.getComponent(
+        var trackingEventProcessorConfiguration = configuration.getComponent(
                 TrackingEventProcessorConfiguration.class,
                 () -> TrackingEventProcessorConfiguration.forParallelProcessing(numberOfSegments));
-        return MarkerAwareTrackingEventProcessor.builder()
+
+        return ReplayMarkerAwareTrackingEventProcessor.builder()
                 .name(name)
                 .eventHandlerInvoker(eventHandlerInvoker)
                 .rollbackConfiguration(eventProcessingModule.rollbackConfiguration(name))
@@ -79,19 +78,7 @@ public class CompositeEventProcessorBuilder implements EventProcessorBuilder {
                 .tokenStore(eventProcessingModule.tokenStore(name))
                 .transactionManager(eventProcessingModule.transactionManager(name))
                 .trackingEventProcessorConfiguration(trackingEventProcessorConfiguration)
-                .switchingAware(EventProcessorType.SWITCHING == eventProcessorType)
                 .taskExecutor(taskExecutor)
                 .build();
-    }
-
-    private SwitchingEventProcessor buildSwitchingEventProcessor(
-            String name,
-            Configuration configuration,
-            EventHandlerInvoker eventHandlerInvoker) {
-        SubscribingEventProcessor subscribingEventProcessor =
-                buildSubscribingEventProcessor(name, configuration, eventHandlerInvoker);
-        MarkerAwareTrackingEventProcessor trackingEventProcessor =
-                buildMarkerAwareTrackingEventProcessor(name, configuration, eventHandlerInvoker);
-        return new SwitchingEventProcessor(subscribingEventProcessor, trackingEventProcessor);
     }
 }

@@ -248,18 +248,16 @@ possibility of:
 
 The starter kit comes with programmatic support for triggering replays. To perform a replay:
 
- * disconnect the application from load balancers (don't skip this is!)
+ * disconnect the application from load balancers
  * trigger a replay via a [Spring Boot Actuator](https://spring.io/guides/gs/actuator-service/) call to `/actuator/replay`
  * monitor the state of replay via a Spring actuator endpoint
  * reconnect the application to load balancers
 
 Behind the scenes, replays are being executed by:
- * changing the event processing configuration from subscribing event processors to
-   [tracking event processors](https://axoniq.io/blog-overview/tracking-event-processors)
- * clearing the tracking tokens in the Axon database
- * placing a marker event into the event log that will end replays
- * starting TEP processing, and
- * changing the event processing configuration back to subscribing mode when the TEP reaches the marker event
+ * shutting down [tracking event processors](https://axoniq.io/blog-overview/tracking-event-processors) (TEP) processing;
+ * clearing the tracking tokens in the Axon database;
+ * placing a marker event into the event log that will end replays; and
+ * resstarting TEP processing.
 
 ## Crypto shredding
 Crypto shredding is a technique for disabling access to sensitive information by discarding encryption keys. You might use 

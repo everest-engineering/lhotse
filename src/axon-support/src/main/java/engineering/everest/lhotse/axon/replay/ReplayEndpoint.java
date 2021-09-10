@@ -2,8 +2,6 @@ package engineering.everest.lhotse.axon.replay;
 
 import engineering.everest.lhotse.axon.replay.ReplayableEventProcessor.ListenerRegistry;
 import lombok.extern.slf4j.Slf4j;
-import org.axonframework.eventhandling.TrackingToken;
-import org.axonframework.eventsourcing.eventstore.EventStore;
 import org.axonframework.spring.config.AxonConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
@@ -31,18 +29,18 @@ import static java.util.stream.Collectors.toList;
 public class ReplayEndpoint {
 
     private final AxonConfiguration axonConfiguration;
-    private final List<ReplayCompletionAware> replayCompletionAwares;
+    private final List<ReplayCompletionAware> replayCompletionAwareListeners;
     private final TaskExecutor taskExecutor;
     private final ConcurrentHashMap<ReplayableEventProcessor, ListenerRegistry> replayingProcessors;
 
     @Autowired
     public ReplayEndpoint(AxonConfiguration axonConfiguration,
-                          List<ReplayCompletionAware> replayCompletionAwares,
+                          List<ReplayCompletionAware> replayCompletionAwareListeners,
                           TaskExecutor taskExecutor) {
         this.axonConfiguration = axonConfiguration;
-        this.replayCompletionAwares = replayCompletionAwares;
+        this.replayCompletionAwareListeners = replayCompletionAwareListeners;
         this.taskExecutor = taskExecutor;
-        replayingProcessors = new ConcurrentHashMap<>();
+        this.replayingProcessors = new ConcurrentHashMap<>();
     }
 
     @ReadOperation
@@ -59,7 +57,8 @@ public class ReplayEndpoint {
     public void startReplay(@Nullable Set<String> processingGroups,
                             @Nullable OffsetDateTime startTime) {
         var replayableEventProcessors = processingGroups == null
-                ? getReplayableEventProcessors() : getReplayableEventProcessor(processingGroups);
+                ? getReplayableEventProcessors()
+                : getReplayableEventProcessor(processingGroups);
 
         if (replayableEventProcessors.isEmpty()) {
             throw new IllegalStateException("No matching replayable event processors");
@@ -69,14 +68,14 @@ public class ReplayEndpoint {
             if (isReplaying()) {
                 throw new IllegalStateException("Cannot start replay while an existing one is running");
             }
-            EventStore eventStore = axonConfiguration.eventStore();
-            TrackingToken startPosition = startTime == null
-                    ? eventStore.createTailToken() : eventStore.createTokenAt(startTime.toInstant());
+            var startPosition = startTime == null
+                    ? axonConfiguration.eventStore().createTailToken()
+                    : axonConfiguration.eventStore().createTokenAt(startTime.toInstant());
 
-            ReplayMarkerEvent replayMarkerEvent = new ReplayMarkerEvent(randomUUID());
-            replayableEventProcessors.forEach(p -> {
-                replayingProcessors.put(p, p.registerReplayCompletionListener(this::onSingleProcessorReplayCompletion));
-                p.startReplay(startPosition, replayMarkerEvent);
+            var replayMarkerEvent = new ReplayMarkerEvent(randomUUID());
+            replayableEventProcessors.forEach(x -> {
+                replayingProcessors.put(x, x.registerReplayCompletionListener(this::onSingleProcessorReplayCompletion));
+                x.startReplay(startPosition, replayMarkerEvent);
             });
             axonConfiguration.eventGateway().publish(replayMarkerEvent);
         }
@@ -85,7 +84,7 @@ public class ReplayEndpoint {
     @SuppressWarnings("PMD.CloseResource")
     private void onSingleProcessorReplayCompletion(ReplayableEventProcessor processor) {
         synchronized (this) {
-            ListenerRegistry listenerRegistry = replayingProcessors.remove(processor);
+            var listenerRegistry = replayingProcessors.remove(processor);
             if (listenerRegistry == null) {
                 LOGGER.warn("Processor not registered for replaying: {}", processor);
                 return;
@@ -97,7 +96,7 @@ public class ReplayEndpoint {
             }
             if (replayingProcessors.size() == 0) {
                 LOGGER.info("Executing reset completion tasks");
-                taskExecutor.execute(() -> replayCompletionAwares.forEach(t -> {
+                taskExecutor.execute(() -> replayCompletionAwareListeners.forEach(t -> {
                     try {
                         t.replayCompleted();
                     } catch (Exception e) {

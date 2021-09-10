@@ -42,7 +42,7 @@ class ReplayEndpointTest {
     @Mock
     private EventProcessingConfiguration eventProcessingConfiguration;
     @Mock
-    private SwitchingEventProcessor switchingEventProcessor;
+    private ReplayMarkerAwareTrackingEventProcessor replayMarkerAwareTrackingEventProcessor;
     @Mock
     private EventStore eventStore;
     @Mock
@@ -58,8 +58,8 @@ class ReplayEndpointTest {
     void setUp() {
         lenient().when(axonConfiguration.eventProcessingConfiguration()).thenReturn(eventProcessingConfiguration);
         lenient().when(eventProcessingConfiguration.eventProcessors()).thenReturn(Map.of("default",
-                switchingEventProcessor));
-        lenient().when(switchingEventProcessor.isReplaying()).thenReturn(false);
+                replayMarkerAwareTrackingEventProcessor));
+        lenient().when(replayMarkerAwareTrackingEventProcessor.isReplaying()).thenReturn(false);
         replayEndpoint = new ReplayEndpoint(axonConfiguration, List.of(replayCompletionAware), taskExecutor);
     }
 
@@ -84,9 +84,9 @@ class ReplayEndpointTest {
         doAnswer(invocation -> {
             listener.set(invocation.getArgument(0));
             return listenerRegistry;
-        }).when(switchingEventProcessor).registerReplayCompletionListener(any());
+        }).when(replayMarkerAwareTrackingEventProcessor).registerReplayCompletionListener(any());
         replayEndpoint.startReplay(null, null);
-        verify(switchingEventProcessor).startReplay(eq(startPosition), any(ReplayMarkerEvent.class));
+        verify(replayMarkerAwareTrackingEventProcessor).startReplay(eq(startPosition), any(ReplayMarkerEvent.class));
         verify(eventGateway).publish(any(ReplayMarkerEvent.class));
 
         // Another attempt to start replay before current one is completed will fail
@@ -98,13 +98,13 @@ class ReplayEndpointTest {
                 "isReplaying", true), status);
 
         // Now complete the replay
-        listener.get().accept(switchingEventProcessor);
+        listener.get().accept(replayMarkerAwareTrackingEventProcessor);
         verify(listenerRegistry).close();
         verify(replayCompletionAware).replayCompleted();
     }
 
     @Test
-    void triggerReplayWillThrowIllegalStateException_WhenNoMatchingSwitchingEventProcessorFound() {
+    void triggerReplayWillThrowIllegalStateException_WhenNoMatchingEventProcessorFound() {
         when(eventProcessingConfiguration.eventProcessorByProcessingGroup(
                 "foo", ReplayableEventProcessor.class)).thenReturn(Optional.empty());
         assertThrows(IllegalStateException.class, () -> replayEndpoint.startReplay(Set.of("foo"), null));
