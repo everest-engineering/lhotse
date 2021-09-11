@@ -2,7 +2,7 @@ package engineering.everest.lhotse.registrations.eventhandlers;
 
 import engineering.everest.lhotse.registrations.persistence.PendingRegistrationsRepository;
 import engineering.everest.lhotse.registrations.domain.events.OrganizationRegistrationCompletedEvent;
-import engineering.everest.lhotse.registrations.domain.events.OrganizationRegistrationConfirmedAfterUserWithEmailCreatedEvent;
+import engineering.everest.lhotse.registrations.domain.events.OrganizationRegistrationCancelledUserWithEmailAddressAlreadyInUseEvent;
 import engineering.everest.lhotse.registrations.domain.events.OrganizationRegistrationReceivedEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -57,22 +57,22 @@ class PendingRegistrationsEventHandlerTest {
         var organizationRegistrationReceivedEvent = new OrganizationRegistrationReceivedEvent(ORGANIZATION_ID, REGISTERING_USER_ID, REGISTRATION_CONFIRMATION_CODE, CONTACT_EMAIL, ENCODED_PASSWORD, ORGANIZATION_NAME, WEBSITE_URL, STREET, CITY, STATE, COUNTRY, POSTAL_CODE, CONTACT_NAME, CONTACT_PHONE_NUMBER);
         pendingRegistrationsEventHandler.on(organizationRegistrationReceivedEvent, REGISTRATION_RECEIVED_TIME);
 
-        verify(pendingRegistrationsRepository).createPendingRegistration(REGISTRATION_CONFIRMATION_CODE, ORGANIZATION_ID, REGISTERING_USER_ID, CONTACT_EMAIL, REGISTRATION_RECEIVED_TIME);
+        verify(pendingRegistrationsRepository).createPendingRegistration(ORGANIZATION_ID, REGISTRATION_CONFIRMATION_CODE, REGISTERING_USER_ID, CONTACT_EMAIL, REGISTRATION_RECEIVED_TIME);
     }
 
     @Test
     void onOrganizationRegistrationCompleted_WillDeleteProjectedPendingRegistration() {
-        var organizationRegistrationCompletedEvent = new OrganizationRegistrationCompletedEvent(REGISTRATION_CONFIRMATION_CODE, ORGANIZATION_ID, REGISTERING_USER_ID);
+        var organizationRegistrationCompletedEvent = new OrganizationRegistrationCompletedEvent(ORGANIZATION_ID, REGISTERING_USER_ID);
         pendingRegistrationsEventHandler.on(organizationRegistrationCompletedEvent);
 
-        verify(pendingRegistrationsRepository).deleteById(REGISTRATION_CONFIRMATION_CODE);
+        verify(pendingRegistrationsRepository).deleteById(ORGANIZATION_ID);
     }
 
     @Test
     void onOrganizationRegistrationConfirmedAfterUserWithEmailCreated_WillDeleteProjectedPendingRegistration() {
-        var organizationRegistrationConfirmedAfterUserWithEmailCreatedEvent = new OrganizationRegistrationConfirmedAfterUserWithEmailCreatedEvent(REGISTRATION_CONFIRMATION_CODE, ORGANIZATION_ID, REGISTERING_USER_ID, CONTACT_EMAIL);
+        var organizationRegistrationConfirmedAfterUserWithEmailCreatedEvent = new OrganizationRegistrationCancelledUserWithEmailAddressAlreadyInUseEvent(ORGANIZATION_ID, REGISTERING_USER_ID, CONTACT_EMAIL);
         pendingRegistrationsEventHandler.on(organizationRegistrationConfirmedAfterUserWithEmailCreatedEvent);
 
-        verify(pendingRegistrationsRepository).deleteById(REGISTRATION_CONFIRMATION_CODE);
+        verify(pendingRegistrationsRepository).deleteById(ORGANIZATION_ID);
     }
 }

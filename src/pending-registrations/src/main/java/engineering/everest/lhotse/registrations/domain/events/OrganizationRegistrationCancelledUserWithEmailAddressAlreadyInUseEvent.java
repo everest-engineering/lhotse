@@ -13,8 +13,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Revision("0")
-public class OrganizationRegistrationConfirmedAfterUserWithEmailCreatedEvent {
-    private UUID registrationConfirmationCode;
+public class OrganizationRegistrationCancelledUserWithEmailAddressAlreadyInUseEvent {
     private UUID organizationId;
     @EncryptionKeyIdentifier
     private UUID registeringUserId;

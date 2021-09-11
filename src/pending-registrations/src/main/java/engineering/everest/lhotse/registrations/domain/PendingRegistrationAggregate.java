@@ -8,7 +8,7 @@ import engineering.everest.lhotse.registrations.domain.commands.RecordSentOrgani
 import engineering.everest.lhotse.registrations.domain.commands.RegisterOrganizationCommand;
 import engineering.everest.lhotse.registrations.domain.events.OrganizationRegistrationCompletedEvent;
 import engineering.everest.lhotse.registrations.domain.events.OrganizationRegistrationConfirmationEmailSentEvent;
-import engineering.everest.lhotse.registrations.domain.events.OrganizationRegistrationConfirmedAfterUserWithEmailCreatedEvent;
+import engineering.everest.lhotse.registrations.domain.events.OrganizationRegistrationCancelledUserWithEmailAddressAlreadyInUseEvent;
 import engineering.everest.lhotse.registrations.domain.events.OrganizationRegistrationConfirmedEvent;
 import engineering.everest.lhotse.registrations.domain.events.OrganizationRegistrationReceivedEvent;
 import org.axonframework.commandhandling.CommandHandler;
@@ -58,13 +58,13 @@ public class PendingRegistrationAggregate implements Serializable {
 
     @CommandHandler
     void handle(CompleteOrganizationRegistrationCommand command) {
-        apply(new OrganizationRegistrationCompletedEvent(registrationConfirmationCode, organizationId, command.getRegisteringUserId()));
+        apply(new OrganizationRegistrationCompletedEvent(organizationId, command.getRegisteringUserId()));
     }
 
     @CommandHandler
     void handle(CancelConfirmedRegistrationUserEmailAlreadyInUseCommand command) {
-        apply(new OrganizationRegistrationConfirmedAfterUserWithEmailCreatedEvent(registrationConfirmationCode,
-                command.getOrganizationId(), command.getRegisteringUserId(), command.getRegisteringUserEmail()));
+        apply(new OrganizationRegistrationCancelledUserWithEmailAddressAlreadyInUseEvent(command.getOrganizationId(),
+                command.getRegisteringUserId(), command.getRegisteringUserEmail()));
     }
 
     @EventSourcingHandler
@@ -75,6 +75,11 @@ public class PendingRegistrationAggregate implements Serializable {
 
     @EventSourcingHandler
     void on(OrganizationRegistrationCompletedEvent event) {
+        markDeleted();
+    }
+
+    @EventSourcingHandler
+    void on(OrganizationRegistrationCancelledUserWithEmailAddressAlreadyInUseEvent event) {
         markDeleted();
     }
 }
