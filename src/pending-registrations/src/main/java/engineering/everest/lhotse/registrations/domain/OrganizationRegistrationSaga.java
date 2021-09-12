@@ -35,6 +35,8 @@ import java.time.Duration;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+
 @Saga
 @Revision("0")
 @Log4j2
@@ -136,7 +138,11 @@ public class OrganizationRegistrationSaga {
 
     @SagaEventHandler(associationProperty = ORGANIZATION_PROPERTY)
     public void on(UserCreatedForNewlyRegisteredOrganizationEvent event) throws Exception {
-        var retryWithExponentialBackoff = new RetryWithExponentialBackoff(Duration.ofMillis(200), 2L, Duration.ofMinutes(1));
+        var retryWithExponentialBackoff = new RetryWithExponentialBackoff(Duration.ofMillis(200),
+                2L,
+                Duration.ofMinutes(1),
+                x -> MILLISECONDS.sleep(x.toMillis()));
+
         Callable<Boolean> projectionsDone = () -> usersReadService.exists(event.getUserId())
                 && organizationsReadService.exists(event.getOrganizationId());
 
