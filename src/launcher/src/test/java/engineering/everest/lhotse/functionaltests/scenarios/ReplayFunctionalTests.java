@@ -1,6 +1,5 @@
 package engineering.everest.lhotse.functionaltests.scenarios;
 
-import engineering.everest.lhotse.AdminProvisionTask;
 import engineering.everest.lhotse.Launcher;
 import engineering.everest.lhotse.api.rest.requests.NewOrganizationRequest;
 import engineering.everest.lhotse.api.rest.requests.NewUserRequest;

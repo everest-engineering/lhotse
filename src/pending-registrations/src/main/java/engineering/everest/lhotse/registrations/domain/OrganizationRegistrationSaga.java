@@ -4,7 +4,10 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import engineering.everest.axon.cryptoshredding.annotations.EncryptedField;
 import engineering.everest.axon.cryptoshredding.annotations.EncryptionKeyIdentifier;
+import engineering.everest.lhotse.axon.common.RestClient;
 import engineering.everest.lhotse.axon.common.RetryWithExponentialBackoff;
+import engineering.everest.lhotse.axon.common.domain.Role;
+import engineering.everest.lhotse.axon.common.domain.User;
 import engineering.everest.lhotse.organizations.domain.commands.CreateRegisteredOrganizationCommand;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationRegisteredEvent;
 import engineering.everest.lhotse.organizations.domain.events.UserPromotedToOrganizationAdminEvent;
@@ -20,7 +23,6 @@ import engineering.everest.lhotse.users.domain.commands.CreateUserForNewlyRegist
 import engineering.everest.lhotse.users.domain.commands.PromoteUserToOrganizationAdminCommand;
 import engineering.everest.lhotse.users.domain.events.UserCreatedForNewlyRegisteredOrganizationEvent;
 import engineering.everest.lhotse.users.services.UsersReadService;
-import lombok.extern.log4j.Log4j2;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.modelling.saga.EndSaga;
 import org.axonframework.modelling.saga.SagaEventHandler;
@@ -32,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.time.Duration;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
@@ -39,7 +42,6 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 @Saga
 @Revision("0")
-@Log4j2
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY) // TODO there might be a cleaner way
 public class OrganizationRegistrationSaga {
     private static final String CONFIRMATION_CODE_PROPERTY = "registrationConfirmationCode";
@@ -71,6 +73,9 @@ public class OrganizationRegistrationSaga {
     private String websiteUrl;
     @EncryptedField
     private String phoneNumber;
+
+    @Autowired
+    private RestClient restClient;
 
     // Not implemented: deadline management for handling confirmation timeouts
 
@@ -152,7 +157,20 @@ public class OrganizationRegistrationSaga {
     }
 
     @SagaEventHandler(associationProperty = "promotedUserId", keyName = REGISTERING_USER_PROPERTY)
-    public void on(UserPromotedToOrganizationAdminEvent event) {
+    public void on(UserPromotedToOrganizationAdminEvent event) throws Exception {
+        var retryWithExponentialBackoff = new RetryWithExponentialBackoff(Duration.ofMillis(200),
+                2L,
+                Duration.ofMinutes(1),
+                x -> MILLISECONDS.sleep(x.toMillis()));
+
+        User user = usersReadService.getById(registeringUserId);
+        Set<Role> roles = user.getRoles();
+        Callable<Boolean> projectionsDone = () -> roles.contains(Role.ORG_ADMIN);
+
+        // Failure here will result in the saga not completing. Rollback has not been implemented in this example.
+        retryWithExponentialBackoff.waitOrThrow(projectionsDone, "user roles projection update");
+        String attributes = "{\"attributes\": {\"organizationId\": \""+ organizationId +"\", \"roles\": \""+ roles.toString() +"\"}}";
+        restClient.updateUserAttributes(registeringUserId, attributes);
         commandGateway.send(new CompleteOrganizationRegistrationCommand(registrationConfirmationCode, organizationId, registeringUserId));
     }
 

@@ -4,23 +4,29 @@ dependencies {
     implementation project(':common')
     implementation project(':i18n-support')
     implementation project(':organizations-api')
+    implementation project(':pending-registrations')
     implementation project(':pending-registrations-api')
     implementation project(':users-api')
-    implementation project(':security-support')
 
     implementation "engineering.everest.axon:command-distribution-extension:${axonHazelcastCommandDistributionVersion}"
     implementation "engineering.everest.starterkit:media:${mediaVersion}"
     implementation "engineering.everest.starterkit:storage:${storageVersion}"
-    implementation "engineering.everest.starterkit:security:${securityVersion}"
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation "io.springfox:springfox-boot-starter:${swaggerVersion}"
     implementation "org.axonframework:axon-modelling:${axonVersion}"
+    implementation 'org.keycloak:keycloak-spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
 
     testImplementation project(':users-api').sourceSets.test.output
     testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
     testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
     testImplementation "org.springframework.boot:spring-boot-starter-test"
-    testImplementation "org.springframework.security:spring-security-test"
     testImplementation "org.apache.commons:commons-lang3:${commonsLangVersion}"
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "org.keycloak.bom:keycloak-adapter-bom:${keycloakVersion}"
+	}
 }

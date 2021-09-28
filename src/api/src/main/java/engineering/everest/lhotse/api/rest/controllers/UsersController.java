@@ -37,9 +37,7 @@ public class UsersController {
     private final UsersReadService usersReadService;
 
     @Autowired
-    public UsersController(DtoConverter dtoConverter,
-                           UsersService usersService,
-                           UsersReadService usersReadService) {
+    public UsersController(DtoConverter dtoConverter, UsersService usersService, UsersReadService usersReadService) {
         this.dtoConverter = dtoConverter;
         this.usersService = usersService;
         this.usersReadService = usersReadService;
@@ -50,17 +48,14 @@ public class UsersController {
     @AdminOnly
 
     public List<UserResponse> getAllUsers() {
-        return usersReadService.getUsers().stream()
-                .map(dtoConverter::convert)
-                .collect(toList());
+        return usersReadService.getUsers().stream().map(dtoConverter::convert).collect(toList());
     }
 
     @PostMapping("/{userId}/forget")
     @ApiOperation("Handle a GDPR request to delete an account and scrub personal information")
     @AdminOnly
-    public void deleteUser(User requestinguser,
-                           @PathVariable UUID userId,
-                           @RequestBody @Valid DeleteAndForgetUserRequest request) {
+    public void deleteUser(User requestinguser, @PathVariable UUID userId,
+            @RequestBody @Valid DeleteAndForgetUserRequest request) {
         usersService.deleteAndForget(requestinguser.getId(), userId, request.getRequestReason());
     }
 
@@ -74,8 +69,9 @@ public class UsersController {
     @PutMapping("/{userId}")
     @ApiOperation("Update an organization user's details")
     @PreAuthorize("#requestingUser.id == #userId or hasPermission(#userId, 'User', 'update')")
-    public void updateUser(User requestingUser, @PathVariable UUID userId, @RequestBody @Valid UpdateUserRequest request) {
-        usersService.updateUser(requestingUser.getId(), userId,
-                request.getEmail(), request.getDisplayName(), request.getPassword());
+    public void updateUser(User requestingUser, @PathVariable UUID userId,
+            @RequestBody @Valid UpdateUserRequest request) {
+        usersService.updateUser(requestingUser.getId(), userId, request.getEmail(), request.getDisplayName(),
+                request.getPassword());
     }
 }

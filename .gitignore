@@ -41,3 +41,9 @@ build/
 
 .ipynb_checkpoints/
 
+.project
+.settings
+.vscode
+.env
+/src/launcher/bin
+.classpath

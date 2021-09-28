@@ -30,3 +30,26 @@ services:
       - 'mongo-db:mongo'
     ports:
       - 8081:8081
+
+  keycloak:
+    image: jboss/keycloak
+    container_name: keycloak
+    command: 
+      -Djboss.http.port=${KEYCLOAK_SERVER_PORT}
+    volumes:
+      - ./imports:/opt/jboss/keycloak/imports
+      - ./keycloak-themes/custom:/opt/jboss/keycloak/themes/custom
+    environment:
+      DB_VENDOR: POSTGRES
+      DB_ADDR: postgres-db
+      DB_DATABASE: keycloak
+      DB_USER: keycloak
+      DB_SCHEMA: public
+      DB_PASSWORD: keycloak
+      KEYCLOAK_USER: ${KEYCLOAK_USER}
+      KEYCLOAK_PASSWORD: ${KEYCLOAK_PASSWORD}
+      KEYCLOAK_IMPORT: /opt/jboss/keycloak/imports/realm-export.json -Dkeycloak.profile.feature.upload_scripts=enabled
+    ports:
+      - "${KEYCLOAK_SERVER_PORT}:${KEYCLOAK_SERVER_PORT}"
+    depends_on:
+      - postgres-db

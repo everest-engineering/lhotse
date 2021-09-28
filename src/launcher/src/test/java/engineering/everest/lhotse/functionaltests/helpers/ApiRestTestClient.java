@@ -1,6 +1,5 @@
 package engineering.everest.lhotse.functionaltests.helpers;
 
-import engineering.everest.lhotse.AdminProvisionTask;
 import engineering.everest.lhotse.api.rest.requests.NewOrganizationRequest;
 import engineering.everest.lhotse.api.rest.requests.NewUserRequest;
 import engineering.everest.lhotse.api.rest.requests.RegisterOrganizationRequest;

@@ -12,9 +12,9 @@ dependencies {
     implementation project(':pending-registrations-api')
     implementation project(':users-api')
 
+    implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation "engineering.everest.axon:crypto-shredding-extension:${axonCryptoShreddingVersion}"
     implementation "engineering.everest.axon:command-distribution-extension:${axonHazelcastCommandDistributionVersion}"
-    implementation "engineering.everest.starterkit:security:${securityVersion}"
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'com.fasterxml.jackson.core:jackson-databind'
     implementation "org.apache.commons:commons-lang3:${commonsLangVersion}"

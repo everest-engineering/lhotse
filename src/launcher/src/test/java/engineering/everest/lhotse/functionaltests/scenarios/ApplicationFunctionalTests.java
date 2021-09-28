@@ -1,12 +1,10 @@
 package engineering.everest.lhotse.functionaltests.scenarios;
 
 import com.hazelcast.core.HazelcastInstance;
-import engineering.everest.lhotse.AdminProvisionTask;
 import engineering.everest.lhotse.Launcher;
 import engineering.everest.lhotse.api.rest.requests.NewOrganizationRequest;
 import engineering.everest.lhotse.api.rest.requests.NewUserRequest;
 import engineering.everest.lhotse.api.rest.requests.RegisterOrganizationRequest;
-import engineering.everest.lhotse.api.rest.security.EntityPermissionEvaluator;
 import engineering.everest.lhotse.axon.CommandValidatingMessageHandlerInterceptor;
 import engineering.everest.lhotse.functionaltests.helpers.ApiRestTestClient;
 import engineering.everest.lhotse.registrations.persistence.PendingRegistrationsRepository;

@@ -6,7 +6,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication(scanBasePackages = {
         "engineering.everest.lhotse",
-        "engineering.everest.starterkit",
         "engineering.everest.axon"
 })
 @EnableScheduling
