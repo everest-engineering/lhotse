@@ -1,9 +1,7 @@
 package engineering.everest.lhotse.api.config;
 
-import engineering.everest.lhotse.api.helpers.MockAuthenticationContextProvider;
 import engineering.everest.lhotse.api.rest.converters.DtoConverter;
 import engineering.everest.lhotse.axon.common.services.ReadServiceProvider;
-import engineering.everest.lhotse.security.AuthenticationContextProvider;
 import engineering.everest.lhotse.users.services.UsersReadService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -45,26 +43,6 @@ public class TestApiConfig {
         return mock(ReadServiceProvider.class);
     }
 
-    @Bean
-    public EntityPermissionEvaluator entityPermissionEvaluator(
-            AuthenticationContextProvider authenticationContextProvider,
-            ReadServiceProvider readServiceProvider) {
-        return new EntityPermissionEvaluator(authenticationContextProvider, readServiceProvider);
-    }
-
-    @Configuration
-    public static class TestWebConfig implements WebMvcConfigurer {
-
-        @Bean
-        AuthenticationContextProvider authenticationContextProvider() {
-            return new MockAuthenticationContextProvider();
-        }
-
-        @Override
-        public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-            resolvers.add(new AuthUserArgumentResolver(authenticationContextProvider()));
-        }
-    }
 
     @Configuration
     @Order(HIGHEST_PRECEDENCE)

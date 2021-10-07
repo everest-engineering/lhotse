@@ -49,9 +49,9 @@ class SecurityFunctionalTests {
     }
 
     @Test
-    void retrievingOrganizationListWillFail_WhenUserIsNotAuthenticated() {
-        webClient.get().uri("/admin/organization")
+    void retrievingOrganizationListWillRedirectToLogin_WhenUserIsNotAuthenticated() {
+        webClient.get().uri("/admin/organizations")
                 .exchange()
-                .expectStatus().isUnauthorized();
+                .expectStatus().isFound();
     }
 }

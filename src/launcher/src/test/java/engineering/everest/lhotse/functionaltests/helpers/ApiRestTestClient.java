@@ -24,19 +24,16 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.web.reactive.function.BodyInserters.fromValue;
 
 public class ApiRestTestClient {
-    private static final String AUTHENTICATION_ENDPOINT = "/oauth/token";
+    private static final String AUTHENTICATION_ENDPOINT = "/auth";
 
     private final WebTestClient webTestClient;
-    private final AdminProvisionTask adminProvisionTask;
     private String accessToken;
 
-    public ApiRestTestClient(WebTestClient webTestClient, AdminProvisionTask adminProvisionTask) {
+    public ApiRestTestClient(WebTestClient webTestClient) {
         this.webTestClient = webTestClient;
-        this.adminProvisionTask = adminProvisionTask;
     }
 
     public void createAdminUserAndLogin() {
-        adminProvisionTask.run();
         login("admin@everest.engineering", "ac0n3x72");
     }
 

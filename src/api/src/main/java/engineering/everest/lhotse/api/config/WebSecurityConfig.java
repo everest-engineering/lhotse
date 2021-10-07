@@ -39,12 +39,12 @@ public class WebSecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         super.configure(http);
 
         http.authorizeRequests()
-                .antMatchers("/api/organizations/register/**", "/api/organizations/**/register/**", "/api/version",
-                        "/actuator/health/**", "/api/doc/**", "/swagger-ui/**", "/swagger-resources/**", "/sso/login*")
-                .permitAll()
-                .antMatchers("/api/**", "/actuator/prometheus/**").authenticated()
-                .antMatchers("/admin/**", "/actuator/**").hasRole("ADMIN").anyRequest().permitAll()
-                .and()
-                .logout().logoutRequestMatcher(new AntPathRequestMatcher("/logout", "GET")).logoutSuccessUrl("/");
+            .antMatchers("/api/organizations/register/**", "/api/organizations/**/register/**", "/api/version",
+                    "/actuator/health/**", "/api/doc/**", "/swagger-ui/**", "/swagger-resources/**", "/sso/login*")
+            .permitAll()
+            .antMatchers("/api/**", "/actuator/prometheus/**").authenticated()
+            .antMatchers("/admin/**", "/actuator/**").hasRole("ADMIN").anyRequest().permitAll()
+            .and()
+            .logout().logoutRequestMatcher(new AntPathRequestMatcher("/logout", "GET")).logoutSuccessUrl("/");
     }
 }

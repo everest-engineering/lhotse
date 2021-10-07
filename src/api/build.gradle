@@ -1,5 +1,9 @@
 apply plugin: 'jacoco'
 
+repositories {
+    mavenCentral()
+}
+
 dependencies {
     implementation project(':common')
     implementation project(':i18n-support')
@@ -22,8 +26,11 @@ dependencies {
     testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
     testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
     testImplementation "org.springframework.boot:spring-boot-starter-test"
+    testImplementation "org.springframework.security:spring-security-test"
     testImplementation "org.apache.commons:commons-lang3:${commonsLangVersion}"
-}
+    testImplementation "com.c4-soft.springaddons:spring-security-oauth2-test-webmvc-addons:2.6.6"
+
+}  
 
 dependencyManagement {
 	imports {

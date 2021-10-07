@@ -57,8 +57,8 @@ public class FilterConfig extends OncePerRequestFilter {
 
                         IDToken idToken = keycloakSecurityContext.getIdToken();
 
-                        Map<String, String> claims = new HashMap<>();
-                        claims.put(USER_ID_KEY, idToken.getSubject());
+                        HashMap<String, String> claims = new HashMap<>();
+                        claims.put(USER_ID_KEY, idToken.getId());
                         claims.put(EMAIL_ID_KEY, idToken.getEmail());
                         claims.put(USERNAME_KEY, idToken.getPreferredUsername());
 
@@ -95,7 +95,6 @@ public class FilterConfig extends OncePerRequestFilter {
                 } finally {
                         filterChain.doFilter(httpServletRequest, httpServletResponse);
                 }
-
         }
 
         // We are using this method as shouldFilter by doing noneMatch for provided patterns and request paths.
