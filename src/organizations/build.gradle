@@ -9,7 +9,6 @@ dependencies {
     implementation project(':i18n-support')
     implementation project(':command-validation-support')
     implementation project(':organizations-api')
-    implementation project(':pending-registrations-api')
     implementation project(':users-api')
 
     implementation "engineering.everest.axon:command-distribution-extension:${axonHazelcastCommandDistributionVersion}"

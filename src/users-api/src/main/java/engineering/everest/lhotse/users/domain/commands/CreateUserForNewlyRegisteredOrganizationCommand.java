@@ -11,8 +11,8 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CreateUserForNewlyRegisteredOrganizationCommand implements ValidatableCommand {
     @TargetAggregateIdentifier
-    UUID userId;
     UUID organizationId;
+    UUID userId;
     String userEmail;
     String encodedPassword;
     String displayName;

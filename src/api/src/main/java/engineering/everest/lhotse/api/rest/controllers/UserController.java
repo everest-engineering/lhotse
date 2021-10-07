@@ -22,6 +22,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.io.IOException;
+import java.security.Principal;
+import java.util.UUID;
 
 import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM;
 import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
@@ -59,17 +61,17 @@ public class UserController {
     }
 
     @PostMapping("/profile-photo")
-    public void uploadProfilePhoto(User requestingUser,
+    public void uploadProfilePhoto(Principal principal,
                                    @RequestParam("file") MultipartFile uploadedFile) throws IOException {
         var persistedFileId = fileService.transferToPermanentStore(uploadedFile.getOriginalFilename(), uploadedFile.getSize(),
                 uploadedFile.getInputStream());
-        usersService.storeProfilePhoto(requestingUser.getId(), persistedFileId);
+        usersService.storeProfilePhoto(UUID.fromString(principal.getName()), persistedFileId);
     }
 
     @GetMapping("/profile-photo")
-    public ResponseEntity<StreamingResponseBody> streamProfilePhoto(User requestingUser) {
+    public ResponseEntity<StreamingResponseBody> streamProfilePhoto(Principal principal) {
         StreamingResponseBody streamingResponse = outputStream -> {
-            try (var inputStream = usersReadService.getProfilePhotoStream(requestingUser.getId())) {
+            try (var inputStream = usersReadService.getProfilePhotoStream(UUID.fromString(principal.getName()))) {
                 inputStream.transferTo(outputStream);
             }
         };
@@ -81,11 +83,11 @@ public class UserController {
     @GetMapping(
             value = "/profile-photo/thumbnail",
             produces = APPLICATION_OCTET_STREAM_VALUE)
-    public ResponseEntity<StreamingResponseBody> streamProfilePhotoThumbnail(User requestingUser,
+    public ResponseEntity<StreamingResponseBody> streamProfilePhotoThumbnail(Principal principal,
                                                                              @RequestParam int width,
                                                                              @RequestParam int height) {
         StreamingResponseBody streamingResponse = outputStream -> {
-            try (var inputStream = usersReadService.getProfilePhotoThumbnailStream(requestingUser.getId(), width, height)) {
+            try (var inputStream = usersReadService.getProfilePhotoThumbnailStream(UUID.fromString(principal.getName()), width, height)) {
                 inputStream.transferTo(outputStream);
             }
         };

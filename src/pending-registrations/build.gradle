@@ -1,7 +1,6 @@
 apply plugin: 'jacoco'
 
 dependencies {
-    api project(':pending-registrations-persistence')
     api "org.axonframework:axon-spring:${axonVersion}"
 
     implementation project(':axon-support')
@@ -9,7 +8,6 @@ dependencies {
     implementation project(':command-validation-support')
     implementation project(':i18n-support')
     implementation project(':organizations-api')
-    implementation project(':pending-registrations-api')
     implementation project(':users-api')
 
     implementation 'org.springframework.boot:spring-boot-starter-security'

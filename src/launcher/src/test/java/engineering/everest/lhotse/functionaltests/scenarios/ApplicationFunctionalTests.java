@@ -7,7 +7,6 @@ import engineering.everest.lhotse.api.rest.requests.NewUserRequest;
 import engineering.everest.lhotse.api.rest.requests.RegisterOrganizationRequest;
 import engineering.everest.lhotse.axon.CommandValidatingMessageHandlerInterceptor;
 import engineering.everest.lhotse.functionaltests.helpers.ApiRestTestClient;
-import engineering.everest.lhotse.registrations.persistence.PendingRegistrationsRepository;
 import engineering.everest.lhotse.users.persistence.UsersRepository;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -39,8 +38,6 @@ class ApplicationFunctionalTests {
     private ApplicationContext applicationContext;
     @Autowired
     private UsersRepository usersRepository;
-    @Autowired
-    private PendingRegistrationsRepository pendingRegistrationsRepository;
     @Value("${application.setup.admin.username}")
     private String adminUserName;
     @Autowired
@@ -93,9 +90,7 @@ class ApplicationFunctionalTests {
         var newOrganizationId = organizationRegistrationResponse.getNewOrganizationId();
         Thread.sleep(2000); // Default is now tracking event processor
         // Confirmation code is "emailed", but we can cheat and pull it from the DB.
-        var pendingRegistration = pendingRegistrationsRepository.findById(newOrganizationId);
-
-        apiRestTestClient.confirmOrganizationRegistration(newOrganizationId, pendingRegistration.orElseThrow().getConfirmationCode(), OK);
+        
         apiRestTestClient.login("alice@example.com", "alicerocks");
         var newUserRequest = new NewUserRequest("bob@example.com", "bobalsorocks", "My name is Bob");
         apiRestTestClient.createUser(newOrganizationId, newUserRequest, CREATED);

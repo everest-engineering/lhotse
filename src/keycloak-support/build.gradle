@@ -1,0 +1,25 @@
+apply plugin: 'jacoco'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(':organizations-api')
+    implementation project(':users-api')
+
+    implementation "engineering.everest.axon:command-distribution-extension:${axonHazelcastCommandDistributionVersion}"
+    implementation "org.axonframework:axon-modelling:${axonVersion}"
+    implementation 'org.keycloak:keycloak-spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    testImplementation "org.springframework.boot:spring-boot-starter-test"
+    testImplementation "org.springframework.security:spring-security-test"
+}  
+
+dependencyManagement {
+	imports {
+		mavenBom "org.keycloak.bom:keycloak-adapter-bom:${keycloakVersion}"
+	}
+}

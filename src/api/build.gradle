@@ -8,8 +8,6 @@ dependencies {
     implementation project(':common')
     implementation project(':i18n-support')
     implementation project(':organizations-api')
-    implementation project(':pending-registrations')
-    implementation project(':pending-registrations-api')
     implementation project(':users-api')
 
     implementation "engineering.everest.axon:command-distribution-extension:${axonHazelcastCommandDistributionVersion}"
@@ -17,7 +15,6 @@ dependencies {
     implementation "engineering.everest.starterkit:storage:${storageVersion}"
     implementation "io.springfox:springfox-boot-starter:${swaggerVersion}"
     implementation "org.axonframework:axon-modelling:${axonVersion}"
-    implementation 'org.keycloak:keycloak-spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'

@@ -2,7 +2,6 @@ package engineering.everest.lhotse.users.persistence;
 
 import engineering.everest.lhotse.axon.common.domain.User;
 import engineering.everest.lhotse.users.config.TestUserSessionsJpaConfig;
-import engineering.everest.lhotse.users.config.UserSessionsJpaConfig;
 import engineering.everest.lhotse.users.services.UsersReadService;
 import engineering.everest.starterkit.filestorage.FileService;
 import engineering.everest.starterkit.filestorage.InputStreamOfKnownLength;
@@ -36,13 +35,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
-import static org.springframework.context.annotation.FilterType.ASSIGNABLE_TYPE;
 
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
 @EnableAutoConfiguration
-@ComponentScan(basePackages = "engineering.everest.lhotse.users",
-        excludeFilters = @ComponentScan.Filter(type = ASSIGNABLE_TYPE, value = UserSessionsJpaConfig.class))
+@ComponentScan(basePackages = "engineering.everest.lhotse.users")
 @ContextConfiguration(classes = {TestUserSessionsJpaConfig.class})
 class UsersReadServiceIntegrationTest {
 
