@@ -1,6 +1,9 @@
 package engineering.everest.lhotse.users.services;
+import engineering.everest.lhotse.axon.common.domain.Role;
 
 import java.util.UUID;
+import java.util.Set;
+
 
 public interface UsersService {
 
@@ -8,6 +11,8 @@ public interface UsersService {
 
     void updateUser(UUID requestingUserId, UUID userId, String emailChange,
                     String displayNameChange, String passwordChange);
+
+    void updateUserRoles(UUID requestingUserId, UUID userId, Set<Role> roles);
 
     void storeProfilePhoto(UUID requestingUserId, UUID profilePhotoFileId);
 

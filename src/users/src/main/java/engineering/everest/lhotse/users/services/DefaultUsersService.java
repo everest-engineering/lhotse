@@ -6,11 +6,23 @@ import engineering.everest.lhotse.users.domain.commands.CreateUserCommand;
 import engineering.everest.lhotse.users.domain.commands.DeleteAndForgetUserCommand;
 import engineering.everest.lhotse.users.domain.commands.RegisterUploadedUserProfilePhotoCommand;
 import engineering.everest.lhotse.users.domain.commands.UpdateUserDetailsCommand;
+import engineering.everest.lhotse.axon.common.services.KeycloakSynchronizationService;
+import engineering.everest.lhotse.axon.common.domain.Role;
+import engineering.everest.lhotse.users.services.UsersReadService;
+import org.springframework.beans.factory.annotation.Autowired;
+
+
+
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
+import java.util.Set;
+import java.util.Map;
+import static java.util.Map.entry;   
+
+
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -20,6 +32,11 @@ public class DefaultUsersService implements UsersService {
     private final HazelcastCommandGateway commandGateway;
     private final RandomFieldsGenerator randomFieldsGenerator;
     private final PasswordEncoder passwordEncoder;
+    
+    @Autowired
+    private UsersReadService usersReadService;
+    @Autowired
+    private KeycloakSynchronizationService keycloakSynchronizationService;
 
     public DefaultUsersService(HazelcastCommandGateway commandGateway,
                                RandomFieldsGenerator randomFieldsGenerator,
@@ -35,6 +52,13 @@ public class DefaultUsersService implements UsersService {
 
         commandGateway.sendAndWait(new UpdateUserDetailsCommand(userId, emailChange,
                 displayNameChange, encodePasswordIfNotBlank(passwordChange), requestingUserId));
+    }
+
+    @Override
+    public void updateUserRoles(UUID requestingUserId, UUID userId, Set<Role> roles) {
+        keycloakSynchronizationService.updateUserAttributes(userId, Map.ofEntries(
+            entry("attributes", usersReadService.getById(requestingUserId).getRoles())
+        ));
     }
 
     @Override

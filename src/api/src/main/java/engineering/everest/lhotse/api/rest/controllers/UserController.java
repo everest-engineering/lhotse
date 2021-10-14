@@ -20,10 +20,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+import engineering.everest.lhotse.axon.common.domain.Role;
 
 import java.io.IOException;
 import java.security.Principal;
 import java.util.UUID;
+import java.util.Set;
 
 import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM;
 import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
@@ -53,11 +55,19 @@ public class UserController {
         return dtoConverter.convert(user);
     }
 
+
     @PutMapping
     @ApiOperation("Update currently authenticated user information")
     public void updateUser(User user, @RequestBody UpdateUserRequest updateUserRequest) {
         usersService.updateUser(user.getId(), user.getId(),
                 updateUserRequest.getEmail(), updateUserRequest.getDisplayName(), updateUserRequest.getPassword());
+    }
+
+    @PutMapping("/roles")
+    @ApiOperation("Updates given user roles")
+    public void updateUserRoles(User user, @RequestBody Set<Role> roles) {
+        usersService.updateUserRoles(user.getId(), user.getId(),
+                user.getRoles());
     }
 
     @PostMapping("/profile-photo")
