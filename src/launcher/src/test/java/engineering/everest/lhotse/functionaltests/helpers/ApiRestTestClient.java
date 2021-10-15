@@ -7,8 +7,14 @@ import engineering.everest.lhotse.api.rest.requests.UpdateUserRequest;
 import engineering.everest.lhotse.api.rest.responses.OrganizationRegistrationResponse;
 import engineering.everest.lhotse.api.rest.responses.OrganizationResponse;
 import engineering.everest.lhotse.api.rest.responses.UserResponse;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.keycloak.OAuth2Constants;
+import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.KeycloakBuilder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.reactive.server.WebTestClient.ResponseSpec;
 
@@ -18,13 +24,25 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.OK;
-import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.web.reactive.function.BodyInserters.fromValue;
 
+@Service
 public class ApiRestTestClient {
-    private static final String AUTHENTICATION_ENDPOINT = "/auth";
+    @Value("${keycloak.auth-server-url}")
+    private String keycloakServerAuthUrl;
+    @Value("${kc.server.admin-user}")
+    private String keycloakAdminUser;
+    @Value("${kc.server.admin-password}")
+    private String keycloakAdminPassword;
+    @Value("${keycloak.realm}")
+    private String keycloakAdminRealm;
+    @Value("${keycloak.resource}")
+    private String keycloakAdminClientId;
+    @Value("${keycloak.credentials.secret}")
+    private String keycloakAdminClientSecret;
+    @Value("${kc.server.connection.pool-size}")
+    private int keycloakServerConnectionPoolSize;
 
     private final WebTestClient webTestClient;
     private String accessToken;
@@ -34,7 +52,7 @@ public class ApiRestTestClient {
     }
 
     public void createAdminUserAndLogin() {
-        login("admin@everest.engineering", "ac0n3x72");
+        login(keycloakAdminUser, keycloakAdminPassword);
     }
 
     public String getAccessToken() {
@@ -42,16 +60,20 @@ public class ApiRestTestClient {
     }
 
     public void login(String username, String password) {
-        Map<String, String> results = webTestClient.post().uri(AUTHENTICATION_ENDPOINT)
-                .contentType(APPLICATION_FORM_URLENCODED)
-                .body(fromValue(String.format("grant_type=password&username=%s&password=%s&client_id=web-app-ui&client_secret=replace-me", username, password)))
-                .exchange()
-                .expectStatus().isEqualTo(OK)
-                .returnResult(new ParameterizedTypeReference<Map<String, String>>() {
-                })
-                .getResponseBody().blockFirst();
-        assertNotNull(results);
-        String accessToken = results.get("access_token");
+        Keycloak keycloak = KeycloakBuilder.builder()
+                .serverUrl(keycloakServerAuthUrl)
+                .grantType(OAuth2Constants.PASSWORD)
+                .realm(keycloakAdminRealm)
+                .clientId(keycloakAdminClientId)
+                .clientSecret(keycloakAdminClientSecret)
+                .username(username)
+                .password(password)
+                .resteasyClient(new ResteasyClientBuilder()
+                        .connectionPoolSize(keycloakServerConnectionPoolSize).build())
+                .build();
+
+        assertNotNull(keycloak);
+        var accessToken = keycloak.tokenManager().getAccessToken().getToken();
         assertNotNull(accessToken);
         this.accessToken = accessToken;
     }
@@ -76,7 +98,7 @@ public class ApiRestTestClient {
                 .returnResult(UserResponse.class).getResponseBody().buffer().blockFirst();
     }
 
-    public UUID createRegisteredOrganization(NewOrganizationRequest request, HttpStatus expectedHttpStatus) {
+    public UUID createOrganization(NewOrganizationRequest request, HttpStatus expectedHttpStatus) {
         ResponseSpec responseSpec = webTestClient.post().uri("/admin/organizations")
                 .header("Authorization", "Bearer " + accessToken)
                 .contentType(APPLICATION_JSON)
@@ -99,12 +121,6 @@ public class ApiRestTestClient {
             return responseSpec.returnResult(OrganizationRegistrationResponse.class).getResponseBody().blockFirst();
         }
         return null;
-    }
-
-    public void confirmOrganizationRegistration(UUID organizationId, UUID confirmationCode, HttpStatus expectedHttpStatus) {
-        webTestClient.get().uri("/api/organizations/{organizationId}/register/{confirmationCode}", organizationId, confirmationCode)
-                .exchange()
-                .expectStatus().isEqualTo(expectedHttpStatus);
     }
 
     public List<OrganizationResponse> getAllOrganizations(HttpStatus expectedHttpStatus) {

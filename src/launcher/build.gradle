@@ -77,6 +77,7 @@ dependencies {
     testImplementation "org.apache.commons:commons-text:${commonsTextVersion}"
     testImplementation "org.bouncycastle:bcpkix-jdk15on:${bouncyCastleVersion}"
     testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo'
+    testImplementation "org.keycloak:keycloak-admin-client:${keycloakRestClientVersion}"
 }
 
 dependencyManagement {

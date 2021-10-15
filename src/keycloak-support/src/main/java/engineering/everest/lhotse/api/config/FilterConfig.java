@@ -10,7 +10,7 @@ import engineering.everest.axon.HazelcastCommandGateway;
 import engineering.everest.lhotse.axon.common.RetryWithExponentialBackoff;
 import engineering.everest.lhotse.axon.common.domain.Role;
 import engineering.everest.lhotse.axon.common.domain.User;
-import engineering.everest.lhotse.organizations.domain.commands.CreateRegisteredOrganizationCommand;
+import engineering.everest.lhotse.organizations.domain.commands.CreateSelfRegisteredOrganizationCommand;
 import engineering.everest.lhotse.organizations.services.OrganizationsReadService;
 import engineering.everest.lhotse.users.services.UsersReadService;
 import lombok.extern.slf4j.Slf4j;
@@ -43,7 +43,7 @@ public class FilterConfig extends OncePerRequestFilter {
     private static final String ORGANIZATION_CONTACT_PHONE_NUMBER = "0000000000";
 
     private static final String ORGANIZATION_ID_KEY = "organizationId";
-    private static final String DISPLAYNAME_KEY = "displayname";
+    private static final String DISPLAY_NAME_KEY = "displayName";
 
     @Autowired
     private HazelcastCommandGateway commandGateway;
@@ -79,17 +79,18 @@ public class FilterConfig extends OncePerRequestFilter {
 
                 LOGGER.info("Already registered user details: " + new User(UUID.fromString(accessToken.getSubject()),
                         UUID.fromString(otherClaims.get(ORGANIZATION_ID_KEY).toString()),
-                        accessToken.getPreferredUsername(), otherClaims.get(DISPLAYNAME_KEY).toString(),
+                        accessToken.getPreferredUsername(), otherClaims.get(DISPLAY_NAME_KEY).toString(),
                         accessToken.getEmail(), false, roles));
             } else {
                 var organizationId = randomUUID();
                 var registeringUserId = UUID.fromString(accessToken.getSubject());
                 var userEmailAddress = accessToken.getEmail();
                 var organizationName = accessToken.getPreferredUsername();
+                var displayName = otherClaims.getOrDefault(DISPLAY_NAME_KEY, "Guest").toString().trim();
 
-                commandGateway.sendAndWait(new CreateRegisteredOrganizationCommand(organizationId, registeringUserId,
+                commandGateway.sendAndWait(new CreateSelfRegisteredOrganizationCommand(organizationId, registeringUserId,
                         organizationName, ORGANIZATION_STREET, ORGANIZATION_CITY, ORGANIZATION_STATE,
-                        ORGANIZATION_COUNTRY, ORGANIZATION_POSTAL_CODE, ORGANIZATION_WEBSITE_URL, organizationName,
+                        ORGANIZATION_COUNTRY, ORGANIZATION_POSTAL_CODE, ORGANIZATION_WEBSITE_URL, displayName,
                         ORGANIZATION_CONTACT_PHONE_NUMBER, userEmailAddress));
 
                 new RetryWithExponentialBackoff(Duration.ofMillis(200), 2L, Duration.ofMinutes(1),
@@ -105,8 +106,8 @@ public class FilterConfig extends OncePerRequestFilter {
                 LOGGER.info("Newly registered user details: " + user);
 
                 // Updating the access token with user claims to avoid token regeneration
-                accessToken.getOtherClaims().putAll(Map.of(ORGANIZATION_ID_KEY, organizationId, DISPLAYNAME_KEY,
-                        otherClaims.getOrDefault(DISPLAYNAME_KEY, "_"), "roles", user.getRoles()));
+                accessToken.getOtherClaims().putAll(Map.of(ORGANIZATION_ID_KEY, organizationId, DISPLAY_NAME_KEY,
+                        user.getDisplayName(), "roles", user.getRoles()));
                 LOGGER.info("Updated user access token with custom claims.");
             }
 
@@ -121,8 +122,12 @@ public class FilterConfig extends OncePerRequestFilter {
     // We are using this method as shouldFilter by doing noneMatch for provided patterns and request paths.
     // That means, doFilterInternal checks can be applied to only specified includeUrlPatterns.
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest httpServletRequest) throws ServletException {
+    protected boolean shouldNotFilter(HttpServletRequest httpServletRequest) {
         final AntPathMatcher pathMatcher = new AntPathMatcher();
+
+        if (pathMatcher.match("/api/organizations/register", httpServletRequest.getServletPath())) {
+            return true;
+        }
 
         List<String> includeUrlPatterns = new ArrayList<>();
         includeUrlPatterns.add("/api/user/**");

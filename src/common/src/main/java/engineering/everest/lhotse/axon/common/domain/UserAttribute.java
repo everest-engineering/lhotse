@@ -13,4 +13,5 @@ import lombok.NoArgsConstructor;
 public class UserAttribute {
     private UUID organizationId;
     private Set<Role> roles;
+    private String displayName;
 }

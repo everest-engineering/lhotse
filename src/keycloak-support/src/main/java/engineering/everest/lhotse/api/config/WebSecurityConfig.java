@@ -21,7 +21,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @EnableGlobalMethodSecurity(jsr250Enabled = true, prePostEnabled = true)
 public class WebSecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
     @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+    public void configureGlobal(AuthenticationManagerBuilder auth) {
         KeycloakAuthenticationProvider keycloakAuthenticationProvider = keycloakAuthenticationProvider();
         keycloakAuthenticationProvider.setGrantedAuthoritiesMapper(new SimpleAuthorityMapper());
 
@@ -43,7 +43,7 @@ public class WebSecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
             .csrf()
             .disable()
             .authorizeRequests()
-            .antMatchers("/api/organizations/register/**", "/api/organizations/**/register/**", "/api/version",
+            .antMatchers("/api/organizations/**", "/api/version",
                     "/actuator/health/**", "/api/doc/**", "/swagger-ui/**", "/swagger-resources/**", "/sso/login*")
             .permitAll()
             .antMatchers("/api/**", "/actuator/prometheus/**").authenticated()

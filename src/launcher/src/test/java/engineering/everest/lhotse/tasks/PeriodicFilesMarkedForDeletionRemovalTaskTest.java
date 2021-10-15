@@ -4,7 +4,6 @@ import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.cp.CPSubsystem;
 import com.hazelcast.cp.lock.FencedLock;
 import engineering.everest.starterkit.filestorage.FileService;
-import engineering.everest.starterkit.filestorage.persistence.PersistableFileMapping;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,11 +16,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 
 import java.lang.reflect.Method;
 import java.time.Duration;
-import java.util.UUID;
 import java.util.stream.Stream;
 
-import static engineering.everest.starterkit.filestorage.FileStoreType.EPHEMERAL;
-import static engineering.everest.starterkit.filestorage.NativeStorageType.MONGO_GRID_FS;
 import static java.time.Duration.parse;
 import static java.util.Arrays.stream;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -36,12 +32,6 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class PeriodicFilesMarkedForDeletionRemovalTaskTest {
 
-    private static final UUID FILE_ID = UUID.randomUUID();
-    private static final String FILE_IDENTIFIER = "FILE_IDENTIFIER";
-    private static final String SHA_256 = "SHA_256";
-    private static final String SHA_512 = "SHA_512";
-    private static final String TEMPORARY_FILE_CONTENTS = "TEMPORARY_FILE_CONTENTS";
-    private static final Long FILE_SIZE = (long) TEMPORARY_FILE_CONTENTS.length();
     private static final int BATCH_SIZE = 50;
 
     private PeriodicFilesMarkedForDeletionRemovalTask periodicFilesMarkedForDeletionRemovalTask;

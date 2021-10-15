@@ -1,10 +1,16 @@
 package engineering.everest.lhotse.api.rest.controllers;
 
+import com.c4_soft.springaddons.security.oauth2.test.annotations.ClaimSet;
+import com.c4_soft.springaddons.security.oauth2.test.annotations.StringClaim;
+import com.c4_soft.springaddons.security.oauth2.test.annotations.keycloak.WithMockKeycloakAuth;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import engineering.everest.lhotse.api.config.TestApiConfig;
+import engineering.everest.lhotse.api.rest.converters.DtoConverter;
 import engineering.everest.lhotse.api.rest.requests.NewUserRequest;
 import engineering.everest.lhotse.api.rest.requests.RegisterOrganizationRequest;
 import engineering.everest.lhotse.api.rest.requests.UpdateOrganizationRequest;
+import engineering.everest.lhotse.api.rest.responses.OrganizationResponse;
+import engineering.everest.lhotse.api.rest.responses.UserResponse;
 import engineering.everest.lhotse.axon.common.RandomFieldsGenerator;
 import engineering.everest.lhotse.axon.common.domain.User;
 import engineering.everest.lhotse.organizations.Organization;
@@ -14,65 +20,45 @@ import engineering.everest.lhotse.organizations.services.OrganizationsService;
 import engineering.everest.lhotse.users.services.UsersReadService;
 import engineering.everest.lhotse.users.services.UsersService;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
-import java.util.UUID;
-import org.junit.jupiter.api.Disabled;
+import java.util.*;
 
 import static engineering.everest.lhotse.users.UserTestHelper.ADMIN_USER;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.c4_soft.springaddons.security.oauth2.test.mockmvc.keycloak.ServletKeycloakAuthUnitTestingSupport;
-import com.c4_soft.springaddons.security.oauth2.test.annotations.keycloak.WithMockKeycloakAuth;
-import com.c4_soft.springaddons.security.oauth2.test.annotations.IdTokenClaims;
-import com.c4_soft.springaddons.security.oauth2.test.annotations.OidcStandardClaims;
-import com.c4_soft.springaddons.security.oauth2.test.annotations.keycloak.KeycloakAccess;
-import com.c4_soft.springaddons.security.oauth2.test.annotations.keycloak.KeycloakAccessToken;
-import com.c4_soft.springaddons.security.oauth2.test.annotations.ClaimSet;
-import com.c4_soft.springaddons.security.oauth2.test.annotations.JsonObjectClaim;
-
-@WebMvcTest(controllers = OrganizationsController.class)
-@ContextConfiguration(classes = {TestApiConfig.class, OrganizationsController.class})
-@Import({ ServletKeycloakAuthUnitTestingSupport.UnitTestConfig.class })
-@AutoConfigureMockMvc
-@ActiveProfiles("keycloak")
-@ExtendWith({MockitoExtension.class, SpringExtension.class})
+@WebMvcTest(controllers = { OrganizationsController.class })
+@ContextConfiguration(classes = { TestApiConfig.class, OrganizationsController.class })
 class OrganizationsControllerTest {
 
-    private static final UUID ORGANIZATION_ID = randomUUID();
     private static final UUID USER_ID = randomUUID();
-    private static final String USER_USERNAME = "user@umbrella.com";
-    private static final String ADMIN_USERNAME = "admin@umbrella.com";
     private static final String RAW_PASSWORD = "secret";
     private static final String NEW_USER_USERNAME = "new@umbrella.com";
     private static final String NEW_USER_DISPLAY_NAME = "new user";
-    private static final String ROLE_ADMIN = "ADMIN";
-    private static final String ROLE_ORGANIZATION_USER = "ORG_USER";
+    private static final String ROLE_ADMIN = "ROLE_ADMIN";
+    private static final String ROLE_ORG_USER = "ORG_USER";
     private static final NewUserRequest NEW_USER_REQUEST = new NewUserRequest(NEW_USER_USERNAME, RAW_PASSWORD, NEW_USER_DISPLAY_NAME);
     private static final Organization ORGANIZATION_1 = new Organization(fromString("53ac29ab-ecc6-431e-bde0-64440cd3dc93"),
             "organization-1", new OrganizationAddress("street-1", "city-1",
@@ -81,12 +67,18 @@ class OrganizationsControllerTest {
             "organization-2", new OrganizationAddress("street-2", "city-2",
             "state-2", "country-2", "postal-2"), "website-2", "", "", "", false);
     private static final User ORG_1_USER_1 = new User(randomUUID(), ORGANIZATION_1.getId(), "user11@email.com", "new-user-display-name-11", false);
+    private static final User ORG_2_USER_2 = new User(randomUUID(), ORGANIZATION_2.getId(), "user22@email.com", "new-user-display-name-22", false);
+    private static final UUID organizationId = ORG_1_USER_1.getOrganizationId();
 
-    @Autowired
     private MockMvc mockMvc;
+
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private WebApplicationContext webApplicationContext;
 
+    @MockBean
+    private DtoConverter dtoConverter;
     @MockBean
     private OrganizationsService organizationsService;
     @MockBean
@@ -98,63 +90,61 @@ class OrganizationsControllerTest {
     @MockBean
     private RandomFieldsGenerator randomFieldsGenerator;
 
-//     @Test
-//     @Disabled
-//     @WithMockUser(username = USER_USERNAME, roles = ROLE_ORGANIZATION_USER)
-//     void getOrganizationWillDelegate_WhenRequestingUserBelongsToOrganization() throws Exception {
-//         User authUser = MockAuthenticationContextProvider.getAuthUser();
-//         when(organizationsReadService.getById(authUser.getOrganizationId()))
-//                 .thenReturn(new Organization(authUser.getOrganizationId(), "demo",
-//                         new OrganizationAddress("", "", "", "", ""),
-//                         "", "", "", "", false));
-//         mockMvc.perform(get("/api/organizations/{organizationId}", authUser.getOrganizationId()))
-//                 .andExpect(status().isOk())
-//                 .andExpect(content().contentType(APPLICATION_JSON))
-//                 .andExpect(jsonPath("$.id", is(authUser.getOrganizationId().toString())));
-//     }
+    @BeforeEach
+    public void setup() {
+        this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+    }
+
+    @Test
+    @WithMockKeycloakAuth(authorities = ROLE_ADMIN)
+    void getOrganizationWillDelegate_WhenRequestingUserBelongsToOrganization() throws Exception {
+        when(dtoConverter.convert(ORGANIZATION_1))
+                .thenReturn(getOrganizationResponse());
+        when(organizationsReadService.getById(organizationId)).thenReturn(ORGANIZATION_1);
+
+        mockMvc.perform(get("/api/organizations/{organizationId}", organizationId)
+                        .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(APPLICATION_JSON))
+                .andExpect(jsonPath("$.id", is(organizationId.toString())));
+    }
 
     @Test
     void registerOrganizationWillDelegate() throws Exception {
-        when(randomFieldsGenerator.genRandomUUID())
-                .thenReturn(ORGANIZATION_1.getId())
-                .thenReturn(USER_ID);
-
+        when(randomFieldsGenerator.genRandomUUID()).thenReturn(USER_ID);
         OrganizationAddress address = ORGANIZATION_1.getOrganizationAddress();
+        RegisterOrganizationRequest registerOrganizationRequest = new RegisterOrganizationRequest(ORGANIZATION_1.getOrganizationName(), address.getStreet(),
+                address.getCity(), address.getState(), address.getCountry(), address.getPostalCode(), ORGANIZATION_1.getWebsiteUrl(),
+                ORGANIZATION_1.getContactName(), ORGANIZATION_1.getPhoneNumber(), ORGANIZATION_1.getEmailAddress(), RAW_PASSWORD);
+
+        when(organizationsService.createOrganization(USER_ID, ORGANIZATION_1.getOrganizationName(), address.getStreet(),
+                address.getCity(), address.getState(), address.getCountry(), address.getPostalCode(), ORGANIZATION_1.getWebsiteUrl(),
+                ORGANIZATION_1.getContactName(), ORGANIZATION_1.getPhoneNumber(), ORGANIZATION_1.getEmailAddress())).thenReturn(ORGANIZATION_1.getId());
 
         mockMvc.perform(post("/api/organizations/register")
-                .contentType(APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new RegisterOrganizationRequest(ORGANIZATION_1.getOrganizationName(), address.getStreet(),
-                        address.getCity(), address.getState(), address.getCountry(), address.getPostalCode(), ORGANIZATION_1.getWebsiteUrl(),
-                        ORGANIZATION_1.getContactName(), ORGANIZATION_1.getPhoneNumber(), ORGANIZATION_1.getEmailAddress(), RAW_PASSWORD))))
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(registerOrganizationRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$.newOrganizationId", is(ORGANIZATION_1.getId().toString())))
                 .andExpect(jsonPath("$.newUserId", is(USER_ID.toString())));
 
-        verify(organizationsService).createRegisteredOrganization(
-                ORGANIZATION_1.getId(), ORGANIZATION_1.getOrganizationName(),
+        verify(organizationsService).createOrganization(USER_ID, ORGANIZATION_1.getOrganizationName(),
                 address.getStreet(), address.getCity(), address.getState(), address.getCountry(), address.getPostalCode(),
                 ORGANIZATION_1.getWebsiteUrl(), ORGANIZATION_1.getContactName(), ORGANIZATION_1.getPhoneNumber(), ORGANIZATION_1.getEmailAddress());
+
         verifyNoInteractions(usersService);
     }
 
     @Test
-    @Disabled
-    @WithMockKeycloakAuth(authorities = {"ROLE_ADMIN"},
-        id = @IdTokenClaims(sub = "42"),
-        oidc = @OidcStandardClaims(
-                nickName = ADMIN_USERNAME,
-                preferredUsername = ADMIN_USERNAME),
-        accessToken = @KeycloakAccessToken(
-                realmAccess = @KeycloakAccess(roles = { "ROLE_ADMIN" }))
-        // otherClaims = @ClaimSet(jsonObjectClaims = @JsonObjectClaim(name = "id", value = USER_ID))
-    )
+    @WithMockKeycloakAuth(authorities = ROLE_ADMIN)
     void updateOrganizationWillDelegate_WhenRequestingUserIsAdmin() throws Exception {
         mockMvc.perform(put("/api/organizations/{organizationId}", ORGANIZATION_1.getId())
-                .contentType(APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new UpdateOrganizationRequest(ORGANIZATION_1.getOrganizationName(), ORGANIZATION_1.getOrganizationAddress().getStreet(),
-                        ORGANIZATION_1.getOrganizationAddress().getCity(), ORGANIZATION_1.getOrganizationAddress().getState(), ORGANIZATION_1.getOrganizationAddress().getCountry(), ORGANIZATION_1.getOrganizationAddress().getPostalCode(), ORGANIZATION_1.getWebsiteUrl(),
-                        ORGANIZATION_1.getContactName(), ORGANIZATION_1.getPhoneNumber(), ORGANIZATION_1.getEmailAddress()))))
+                        .principal(() -> ADMIN_USER.getId().toString())
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new UpdateOrganizationRequest(ORGANIZATION_1.getOrganizationName(), ORGANIZATION_1.getOrganizationAddress().getStreet(),
+                                ORGANIZATION_1.getOrganizationAddress().getCity(), ORGANIZATION_1.getOrganizationAddress().getState(), ORGANIZATION_1.getOrganizationAddress().getCountry(), ORGANIZATION_1.getOrganizationAddress().getPostalCode(), ORGANIZATION_1.getWebsiteUrl(),
+                                ORGANIZATION_1.getContactName(), ORGANIZATION_1.getPhoneNumber(), ORGANIZATION_1.getEmailAddress()))))
                 .andExpect(status().isOk());
 
         verify(organizationsService).updateOrganization(ADMIN_USER.getId(), ORGANIZATION_1.getId(), ORGANIZATION_1.getOrganizationName(), ORGANIZATION_1.getOrganizationAddress().getStreet(),
@@ -163,11 +153,26 @@ class OrganizationsControllerTest {
     }
 
     @Test
-    @WithMockKeycloakAuth
+    void updateOrganization_WillFail_WhenOrganizationIdIsBlank() throws Exception {
+        mockMvc.perform(put("/api/organizations/{organizationId}", "")
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new UpdateOrganizationRequest(ORGANIZATION_1.getOrganizationName(), ORGANIZATION_1.getOrganizationAddress().getStreet(),
+                                ORGANIZATION_1.getOrganizationAddress().getCity(), ORGANIZATION_1.getOrganizationAddress().getState(), ORGANIZATION_1.getOrganizationAddress().getCountry(), ORGANIZATION_1.getOrganizationAddress().getPostalCode(), ORGANIZATION_1.getWebsiteUrl(),
+                                ORGANIZATION_1.getContactName(), ORGANIZATION_1.getPhoneNumber(), ORGANIZATION_1.getEmailAddress()))))
+                .andExpect(status().isNotFound());
+
+        verifyNoInteractions(organizationsService);
+    }
+
+    @Test
+    @WithMockKeycloakAuth(authorities = ROLE_ADMIN)
     void retrievingUserListForOrganization_WillRetrieveSub_WhenRequestingUserIsAdmin() throws Exception {
+        when(dtoConverter.convert(ORG_1_USER_1))
+                .thenReturn(getUserResponse());
         when(usersReadService.getUsersForOrganization(ORGANIZATION_1.getId())).thenReturn(singletonList(ORG_1_USER_1));
 
-        mockMvc.perform(get("/api/organizations/{organizationId}/users", ORGANIZATION_1.getId()))
+        mockMvc.perform(get("/api/organizations/{organizationId}/users", ORGANIZATION_1.getId())
+                        .principal(() -> ORG_1_USER_1.getId().toString()))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$.[0].id", is(ORG_1_USER_1.getId().toString())))
@@ -177,23 +182,89 @@ class OrganizationsControllerTest {
     }
 
     @Test
-    @Disabled
-    @WithMockKeycloakAuth
-    void creatingOrganizationUserWillDelegate_WhenRequestingUserIsAdmin() throws Exception {
-        mockMvc.perform(post("/api/organizations/{organizationId}/users", ORGANIZATION_ID)
-                .contentType(APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(NEW_USER_REQUEST)))
-                .andExpect(status().isCreated())
-                .andExpect(content().string(Matchers.any(String.class)));
+    void creatingOrganizationUser_WillFail_WhenEmailIsBlank() throws Exception {
+        mockMvc.perform(post("/api/organizations/{organizationId}/users", ORGANIZATION_2.getId())
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new NewUserRequest("", RAW_PASSWORD, ORG_1_USER_1.getDisplayName()))))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(usersService);
     }
 
     @Test
-    @Disabled
-    @WithMockKeycloakAuth
-    void creatingOrganizationUserWillThrow_WhenRequestingUserIsNotAdmin() throws Exception {
-        mockMvc.perform(post("/api/organizations/{organizationId}/users")
-                .contentType(APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(NEW_USER_REQUEST)))
-                .andExpect(status().isForbidden());
+    void creatingOrganizationUser_WillFail_WhenDisplayNameIsBlank() throws Exception {
+        mockMvc.perform(post("/api/organizations/{organizationId}/users", ORGANIZATION_2.getId())
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new NewUserRequest(ORG_1_USER_1.getUsername(), RAW_PASSWORD, ""))))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(usersService);
+    }
+
+    @Test
+    void creatingOrganizationUser_WillFail_WhenPasswordIsBlank() throws Exception {
+        mockMvc.perform(post("/api/organizations/{organizationId}/users", ORGANIZATION_2.getId())
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new NewUserRequest(ORG_1_USER_1.getUsername(), "", ORG_1_USER_1.getDisplayName()))))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(usersService);
+    }
+
+    @Test
+    @WithMockKeycloakAuth(authorities = ROLE_ADMIN)
+    void creatingOrganizationUserWillDelegate_WhenRequestingUserIsAdmin() throws Exception {
+        mockMvc.perform(post("/api/organizations/{organizationId}/users", ORGANIZATION_2.getId())
+                        .principal(() -> ORG_2_USER_2.getId().toString())
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(NEW_USER_REQUEST)))
+                .andExpect(status().isCreated())
+                .andExpect(content().string(Matchers.any(String.class)));
+
+        verify(usersService).createUser(ORG_2_USER_2.getId(), ORGANIZATION_2.getId(), NEW_USER_USERNAME, NEW_USER_DISPLAY_NAME, RAW_PASSWORD);
+    }
+
+    @Test
+    @WithMockKeycloakAuth(otherClaims = @ClaimSet(
+            stringClaims = {
+                    @StringClaim(name = "organizationId", value = "a29797ff-11eb-40e4-9024-30e8cca17096"),
+                    @StringClaim(name = "roles", value = ROLE_ORG_USER)
+            }
+    ))
+    void creatingOrganizationUserWillThrow_WhenRequestingUserIsNotAdmin() {
+        try {
+            mockMvc.perform(post("/api/organizations/{organizationId}/users", ORGANIZATION_2.getId())
+                            .principal(() -> ORG_2_USER_2.getId().toString())
+                            .contentType(APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(NEW_USER_REQUEST)))
+                    .andReturn();
+        } catch (Exception e) {
+            assert e.getCause() instanceof AccessDeniedException;
+        }
+    }
+
+    private static UserResponse getUserResponse() {
+        return new UserResponse(OrganizationsControllerTest.ORG_1_USER_1.getId(),
+                OrganizationsControllerTest.ORG_1_USER_1.getOrganizationId(),
+                OrganizationsControllerTest.ORG_1_USER_1.getUsername(),
+                OrganizationsControllerTest.ORG_1_USER_1.getDisplayName(),
+                OrganizationsControllerTest.ORG_1_USER_1.getEmail(),
+                OrganizationsControllerTest.ORG_1_USER_1.isDisabled(),
+                OrganizationsControllerTest.ORG_1_USER_1.getRoles());
+    }
+
+    private static OrganizationResponse getOrganizationResponse() {
+        return new OrganizationResponse(OrganizationsControllerTest.ORGANIZATION_1.getId(),
+                OrganizationsControllerTest.ORGANIZATION_1.getOrganizationName(),
+                OrganizationsControllerTest.ORGANIZATION_1.getOrganizationAddress().getStreet(),
+                OrganizationsControllerTest.ORGANIZATION_1.getOrganizationAddress().getCity(),
+                OrganizationsControllerTest.ORGANIZATION_1.getOrganizationAddress().getState(),
+                OrganizationsControllerTest.ORGANIZATION_1.getOrganizationAddress().getCountry(),
+                OrganizationsControllerTest.ORGANIZATION_1.getOrganizationAddress().getPostalCode(),
+                OrganizationsControllerTest.ORGANIZATION_1.getWebsiteUrl(),
+                OrganizationsControllerTest.ORGANIZATION_1.getContactName(),
+                OrganizationsControllerTest.ORGANIZATION_1.getPhoneNumber(),
+                OrganizationsControllerTest.ORGANIZATION_1.getEmailAddress(),
+                OrganizationsControllerTest.ORGANIZATION_1.isDisabled());
     }
 }

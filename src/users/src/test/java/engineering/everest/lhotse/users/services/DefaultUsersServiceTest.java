@@ -1,11 +1,13 @@
 package engineering.everest.lhotse.users.services;
 
 import engineering.everest.axon.HazelcastCommandGateway;
-import engineering.everest.lhotse.axon.common.RandomFieldsGenerator;
+import engineering.everest.lhotse.axon.common.services.KeycloakSynchronizationService;
 import engineering.everest.lhotse.users.domain.commands.CreateUserCommand;
 import engineering.everest.lhotse.users.domain.commands.DeleteAndForgetUserCommand;
 import engineering.everest.lhotse.users.domain.commands.RegisterUploadedUserProfilePhotoCommand;
 import engineering.everest.lhotse.users.domain.commands.UpdateUserDetailsCommand;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,7 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.UUID;
+import java.util.*;
 
 import static engineering.everest.lhotse.axon.common.domain.User.ADMIN_ID;
 import static java.util.UUID.randomUUID;
@@ -30,17 +32,17 @@ class DefaultUsersServiceTest {
     private static final String NEW_USER_DISPLAY_NAME = "new-user-display-name";
 
     @Mock
-    private RandomFieldsGenerator randomFieldsGenerator;
-    @Mock
     private HazelcastCommandGateway commandGateway;
     @Mock
     private PasswordEncoder passwordEncoder;
+    @Mock
+    private KeycloakSynchronizationService keycloakSynchronizationService;
 
     private DefaultUsersService defaultUsersService;
 
     @BeforeEach
     void setUp() {
-        defaultUsersService = new DefaultUsersService(commandGateway, randomFieldsGenerator, passwordEncoder);
+        defaultUsersService = new DefaultUsersService(commandGateway, passwordEncoder, keycloakSynchronizationService);
     }
 
     @Test
@@ -57,7 +59,8 @@ class DefaultUsersServiceTest {
     @Test
     void createNewUser_WillSendCommandAndWaitForCompletion() {
         when(passwordEncoder.encode("raw-password")).thenReturn("encoded-password");
-        when(randomFieldsGenerator.genRandomUUID()).thenReturn(USER_ID);
+        when(keycloakSynchronizationService.getUsers(Map.of("username", NEW_USER_EMAIL)))
+                .thenReturn(new JSONArray().put(0, new JSONObject().put("id", USER_ID)).toString());
 
         defaultUsersService.createUser(ADMIN_ID, ORGANIZATION_ID, NEW_USER_EMAIL, NEW_USER_DISPLAY_NAME, "raw-password");
 

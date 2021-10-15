@@ -1,5 +1,5 @@
 <#import "template.ftl" as layout>
-<@layout.registrationLayout displayMessage=!messagesPerField.existsError('email','username','user.attributes.displayname','password','password-confirm'); section>
+<@layout.registrationLayout displayMessage=!messagesPerField.existsError('email','username','user.attributes.displayName','password','password-confirm'); section>
     <#if section = "header">
         ${msg("registerTitle")}
     <#elseif section = "form">
@@ -44,17 +44,17 @@
 
             <div class="${properties.kcFormGroupClass!}">
                 <div class="${properties.kcLabelWrapperClass!}">
-                    <label for="user.attributes.displayname" class="${properties.kcLabelClass!}">Display name</label>
+                    <label for="user.attributes.displayName" class="${properties.kcLabelClass!}">Display name</label>
                 </div>
                 <div class="${properties.kcInputWrapperClass!}">
-                    <input type="text" id="user.attributes.displayname" class="${properties.kcInputClass!}" name="user.attributes.displayname"
-                            value="${(register.formData['user.attributes.displayname']!'')}" autocomplete="user.attributes.displayname"
-                            aria-invalid="<#if messagesPerField.existsError('user.attributes.displayname')>true</#if>"
+                    <input type="text" id="user.attributes.displayName" class="${properties.kcInputClass!}" name="user.attributes.displayName"
+                            value="${(register.formData['user.attributes.displayName']!'')}" autocomplete="user.attributes.displayName"
+                            aria-invalid="<#if messagesPerField.existsError('user.attributes.displayName')>true</#if>"
                     />
 
-                    <#if messagesPerField.existsError('user.attributes.displayname')>
-                        <span id="input-error-displayname" class="${properties.kcInputErrorMessageClass!}" aria-live="polite">
-                            ${kcSanitize(messagesPerField.get('user.attributes.displayname'))?no_esc}
+                    <#if messagesPerField.existsError('user.attributes.displayName')>
+                        <span id="input-error-displayName" class="${properties.kcInputErrorMessageClass!}" aria-live="polite">
+                            ${kcSanitize(messagesPerField.get('user.attributes.displayName'))?no_esc}
                         </span>
                     </#if>
                 </div>

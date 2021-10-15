@@ -9,10 +9,12 @@ dependencies {
     implementation project(':i18n-support')
     implementation project(':organizations-api')
     implementation project(':users-api')
+    implementation project(':keycloak-support')
 
     implementation "engineering.everest.axon:command-distribution-extension:${axonHazelcastCommandDistributionVersion}"
     implementation "engineering.everest.starterkit:media:${mediaVersion}"
     implementation "engineering.everest.starterkit:storage:${storageVersion}"
+    implementation 'org.keycloak:keycloak-spring-boot-starter'
     implementation "io.springfox:springfox-boot-starter:${swaggerVersion}"
     implementation "org.axonframework:axon-modelling:${axonVersion}"
     implementation 'org.springframework.boot:spring-boot-starter-security'
@@ -26,7 +28,6 @@ dependencies {
     testImplementation "org.springframework.security:spring-security-test"
     testImplementation "org.apache.commons:commons-lang3:${commonsLangVersion}"
     testImplementation "com.c4-soft.springaddons:spring-security-oauth2-test-webmvc-addons:2.6.6"
-
 }  
 
 dependencyManagement {

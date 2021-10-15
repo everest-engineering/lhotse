@@ -2,6 +2,7 @@ package engineering.everest.lhotse.users.eventhandlers;
 
 import engineering.everest.axon.cryptoshredding.CryptoShreddingKeyService;
 import engineering.everest.axon.cryptoshredding.TypeDifferentiatedSecretKeyId;
+import engineering.everest.lhotse.axon.common.services.KeycloakSynchronizationService;
 import engineering.everest.lhotse.organizations.domain.events.UserPromotedToOrganizationAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserCreatedByAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserCreatedForNewlyRegisteredOrganizationEvent;
@@ -47,10 +48,12 @@ class UsersEventHandlerTest {
     private UsersRepository usersRepository;
     @Mock
     private CryptoShreddingKeyService cryptoShreddingKeyService;
+    @Mock
+    private KeycloakSynchronizationService keycloakSynchronizationService;
 
     @BeforeEach
     void setUp() {
-        usersEventHandler = new UsersEventHandler(usersRepository, cryptoShreddingKeyService);
+        usersEventHandler = new UsersEventHandler(usersRepository, cryptoShreddingKeyService, keycloakSynchronizationService);
     }
 
     @Test
@@ -70,7 +73,7 @@ class UsersEventHandlerTest {
 
     @Test
     void onUserCreatedForNewlyRegisteredOrganizationEvent_WillDelegate() {
-        usersEventHandler.on(new UserCreatedForNewlyRegisteredOrganizationEvent(USER_ID, ORGANIZATION_ID, USER_DISPLAY_NAME,
+        usersEventHandler.on(new UserCreatedForNewlyRegisteredOrganizationEvent(ORGANIZATION_ID, USER_ID, USER_DISPLAY_NAME,
                 USER_USERNAME, ENCODED_PASSWORD), CREATION_TIME);
 
         verify(usersRepository).createUser(USER_ID, ORGANIZATION_ID, USER_DISPLAY_NAME, USER_USERNAME, ENCODED_PASSWORD, CREATION_TIME);

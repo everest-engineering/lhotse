@@ -3,10 +3,10 @@ package engineering.everest.lhotse.organizations.services;
 
 import engineering.everest.axon.HazelcastCommandGateway;
 import engineering.everest.lhotse.axon.common.RandomFieldsGenerator;
-import engineering.everest.lhotse.organizations.domain.commands.CreateRegisteredOrganizationCommand;
+import engineering.everest.lhotse.organizations.domain.commands.CreateAdminRegisteredOrganizationCommand;
+import engineering.everest.lhotse.organizations.domain.commands.UpdateOrganizationCommand;
 import engineering.everest.lhotse.organizations.domain.commands.DisableOrganizationCommand;
 import engineering.everest.lhotse.organizations.domain.commands.EnableOrganizationCommand;
-import engineering.everest.lhotse.organizations.domain.commands.UpdateOrganizationCommand;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -31,11 +31,11 @@ public class DefaultOrganizationsService implements OrganizationsService {
     }
 
     @Override
-    public UUID createRegisteredOrganization(UUID requestingUserId, String organizationName, String street, String city, String state,
+    public UUID createOrganization(UUID requestingUserId, String organizationName, String street, String city, String state,
                                              String country, String postalCode, String websiteUrl, String contactName, String phoneNumber,
                                              String emailAddress) {
         UUID organizationId = randomFieldsGenerator.genRandomUUID();
-        return commandGateway.sendAndWait(new CreateRegisteredOrganizationCommand(organizationId,
+        return commandGateway.sendAndWait(new CreateAdminRegisteredOrganizationCommand(organizationId,
                 requestingUserId, organizationName, street, city, state, country, postalCode, websiteUrl, contactName,
                 phoneNumber, emailAddress));
     }

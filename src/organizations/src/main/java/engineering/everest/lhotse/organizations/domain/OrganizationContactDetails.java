@@ -2,7 +2,7 @@ package engineering.everest.lhotse.organizations.domain;
 
 import engineering.everest.lhotse.organizations.domain.events.OrganizationAddressUpdatedEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationContactDetailsUpdatedEvent;
-import engineering.everest.lhotse.organizations.domain.events.OrganizationRegisteredEvent;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationCreatedForNewSelfRegisteredUserEvent;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -30,7 +30,7 @@ class OrganizationContactDetails implements Serializable {
     private String postalCode;
 
     @EventSourcingHandler
-    void on(OrganizationRegisteredEvent event) {
+    void on(OrganizationCreatedForNewSelfRegisteredUserEvent event) {
         contactName = event.getContactName();
         contactEmail = event.getContactEmail();
         contactPhoneNumber = event.getContactPhoneNumber();

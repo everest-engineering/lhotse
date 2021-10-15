@@ -1,6 +1,6 @@
 package engineering.everest.lhotse.functionaltests.helpers;
 
-import engineering.everest.lhotse.organizations.domain.events.OrganizationRegisteredEvent;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationCreatedForNewSelfRegisteredUserEvent;
 import lombok.Getter;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventhandling.ReplayStatus;
@@ -15,7 +15,7 @@ public class TestEventHandler {
     private final AtomicInteger counter = new AtomicInteger(0);
 
     @EventHandler
-    void on(OrganizationRegisteredEvent event, ReplayStatus replayStatus) {
+    void on(OrganizationCreatedForNewSelfRegisteredUserEvent event, ReplayStatus replayStatus) {
         if (!replayStatus.isReplay()) {
             counter.incrementAndGet();
         }

@@ -33,24 +33,21 @@ class ReplayFunctionalTests {
     private WebTestClient webTestClient;
     @Autowired
     private TestEventHandler testEventHandler;
-
+    @Autowired
     private ApiRestTestClient apiRestTestClient;
 
     @BeforeEach
     void setUp() {
-        apiRestTestClient = new ApiRestTestClient(webTestClient);
         apiRestTestClient.createAdminUserAndLogin();
     }
 
     @Test
-    @Disabled
     void canGetReplayStatus() {
         Map<String, Object> replayStatus = apiRestTestClient.getReplayStatus(OK);
         assertSame(FALSE, replayStatus.get("isReplaying"));
     }
 
     @Test
-    @Disabled
     void canTriggerReplayEvents() {
         apiRestTestClient.triggerReplay(NO_CONTENT);
         // This is necessary, otherwise the canGetReplayStatus() may sometimes fail if it runs later
@@ -62,7 +59,7 @@ class ReplayFunctionalTests {
     @Disabled("To be revisited. This test always passes locally yet fails on the new build node")
     void replayStatusWillBeSetCorrectlyForReplay() {
         // First event and replay marker event
-        UUID org1 = apiRestTestClient.createRegisteredOrganization(
+        UUID org1 = apiRestTestClient.createOrganization(
                 new NewOrganizationRequest("test org", null, null, null, null, null, null, null, null, "admin@example.com"),
                 CREATED);
         apiRestTestClient.createUser(org1, new NewUserRequest("alice@umbrella.com", "password", "Alice"), CREATED);
@@ -71,7 +68,7 @@ class ReplayFunctionalTests {
         assertEquals(1, testEventHandler.getCounter().get());
 
         // Second event and replay again
-        UUID org2 = apiRestTestClient.createRegisteredOrganization(
+        UUID org2 = apiRestTestClient.createOrganization(
                 new NewOrganizationRequest("test org", null, null, null, null, null, null, null, null, "admin2@example.com"),
                 CREATED);
         apiRestTestClient.createUser(org2, new NewUserRequest("bob@umbrella.com", "password", "Bob"), CREATED);

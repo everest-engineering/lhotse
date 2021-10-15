@@ -2,10 +2,7 @@ package engineering.everest.lhotse.organizations.services;
 
 import engineering.everest.axon.HazelcastCommandGateway;
 import engineering.everest.lhotse.axon.common.RandomFieldsGenerator;
-import engineering.everest.lhotse.organizations.domain.commands.CreateRegisteredOrganizationCommand;
-import engineering.everest.lhotse.organizations.domain.commands.DisableOrganizationCommand;
-import engineering.everest.lhotse.organizations.domain.commands.EnableOrganizationCommand;
-import engineering.everest.lhotse.organizations.domain.commands.UpdateOrganizationCommand;
+import engineering.everest.lhotse.organizations.domain.commands.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,14 +45,14 @@ class DefaultOrganizationsServiceTest {
     }
 
     @Test
-    void createRegisteredOrganisation_WillSendCommandAndWaitForCompletion() {
-        var expectedCommand = new CreateRegisteredOrganizationCommand(ORGANIZATION_ID, ADMIN_ID,
+    void createOrganisation_WillSendCommandAndWaitForCompletion() {
+        var expectedCommand = new CreateAdminRegisteredOrganizationCommand(ORGANIZATION_ID, ADMIN_ID,
                 ORGANIZATION_NAME, ORGANIZATION_STREET_1, ORGANIZATION_CITY_1, ORGANIZATION_STATE_1, ORGANIZATION_COUNTRY_1, ORGANIZATION_POSTAL_CODE_1, ORGANIZATION_WEBSITE_URL_1, ORGANIZATION_CONTACT_NAME_1, ORGANIZATION_PHONE_NUMBER_1, ORG_ADMIN_EMAIL_ADDRESS_1);
 
         when(randomFieldsGenerator.genRandomUUID()).thenReturn(ORGANIZATION_ID);
         when(commandGateway.sendAndWait(expectedCommand)).thenReturn(ORGANIZATION_ID);
 
-        var newOrgId = defaultOrganizationService.createRegisteredOrganization(ADMIN_ID, ORGANIZATION_NAME, ORGANIZATION_STREET_1, ORGANIZATION_CITY_1, ORGANIZATION_STATE_1,
+        var newOrgId = defaultOrganizationService.createOrganization(ADMIN_ID, ORGANIZATION_NAME, ORGANIZATION_STREET_1, ORGANIZATION_CITY_1, ORGANIZATION_STATE_1,
                 ORGANIZATION_COUNTRY_1, ORGANIZATION_POSTAL_CODE_1, ORGANIZATION_WEBSITE_URL_1, ORGANIZATION_CONTACT_NAME_1, ORGANIZATION_PHONE_NUMBER_1, ORG_ADMIN_EMAIL_ADDRESS_1);
 
         assertEquals(ORGANIZATION_ID, newOrgId);

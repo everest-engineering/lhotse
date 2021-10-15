@@ -2,13 +2,11 @@ package engineering.everest.lhotse.registrations.domain;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import engineering.everest.axon.cryptoshredding.annotations.EncryptedField;
-import engineering.everest.axon.cryptoshredding.annotations.EncryptionKeyIdentifier;
 import engineering.everest.lhotse.axon.common.RetryWithExponentialBackoff;
 import engineering.everest.lhotse.axon.common.domain.Role;
 import engineering.everest.lhotse.axon.common.domain.UserAttribute;
 import engineering.everest.lhotse.axon.common.services.KeycloakSynchronizationService;
-import engineering.everest.lhotse.organizations.domain.events.OrganizationRegisteredEvent;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationCreatedForNewSelfRegisteredUserEvent;
 import engineering.everest.lhotse.organizations.domain.events.UserPromotedToOrganizationAdminEvent;
 import engineering.everest.lhotse.organizations.services.OrganizationsReadService;
 import engineering.everest.lhotse.users.domain.commands.CreateUserForNewlyRegisteredOrganizationCommand;
@@ -26,7 +24,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.time.Duration;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.Callable;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -45,18 +42,8 @@ public class OrganizationRegistrationSaga {
     @JsonIgnore
     private transient OrganizationsReadService organizationsReadService;
 
-    private UUID organizationId;
-    @EncryptionKeyIdentifier
-    private UUID registeringUserId;
-    @EncryptedField
-    private String registeringUserEmail;
-    @EncryptedField
-    private String registeringUserDisplayName;
-
     @Autowired
     private KeycloakSynchronizationService keycloakSynchronizationService;
-
-    // Not implemented: deadline management for handling confirmation timeouts
 
     @Autowired
     @Qualifier("hazelcastCommandGateway")
@@ -76,15 +63,14 @@ public class OrganizationRegistrationSaga {
 
     @StartSaga
     @SagaEventHandler(associationProperty = ORGANIZATION_PROPERTY)
-    public void on(OrganizationRegisteredEvent event) {
-        organizationId = event.getOrganizationId();
-        registeringUserId = event.getRegisteringUserId();
-        registeringUserDisplayName = event.getContactName();
-        registeringUserEmail = event.getContactEmail();
-
+    public void on(OrganizationCreatedForNewSelfRegisteredUserEvent event) {
+        var organizationId = event.getOrganizationId();
+        var registeringUserId = event.getRegisteringUserId();
+        var registeringUserDisplayName = event.getContactName();
+        var registeringUserEmail = event.getContactEmail();
         var registeringUserEncodedPassword = "encoded-password";
 
-        commandGateway.send(new CreateUserForNewlyRegisteredOrganizationCommand(registeringUserId, organizationId,
+        commandGateway.send(new CreateUserForNewlyRegisteredOrganizationCommand(organizationId, registeringUserId,
                 registeringUserEmail, registeringUserEncodedPassword, registeringUserDisplayName));
     }
 
@@ -95,18 +81,19 @@ public class OrganizationRegistrationSaga {
                         && organizationsReadService.exists(event.getOrganizationId()),
                 "user and organization self registration projection update");
 
-        commandGateway.send(new PromoteUserToOrganizationAdminCommand(organizationId, registeringUserId));
+        commandGateway.send(new PromoteUserToOrganizationAdminCommand(event.getOrganizationId(), event.getUserId()));
     }
 
     @EndSaga
     @SagaEventHandler(associationProperty = ORGANIZATION_PROPERTY)
     public void on(UserPromotedToOrganizationAdminEvent event) throws Exception {
         waitForTheProjectionUpdate(
-                () -> usersReadService.getById(registeringUserId).getRoles().contains(Role.ORG_ADMIN),
+                () -> usersReadService.getById(event.getPromotedUserId()).getRoles().contains(Role.ORG_ADMIN),
                 "user roles projection update");
 
-        keycloakSynchronizationService.updateUserAttributes(registeringUserId, Map.ofEntries(entry("attributes",
-                new UserAttribute(organizationId, usersReadService.getById(registeringUserId).getRoles()))));
+        keycloakSynchronizationService.updateUserAttributes(event.getPromotedUserId(), Map.ofEntries(entry("attributes",
+                new UserAttribute(event.getOrganizationId(), usersReadService.getById(event.getPromotedUserId()).getRoles(),
+                        usersReadService.getById(event.getPromotedUserId()).getDisplayName()))));
     }
 
     // Failure here will result in the saga not completing.

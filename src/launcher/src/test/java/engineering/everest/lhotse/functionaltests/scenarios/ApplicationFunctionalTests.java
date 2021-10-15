@@ -11,19 +11,19 @@ import engineering.everest.lhotse.users.persistence.UsersRepository;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.junit.jupiter.api.Disabled;
+
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
@@ -38,19 +38,12 @@ class ApplicationFunctionalTests {
     private ApplicationContext applicationContext;
     @Autowired
     private UsersRepository usersRepository;
-    @Value("${application.setup.admin.username}")
-    private String adminUserName;
     @Autowired
     private WebTestClient webTestClient;
     @Autowired
     private HazelcastInstance hazelcastInstance;
-
+    @Autowired
     private ApiRestTestClient apiRestTestClient;
-
-    @BeforeEach
-    void setUp() {
-        apiRestTestClient = new ApiRestTestClient(webTestClient);
-    }
 
     @Test
     void commandValidatingMessageHandlerInterceptorWillBeRegistered() {
@@ -58,7 +51,6 @@ class ApplicationFunctionalTests {
     }
 
     @Test
-    @Disabled
     void metricsEndpointPublishesAxonMetrics() {
         apiRestTestClient.createAdminUserAndLogin();
 
@@ -69,28 +61,29 @@ class ApplicationFunctionalTests {
     }
 
     @Test
-    @Disabled
+    @Disabled("To be revisited. DB query is returning empty results.")
     void organizationsAndUsersCanBeCreated() {
         apiRestTestClient.createAdminUserAndLogin();
         var newOrganizationRequest = new NewOrganizationRequest("ACME", "123 King St", "Melbourne",
                 "Vic", "Oz", "3000", null, null, null, "admin@example.com");
         var newUserRequest = new NewUserRequest("user@example.com", "password", "Captain Fancypants");
 
-        var organizationId = apiRestTestClient.createRegisteredOrganization(newOrganizationRequest, CREATED);
+        var organizationId = apiRestTestClient.createOrganization(newOrganizationRequest, CREATED);
         var userId = apiRestTestClient.createUser(organizationId, newUserRequest, CREATED);
         apiRestTestClient.getUser(userId, OK);
     }
 
     @Test
-    @Disabled
+    @Disabled("To be revisited. " +
+            "Organization can be registered but login throws {\"error\":\"invalid_grant\",\"error_description\":\"Account is not fully set up\"}. " +
+            "Because a user is expected to update his password at initial login.")
     void newUsersCanRegisterTheirOrganizationAndCreateNewUsersInTheirOrganization() throws InterruptedException {
         apiRestTestClient.logout();
         var registerOrganizationRequest = new RegisterOrganizationRequest("Alice's Art Artefactory", "123 Any Street", "Melbourne", "Victoria", "Australia", "3000", "http://alicesartartefactory.com", "Alice", "+61 422 123 456", "alice@example.com", "alicerocks");
         var organizationRegistrationResponse = apiRestTestClient.registerNewOrganization(registerOrganizationRequest, CREATED);
         var newOrganizationId = organizationRegistrationResponse.getNewOrganizationId();
         Thread.sleep(2000); // Default is now tracking event processor
-        // Confirmation code is "emailed", but we can cheat and pull it from the DB.
-        
+
         apiRestTestClient.login("alice@example.com", "alicerocks");
         var newUserRequest = new NewUserRequest("bob@example.com", "bobalsorocks", "My name is Bob");
         apiRestTestClient.createUser(newOrganizationId, newUserRequest, CREATED);
@@ -106,14 +99,13 @@ class ApplicationFunctionalTests {
     }
 
     @Test
-    @Disabled
     void jsr303errorMessagesAreInternationalized() {
         apiRestTestClient.createAdminUserAndLogin();
 
         var newOrganizationRequest = new NewOrganizationRequest("ACME", "123 King St", "Melbourne",
                 "Vic", "Oz", "3000", null, null, null, "admin@example.com");
         var newUserRequest = new NewUserRequest("a-user", "password", "");
-        var organizationId = apiRestTestClient.createRegisteredOrganization(newOrganizationRequest, CREATED);
+        var organizationId = apiRestTestClient.createOrganization(newOrganizationRequest, CREATED);
 
         var response = webTestClient.post().uri("/api/organizations/{organizationId}/users", organizationId)
                 .header("Authorization", "Bearer " + apiRestTestClient.getAccessToken())
@@ -124,18 +116,18 @@ class ApplicationFunctionalTests {
                 .returnResult(ErrorResponse.class)
                 .getResponseBody()
                 .blockFirst();
+        assertNotNull(response);
         assertEquals("displayName: darf nicht leer sein", response.getMessage());
     }
 
     @Test
-    @Disabled
     void domainValidationErrorMessagesAreInternationalized() {
         apiRestTestClient.createAdminUserAndLogin();
 
         var newOrganizationRequest = new NewOrganizationRequest("ACME", "123 King St", "Melbourne",
                 "Vic", "Oz", "3000", null, null, null, "admin@example.com");
         var newUserRequest = new NewUserRequest("user123@example.com", "password", "Captain Fancypants");
-        var organizationId = apiRestTestClient.createRegisteredOrganization(newOrganizationRequest, CREATED);
+        var organizationId = apiRestTestClient.createOrganization(newOrganizationRequest, CREATED);
         apiRestTestClient.createUser(organizationId, newUserRequest, CREATED);
 
         var response = webTestClient.post().uri("/api/organizations/{organizationId}/users", organizationId)
@@ -147,6 +139,7 @@ class ApplicationFunctionalTests {
                 .returnResult(ErrorResponse.class)
                 .getResponseBody()
                 .blockFirst();
+        assertNotNull(response);
         assertEquals("Diese E-Mail Adresse ist bereits vergeben", response.getMessage());
     }
 }

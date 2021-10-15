@@ -13,8 +13,7 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateRegisteredOrganizationCommand implements ValidatableCommand {
-
+public class CreateAdminRegisteredOrganizationCommand implements ValidatableCommand {
     @TargetAggregateIdentifier
     private UUID organizationId;
     @NotNull

@@ -8,6 +8,8 @@ import engineering.everest.lhotse.organizations.services.OrganizationsReadServic
 import engineering.everest.lhotse.organizations.services.OrganizationsService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import springfox.documentation.annotations.ApiIgnore;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,9 +41,8 @@ public class AdminOrganizationsController {
     private final OrganizationsReadService organizationsReadService;
 
     @Autowired
-    public AdminOrganizationsController(DtoConverter dtoConverter,
-                                        OrganizationsService organizationsService,
-                                        OrganizationsReadService organizationsReadService) {
+    public AdminOrganizationsController(DtoConverter dtoConverter, OrganizationsService organizationsService,
+            OrganizationsReadService organizationsReadService) {
         this.dtoConverter = dtoConverter;
         this.organizationsService = organizationsService;
         this.organizationsReadService = organizationsReadService;
@@ -52,26 +53,25 @@ public class AdminOrganizationsController {
     @ApiOperation("Retrieves details of all organizations")
     @AdminOnly
     public List<OrganizationResponse> getAllOrganizations() {
-        return organizationsReadService.getOrganizations().stream()
-                .map(dtoConverter::convert)
-                .collect(toList());
+        return organizationsReadService.getOrganizations().stream().map(dtoConverter::convert).collect(toList());
     }
 
     @PostMapping
     @ResponseStatus(CREATED)
     @ApiOperation("Register a new organization")
     @AdminOnly
-    public UUID newOrganization(Principal principal, @RequestBody @Valid NewOrganizationRequest request) {
-        return organizationsService.createRegisteredOrganization(UUID.fromString(principal.getName()), request.getOrganizationName(),
-                request.getStreet(), request.getCity(), request.getState(), request.getCountry(), request.getPostalCode(),
-                request.getWebsiteUrl(), request.getContactName(), request.getContactPhoneNumber(), request.getContactEmail());
+    public UUID newOrganization(@ApiIgnore Principal principal, @RequestBody @Valid NewOrganizationRequest request) {
+        return organizationsService.createOrganization(UUID.fromString(principal.getName()),
+                request.getOrganizationName(), request.getStreet(), request.getCity(), request.getState(),
+                request.getCountry(), request.getPostalCode(), request.getWebsiteUrl(), request.getContactName(),
+                request.getContactPhoneNumber(), request.getContactEmail());
     }
 
     @DeleteMapping("/{organizationId}")
     @ResponseStatus(OK)
     @ApiOperation("Disable an organization")
     @AdminOnly
-    public void disableOrganization(Principal principal, @PathVariable UUID organizationId) {
+    public void disableOrganization(@ApiIgnore Principal principal, @PathVariable UUID organizationId) {
         organizationsService.disableOrganization(UUID.fromString(principal.getName()), organizationId);
     }
 
@@ -79,7 +79,7 @@ public class AdminOrganizationsController {
     @ResponseStatus(OK)
     @ApiOperation("Enable an organization")
     @AdminOnly
-    public void enableOrganization(Principal principal, @PathVariable UUID organizationId) {
+    public void enableOrganization(@ApiIgnore Principal principal, @PathVariable UUID organizationId) {
         organizationsService.enableOrganization(UUID.fromString(principal.getName()), organizationId);
     }
 }

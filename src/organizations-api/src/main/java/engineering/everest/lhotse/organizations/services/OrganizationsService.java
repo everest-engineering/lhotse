@@ -9,7 +9,7 @@ public interface OrganizationsService {
                             String city, String state, String country, String postalCode, String websiteUrl,
                             String contactName, String phoneNumber, String emailAddress);
 
-    UUID createRegisteredOrganization(UUID requestingUserId, String organizationName, String street,
+    UUID createOrganization(UUID requestingUserId, String organizationName, String street,
                                       String city, String state, String country, String postalCode, String websiteUrl,
                                       String contactName, String phoneNumber, String emailAddress);
 

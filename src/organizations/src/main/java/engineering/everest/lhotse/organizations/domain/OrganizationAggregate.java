@@ -1,17 +1,19 @@
 package engineering.everest.lhotse.organizations.domain;
 
 import engineering.everest.lhotse.i18n.TranslatableExceptionFactory;
-import engineering.everest.lhotse.organizations.domain.commands.CreateRegisteredOrganizationCommand;
+import engineering.everest.lhotse.organizations.domain.commands.CreateAdminRegisteredOrganizationCommand;
+import engineering.everest.lhotse.organizations.domain.commands.CreateSelfRegisteredOrganizationCommand;
 import engineering.everest.lhotse.organizations.domain.commands.DisableOrganizationCommand;
 import engineering.everest.lhotse.organizations.domain.commands.EnableOrganizationCommand;
 import engineering.everest.lhotse.organizations.domain.commands.UpdateOrganizationCommand;
-import engineering.everest.lhotse.organizations.domain.events.OrganizationAddressUpdatedEvent;
-import engineering.everest.lhotse.organizations.domain.events.OrganizationContactDetailsUpdatedEvent;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationCreatedByAdminEvent;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationCreatedForNewSelfRegisteredUserEvent;
+import engineering.everest.lhotse.organizations.domain.events.UserPromotedToOrganizationAdminEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationDisabledByAdminEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationEnabledByAdminEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationNameChangedEvent;
-import engineering.everest.lhotse.organizations.domain.events.OrganizationRegisteredEvent;
-import engineering.everest.lhotse.organizations.domain.events.UserPromotedToOrganizationAdminEvent;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationContactDetailsUpdatedEvent;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationAddressUpdatedEvent;
 import engineering.everest.lhotse.users.domain.commands.PromoteUserToOrganizationAdminCommand;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
@@ -37,7 +39,7 @@ public class OrganizationAggregate implements Serializable {
     private UUID id;
     private String organizationName;
     @AggregateMember
-    private OrganizationContactDetails organizationContactDetails = new OrganizationContactDetails();
+    private final OrganizationContactDetails organizationContactDetails = new OrganizationContactDetails();
     private boolean disabled;
     private Set<UUID> organizationAdminIds;
 
@@ -45,8 +47,16 @@ public class OrganizationAggregate implements Serializable {
     }
 
     @CommandHandler
-    public OrganizationAggregate(CreateRegisteredOrganizationCommand command) {
-        apply(new OrganizationRegisteredEvent(command.getOrganizationId(), command.getRequestingUserId(),
+    public OrganizationAggregate(CreateAdminRegisteredOrganizationCommand command) {
+        apply(new OrganizationCreatedByAdminEvent(command.getOrganizationId(), command.getRequestingUserId(),
+                command.getOrganizationName(), command.getWebsiteUrl(), command.getStreet(), command.getCity(),
+                command.getState(), command.getCountry(), command.getPostalCode(), command.getContactName(),
+                command.getPhoneNumber(), command.getEmailAddress()));
+    }
+
+    @CommandHandler
+    public OrganizationAggregate(CreateSelfRegisteredOrganizationCommand command) {
+        apply(new OrganizationCreatedForNewSelfRegisteredUserEvent(command.getOrganizationId(), command.getRequestingUserId(),
                 command.getOrganizationName(), command.getWebsiteUrl(), command.getStreet(), command.getCity(),
                 command.getState(), command.getCountry(), command.getPostalCode(), command.getContactName(),
                 command.getPhoneNumber(), command.getEmailAddress()));
@@ -77,7 +87,7 @@ public class OrganizationAggregate implements Serializable {
     }
 
     @CommandHandler
-    public void handle(UpdateOrganizationCommand command) throws Throwable {
+    public void handle(UpdateOrganizationCommand command) {
         validateOrganizationIsEnabled();
         validateAtLeastOneUpdateIsMade(command);
 
@@ -96,7 +106,15 @@ public class OrganizationAggregate implements Serializable {
     }
 
     @EventSourcingHandler
-    void on(OrganizationRegisteredEvent event) {
+    void on(OrganizationCreatedByAdminEvent event) {
+        id = event.getOrganizationId();
+        organizationName = event.getOrganizationName();
+        organizationAdminIds = new HashSet<>();
+        disabled = false;
+    }
+
+    @EventSourcingHandler
+    void on(OrganizationCreatedForNewSelfRegisteredUserEvent event) {
         id = event.getOrganizationId();
         organizationName = event.getOrganizationName();
         organizationAdminIds = new HashSet<>();
@@ -124,7 +142,7 @@ public class OrganizationAggregate implements Serializable {
         }
     }
 
-    private void validateAtLeastOneUpdateIsMade(UpdateOrganizationCommand command) throws Throwable {
+    private void validateAtLeastOneUpdateIsMade(UpdateOrganizationCommand command) {
         var isChangeMade = isNameUpdated(command) || areContactDetailsUpdated(command) || isAddressUpdated(command);
         if (!isChangeMade) {
             TranslatableExceptionFactory.throwForKey(ORGANIZATION_UPDATE_NO_FIELDS_CHANGED);

@@ -5,13 +5,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.axonframework.serialization.Revision;
 
+import java.io.Serializable;
 import java.util.UUID;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Revision("0")
-public class OrganizationRegisteredEvent {
+public class OrganizationCreatedByAdminEvent implements Serializable {
     private UUID organizationId;
     private UUID registeringUserId;
     private String organizationName;

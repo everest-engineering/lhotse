@@ -1,30 +1,36 @@
 package engineering.everest.lhotse.api.rest.controllers;
 
 import engineering.everest.lhotse.api.rest.annotations.AdminOnly;
+import engineering.everest.lhotse.api.rest.annotations.AdminOrOrgAdmin;
+import engineering.everest.lhotse.api.rest.annotations.AdminOrOrgAdminOrOrgUser;
 import engineering.everest.lhotse.api.rest.converters.DtoConverter;
 import engineering.everest.lhotse.api.rest.requests.DeleteAndForgetUserRequest;
 import engineering.everest.lhotse.api.rest.requests.UpdateUserRequest;
 import engineering.everest.lhotse.api.rest.responses.UserResponse;
+import engineering.everest.lhotse.axon.common.domain.Role;
 import engineering.everest.lhotse.users.services.UsersReadService;
 import engineering.everest.lhotse.users.services.UsersService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PostAuthorize;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import springfox.documentation.annotations.ApiIgnore;
+
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import static java.util.stream.Collectors.toList;
+import static org.springframework.http.HttpStatus.OK;
 
 import java.security.Principal;
 
@@ -54,24 +60,33 @@ public class UsersController {
     @PostMapping("/{userId}/forget")
     @ApiOperation("Handle a GDPR request to delete an account and scrub personal information")
     @AdminOnly
-    public void deleteUser(Principal principal, @PathVariable UUID userId,
+    public void deleteUser(@ApiIgnore Principal principal, @PathVariable UUID userId,
             @RequestBody @Valid DeleteAndForgetUserRequest request) {
         usersService.deleteAndForget(UUID.fromString(principal.getName()), userId, request.getRequestReason());
     }
 
     @GetMapping("/{userId}")
     @ApiOperation("Retrieves user details")
-    @PostAuthorize("hasRole('ADMIN') or belongsToOrg(returnObject.organizationId)")
-    public UserResponse getUser(Principal principal, @PathVariable UUID userId) {
+    @AdminOrOrgAdminOrOrgUser
+    public UserResponse getUser(@ApiIgnore Principal principal, @PathVariable UUID userId) {
         return dtoConverter.convert(usersReadService.getById(userId));
     }
 
     @PutMapping("/{userId}")
     @ApiOperation("Update an organization user's details")
-    @PreAuthorize("#requestingUser.id == #userId or hasPermission(#userId, 'User', 'update')")
-    public void updateUser(Principal principal, @PathVariable UUID userId,
+    @AdminOrOrgAdminOrOrgUser
+    public void updateUser(@ApiIgnore Principal principal, @PathVariable UUID userId,
             @RequestBody @Valid UpdateUserRequest request) {
-        usersService.updateUser(UUID.fromString(principal.getName()), userId, request.getEmail(), request.getDisplayName(),
-                request.getPassword());
+        usersService.updateUser(UUID.fromString(principal.getName()), userId, request.getEmail(),
+                request.getDisplayName(), request.getPassword());
+    }
+
+    @PutMapping("/{userId}/roles")
+    @ResponseStatus(OK)
+    @ApiOperation("Update user roles")
+    @AdminOrOrgAdmin
+    public void updateUserRoles(@ApiIgnore Principal principal, @PathVariable UUID userId,
+                                @RequestBody Set<Role> roles) {
+        usersService.updateUserRoles(UUID.fromString(principal.getName()), userId, roles);
     }
 }
