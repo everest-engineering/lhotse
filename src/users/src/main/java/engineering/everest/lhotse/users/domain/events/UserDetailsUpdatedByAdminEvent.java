@@ -21,6 +21,5 @@ public class UserDetailsUpdatedByAdminEvent {
     private String displayNameChange;
     @EncryptedField
     private String emailChange;
-    private String encodedPasswordChange;
     private UUID adminId;
 }

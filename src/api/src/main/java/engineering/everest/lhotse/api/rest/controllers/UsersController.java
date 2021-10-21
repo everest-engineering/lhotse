@@ -78,7 +78,7 @@ public class UsersController {
     public void updateUser(@ApiIgnore Principal principal, @PathVariable UUID userId,
             @RequestBody @Valid UpdateUserRequest request) {
         usersService.updateUser(UUID.fromString(principal.getName()), userId, request.getEmail(),
-                request.getDisplayName(), request.getPassword());
+                request.getDisplayName());
     }
 
     @PutMapping("/{userId}/roles")

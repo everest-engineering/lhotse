@@ -35,10 +35,8 @@ public class DefaultUsersService implements UsersService {
     }
 
     @Override
-    public void updateUser(UUID requestingUserId, UUID userId, String emailChange, String displayNameChange,
-            String passwordChange) {
-        commandGateway.sendAndWait(new UpdateUserDetailsCommand(userId, emailChange, displayNameChange,
-                encodePasswordIfNotBlank(passwordChange), requestingUserId));
+    public void updateUser(UUID requestingUserId, UUID userId, String emailChange, String displayNameChange) {
+        commandGateway.sendAndWait(new UpdateUserDetailsCommand(userId, emailChange, displayNameChange, requestingUserId));
     }
 
     @Override
@@ -47,8 +45,7 @@ public class DefaultUsersService implements UsersService {
     }
 
     @Override
-    public UUID createUser(UUID requestingUserId, UUID organizationId, String username, String displayName,
-            String rawPassword) {
+    public UUID createUser(UUID requestingUserId, UUID organizationId, String username, String displayName) {
         var userId = UUID.randomUUID();
         try {
             // Create user in the keycloak first so that we can get a newly created user id and map it in our app db.
@@ -71,7 +68,7 @@ public class DefaultUsersService implements UsersService {
         }
 
         return commandGateway.sendAndWait(new CreateUserCommand(userId, organizationId,
-                requestingUserId, username, encodePasswordIfNotBlank(rawPassword), displayName));
+                requestingUserId, username, displayName));
     }
 
     @Override

@@ -81,11 +81,11 @@ class UserControllerTest {
         mockMvc.perform(put("/api/user")
                         .principal(USER_ID_1::toString)
                         .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new UpdateUserRequest("display-name-change", "email-change", "password-change"))))
+                        .content(objectMapper.writeValueAsString(new UpdateUserRequest("display-name-change", "email-change"))))
                 .andExpect(status().isOk());
 
         verify(usersService).updateUser(USER_ID_1, USER_ID_1, "email-change",
-                "display-name-change", "password-change");
+                "display-name-change");
     }
 
     @Test

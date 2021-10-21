@@ -53,8 +53,7 @@ public class UsersEventHandler implements ReplayCompletionAware {
         LOGGER.info("User {} created for admin created organization {}", event.getUserId(), event.getOrganizationId());
         var userEmail = event.getUserEmail() == null ? String.format("%s@deleted", event.getUserId())
                 : event.getUserEmail();
-        usersRepository.createUser(event.getUserId(), event.getOrganizationId(), event.getUserDisplayName(), userEmail,
-                event.getEncodedPassword(), creationTime);
+        usersRepository.createUser(event.getUserId(), event.getOrganizationId(), event.getUserDisplayName(), userEmail, creationTime);
     }
 
     @EventHandler
@@ -62,7 +61,7 @@ public class UsersEventHandler implements ReplayCompletionAware {
         LOGGER.info("User {} created for self registered organization {}", event.getUserId(),
                 event.getOrganizationId());
         usersRepository.createUser(event.getUserId(), event.getOrganizationId(), event.getUserDisplayName(),
-                event.getUserEmail(), event.getEncodedPassword(), creationTime);
+                event.getUserEmail(), creationTime);
 
         // You may also want a non-replayable event handler for sending a welcome email
         // to new users
@@ -75,8 +74,6 @@ public class UsersEventHandler implements ReplayCompletionAware {
         persistableUser
                 .setDisplayName(selectDesiredState(event.getDisplayNameChange(), persistableUser.getDisplayName()));
         persistableUser.setEmail(selectDesiredState(event.getEmailChange(), persistableUser.getEmail()));
-        persistableUser.setEncodedPassword(
-                selectDesiredState(event.getEncodedPasswordChange(), persistableUser.getEncodedPassword()));
         usersRepository.save(persistableUser);
     }
 

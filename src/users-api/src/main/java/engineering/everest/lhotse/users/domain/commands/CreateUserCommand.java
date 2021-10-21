@@ -26,8 +26,6 @@ public class CreateUserCommand implements EmailAddressValidatableCommand, UserUn
     private UUID requestingUserId;
     @NotNull
     private String username;
-    @NotNull
-    private String encodedPassword;
     @NotBlank
     private String userDisplayName;
 

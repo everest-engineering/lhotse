@@ -19,7 +19,6 @@ public class UpdateUserDetailsCommand implements EmailAddressValidatableCommand,
     private UUID userId;
     private String emailChange;
     private String displayNameChange;
-    private String passwordChange;
 
     @NotNull
     private UUID requestingUserId;

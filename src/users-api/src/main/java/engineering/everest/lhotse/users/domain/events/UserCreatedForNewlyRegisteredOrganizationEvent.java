@@ -21,5 +21,4 @@ public class UserCreatedForNewlyRegisteredOrganizationEvent {
     private String userDisplayName;
     @EncryptedField
     private String userEmail;
-    private String encodedPassword;
 }

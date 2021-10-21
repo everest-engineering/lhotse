@@ -38,7 +38,6 @@ class UsersEventHandlerTest {
     private static final Instant CREATION_TIME = Instant.ofEpochSecond(9999999L);
     private static final String USER_DISPLAY_NAME = "user-display-name";
     private static final String USER_USERNAME = "user-email";
-    private static final String ENCODED_PASSWORD = "encoded-password";
     private static final String NO_CHANGE = null;
     private static final String BLANK_FIELD = "";
 
@@ -66,17 +65,17 @@ class UsersEventHandlerTest {
     @Test
     void onUserCreatedByAdminEvent_WillDelegate() {
         usersEventHandler.on(new UserCreatedByAdminEvent(USER_ID, ORGANIZATION_ID, ADMIN_ID,
-                USER_DISPLAY_NAME, USER_USERNAME, ENCODED_PASSWORD), CREATION_TIME);
+                USER_DISPLAY_NAME, USER_USERNAME), CREATION_TIME);
 
-        verify(usersRepository).createUser(USER_ID, ORGANIZATION_ID, USER_DISPLAY_NAME, USER_USERNAME, ENCODED_PASSWORD, CREATION_TIME);
+        verify(usersRepository).createUser(USER_ID, ORGANIZATION_ID, USER_DISPLAY_NAME, USER_USERNAME, CREATION_TIME);
     }
 
     @Test
     void onUserCreatedForNewlyRegisteredOrganizationEvent_WillDelegate() {
         usersEventHandler.on(new UserCreatedForNewlyRegisteredOrganizationEvent(ORGANIZATION_ID, USER_ID, USER_DISPLAY_NAME,
-                USER_USERNAME, ENCODED_PASSWORD), CREATION_TIME);
+                USER_USERNAME), CREATION_TIME);
 
-        verify(usersRepository).createUser(USER_ID, ORGANIZATION_ID, USER_DISPLAY_NAME, USER_USERNAME, ENCODED_PASSWORD, CREATION_TIME);
+        verify(usersRepository).createUser(USER_ID, ORGANIZATION_ID, USER_DISPLAY_NAME, USER_USERNAME, CREATION_TIME);
     }
 
     @Test
@@ -86,12 +85,10 @@ class UsersEventHandlerTest {
         when(usersRepository.findById(USER_ID)).thenReturn(Optional.of(persistableUser));
 
         usersEventHandler.on(new UserDetailsUpdatedByAdminEvent(USER_ID, ORGANIZATION_ID, "display-name-change",
-                "email-change", "password-change", ADMIN_ID));
+                "email-change", ADMIN_ID));
 
         assertEquals("display-name-change", persistableUser.getDisplayName());
         assertEquals("email-change", persistableUser.getEmail());
-        assertEquals("password-change", persistableUser.getEncodedPassword());
-
         verify(usersRepository).save(persistableUser);
     }
 
@@ -101,12 +98,10 @@ class UsersEventHandlerTest {
 
         when(usersRepository.findById(USER_ID)).thenReturn(Optional.of(persistableUser));
 
-        usersEventHandler.on(new UserDetailsUpdatedByAdminEvent(USER_ID, ORGANIZATION_ID, NO_CHANGE, NO_CHANGE, NO_CHANGE, ADMIN_ID));
+        usersEventHandler.on(new UserDetailsUpdatedByAdminEvent(USER_ID, ORGANIZATION_ID, NO_CHANGE, NO_CHANGE, ADMIN_ID));
 
         assertEquals("old-display-name", persistableUser.getDisplayName());
         assertEquals("old-email", persistableUser.getEmail());
-        assertEquals("old-password", persistableUser.getEncodedPassword());
-
         verify(usersRepository).save(persistableUser);
     }
 
@@ -116,12 +111,10 @@ class UsersEventHandlerTest {
 
         when(usersRepository.findById(USER_ID)).thenReturn(Optional.of(persistableUser));
 
-        usersEventHandler.on(new UserDetailsUpdatedByAdminEvent(USER_ID, ORGANIZATION_ID, BLANK_FIELD, BLANK_FIELD, BLANK_FIELD, ADMIN_ID));
+        usersEventHandler.on(new UserDetailsUpdatedByAdminEvent(USER_ID, ORGANIZATION_ID, BLANK_FIELD, BLANK_FIELD, ADMIN_ID));
 
         assertEquals(BLANK_FIELD, persistableUser.getDisplayName());
         assertEquals(BLANK_FIELD, persistableUser.getEmail());
-        assertEquals(BLANK_FIELD, persistableUser.getEncodedPassword());
-
         verify(usersRepository).save(persistableUser);
     }
 
@@ -161,7 +154,6 @@ class UsersEventHandlerTest {
         PersistableUser persistableUser = new PersistableUser();
         persistableUser.setEmail("old-email");
         persistableUser.setDisplayName("old-display-name");
-        persistableUser.setEncodedPassword("old-password");
         return persistableUser;
     }
 }

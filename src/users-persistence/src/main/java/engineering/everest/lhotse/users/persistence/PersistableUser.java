@@ -31,7 +31,6 @@ public class PersistableUser {
     @Column(name = "username", unique = true)
     private String username;
 
-    private String encodedPassword;
     private String displayName;
 
     @Column(name = "email", unique = true)
@@ -43,12 +42,11 @@ public class PersistableUser {
     private Instant createdOn;
     private UUID profilePhotoFileId;
 
-    public PersistableUser(UUID id, UUID organizationId, String username, String encodedPassword, String displayName,
+    public PersistableUser(UUID id, UUID organizationId, String username, String displayName,
                            boolean disabled, Set<Role> roles, Instant createdOn) {
         this.id = id;
         this.organizationId = organizationId;
         this.username = username;
-        this.encodedPassword = encodedPassword;
         this.displayName = displayName;
         this.disabled = disabled;
         this.roles = roles;
@@ -57,13 +55,13 @@ public class PersistableUser {
         this.email = this.username;
     }
 
-    PersistableUser(UUID id, UUID organizationId, String displayName, String email, String encodedPassword, Instant createdOn) {
-        this(id, organizationId, email, encodedPassword, displayName, false, createdOn);
+    PersistableUser(UUID id, UUID organizationId, String displayName, String email, Instant createdOn) {
+        this(id, organizationId, email, displayName, false, createdOn);
     }
 
-    PersistableUser(UUID id, UUID organizationId, String username, String encodedPassword, String displayName,
+    PersistableUser(UUID id, UUID organizationId, String username, String displayName,
                     boolean disabled, Instant createdOn) {
-        this(id, organizationId, username, encodedPassword, displayName, disabled, DEFAULT_ROLES, createdOn);
+        this(id, organizationId, username, displayName, disabled, DEFAULT_ROLES, createdOn);
     }
 
     public void addRole(Role role) {

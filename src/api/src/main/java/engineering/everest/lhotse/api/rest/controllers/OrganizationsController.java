@@ -113,6 +113,6 @@ public class OrganizationsController {
     public UUID createUser(@ApiIgnore Principal principal, @PathVariable UUID organizationId,
             @RequestBody @Valid NewUserRequest request) {
         return usersService.createUser(UUID.fromString(principal.getName()), organizationId, request.getUsername(),
-                request.getDisplayName(), request.getPassword());
+                request.getDisplayName());
     }
 }

@@ -68,10 +68,10 @@ public class OrganizationRegistrationSaga {
         var registeringUserId = event.getRegisteringUserId();
         var registeringUserDisplayName = event.getContactName();
         var registeringUserEmail = event.getContactEmail();
-        var registeringUserEncodedPassword = "encoded-password";
+        //var registeringUserEncodedPassword = "encoded-password";
 
         commandGateway.send(new CreateUserForNewlyRegisteredOrganizationCommand(organizationId, registeringUserId,
-                registeringUserEmail, registeringUserEncodedPassword, registeringUserDisplayName));
+                registeringUserEmail, registeringUserDisplayName));
     }
 
     @SagaEventHandler(associationProperty = ORGANIZATION_PROPERTY)

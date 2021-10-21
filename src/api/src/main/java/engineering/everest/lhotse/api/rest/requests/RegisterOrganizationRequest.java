@@ -24,5 +24,4 @@ public class RegisterOrganizationRequest {
         private String contactPhoneNumber;
         @NotBlank
         private String contactEmail;
-        private String contactPassword;
 }

@@ -7,11 +7,9 @@ import java.util.Set;
 
 public interface UsersService {
 
-    UUID createUser(UUID requestingUserId, UUID organizationId, String username, String displayName,
-            String rawPassword);
+    UUID createUser(UUID requestingUserId, UUID organizationId, String username, String displayName);
 
-    void updateUser(UUID requestingUserId, UUID userId, String emailChange, String displayNameChange,
-            String passwordChange);
+    void updateUser(UUID requestingUserId, UUID userId, String emailChange, String displayNameChange);
 
     void updateUserRoles(UUID requestingUserId, UUID userId, Set<Role> roles);
 

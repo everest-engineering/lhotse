@@ -66,7 +66,7 @@ class ApplicationFunctionalTests {
         apiRestTestClient.createAdminUserAndLogin();
         var newOrganizationRequest = new NewOrganizationRequest("ACME", "123 King St", "Melbourne",
                 "Vic", "Oz", "3000", null, null, null, "admin@example.com");
-        var newUserRequest = new NewUserRequest("user@example.com", "password", "Captain Fancypants");
+        var newUserRequest = new NewUserRequest("user@example.com", "Captain Fancypants");
 
         var organizationId = apiRestTestClient.createOrganization(newOrganizationRequest, CREATED);
         var userId = apiRestTestClient.createUser(organizationId, newUserRequest, CREATED);
@@ -79,13 +79,13 @@ class ApplicationFunctionalTests {
             "Because a user is expected to update his password at initial login.")
     void newUsersCanRegisterTheirOrganizationAndCreateNewUsersInTheirOrganization() throws InterruptedException {
         apiRestTestClient.logout();
-        var registerOrganizationRequest = new RegisterOrganizationRequest("Alice's Art Artefactory", "123 Any Street", "Melbourne", "Victoria", "Australia", "3000", "http://alicesartartefactory.com", "Alice", "+61 422 123 456", "alice@example.com", "alicerocks");
+        var registerOrganizationRequest = new RegisterOrganizationRequest("Alice's Art Artefactory", "123 Any Street", "Melbourne", "Victoria", "Australia", "3000", "http://alicesartartefactory.com", "Alice", "+61 422 123 456", "alice@example.com");
         var organizationRegistrationResponse = apiRestTestClient.registerNewOrganization(registerOrganizationRequest, CREATED);
         var newOrganizationId = organizationRegistrationResponse.getNewOrganizationId();
         Thread.sleep(2000); // Default is now tracking event processor
 
         apiRestTestClient.login("alice@example.com", "alicerocks");
-        var newUserRequest = new NewUserRequest("bob@example.com", "bobalsorocks", "My name is Bob");
+        var newUserRequest = new NewUserRequest("bob@example.com", "My name is Bob");
         apiRestTestClient.createUser(newOrganizationId, newUserRequest, CREATED);
     }
 
@@ -104,7 +104,7 @@ class ApplicationFunctionalTests {
 
         var newOrganizationRequest = new NewOrganizationRequest("ACME", "123 King St", "Melbourne",
                 "Vic", "Oz", "3000", null, null, null, "admin@example.com");
-        var newUserRequest = new NewUserRequest("a-user", "password", "");
+        var newUserRequest = new NewUserRequest("a-user", "");
         var organizationId = apiRestTestClient.createOrganization(newOrganizationRequest, CREATED);
 
         var response = webTestClient.post().uri("/api/organizations/{organizationId}/users", organizationId)
@@ -126,7 +126,7 @@ class ApplicationFunctionalTests {
 
         var newOrganizationRequest = new NewOrganizationRequest("ACME", "123 King St", "Melbourne",
                 "Vic", "Oz", "3000", null, null, null, "admin@example.com");
-        var newUserRequest = new NewUserRequest("user123@example.com", "password", "Captain Fancypants");
+        var newUserRequest = new NewUserRequest("user123@example.com", "Captain Fancypants");
         var organizationId = apiRestTestClient.createOrganization(newOrganizationRequest, CREATED);
         apiRestTestClient.createUser(organizationId, newUserRequest, CREATED);
 

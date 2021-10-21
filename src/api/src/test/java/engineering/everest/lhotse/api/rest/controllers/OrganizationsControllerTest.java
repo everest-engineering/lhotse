@@ -54,12 +54,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class OrganizationsControllerTest {
 
     private static final UUID USER_ID = randomUUID();
-    private static final String RAW_PASSWORD = "secret";
     private static final String NEW_USER_USERNAME = "new@umbrella.com";
     private static final String NEW_USER_DISPLAY_NAME = "new user";
     private static final String ROLE_ADMIN = "ROLE_ADMIN";
     private static final String ROLE_ORG_USER = "ORG_USER";
-    private static final NewUserRequest NEW_USER_REQUEST = new NewUserRequest(NEW_USER_USERNAME, RAW_PASSWORD, NEW_USER_DISPLAY_NAME);
+    private static final NewUserRequest NEW_USER_REQUEST = new NewUserRequest(NEW_USER_USERNAME, NEW_USER_DISPLAY_NAME);
     private static final Organization ORGANIZATION_1 = new Organization(fromString("53ac29ab-ecc6-431e-bde0-64440cd3dc93"),
             "organization-1", new OrganizationAddress("street-1", "city-1",
             "state-1", "country-1", "postal-1"), "website-1", "contactName", "phoneNumber", "email@company.com", false);
@@ -115,7 +114,7 @@ class OrganizationsControllerTest {
         OrganizationAddress address = ORGANIZATION_1.getOrganizationAddress();
         RegisterOrganizationRequest registerOrganizationRequest = new RegisterOrganizationRequest(ORGANIZATION_1.getOrganizationName(), address.getStreet(),
                 address.getCity(), address.getState(), address.getCountry(), address.getPostalCode(), ORGANIZATION_1.getWebsiteUrl(),
-                ORGANIZATION_1.getContactName(), ORGANIZATION_1.getPhoneNumber(), ORGANIZATION_1.getEmailAddress(), RAW_PASSWORD);
+                ORGANIZATION_1.getContactName(), ORGANIZATION_1.getPhoneNumber(), ORGANIZATION_1.getEmailAddress());
 
         when(organizationsService.createOrganization(USER_ID, ORGANIZATION_1.getOrganizationName(), address.getStreet(),
                 address.getCity(), address.getState(), address.getCountry(), address.getPostalCode(), ORGANIZATION_1.getWebsiteUrl(),
@@ -185,7 +184,7 @@ class OrganizationsControllerTest {
     void creatingOrganizationUser_WillFail_WhenEmailIsBlank() throws Exception {
         mockMvc.perform(post("/api/organizations/{organizationId}/users", ORGANIZATION_2.getId())
                         .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new NewUserRequest("", RAW_PASSWORD, ORG_1_USER_1.getDisplayName()))))
+                        .content(objectMapper.writeValueAsString(new NewUserRequest("", ORG_1_USER_1.getDisplayName()))))
                 .andExpect(status().isBadRequest());
 
         verifyNoInteractions(usersService);
@@ -195,7 +194,7 @@ class OrganizationsControllerTest {
     void creatingOrganizationUser_WillFail_WhenDisplayNameIsBlank() throws Exception {
         mockMvc.perform(post("/api/organizations/{organizationId}/users", ORGANIZATION_2.getId())
                         .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new NewUserRequest(ORG_1_USER_1.getUsername(), RAW_PASSWORD, ""))))
+                        .content(objectMapper.writeValueAsString(new NewUserRequest(ORG_1_USER_1.getUsername(), ""))))
                 .andExpect(status().isBadRequest());
 
         verifyNoInteractions(usersService);
@@ -205,7 +204,7 @@ class OrganizationsControllerTest {
     void creatingOrganizationUser_WillFail_WhenPasswordIsBlank() throws Exception {
         mockMvc.perform(post("/api/organizations/{organizationId}/users", ORGANIZATION_2.getId())
                         .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new NewUserRequest(ORG_1_USER_1.getUsername(), "", ORG_1_USER_1.getDisplayName()))))
+                        .content(objectMapper.writeValueAsString(new NewUserRequest(ORG_1_USER_1.getUsername(), ORG_1_USER_1.getDisplayName()))))
                 .andExpect(status().isBadRequest());
 
         verifyNoInteractions(usersService);
@@ -221,7 +220,7 @@ class OrganizationsControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(content().string(Matchers.any(String.class)));
 
-        verify(usersService).createUser(ORG_2_USER_2.getId(), ORGANIZATION_2.getId(), NEW_USER_USERNAME, NEW_USER_DISPLAY_NAME, RAW_PASSWORD);
+        verify(usersService).createUser(ORG_2_USER_2.getId(), ORGANIZATION_2.getId(), NEW_USER_USERNAME, NEW_USER_DISPLAY_NAME);
     }
 
     @Test

@@ -45,14 +45,13 @@ public class UserAggregate implements Serializable {
     @CommandHandler
     public UserAggregate(CreateUserCommand command) {
         apply(new UserCreatedByAdminEvent(command.getUserId(), command.getOrganizationId(),
-                command.getRequestingUserId(), command.getUserDisplayName(), command.getEmailAddress(),
-                command.getEncodedPassword()));
+                command.getRequestingUserId(), command.getUserDisplayName(), command.getEmailAddress()));
     }
 
     @CommandHandler
     public UserAggregate(CreateUserForNewlyRegisteredOrganizationCommand command) {
         apply(new UserCreatedForNewlyRegisteredOrganizationEvent(command.getOrganizationId(), command.getUserId(),
-                command.getDisplayName(), command.getUserEmail(), command.getEncodedPassword()));
+                command.getDisplayName(), command.getUserEmail()));
     }
 
     @CommandHandler
@@ -63,8 +62,7 @@ public class UserAggregate implements Serializable {
             validateDisplayNameIsPresent(command.getDisplayNameChange());
         }
         apply(new UserDetailsUpdatedByAdminEvent(command.getUserId(), userOnOrganizationId,
-                command.getDisplayNameChange(), command.getEmailChange(), command.getPasswordChange(),
-                command.getRequestingUserId()));
+                command.getDisplayNameChange(), command.getEmailChange(), command.getRequestingUserId()));
     }
 
     @CommandHandler
@@ -128,8 +126,7 @@ public class UserAggregate implements Serializable {
     }
 
     private void validateAtLeastOneChangeIsBeingMade(UpdateUserDetailsCommand command) {
-        boolean changesMade = command.getDisplayNameChange() != null || command.getEmailChange() != null
-                || command.getPasswordChange() != null;
+        boolean changesMade = command.getDisplayNameChange() != null || command.getEmailChange() != null;
         if (!changesMade) {
             TranslatableExceptionFactory.throwForKey(USER_UPDATE_NO_FIELDS_CHANGED);
         }

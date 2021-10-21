@@ -53,7 +53,7 @@ public class UserController {
     public void updateUser(@ApiIgnore Principal principal, @RequestBody UpdateUserRequest updateUserRequest) {
         var uId = UUID.fromString(principal.getName());
         usersService.updateUser(uId, uId, updateUserRequest.getEmail(),
-                updateUserRequest.getDisplayName(), updateUserRequest.getPassword());
+                updateUserRequest.getDisplayName());
     }
 
     @PostMapping("/profile-photo")

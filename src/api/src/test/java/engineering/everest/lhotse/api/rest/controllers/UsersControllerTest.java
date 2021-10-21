@@ -123,11 +123,11 @@ class UsersControllerTest {
         mockMvc.perform(put("/api/users/{userId}", ORG_2_USER_1.getId())
                         .principal(() -> ADMIN_USER.getId().toString())
                         .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new UpdateUserRequest("display-name-change", "email-change", "password-change"))))
+                        .content(objectMapper.writeValueAsString(new UpdateUserRequest("display-name-change", "email-change"))))
                 .andExpect(status().isOk());
 
         verify(usersService).updateUser(ADMIN_USER.getId(), ORG_2_USER_1.getId(), "email-change",
-                "display-name-change", "password-change");
+                "display-name-change");
     }
 
     @Test
@@ -156,11 +156,11 @@ class UsersControllerTest {
         mockMvc.perform(put("/api/users/{userId}", aUser.getId())
                         .principal(() -> authUser.getId().toString())
                         .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new UpdateUserRequest("display-name-change", "email-change", "password-change"))))
+                        .content(objectMapper.writeValueAsString(new UpdateUserRequest("display-name-change", "email-change"))))
                 .andExpect(status().isOk());
 
         verify(usersService).updateUser(authUser.getId(), aUser.getId(), "email-change",
-                "display-name-change", "password-change");
+                "display-name-change");
     }
 
     @Test
@@ -173,11 +173,11 @@ class UsersControllerTest {
         mockMvc.perform(put("/api/users/{userId}", authUser.getId())
                         .principal(() -> authUser.getId().toString())
                         .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new UpdateUserRequest("display-name-change", "email-change", "password-change"))))
+                        .content(objectMapper.writeValueAsString(new UpdateUserRequest("display-name-change", "email-change"))))
                 .andExpect(status().isOk());
 
         verify(usersService).updateUser(authUser.getId(), authUser.getId(), "email-change",
-                "display-name-change", "password-change");
+                "display-name-change");
     }
 
     @Test
@@ -222,7 +222,7 @@ class UsersControllerTest {
         mockMvc.perform(put("/api/users/{userId}", targetUserId)
                         .principal(() -> authUser.getId().toString())
                         .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new UpdateUserRequest("new", null, null))))
+                        .content(objectMapper.writeValueAsString(new UpdateUserRequest("new", null))))
                 .andExpect(status().isOk());
     }
 

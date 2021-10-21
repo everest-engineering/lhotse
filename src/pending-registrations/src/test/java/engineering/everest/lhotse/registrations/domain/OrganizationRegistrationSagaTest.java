@@ -38,8 +38,7 @@ class OrganizationRegistrationSagaTest {
     private static final String ORGANIZATION_POST_CODE = "post code";
     private static final String CONTACT_NAME = "Major Tom";
     private static final String CONTACT_PHONE_NUMBER = "555-12345";
-    private static final String ENCODED_PASSWORD = "encoded-password";
-    private static final UserCreatedForNewlyRegisteredOrganizationEvent USER_CREATED_FOR_NEWLY_REGISTERED_ORGANIZATION_EVENT = new UserCreatedForNewlyRegisteredOrganizationEvent(ORGANIZATION_ID, REGISTERING_USER_ID, CONTACT_NAME, REGISTERING_USER_EMAIL, ENCODED_PASSWORD);
+    private static final UserCreatedForNewlyRegisteredOrganizationEvent USER_CREATED_FOR_NEWLY_REGISTERED_ORGANIZATION_EVENT = new UserCreatedForNewlyRegisteredOrganizationEvent(ORGANIZATION_ID, REGISTERING_USER_ID, CONTACT_NAME, REGISTERING_USER_EMAIL);
     private static final OrganizationCreatedForNewSelfRegisteredUserEvent ORGANIZATION_REGISTERED_EVENT = new OrganizationCreatedForNewSelfRegisteredUserEvent(ORGANIZATION_ID, REGISTERING_USER_ID, ORGANIZATION_NAME, ORGANIZATION_WEBSITE_URL, ORGANIZATION_STREET, ORGANIZATION_CITY, ORGANIZATION_STATE, ORGANIZATION_COUNTRY, ORGANIZATION_POST_CODE, CONTACT_NAME, CONTACT_PHONE_NUMBER, REGISTERING_USER_EMAIL);
     private static final UserPromotedToOrganizationAdminEvent USER_PROMOTED_TO_ORGANIZATION_ADMIN_EVENT = new UserPromotedToOrganizationAdminEvent(ORGANIZATION_ID, REGISTERING_USER_ID);
 
@@ -61,7 +60,7 @@ class OrganizationRegistrationSagaTest {
 
     @Test
     void organisationRegisteredEvent_WillDispatchCommandToCreateUserForNewlyRegisteredOrganization() {
-        var expectedCreateUserCommand = new CreateUserForNewlyRegisteredOrganizationCommand(ORGANIZATION_ID, REGISTERING_USER_ID, REGISTERING_USER_EMAIL, ENCODED_PASSWORD, CONTACT_NAME);
+        var expectedCreateUserCommand = new CreateUserForNewlyRegisteredOrganizationCommand(ORGANIZATION_ID, REGISTERING_USER_ID, REGISTERING_USER_EMAIL, CONTACT_NAME);
         testFixture.givenAggregate(ORGANIZATION_ID.toString()).published()
                 .whenAggregate(ORGANIZATION_ID.toString()).publishes(ORGANIZATION_REGISTERED_EVENT)
                 .expectDispatchedCommands(expectedCreateUserCommand)
