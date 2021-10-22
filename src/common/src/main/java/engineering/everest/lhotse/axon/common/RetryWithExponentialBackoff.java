@@ -5,6 +5,7 @@ import lombok.extern.log4j.Log4j2;
 
 import java.time.Duration;
 import java.util.concurrent.Callable;
+import java.util.function.Predicate;
 
 import static java.time.Duration.ZERO;
 
@@ -37,6 +38,24 @@ public class RetryWithExponentialBackoff {
         if (!completed) {
             throw new RetryTimedOutException(elapsed, description);
         }
+    }
+
+    public <T> T waitAndReturnOrThrow(Callable<T> callable, Predicate<T> stopPredicate, String description) throws Exception {
+        var elapsed = ZERO;
+        var currentSleepDuration = initialSleep;
+
+        T callResult = callable.call();
+        while (!stopPredicate.test(callResult) && elapsed.compareTo(maxDuration) < 0) {
+            LOGGER.info("Waiting {} for {}", currentSleepDuration, description);
+            sleeper.sleep(currentSleepDuration);
+            elapsed = elapsed.plus(currentSleepDuration);
+            currentSleepDuration = findNextSleepDurationNotExceedingMaxDuration(elapsed, currentSleepDuration);
+            callResult = callable.call();
+        }
+        if (stopPredicate.test(callResult)) {
+            return callResult;
+        }
+        throw new RetryTimedOutException(elapsed, description);
     }
 
     private Duration findNextSleepDurationNotExceedingMaxDuration(Duration elapsed, Duration currentSleepDuration) {

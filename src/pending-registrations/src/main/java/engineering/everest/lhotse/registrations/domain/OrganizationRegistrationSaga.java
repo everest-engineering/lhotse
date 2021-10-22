@@ -102,5 +102,4 @@ public class OrganizationRegistrationSaga {
         new RetryWithExponentialBackoff(Duration.ofMillis(200), 2L, Duration.ofMinutes(1),
                 x -> MILLISECONDS.sleep(x.toMillis())).waitOrThrow(condition, message);
     }
-
 }
