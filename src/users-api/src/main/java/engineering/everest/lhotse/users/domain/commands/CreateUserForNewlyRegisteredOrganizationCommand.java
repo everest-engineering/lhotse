@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.axonframework.modelling.command.TargetAggregateIdentifier;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.UUID;
 
 @Data
@@ -12,7 +14,10 @@ import java.util.UUID;
 public class CreateUserForNewlyRegisteredOrganizationCommand implements ValidatableCommand {
     @TargetAggregateIdentifier
     UUID organizationId;
+    @NotNull
     UUID userId;
+    @NotNull
     String userEmail;
+    @NotBlank
     String displayName;
 }

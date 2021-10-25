@@ -51,8 +51,8 @@ public class UserController {
     @PutMapping
     @ApiOperation("Update currently authenticated user information")
     public void updateUser(@ApiIgnore Principal principal, @RequestBody UpdateUserRequest updateUserRequest) {
-        var uId = UUID.fromString(principal.getName());
-        usersService.updateUser(uId, uId, updateUserRequest.getEmail(),
+        var userId = UUID.fromString(principal.getName());
+        usersService.updateUser(userId, userId, updateUserRequest.getEmail(),
                 updateUserRequest.getDisplayName());
     }
 

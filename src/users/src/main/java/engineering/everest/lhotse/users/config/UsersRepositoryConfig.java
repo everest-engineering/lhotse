@@ -2,7 +2,6 @@ package engineering.everest.lhotse.users.config;
 
 import engineering.everest.lhotse.users.domain.UserAggregate;
 import org.axonframework.common.caching.JCacheAdapter;
-import org.axonframework.eventsourcing.CachingEventSourcingRepository;
 import org.axonframework.eventsourcing.EventCountSnapshotTriggerDefinition;
 import org.axonframework.eventsourcing.GenericAggregateFactory;
 import org.axonframework.eventsourcing.Snapshotter;
@@ -12,6 +11,8 @@ import org.axonframework.modelling.command.Repository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import static org.axonframework.eventsourcing.CachingEventSourcingRepository.builder;
 
 @Configuration
 public class UsersRepositoryConfig {
@@ -27,8 +28,7 @@ public class UsersRepositoryConfig {
 
     @Bean
     public Repository<UserAggregate> repositoryForUser(EventStore eventStore, Snapshotter snapshotter, JCacheAdapter cacheAdapter) {
-
-        return CachingEventSourcingRepository.builder(UserAggregate.class)
+        return builder(UserAggregate.class)
                 .aggregateFactory(new GenericAggregateFactory<>(UserAggregate.class))
                 .parameterResolverFactory(parameterResolverFactory)
                 .snapshotTriggerDefinition(new EventCountSnapshotTriggerDefinition(snapshotter, SNAPSHOT_EVENT_COUNT_THRESHOLD))

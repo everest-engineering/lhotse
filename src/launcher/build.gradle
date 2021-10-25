@@ -1,11 +1,12 @@
 buildscript {
     repositories {
-        jcenter()
+        mavenCentral()
     }
 }
 
 plugins {
     id 'org.springframework.boot'
+    id "de.undercouch.download" version "${undercouchVersion}"
 }
 
 apply plugin: 'jacoco'
@@ -84,4 +85,37 @@ dependencyManagement {
 	imports {
 		mavenBom "org.keycloak.bom:keycloak-adapter-bom:${keycloakVersion}"
 	}
+}
+
+task downloadKeycloakZipFile(type: Download) {
+    src "https://github.com/keycloak/keycloak/releases/download/${keycloakTestServerVersion}/keycloak-${keycloakTestServerVersion}.zip"
+    dest new File(buildDir, "keycloak-${keycloakTestServerVersion}.zip")
+    onlyIfModified true
+}
+
+task downloadAndUnzipKeycloakFile(dependsOn: downloadKeycloakZipFile, type: Copy) {
+    from zipTree(downloadKeycloakZipFile.dest)
+    into buildDir
+}
+
+task startServer(dependsOn: 'downloadAndUnzipKeycloakFile') {
+    doLast {
+        def keycloakDir = "$buildDir/keycloak-${keycloakTestServerVersion}"
+        def port = 8180
+        def waitTime = 10000
+        def testUser = "admin@everest.engineering"
+        def testPass = "ac0n3x72"
+
+        def createUser = "$keycloakDir/bin/add-user-keycloak.sh -r master -u $testUser -p $testPass".execute()
+        createUser.consumeProcessOutput(System.out, System.err)
+        createUser.waitForOrKill(waitTime)
+
+        def startServer = "$keycloakDir/bin/standalone.sh -Djboss.http.port=$port".execute()
+        startServer.consumeProcessOutput(System.out, System.err)
+        startServer.waitForOrKill(3 * waitTime)
+
+        def createRealm = "$keycloakDir/bin/kcadm.sh create realms -f $rootDir/imports/realm-export.json --no-config --server http://localhost:$port/auth --realm master --user $testUser --password $testPass".execute()
+        createRealm.consumeProcessOutput(System.out, System.err)
+        createRealm.waitForOrKill(waitTime)
+    }
 }

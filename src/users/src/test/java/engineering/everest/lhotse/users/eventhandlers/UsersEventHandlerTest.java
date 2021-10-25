@@ -2,7 +2,6 @@ package engineering.everest.lhotse.users.eventhandlers;
 
 import engineering.everest.axon.cryptoshredding.CryptoShreddingKeyService;
 import engineering.everest.axon.cryptoshredding.TypeDifferentiatedSecretKeyId;
-import engineering.everest.lhotse.axon.common.services.KeycloakSynchronizationService;
 import engineering.everest.lhotse.organizations.domain.events.UserPromotedToOrganizationAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserCreatedByAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserCreatedForNewlyRegisteredOrganizationEvent;
@@ -47,12 +46,10 @@ class UsersEventHandlerTest {
     private UsersRepository usersRepository;
     @Mock
     private CryptoShreddingKeyService cryptoShreddingKeyService;
-    @Mock
-    private KeycloakSynchronizationService keycloakSynchronizationService;
 
     @BeforeEach
     void setUp() {
-        usersEventHandler = new UsersEventHandler(usersRepository, cryptoShreddingKeyService, keycloakSynchronizationService);
+        usersEventHandler = new UsersEventHandler(usersRepository, cryptoShreddingKeyService);
     }
 
     @Test

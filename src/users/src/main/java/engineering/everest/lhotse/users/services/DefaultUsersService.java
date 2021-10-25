@@ -1,7 +1,9 @@
 package engineering.everest.lhotse.users.services;
 
 import engineering.everest.axon.HazelcastCommandGateway;
+import engineering.everest.axon.exceptions.RemoteCommandExecutionException;
 import engineering.everest.lhotse.axon.common.domain.UserAttribute;
+import engineering.everest.lhotse.axon.common.exceptions.KeycloakSynchronizationException;
 import engineering.everest.lhotse.axon.common.services.KeycloakSynchronizationService;
 import engineering.everest.lhotse.users.domain.commands.CreateUserCommand;
 import engineering.everest.lhotse.users.domain.commands.DeleteAndForgetUserCommand;
@@ -12,25 +14,22 @@ import engineering.everest.lhotse.axon.common.domain.Role;
 
 import lombok.extern.log4j.Log4j2;
 import org.json.JSONArray;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
-
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import java.util.List;
+import java.util.UUID;
+import java.util.Map;
+import java.util.Set;
 
 @Service
 @Log4j2
 public class DefaultUsersService implements UsersService {
 
     private final HazelcastCommandGateway commandGateway;
-    private final PasswordEncoder passwordEncoder;
     private final KeycloakSynchronizationService keycloakSynchronizationService;
 
-    public DefaultUsersService(HazelcastCommandGateway commandGateway, PasswordEncoder passwordEncoder,
-                               KeycloakSynchronizationService keycloakSynchronizationService) {
+    public DefaultUsersService(HazelcastCommandGateway commandGateway, KeycloakSynchronizationService keycloakSynchronizationService) {
         this.commandGateway = commandGateway;
-        this.passwordEncoder = passwordEncoder;
         this.keycloakSynchronizationService = keycloakSynchronizationService;
     }
 
@@ -46,7 +45,6 @@ public class DefaultUsersService implements UsersService {
 
     @Override
     public UUID createUser(UUID requestingUserId, UUID organizationId, String username, String displayName) {
-        var userId = UUID.randomUUID();
         try {
             // Create user in the keycloak first so that we can get a newly created user id and map it in our app db.
             keycloakSynchronizationService.createUser(
@@ -59,16 +57,15 @@ public class DefaultUsersService implements UsersService {
                                             "value", "changeme",
                                             "temporary", true))));
 
-            userId =  UUID.fromString(
-                    new JSONArray(keycloakSynchronizationService.getUsers(Map.of("username", username)))
-                            .getJSONObject(0).getString("id"));
+            return commandGateway.sendAndWait(new CreateUserCommand(getUserId(username), organizationId,
+                    requestingUserId, username, displayName));
+        } catch (RemoteCommandExecutionException tex) {
+            LOGGER.info("Keycloak createUser error: " + tex);
+            return commandGateway.sendAndWait(new CreateUserCommand(getUserId(username), organizationId,
+                    requestingUserId, username, displayName));
         } catch (Exception e) {
-            LOGGER.info("Keycloak createUser error: " + e);
-            throw new RuntimeException(e);
+            throw (KeycloakSynchronizationException)new KeycloakSynchronizationException(e.getMessage()).initCause(e);
         }
-
-        return commandGateway.sendAndWait(new CreateUserCommand(userId, organizationId,
-                requestingUserId, username, displayName));
     }
 
     @Override
@@ -81,7 +78,9 @@ public class DefaultUsersService implements UsersService {
         commandGateway.sendAndWait(new DeleteAndForgetUserCommand(userId, requestingUserId, requestReason));
     }
 
-    private String encodePasswordIfNotBlank(String passwordChange) {
-        return isBlank(passwordChange) ? passwordChange : passwordEncoder.encode(passwordChange);
+    private UUID getUserId(String username) {
+        return UUID.fromString(
+                new JSONArray(keycloakSynchronizationService.getUsers(Map.of("username", username)))
+                        .getJSONObject(0).getString("id"));
     }
 }

@@ -2,8 +2,6 @@ package engineering.everest.lhotse.users.eventhandlers;
 
 import engineering.everest.axon.cryptoshredding.CryptoShreddingKeyService;
 import engineering.everest.axon.cryptoshredding.TypeDifferentiatedSecretKeyId;
-import engineering.everest.lhotse.axon.common.domain.UserAttribute;
-import engineering.everest.lhotse.axon.common.services.KeycloakSynchronizationService;
 import engineering.everest.lhotse.axon.replay.ReplayCompletionAware;
 import engineering.everest.lhotse.organizations.domain.events.UserPromotedToOrganizationAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserCreatedByAdminEvent;
@@ -21,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.Map;
 
 import static engineering.everest.lhotse.axon.common.domain.Role.ORG_ADMIN;
 import static engineering.everest.lhotse.axon.common.domain.User.ADMIN_ID;
@@ -32,14 +29,11 @@ public class UsersEventHandler implements ReplayCompletionAware {
 
     private final UsersRepository usersRepository;
     private final CryptoShreddingKeyService cryptoShreddingKeyService;
-    private final KeycloakSynchronizationService keycloakSynchronizationService;
 
     @Autowired
-    public UsersEventHandler(UsersRepository usersRepository, CryptoShreddingKeyService cryptoShreddingKeyService,
-                             KeycloakSynchronizationService keycloakSynchronizationService) {
+    public UsersEventHandler(UsersRepository usersRepository, CryptoShreddingKeyService cryptoShreddingKeyService) {
         this.usersRepository = usersRepository;
         this.cryptoShreddingKeyService = cryptoShreddingKeyService;
-        this.keycloakSynchronizationService = keycloakSynchronizationService;
     }
 
     @ResetHandler
@@ -82,12 +76,7 @@ public class UsersEventHandler implements ReplayCompletionAware {
         LOGGER.info("User {} roles updated by admin {}", event.getUserId(), event.getRoles());
         var persistableUser = usersRepository.findById(event.getUserId()).orElseThrow();
         persistableUser.setRoles(event.getRoles());
-        var organizationId = persistableUser.getOrganizationId();
-        var displayName = persistableUser.getDisplayName();
         usersRepository.save(persistableUser);
-
-        keycloakSynchronizationService.updateUserAttributes(event.getUserId(),
-                Map.of("attributes", new UserAttribute(organizationId, event.getRoles(), displayName)));
     }
 
     @EventHandler
@@ -112,8 +101,6 @@ public class UsersEventHandler implements ReplayCompletionAware {
         usersRepository.deleteById(event.getDeletedUserId());
         cryptoShreddingKeyService
                 .deleteSecretKey(new TypeDifferentiatedSecretKeyId(event.getDeletedUserId().toString(), ""));
-
-        keycloakSynchronizationService.deleteUser(event.getDeletedUserId());
     }
 
     private String selectDesiredState(String desiredState, String currentState) {

@@ -12,7 +12,8 @@ steps:
     agents:
       java: 11
     commands:
-      - ./gradlew build --console plain
+      - pkill java || echo 'No Java processes to kill.'
+      - ./gradlew startServer && ./gradlew build --console plain
 
   - label: ':sonarqube: Quality reporting'
     <<: *if-our-repo
@@ -20,7 +21,8 @@ steps:
     agents:
       java: 11
     commands:
-      - ./gradlew clean codeCoverageReport sonarqube --console plain
+      - pkill java || echo 'No Java processes to kill.'
+      - ./gradlew clean startServer && ./gradlew codeCoverageReport sonarqube --console plain
 
   - wait:
     <<: *if-release
@@ -29,7 +31,7 @@ steps:
     <<: *if-release
     key: bintray-publish
     agents:
-      java: 11    
+      java: 11
     commands:
       - git fetch --tags
       - ./gradlew bintrayPublish bintrayUpload --console plain

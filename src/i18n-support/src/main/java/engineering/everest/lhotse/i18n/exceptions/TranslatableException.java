@@ -8,7 +8,7 @@ import static org.springframework.context.i18n.LocaleContextHolder.getLocale;
 public class TranslatableException extends RuntimeException {
 
     private final String i18nMessageKey;
-    private final Object[] args;
+    private final transient Object[] args;
 
     public TranslatableException(String i18nMessageKey) {
         super(i18nMessageKey);

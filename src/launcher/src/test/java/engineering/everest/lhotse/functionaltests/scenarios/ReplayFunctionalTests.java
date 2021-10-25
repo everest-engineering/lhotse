@@ -20,12 +20,12 @@ import static engineering.everest.lhotse.functionaltests.helpers.TestUtils.asser
 import static java.lang.Boolean.FALSE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.DEFINED_PORT;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.HttpStatus.OK;
 
-@SpringBootTest(webEnvironment = RANDOM_PORT, classes = Launcher.class)
+@SpringBootTest(webEnvironment = DEFINED_PORT, classes = Launcher.class)
 @ActiveProfiles("standalone")
 class ReplayFunctionalTests {
 

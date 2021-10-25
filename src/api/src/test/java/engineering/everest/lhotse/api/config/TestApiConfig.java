@@ -125,7 +125,7 @@ public class TestApiConfig extends GlobalMethodSecurityConfiguration {
 
         @Override
         public void setFilterObject(Object o) {
-            // Todo
+            // Do nothing
         }
 
         @Override
@@ -135,7 +135,7 @@ public class TestApiConfig extends GlobalMethodSecurityConfiguration {
 
         @Override
         public void setReturnObject(Object returnObject) {
-            // Todo
+            // Do nothing
         }
 
         @Override

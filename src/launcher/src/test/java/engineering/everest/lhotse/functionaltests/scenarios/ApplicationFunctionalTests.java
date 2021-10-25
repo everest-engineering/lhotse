@@ -1,17 +1,20 @@
 package engineering.everest.lhotse.functionaltests.scenarios;
 
-import com.hazelcast.core.HazelcastInstance;
 import engineering.everest.lhotse.Launcher;
 import engineering.everest.lhotse.api.rest.requests.NewOrganizationRequest;
 import engineering.everest.lhotse.api.rest.requests.NewUserRequest;
 import engineering.everest.lhotse.api.rest.requests.RegisterOrganizationRequest;
+import engineering.everest.lhotse.api.rest.requests.UpdateUserRequest;
 import engineering.everest.lhotse.axon.CommandValidatingMessageHandlerInterceptor;
+import engineering.everest.lhotse.axon.common.RetryWithExponentialBackoff;
+import engineering.everest.lhotse.axon.common.domain.Role;
+import engineering.everest.lhotse.axon.common.services.KeycloakSynchronizationService;
 import engineering.everest.lhotse.functionaltests.helpers.ApiRestTestClient;
-import engineering.everest.lhotse.users.persistence.UsersRepository;
+import engineering.everest.lhotse.organizations.services.OrganizationsReadService;
+import engineering.everest.lhotse.users.services.UsersReadService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,30 +23,36 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
+import java.time.Duration;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.DEFINED_PORT;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.web.reactive.function.BodyInserters.fromValue;
 
-@SpringBootTest(webEnvironment = RANDOM_PORT, classes = Launcher.class)
+@SpringBootTest(webEnvironment = DEFINED_PORT, classes = Launcher.class)
 @ActiveProfiles("standalone")
 class ApplicationFunctionalTests {
 
     @Autowired
     private ApplicationContext applicationContext;
     @Autowired
-    private UsersRepository usersRepository;
-    @Autowired
     private WebTestClient webTestClient;
     @Autowired
-    private HazelcastInstance hazelcastInstance;
-    @Autowired
     private ApiRestTestClient apiRestTestClient;
+    @Autowired
+    private OrganizationsReadService organizationsReadService;
+    @Autowired
+    private UsersReadService usersReadService;
+    @Autowired
+    private KeycloakSynchronizationService keycloakSynchronizationService;
 
     @Test
     void commandValidatingMessageHandlerInterceptorWillBeRegistered() {
@@ -61,32 +70,51 @@ class ApplicationFunctionalTests {
     }
 
     @Test
-    @Disabled("To be revisited. DB query is returning empty results.")
-    void organizationsAndUsersCanBeCreated() {
+    void organizationsAndUsersCanBeCreatedAndUserDetailsCanBeUpdated() throws Exception {
         apiRestTestClient.createAdminUserAndLogin();
         var newOrganizationRequest = new NewOrganizationRequest("ACME", "123 King St", "Melbourne",
                 "Vic", "Oz", "3000", null, null, null, "admin@example.com");
-        var newUserRequest = new NewUserRequest("user@example.com", "Captain Fancypants");
 
+        var newUserRequest = new NewUserRequest("user@example.com", "Captain Fancypants");
         var organizationId = apiRestTestClient.createOrganization(newOrganizationRequest, CREATED);
+
+        var waiter = new RetryWithExponentialBackoff(Duration.ofMillis(200), 2L, Duration.ofMinutes(1),
+                sleepDuration -> MILLISECONDS.sleep(sleepDuration.toMillis()));
+        waiter.waitOrThrow(() -> organizationsReadService.exists(organizationId), "organization registration projection update");
+
         var userId = apiRestTestClient.createUser(organizationId, newUserRequest, CREATED);
+        waiter.waitOrThrow(() -> usersReadService.exists(userId), "user registration projection update");
         apiRestTestClient.getUser(userId, OK);
+
+        var userUpdateRequest = new UpdateUserRequest("Captain Jack Sparrow", "jack@example.com");
+        apiRestTestClient.updateUser(userId, userUpdateRequest, OK);
+        waiter.waitOrThrow(() -> usersReadService.getById(userId).getEmail()
+                        .equals(userUpdateRequest.getEmail()) || usersReadService.getById(userId).getDisplayName().equals(userUpdateRequest.getDisplayName()),
+                "=> user email or displayName projection update");
+        assertEquals(apiRestTestClient.getUser(userId, OK).getDisplayName(), userUpdateRequest.getDisplayName());
+        assertEquals(apiRestTestClient.getUser(userId, OK).getEmail(), userUpdateRequest.getEmail());
     }
 
     @Test
-    @Disabled("To be revisited. " +
-            "Organization can be registered but login throws {\"error\":\"invalid_grant\",\"error_description\":\"Account is not fully set up\"}. " +
-            "Because a user is expected to update his password at initial login.")
-    void newUsersCanRegisterTheirOrganizationAndCreateNewUsersInTheirOrganization() throws InterruptedException {
+    void newUsersCanRegisterTheirOrganizationAndCreateNewUsersInTheirOrganization() throws Exception {
         apiRestTestClient.logout();
         var registerOrganizationRequest = new RegisterOrganizationRequest("Alice's Art Artefactory", "123 Any Street", "Melbourne", "Victoria", "Australia", "3000", "http://alicesartartefactory.com", "Alice", "+61 422 123 456", "alice@example.com");
         var organizationRegistrationResponse = apiRestTestClient.registerNewOrganization(registerOrganizationRequest, CREATED);
         var newOrganizationId = organizationRegistrationResponse.getNewOrganizationId();
-        Thread.sleep(2000); // Default is now tracking event processor
+        var waiter = new RetryWithExponentialBackoff(Duration.ofMillis(200), 2L, Duration.ofMinutes(1),
+                sleepDuration -> MILLISECONDS.sleep(sleepDuration.toMillis()));
+        waiter.waitOrThrow(() -> organizationsReadService.exists(newOrganizationId), "organization registration projection update");
 
-        apiRestTestClient.login("alice@example.com", "alicerocks");
+        keycloakSynchronizationService.setupKeycloakUser("kitty@example.com", "kitty@example.com", true, UUID.randomUUID(), Set.of(Role.ORG_USER, Role.ORG_ADMIN),
+                "Kitty", "meow@123", false);
+        apiRestTestClient.login("kitty@example.com", "meow@123");
+
         var newUserRequest = new NewUserRequest("bob@example.com", "My name is Bob");
-        apiRestTestClient.createUser(newOrganizationId, newUserRequest, CREATED);
+        var userId = apiRestTestClient.createUser(newOrganizationId, newUserRequest, CREATED);
+        waiter.waitOrThrow(() -> usersReadService.exists(userId), "user registration projection update");
+
+        assertEquals(apiRestTestClient.getUser(userId, OK).getUsername(), newUserRequest.getUsername());
+        assertEquals(apiRestTestClient.getUser(userId, OK).getDisplayName(), newUserRequest.getDisplayName());
     }
 
     @Data
@@ -121,14 +149,20 @@ class ApplicationFunctionalTests {
     }
 
     @Test
-    void domainValidationErrorMessagesAreInternationalized() {
+    void domainValidationErrorMessagesAreInternationalized() throws Exception {
         apiRestTestClient.createAdminUserAndLogin();
 
         var newOrganizationRequest = new NewOrganizationRequest("ACME", "123 King St", "Melbourne",
                 "Vic", "Oz", "3000", null, null, null, "admin@example.com");
         var newUserRequest = new NewUserRequest("user123@example.com", "Captain Fancypants");
         var organizationId = apiRestTestClient.createOrganization(newOrganizationRequest, CREATED);
-        apiRestTestClient.createUser(organizationId, newUserRequest, CREATED);
+
+        var waiter = new RetryWithExponentialBackoff(Duration.ofMillis(500), 2L, Duration.ofMinutes(1),
+                sleepDuration -> MILLISECONDS.sleep(sleepDuration.toMillis()));
+        waiter.waitOrThrow(() -> organizationsReadService.exists(organizationId), "organization registration projection update");
+
+        var userId = apiRestTestClient.createUser(organizationId, newUserRequest, CREATED);
+        waiter.waitOrThrow(() -> usersReadService.exists(userId), "user registration projection update");
 
         var response = webTestClient.post().uri("/api/organizations/{organizationId}/users", organizationId)
                 .header("Authorization", "Bearer " + apiRestTestClient.getAccessToken())

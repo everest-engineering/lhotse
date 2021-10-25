@@ -31,7 +31,7 @@ import static java.util.Map.entry;
 
 @Saga
 @Revision("0")
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY) // TODO there might be a cleaner way
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class OrganizationRegistrationSaga {
     private static final String ORGANIZATION_PROPERTY = "organizationId";
 
@@ -68,7 +68,6 @@ public class OrganizationRegistrationSaga {
         var registeringUserId = event.getRegisteringUserId();
         var registeringUserDisplayName = event.getContactName();
         var registeringUserEmail = event.getContactEmail();
-        //var registeringUserEncodedPassword = "encoded-password";
 
         commandGateway.send(new CreateUserForNewlyRegisteredOrganizationCommand(organizationId, registeringUserId,
                 registeringUserEmail, registeringUserDisplayName));

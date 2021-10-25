@@ -37,7 +37,6 @@ public class OrganizationAggregate implements Serializable {
 
     @AggregateIdentifier
     private UUID id;
-    private String organizationName;
     @AggregateMember
     private final OrganizationContactDetails organizationContactDetails = new OrganizationContactDetails();
     private boolean disabled;
@@ -108,7 +107,6 @@ public class OrganizationAggregate implements Serializable {
     @EventSourcingHandler
     void on(OrganizationCreatedByAdminEvent event) {
         id = event.getOrganizationId();
-        organizationName = event.getOrganizationName();
         organizationAdminIds = new HashSet<>();
         disabled = false;
     }
@@ -116,7 +114,6 @@ public class OrganizationAggregate implements Serializable {
     @EventSourcingHandler
     void on(OrganizationCreatedForNewSelfRegisteredUserEvent event) {
         id = event.getOrganizationId();
-        organizationName = event.getOrganizationName();
         organizationAdminIds = new HashSet<>();
         disabled = false;
     }

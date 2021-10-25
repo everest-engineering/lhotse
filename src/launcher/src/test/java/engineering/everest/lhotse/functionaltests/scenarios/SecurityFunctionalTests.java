@@ -14,9 +14,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.DEFINED_PORT;
 
-@SpringBootTest(webEnvironment = RANDOM_PORT, classes = Launcher.class)
+@SpringBootTest(webEnvironment = DEFINED_PORT, classes = Launcher.class)
 @ActiveProfiles("standalone")
 class SecurityFunctionalTests {
 

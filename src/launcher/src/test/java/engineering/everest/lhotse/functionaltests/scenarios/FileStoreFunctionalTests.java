@@ -27,9 +27,9 @@ import static de.flapdoodle.embed.mongo.distribution.Version.Main.PRODUCTION;
 import static engineering.everest.starterkit.filestorage.FileStoreType.EPHEMERAL;
 import static engineering.everest.starterkit.filestorage.NativeStorageType.MONGO_GRID_FS;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.DEFINED_PORT;
 
-@SpringBootTest(webEnvironment = RANDOM_PORT, classes = Launcher.class)
+@SpringBootTest(webEnvironment = DEFINED_PORT, classes = Launcher.class)
 @ActiveProfiles("standalone")
 @Transactional
 class FileStoreFunctionalTests {

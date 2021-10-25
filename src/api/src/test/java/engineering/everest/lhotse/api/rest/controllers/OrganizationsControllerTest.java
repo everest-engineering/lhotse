@@ -201,16 +201,6 @@ class OrganizationsControllerTest {
     }
 
     @Test
-    void creatingOrganizationUser_WillFail_WhenPasswordIsBlank() throws Exception {
-        mockMvc.perform(post("/api/organizations/{organizationId}/users", ORGANIZATION_2.getId())
-                        .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new NewUserRequest(ORG_1_USER_1.getUsername(), ORG_1_USER_1.getDisplayName()))))
-                .andExpect(status().isBadRequest());
-
-        verifyNoInteractions(usersService);
-    }
-
-    @Test
     @WithMockKeycloakAuth(authorities = ROLE_ADMIN)
     void creatingOrganizationUserWillDelegate_WhenRequestingUserIsAdmin() throws Exception {
         mockMvc.perform(post("/api/organizations/{organizationId}/users", ORGANIZATION_2.getId())

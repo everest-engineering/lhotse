@@ -1,5 +1,6 @@
 package engineering.everest.lhotse.functionaltests.helpers;
 
+import engineering.everest.lhotse.AdminProvisionTask;
 import engineering.everest.lhotse.api.rest.requests.NewOrganizationRequest;
 import engineering.everest.lhotse.api.rest.requests.NewUserRequest;
 import engineering.everest.lhotse.api.rest.requests.RegisterOrganizationRequest;
@@ -7,10 +8,13 @@ import engineering.everest.lhotse.api.rest.requests.UpdateUserRequest;
 import engineering.everest.lhotse.api.rest.responses.OrganizationRegistrationResponse;
 import engineering.everest.lhotse.api.rest.responses.OrganizationResponse;
 import engineering.everest.lhotse.api.rest.responses.UserResponse;
+import engineering.everest.lhotse.axon.common.services.KeycloakSynchronizationService;
+import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
@@ -27,6 +31,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.web.reactive.function.BodyInserters.fromValue;
 
+@Slf4j
 @Service
 public class ApiRestTestClient {
     @Value("${keycloak.auth-server-url}")
@@ -39,19 +44,29 @@ public class ApiRestTestClient {
     private String keycloakAdminRealm;
     @Value("${keycloak.resource}")
     private String keycloakAdminClientId;
-    @Value("${keycloak.credentials.secret}")
-    private String keycloakAdminClientSecret;
     @Value("${kc.server.connection.pool-size}")
     private int keycloakServerConnectionPoolSize;
 
-    private final WebTestClient webTestClient;
-    private String accessToken;
+    @Autowired
+    private KeycloakSynchronizationService keycloakSynchronizationService;
 
-    public ApiRestTestClient(WebTestClient webTestClient) {
+    private final WebTestClient webTestClient;
+    private final AdminProvisionTask adminProvisionTask;
+    private String accessToken;
+    private String clientSecret;
+
+    public ApiRestTestClient(WebTestClient webTestClient, AdminProvisionTask adminProvisionTask) {
         this.webTestClient = webTestClient;
+        this.adminProvisionTask = adminProvisionTask;
     }
 
     public void createAdminUserAndLogin() {
+        var userDetails = adminProvisionTask.run();
+        assertNotNull(userDetails);
+
+        clientSecret = userDetails.getOrDefault("clientSecret", null).toString();
+        assertNotNull(clientSecret);
+
         login(keycloakAdminUser, keycloakAdminPassword);
     }
 
@@ -65,7 +80,7 @@ public class ApiRestTestClient {
                 .grantType(OAuth2Constants.PASSWORD)
                 .realm(keycloakAdminRealm)
                 .clientId(keycloakAdminClientId)
-                .clientSecret(keycloakAdminClientSecret)
+                .clientSecret(clientSecret)
                 .username(username)
                 .password(password)
                 .resteasyClient(new ResteasyClientBuilder()

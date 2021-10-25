@@ -49,7 +49,7 @@ public class CustomMethodSecurityExpression extends SecurityExpressionRoot
 
     @Override
     public void setFilterObject(Object o) {
-        // Todo
+        // Do nothing
     }
 
     @Override
@@ -59,7 +59,7 @@ public class CustomMethodSecurityExpression extends SecurityExpressionRoot
 
     @Override
     public void setReturnObject(Object returnObject) {
-        // Todo
+        // Do nothing
     }
 
     @Override

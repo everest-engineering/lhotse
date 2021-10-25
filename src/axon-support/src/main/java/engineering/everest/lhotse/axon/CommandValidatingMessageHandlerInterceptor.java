@@ -36,7 +36,7 @@ public class CommandValidatingMessageHandlerInterceptor implements MessageHandle
         Map<Class<?>, Validates<?>> m = new ConcurrentHashMap<>();
         for (Validates<?> validator : validators) {
             Type validatableCommandType = Arrays.stream(validator.getClass().getGenericInterfaces())
-                    .map(e -> (ParameterizedType) e)
+                    .map(ParameterizedType.class::cast)
                     .filter(e -> Validates.class == e.getRawType())
                     .map(e -> e.getActualTypeArguments()[0])
                     .findFirst().orElseThrow();
