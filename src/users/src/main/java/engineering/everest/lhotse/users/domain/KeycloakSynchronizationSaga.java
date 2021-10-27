@@ -6,6 +6,7 @@ import engineering.everest.lhotse.axon.common.RetryWithExponentialBackoff;
 import engineering.everest.lhotse.axon.common.domain.UserAttribute;
 import engineering.everest.lhotse.axon.common.services.KeycloakSynchronizationService;
 import engineering.everest.lhotse.users.domain.events.UserDeletedAndForgottenEvent;
+import engineering.everest.lhotse.users.domain.events.UserDetailsUpdatedByAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserRolesUpdatedByAdminEvent;
 import engineering.everest.lhotse.users.services.UsersReadService;
 import org.axonframework.modelling.saga.EndSaga;
@@ -50,6 +51,21 @@ public class KeycloakSynchronizationSaga {
 
         keycloakSynchronizationService.updateUserAttributes(event.getUserId(),
                 Map.of("attributes", new UserAttribute(user.getOrganizationId(), event.getRoles(), user.getDisplayName())));
+    }
+
+    @StartSaga
+    @EndSaga
+    @SagaEventHandler(associationProperty = USER_ID_PROPERTY)
+    public void on(UserDetailsUpdatedByAdminEvent event) throws Exception {
+        var user = usersReadService.getById(event.getUserId());
+
+        waitForTheProjectionUpdate(() -> user.getEmail()
+                        .equals(event.getEmailChange() ) || user.getDisplayName().equals(event.getDisplayNameChange()),
+                "user email and displayName projection update");
+
+        keycloakSynchronizationService.updateUserAttributes(event.getUserId(),
+                Map.of("attributes", new UserAttribute(user.getOrganizationId(), user.getRoles(), event.getDisplayNameChange()),
+                        "email", event.getEmailChange()) );
     }
 
     @StartSaga
