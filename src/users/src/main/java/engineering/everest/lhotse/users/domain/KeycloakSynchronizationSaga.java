@@ -60,12 +60,12 @@ public class KeycloakSynchronizationSaga {
         var user = usersReadService.getById(event.getUserId());
 
         waitForTheProjectionUpdate(() -> user.getEmail()
-                        .equals(event.getEmailChange() ) || user.getDisplayName().equals(event.getDisplayNameChange()),
-                "user email and displayName projection update");
+                        .equals(event.getEmailChange()) || user.getDisplayName().equals(event.getDisplayNameChange()),
+                "user email or displayName projection update");
 
         keycloakSynchronizationService.updateUserAttributes(event.getUserId(),
                 Map.of("attributes", new UserAttribute(user.getOrganizationId(), user.getRoles(), event.getDisplayNameChange()),
-                        "email", event.getEmailChange()) );
+                        "email", event.getEmailChange()));
     }
 
     @StartSaga
