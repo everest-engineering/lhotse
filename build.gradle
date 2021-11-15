@@ -60,7 +60,6 @@ subprojects {
         javaXPersistenceVersion = '2.2'
         jsonHelperVersion = '20210307'
         keycloakVersion = '15.0.2'
-        keycloakRestClientVersion = '15.0.2'
         liquibaseVersion = '4.4.0'
         lombokVersion = '1.18.20'
         microMeterPrometheusVersion = '1.7.1'
@@ -73,7 +72,6 @@ subprojects {
         h2Version = '1.4.200'
         hamcrestVersion = '2.2'
         junitVersion = '5.7.2'
-        keycloakTestServerVersion = '15.0.2'
         mockitoVersion = '3.11.2'
         undercouchVersion = '4.1.2'
     }

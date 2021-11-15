@@ -77,7 +77,9 @@ public class UserController {
                 inputStream.transferTo(outputStream);
             }
         };
-        return ResponseEntity.ok().contentType(APPLICATION_OCTET_STREAM).body(streamingResponse);
+        return ResponseEntity.ok()
+                .contentType(APPLICATION_OCTET_STREAM)
+                .body(streamingResponse);
     }
 
     @GetMapping(value = "/profile-photo/thumbnail", produces = APPLICATION_OCTET_STREAM_VALUE)
@@ -89,6 +91,8 @@ public class UserController {
                 inputStream.transferTo(outputStream);
             }
         };
-        return ResponseEntity.ok().contentType(APPLICATION_OCTET_STREAM).body(streamingResponse);
+        return ResponseEntity.ok()
+                .contentType(APPLICATION_OCTET_STREAM)
+                .body(streamingResponse);
     }
 }

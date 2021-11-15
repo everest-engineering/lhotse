@@ -1,11 +1,5 @@
 package engineering.everest.lhotse.axon.common.services;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-
 import engineering.everest.lhotse.axon.common.domain.Role;
 import engineering.everest.lhotse.axon.common.domain.UserAttribute;
 import engineering.everest.lhotse.axon.common.exceptions.KeycloakSynchronizationException;
@@ -20,8 +14,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-
 import reactor.core.publisher.Mono;
+
+import java.util.UUID;
+import java.util.List;
+import java.util.Set;
+import java.util.Map;
+import java.util.HashMap;
 
 @Slf4j
 @Component
@@ -30,18 +29,27 @@ public class KeycloakSynchronizationService {
     private static final String AUTHORIZATION = "Authorization";
     private static final String VALUE_KEY = "value";
 
-    @Value("${keycloak.auth-server-url}")
-    private String keycloakServerAuthUrl;
-    @Value("${kc.server.admin-user}")
-    private String keycloakAdminUser;
-    @Value("${kc.server.admin-password}")
-    private String keycloakAdminPassword;
-    @Value("${kc.server.master-realm.default.client-id}")
-    private String keycloakMasterRealmAdminClientId;
-    @Value("${keycloak.resource}")
-    private String keycloakDefaultRealmDefaultClientId;
-    @Value("${kc.server.connection.pool-size}")
-    private int keycloakServerConnectionPoolSize;
+
+    private final String keycloakServerAuthUrl;
+    private final String keycloakAdminUser;
+    private final String keycloakAdminPassword;
+    private final String keycloakMasterRealmAdminClientId;
+    private final String keycloakDefaultRealmDefaultClientId;
+    private final int keycloakServerConnectionPoolSize;
+
+    public KeycloakSynchronizationService(@Value("${keycloak.auth-server-url}") String keycloakServerAuthUrl,
+                                          @Value("${kc.server.admin-user}") String keycloakAdminUser,
+                                          @Value("${kc.server.admin-password}") String keycloakAdminPassword,
+                                          @Value("${kc.server.master-realm.default.client-id}") String keycloakMasterRealmAdminClientId,
+                                          @Value("${keycloak.resource}") String keycloakDefaultRealmDefaultClientId,
+                                          @Value("${kc.server.connection.pool-size}") int keycloakServerConnectionPoolSize) {
+        this.keycloakServerAuthUrl = keycloakServerAuthUrl;
+        this.keycloakAdminUser = keycloakAdminUser;
+        this.keycloakAdminPassword = keycloakAdminPassword;
+        this.keycloakMasterRealmAdminClientId = keycloakMasterRealmAdminClientId;
+        this.keycloakDefaultRealmDefaultClientId = keycloakDefaultRealmDefaultClientId;
+        this.keycloakServerConnectionPoolSize = keycloakServerConnectionPoolSize;
+    }
 
     private Keycloak getAdminKeycloakClientInstance() {
         return KeycloakBuilder.builder().serverUrl(keycloakServerAuthUrl).grantType(OAuth2Constants.PASSWORD)

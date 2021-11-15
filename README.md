@@ -169,8 +169,8 @@ Previously known as Axon Framework, [Axon](https://axoniq.io/) is a framework fo
 [aggregates](https://www.martinfowler.com/bliki/DDD_Aggregate.html) and
 [CQRS](https://www.martinfowler.com/bliki/CQRS.html).
 
-DDD is, at its core, about **linguistics**. Establishing a ubiquitous language helps identify sources of overlap or
-tension in conceptual understanding that **may be** indicative of a separation of concern in a system. Rather than
+DDD is, at its core, about _linguistics_. Establishing a ubiquitous language helps identify sources of overlap or
+tension in conceptual understanding that _may be_ indicative of a separation of concern in a system. Rather than
 attempting to model a domain in intricate detail inside a common model, DDD places great emphasis on identifying these
 boundaries in order to define [bounded contexts](https://www.martinfowler.com/bliki/BoundedContext.html). These reduce
 complexity of the system by avoiding [anemic domain models](https://www.martinfowler.com/bliki/AnemicDomainModel.html)
@@ -178,11 +178,11 @@ due to a slow migration of complex domain logic from within the domain model to 
 system evolves.
 
 Event sourcing captures the activities of a business in an event log, an append-only history of every important
-**business action** that has ever been taken by users or by the system itself. Events are mapped to an arbitrary number
+_business action_ that has ever been taken by users or by the system itself. Events are mapped to an arbitrary number
 of projections for use by the query side of the system. Being able to replay events offers several significant benefits:
 
 - Projections can be optimised for reading by denormalising data
-- Events can be **upcasted**. That is, events are marked with a revision that allows them to be transformed to an updated
+- Events can be _upcasted_. That is, events are marked with a revision that allows them to be transformed to an updated
   version of the same event. This protects developers from creating significant errors in users' data due to, for example,
   accidentally transposing two fields within a command or event;
 - Projections can be updated with new information that was either captured by or derived from events. New business
@@ -230,7 +230,7 @@ overhead.
 
 There is a philosophical argument for defining aggregates such that all information required to validate commands is
 held by an aggregate in memory. In practice, however, more natural aggregates can be formed by allowing some validation
-to be based on **projections**. We also know from experience that some validation will be shared among multiple aggregates.
+to be based on _projections_. We also know from experience that some validation will be shared among multiple aggregates.
 The amount of testing required to verify all possible command failure situations tends to grow non-linearly as the number
 of checks that are performed inside an aggregate grows.
 
@@ -308,9 +308,7 @@ explains how it works, its limitations and an important caveat.
 
 ## Security and access control
 
-[Keycloak](https://www.keycloak.org/) is an open-source identity and access management solution aimed at modern applications and services. It makes it easy to secure applications and services with little to no code.
-
-We are using Keycloak to manage users' authentication, authorization, and session management.
+We are using [Keycloak](https://www.keycloak.org/) to manage users' authentication, authorization, and session management.
 
 Keycloak has the following three main concepts.
 
@@ -320,11 +318,10 @@ Keycloak has the following three main concepts.
 
 _Note: Our app has some internal roles for managing the user's access levels but those roles don't have any relation with Keycloak roles._
 
-### User and Authentication Token
+### User and Token
 
 A user object in the business domain often requires more attributes than a user object from the Keycloak authentication token.
-For an example, the starter kit's user object has an extra `organizationId` property. To bridge this difference for
-authentication context, we added this info in the Keycloak authentication token as other claims, and we can access these claims like remaining claims of a user object.
+For an example, the starter kit's user object has an extra `organizationId` attribute, to authorize the user, we added this info in the Keycloak authentication token as other claims, and we can access these claims like remaining claims of a user object.
 
 ### Endpoint access control
 

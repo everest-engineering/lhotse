@@ -56,17 +56,14 @@ public class UsersEventHandler implements ReplayCompletionAware {
                 event.getOrganizationId());
         usersRepository.createUser(event.getUserId(), event.getOrganizationId(), event.getUserDisplayName(),
                 event.getUserEmail(), creationTime);
-
-        // You may also want a non-replayable event handler for sending a welcome email
-        // to new users
     }
 
     @EventHandler
     void on(UserDetailsUpdatedByAdminEvent event) {
         LOGGER.info("User {} details updated by admin {}", event.getUserId(), event.getAdminId());
         var persistableUser = usersRepository.findById(event.getUserId()).orElseThrow();
-        persistableUser
-                .setDisplayName(selectDesiredState(event.getDisplayNameChange(), persistableUser.getDisplayName()));
+        persistableUser.setDisplayName(selectDesiredState(event.getDisplayNameChange(),
+                persistableUser.getDisplayName()));
         persistableUser.setEmail(selectDesiredState(event.getEmailChange(), persistableUser.getEmail()));
         usersRepository.save(persistableUser);
     }
@@ -99,8 +96,8 @@ public class UsersEventHandler implements ReplayCompletionAware {
     void on(UserDeletedAndForgottenEvent event) {
         LOGGER.info("Deleting user {}", event.getDeletedUserId());
         usersRepository.deleteById(event.getDeletedUserId());
-        cryptoShreddingKeyService
-                .deleteSecretKey(new TypeDifferentiatedSecretKeyId(event.getDeletedUserId().toString(), ""));
+        cryptoShreddingKeyService.deleteSecretKey(new TypeDifferentiatedSecretKeyId(event.getDeletedUserId()
+                .toString(), ""));
     }
 
     private String selectDesiredState(String desiredState, String currentState) {

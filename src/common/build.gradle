@@ -5,7 +5,7 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-starter-json:${springBootVersion}"
     implementation "org.apache.commons:commons-lang3:${commonsLangVersion}"
     implementation "org.json:json:${jsonHelperVersion}"
-    implementation "org.keycloak:keycloak-admin-client:${keycloakRestClientVersion}"
+    implementation "org.keycloak:keycloak-admin-client:${keycloakVersion}"
     implementation "org.springframework.boot:spring-boot-starter-webflux:${webfluxVersion}"
 
     testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"

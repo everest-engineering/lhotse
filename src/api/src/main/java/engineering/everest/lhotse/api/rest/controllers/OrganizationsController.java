@@ -102,7 +102,8 @@ public class OrganizationsController {
     @ApiOperation("Retrieve a list of users for an organization")
     @AdminOrUserOfTargetOrganization
     public List<UserResponse> listOrganizationUsers(@ApiIgnore Principal principal, @PathVariable UUID organizationId) {
-        return usersReadService.getUsersForOrganization(organizationId).stream().map(dtoConverter::convert)
+        return usersReadService.getUsersForOrganization(organizationId)
+                .stream().map(dtoConverter::convert)
                 .collect(toList());
     }
 

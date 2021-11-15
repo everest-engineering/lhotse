@@ -78,7 +78,7 @@ dependencies {
     testImplementation "org.apache.commons:commons-text:${commonsTextVersion}"
     testImplementation "org.bouncycastle:bcpkix-jdk15on:${bouncyCastleVersion}"
     testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo'
-    testImplementation "org.keycloak:keycloak-admin-client:${keycloakRestClientVersion}"
+    testImplementation "org.keycloak:keycloak-admin-client:${keycloakVersion}"
 }
 
 dependencyManagement {
@@ -88,8 +88,8 @@ dependencyManagement {
 }
 
 task downloadKeycloakZipFile(type: Download) {
-    src "https://github.com/keycloak/keycloak/releases/download/${keycloakTestServerVersion}/keycloak-${keycloakTestServerVersion}.zip"
-    dest new File(buildDir, "keycloak-${keycloakTestServerVersion}.zip")
+    src "https://github.com/keycloak/keycloak/releases/download/${keycloakVersion}/keycloak-${keycloakVersion}.zip"
+    dest new File(buildDir, "keycloak-${keycloakVersion}.zip")
     onlyIfModified true
 }
 
@@ -100,7 +100,7 @@ task downloadAndUnzipKeycloakFile(dependsOn: downloadKeycloakZipFile, type: Copy
 
 task startServer(dependsOn: 'downloadAndUnzipKeycloakFile') {
     doLast {
-        def keycloakDir = "$buildDir/keycloak-${keycloakTestServerVersion}"
+        def keycloakDir = "$buildDir/keycloak-${keycloakVersion}"
         def port = 8180
         def waitTime = 10000
         def testUser = "admin@everest.engineering"
@@ -114,7 +114,7 @@ task startServer(dependsOn: 'downloadAndUnzipKeycloakFile') {
         startServer.consumeProcessOutput(System.out, System.err)
         startServer.waitForOrKill(3 * waitTime)
 
-        def createRealm = "$keycloakDir/bin/kcadm.sh create realms -f $rootDir/imports/realm-export.json --no-config --server http://localhost:$port/auth --realm master --user $testUser --password $testPass".execute()
+        def createRealm = "$keycloakDir/bin/kcadm.sh create realms -f $rootDir/keycloak/imports/realm-export.json --no-config --server http://localhost:$port/auth --realm master --user $testUser --password $testPass".execute()
         createRealm.consumeProcessOutput(System.out, System.err)
         createRealm.waitForOrKill(waitTime)
     }

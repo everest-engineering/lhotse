@@ -1,35 +1,34 @@
 package engineering.everest.lhotse.api.config;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
-import org.springframework.context.annotation.PropertySource;
-
 import io.swagger.annotations.SwaggerDefinition;
 import io.swagger.annotations.Tag;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.Bean;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.OAuthBuilder;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.service.ApiInfo;
-import springfox.documentation.service.AuthorizationScope;
+import springfox.documentation.service.SecurityScheme;
 import springfox.documentation.service.GrantType;
 import springfox.documentation.service.ResourceOwnerPasswordCredentialsGrant;
 import springfox.documentation.service.SecurityReference;
-import springfox.documentation.service.SecurityScheme;
+import springfox.documentation.service.AuthorizationScope;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spi.service.contexts.SecurityContext;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger.web.SecurityConfiguration;
 import springfox.documentation.swagger.web.SecurityConfigurationBuilder;
 
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static springfox.documentation.builders.PathSelectors.regex;
-
 import java.util.Arrays;
 import java.util.Set;
 import java.util.function.Predicate;
+
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static springfox.documentation.builders.PathSelectors.regex;
 
 @Profile("!prod")
 @Configuration
@@ -42,17 +41,21 @@ import java.util.function.Predicate;
     @Tag(name = "OrgAdmins", description = "Organization Admin information and management"),
 })
 public class SwaggerConfig {
-    @Value("${keycloak.auth-server-url}")
+
     private String authServer;
-   
-    @Value("${keycloak.credentials.secret}")
     private String clientSecret;
-   
-    @Value("${keycloak.resource}")
     private String cliendId;
-   
-    @Value("${keycloak.realm}")
     private String realm;
+
+    public SwaggerConfig(@Value("${keycloak.auth-server-url}") String authServer,
+                         @Value("${keycloak.credentials.secret}") String clientSecret,
+                         @Value("${keycloak.resource}") String cliendId,
+                         @Value("${keycloak.realm}") String realm) {
+        this.authServer = authServer;
+        this.cliendId = cliendId;
+        this.clientSecret = clientSecret;
+        this.realm = realm;
+    }
 
     @Bean
     public Docket apiDocumentation() {
@@ -114,7 +117,6 @@ public class SwaggerConfig {
     private AuthorizationScope[] scopes() {
         return new AuthorizationScope[] { 
             new AuthorizationScope("read", "for read operations"), 
-            new AuthorizationScope("write", "for write operations"), 
-            new AuthorizationScope("foo", "Access foo API") };
+            new AuthorizationScope("write", "for write operations") };
     }
 }

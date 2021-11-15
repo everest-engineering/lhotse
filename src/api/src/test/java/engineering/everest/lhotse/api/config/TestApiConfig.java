@@ -31,7 +31,7 @@ import org.springframework.security.web.authentication.session.RegisterSessionAu
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
-import java.util.*;
+import java.util.UUID;
 
 import static org.mockito.Mockito.mock;
 import static org.springframework.core.Ordered.HIGHEST_PRECEDENCE;

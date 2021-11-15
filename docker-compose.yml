@@ -37,8 +37,8 @@ services:
     command: 
       -Djboss.http.port=${KEYCLOAK_SERVER_PORT}
     volumes:
-      - ./imports:/opt/jboss/keycloak/imports
-      - ./keycloak-themes/custom:/opt/jboss/keycloak/themes/custom
+      - ./keycloak/imports:/opt/jboss/keycloak/imports
+      - ./keycloak/themes/custom:/opt/jboss/keycloak/themes/custom
     environment:
       DB_VENDOR: POSTGRES
       DB_ADDR: postgres-db

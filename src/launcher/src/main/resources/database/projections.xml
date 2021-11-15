@@ -35,7 +35,6 @@
             </column>
             <column name="displayname" type="varchar(255)"/>
             <column name="email" type="varchar(255)"/>
-            <column name="encodedpassword" type="varchar(255)"/>
             <column name="organizationid" type="uuid"/>
             <column name="profilephotofileid" type="uuid"/>
             <column name="username" type="varchar(255)">

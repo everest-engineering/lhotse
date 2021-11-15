@@ -44,6 +44,5 @@ build/
 .project
 .settings
 .vscode
-.env
 /src/launcher/bin
 *.classpath

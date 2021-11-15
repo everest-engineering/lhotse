@@ -53,7 +53,9 @@ public class AdminOrganizationsController {
     @ApiOperation("Retrieves details of all organizations")
     @AdminOnly
     public List<OrganizationResponse> getAllOrganizations() {
-        return organizationsReadService.getOrganizations().stream().map(dtoConverter::convert).collect(toList());
+        return organizationsReadService.getOrganizations().stream()
+                .map(dtoConverter::convert)
+                .collect(toList());
     }
 
     @PostMapping

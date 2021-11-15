@@ -12,27 +12,25 @@ import engineering.everest.lhotse.users.services.UsersReadService;
 import engineering.everest.lhotse.users.services.UsersService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import springfox.documentation.annotations.ApiIgnore;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
 import javax.validation.Valid;
+import java.security.Principal;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
 import static java.util.stream.Collectors.toList;
 import static org.springframework.http.HttpStatus.OK;
-
-import java.security.Principal;
 
 @RestController
 @RequestMapping("/api/users")
@@ -54,7 +52,9 @@ public class UsersController {
     @ApiOperation("Retrieves entire user list for all organisations")
     @AdminOnly
     public List<UserResponse> getAllUsers() {
-        return usersReadService.getUsers().stream().map(dtoConverter::convert).collect(toList());
+        return usersReadService.getUsers()
+                .stream().map(dtoConverter::convert)
+                .collect(toList());
     }
 
     @PostMapping("/{userId}/forget")
