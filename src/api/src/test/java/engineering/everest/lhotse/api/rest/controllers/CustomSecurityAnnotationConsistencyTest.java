@@ -1,7 +1,6 @@
 package engineering.everest.lhotse.api.rest.controllers;
 
 import engineering.everest.lhotse.api.rest.annotations.AdminOrAdminOfTargetOrganization;
-import engineering.everest.lhotse.api.rest.annotations.AdminOrExpertOfTargetOrganization;
 import engineering.everest.lhotse.api.rest.annotations.AdminOrUserOfTargetOrganization;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -61,8 +60,7 @@ class CustomSecurityAnnotationConsistencyTest {
 
     private boolean isSecurityAnnotationPresent(Method method) {
         return method.isAnnotationPresent(AdminOrAdminOfTargetOrganization.class)
-                || method.isAnnotationPresent(AdminOrUserOfTargetOrganization.class)
-                || method.isAnnotationPresent(AdminOrExpertOfTargetOrganization.class);
+                || method.isAnnotationPresent(AdminOrUserOfTargetOrganization.class);
     }
 
     private boolean isMethodSignatureConsistentWithSecurityAnnotation(Method method) {

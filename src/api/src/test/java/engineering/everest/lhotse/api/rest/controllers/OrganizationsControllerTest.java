@@ -7,11 +7,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import engineering.everest.lhotse.api.config.TestApiConfig;
 import engineering.everest.lhotse.api.rest.converters.DtoConverter;
 import engineering.everest.lhotse.api.rest.requests.NewUserRequest;
-import engineering.everest.lhotse.api.rest.requests.RegisterOrganizationRequest;
 import engineering.everest.lhotse.api.rest.requests.UpdateOrganizationRequest;
 import engineering.everest.lhotse.api.rest.responses.OrganizationResponse;
 import engineering.everest.lhotse.api.rest.responses.UserResponse;
-import engineering.everest.lhotse.axon.common.RandomFieldsGenerator;
 import engineering.everest.lhotse.axon.common.domain.User;
 import engineering.everest.lhotse.organizations.Organization;
 import engineering.everest.lhotse.organizations.OrganizationAddress;
@@ -53,7 +51,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ContextConfiguration(classes = { TestApiConfig.class, OrganizationsController.class })
 class OrganizationsControllerTest {
 
-    private static final UUID USER_ID = randomUUID();
     private static final String NEW_USER_USERNAME = "new@umbrella.com";
     private static final String NEW_USER_DISPLAY_NAME = "new user";
     private static final String ROLE_ADMIN = "ROLE_ADMIN";
@@ -86,8 +83,6 @@ class OrganizationsControllerTest {
     private UsersService usersService;
     @MockBean
     private UsersReadService usersReadService;
-    @MockBean
-    private RandomFieldsGenerator randomFieldsGenerator;
 
     @BeforeEach
     public void setup() {
@@ -106,33 +101,6 @@ class OrganizationsControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$.id", is(organizationId.toString())));
-    }
-
-    @Test
-    void registerOrganizationWillDelegate() throws Exception {
-        when(randomFieldsGenerator.genRandomUUID()).thenReturn(USER_ID);
-        OrganizationAddress address = ORGANIZATION_1.getOrganizationAddress();
-        RegisterOrganizationRequest registerOrganizationRequest = new RegisterOrganizationRequest(ORGANIZATION_1.getOrganizationName(), address.getStreet(),
-                address.getCity(), address.getState(), address.getCountry(), address.getPostalCode(), ORGANIZATION_1.getWebsiteUrl(),
-                ORGANIZATION_1.getContactName(), ORGANIZATION_1.getPhoneNumber(), ORGANIZATION_1.getEmailAddress());
-
-        when(organizationsService.createOrganization(USER_ID, ORGANIZATION_1.getOrganizationName(), address.getStreet(),
-                address.getCity(), address.getState(), address.getCountry(), address.getPostalCode(), ORGANIZATION_1.getWebsiteUrl(),
-                ORGANIZATION_1.getContactName(), ORGANIZATION_1.getPhoneNumber(), ORGANIZATION_1.getEmailAddress())).thenReturn(ORGANIZATION_1.getId());
-
-        mockMvc.perform(post("/api/organizations/register")
-                        .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(registerOrganizationRequest)))
-                .andExpect(status().isCreated())
-                .andExpect(content().contentType(APPLICATION_JSON))
-                .andExpect(jsonPath("$.newOrganizationId", is(ORGANIZATION_1.getId().toString())))
-                .andExpect(jsonPath("$.newUserId", is(USER_ID.toString())));
-
-        verify(organizationsService).createOrganization(USER_ID, ORGANIZATION_1.getOrganizationName(),
-                address.getStreet(), address.getCity(), address.getState(), address.getCountry(), address.getPostalCode(),
-                ORGANIZATION_1.getWebsiteUrl(), ORGANIZATION_1.getContactName(), ORGANIZATION_1.getPhoneNumber(), ORGANIZATION_1.getEmailAddress());
-
-        verifyNoInteractions(usersService);
     }
 
     @Test

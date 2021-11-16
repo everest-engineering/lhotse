@@ -41,7 +41,7 @@ public class CustomMethodSecurityExpression extends SecurityExpressionRoot
         return Arrays.stream(roles.toArray()).anyMatch(v -> v.equals(role));
     }
 
-    public boolean belongsToOrg(UUID organizationId) {
+    public boolean memberOfOrg(UUID organizationId) {
         var otherClaims = principal.getKeycloakSecurityContext().getToken().getOtherClaims();
         return otherClaims != null && otherClaims.containsKey("organizationId")
                 && organizationId.compareTo(UUID.fromString(otherClaims.get("organizationId").toString())) == 0;

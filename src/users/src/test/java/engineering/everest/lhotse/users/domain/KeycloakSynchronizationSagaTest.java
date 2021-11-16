@@ -1,9 +1,9 @@
 package engineering.everest.lhotse.users.domain;
 
+import engineering.everest.lhotse.api.services.KeycloakSynchronizationService;
 import engineering.everest.lhotse.axon.common.domain.Role;
 import engineering.everest.lhotse.axon.common.domain.User;
 import engineering.everest.lhotse.axon.common.domain.UserAttribute;
-import engineering.everest.lhotse.axon.common.services.KeycloakSynchronizationService;
 import engineering.everest.lhotse.users.domain.events.UserDeletedAndForgottenEvent;
 import engineering.everest.lhotse.users.domain.events.UserDetailsUpdatedByAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserRolesUpdatedByAdminEvent;

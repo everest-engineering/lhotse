@@ -8,7 +8,7 @@ import engineering.everest.lhotse.api.rest.requests.UpdateUserRequest;
 import engineering.everest.lhotse.api.rest.responses.OrganizationRegistrationResponse;
 import engineering.everest.lhotse.api.rest.responses.OrganizationResponse;
 import engineering.everest.lhotse.api.rest.responses.UserResponse;
-import engineering.everest.lhotse.axon.common.services.KeycloakSynchronizationService;
+import engineering.everest.lhotse.api.services.KeycloakSynchronizationService;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.keycloak.OAuth2Constants;
@@ -122,18 +122,6 @@ public class ApiRestTestClient {
                 .expectStatus().isEqualTo(expectedHttpStatus);
         if (expectedHttpStatus == CREATED) {
             return responseSpec.returnResult(UUID.class).getResponseBody().blockFirst();
-        }
-        return null;
-    }
-
-    public OrganizationRegistrationResponse registerNewOrganization(RegisterOrganizationRequest request, HttpStatus expectedHttpStatus) {
-        ResponseSpec responseSpec = webTestClient.post().uri("/api/organizations/register")
-                .contentType(APPLICATION_JSON)
-                .body(fromValue(request))
-                .exchange()
-                .expectStatus().isEqualTo(expectedHttpStatus);
-        if (expectedHttpStatus == CREATED) {
-            return responseSpec.returnResult(OrganizationRegistrationResponse.class).getResponseBody().blockFirst();
         }
         return null;
     }

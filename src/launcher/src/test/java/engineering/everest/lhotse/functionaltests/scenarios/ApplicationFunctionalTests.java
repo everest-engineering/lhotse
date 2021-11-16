@@ -3,12 +3,10 @@ package engineering.everest.lhotse.functionaltests.scenarios;
 import engineering.everest.lhotse.Launcher;
 import engineering.everest.lhotse.api.rest.requests.NewOrganizationRequest;
 import engineering.everest.lhotse.api.rest.requests.NewUserRequest;
-import engineering.everest.lhotse.api.rest.requests.RegisterOrganizationRequest;
 import engineering.everest.lhotse.api.rest.requests.UpdateUserRequest;
 import engineering.everest.lhotse.axon.CommandValidatingMessageHandlerInterceptor;
 import engineering.everest.lhotse.axon.common.RetryWithExponentialBackoff;
-import engineering.everest.lhotse.axon.common.domain.Role;
-import engineering.everest.lhotse.axon.common.services.KeycloakSynchronizationService;
+import engineering.everest.lhotse.api.services.KeycloakSynchronizationService;
 import engineering.everest.lhotse.functionaltests.helpers.ApiRestTestClient;
 import engineering.everest.lhotse.organizations.services.OrganizationsReadService;
 import engineering.everest.lhotse.users.services.UsersReadService;
@@ -25,8 +23,6 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.time.Duration;
 import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -78,43 +74,21 @@ class ApplicationFunctionalTests {
         var newUserRequest = new NewUserRequest("user@example.com", "Captain Fancypants");
         var organizationId = apiRestTestClient.createOrganization(newOrganizationRequest, CREATED);
 
-        var waiter = new RetryWithExponentialBackoff(Duration.ofMillis(200), 2L, Duration.ofMinutes(1),
-                sleepDuration -> MILLISECONDS.sleep(sleepDuration.toMillis()));
-        waiter.waitOrThrow(() -> organizationsReadService.exists(organizationId), "organization registration projection update");
+        RetryWithExponentialBackoff.oneMinuteWaiter().waitOrThrow(() -> organizationsReadService.exists(organizationId),
+                "organization registration projection update");
 
         var userId = apiRestTestClient.createUser(organizationId, newUserRequest, CREATED);
-        waiter.waitOrThrow(() -> usersReadService.exists(userId), "user registration projection update");
+        RetryWithExponentialBackoff.oneMinuteWaiter().waitOrThrow(() -> usersReadService.exists(userId),
+                "user registration projection update");
         apiRestTestClient.getUser(userId, OK);
 
         var userUpdateRequest = new UpdateUserRequest("Captain Jack Sparrow", "jack@example.com");
         apiRestTestClient.updateUser(userId, userUpdateRequest, OK);
-        waiter.waitOrThrow(() -> usersReadService.getById(userId).getEmail()
+        RetryWithExponentialBackoff.oneMinuteWaiter().waitOrThrow(() -> usersReadService.getById(userId).getEmail()
                         .equals(userUpdateRequest.getEmail()) || usersReadService.getById(userId).getDisplayName().equals(userUpdateRequest.getDisplayName()),
                 "=> user email or displayName projection update");
         assertEquals(apiRestTestClient.getUser(userId, OK).getDisplayName(), userUpdateRequest.getDisplayName());
         assertEquals(apiRestTestClient.getUser(userId, OK).getEmail(), userUpdateRequest.getEmail());
-    }
-
-    @Test
-    void newUsersCanRegisterTheirOrganizationAndCreateNewUsersInTheirOrganization() throws Exception {
-        apiRestTestClient.logout();
-        var registerOrganizationRequest = new RegisterOrganizationRequest("Alice's Art Artefactory", "123 Any Street", "Melbourne", "Victoria", "Australia", "3000", "http://alicesartartefactory.com", "Alice", "+61 422 123 456", "alice@example.com");
-        var organizationRegistrationResponse = apiRestTestClient.registerNewOrganization(registerOrganizationRequest, CREATED);
-        var newOrganizationId = organizationRegistrationResponse.getNewOrganizationId();
-        var waiter = new RetryWithExponentialBackoff(Duration.ofMillis(200), 2L, Duration.ofMinutes(1),
-                sleepDuration -> MILLISECONDS.sleep(sleepDuration.toMillis()));
-        waiter.waitOrThrow(() -> organizationsReadService.exists(newOrganizationId), "organization registration projection update");
-
-        keycloakSynchronizationService.setupKeycloakUser("kitty@example.com", "kitty@example.com", true, UUID.randomUUID(), Set.of(Role.ORG_USER, Role.ORG_ADMIN),
-                "Kitty", "meow@123", false);
-        apiRestTestClient.login("kitty@example.com", "meow@123");
-
-        var newUserRequest = new NewUserRequest("bob@example.com", "My name is Bob");
-        var userId = apiRestTestClient.createUser(newOrganizationId, newUserRequest, CREATED);
-        waiter.waitOrThrow(() -> usersReadService.exists(userId), "user registration projection update");
-
-        assertEquals(apiRestTestClient.getUser(userId, OK).getUsername(), newUserRequest.getUsername());
-        assertEquals(apiRestTestClient.getUser(userId, OK).getDisplayName(), newUserRequest.getDisplayName());
     }
 
     @Data

@@ -1,8 +1,8 @@
 package engineering.everest.lhotse.users.services;
 
 import engineering.everest.axon.HazelcastCommandGateway;
+import engineering.everest.lhotse.api.services.KeycloakSynchronizationService;
 import engineering.everest.lhotse.axon.common.domain.Role;
-import engineering.everest.lhotse.axon.common.services.KeycloakSynchronizationService;
 import engineering.everest.lhotse.users.domain.commands.CreateUserCommand;
 import engineering.everest.lhotse.users.domain.commands.DeleteAndForgetUserCommand;
 import engineering.everest.lhotse.users.domain.commands.RegisterUploadedUserProfilePhotoCommand;
@@ -48,7 +48,7 @@ class DefaultUsersServiceTest {
         defaultUsersService.updateUser(ADMIN_ID, USER_ID, "email-change",
                 "display-name-change");
 
-        verify(commandGateway).sendAndWait(new UpdateUserDetailsCommand(USER_ID, "email-change",
+        verify(commandGateway).send(new UpdateUserDetailsCommand(USER_ID, "email-change",
                 "display-name-change", ADMIN_ID));
     }
 
@@ -56,7 +56,7 @@ class DefaultUsersServiceTest {
     void updateUserRoles_WillSendCommandAndWaitForCompletion() {
         var roles = Set.of(Role.ORG_ADMIN, Role.ORG_USER);
         defaultUsersService.updateUserRoles(ADMIN_ID, USER_ID, roles);
-        verify(commandGateway).sendAndWait(new UpdateUserRolesCommand(USER_ID, roles, ADMIN_ID));
+        verify(commandGateway).send(new UpdateUserRolesCommand(USER_ID, roles, ADMIN_ID));
     }
 
     @Test
@@ -70,12 +70,12 @@ class DefaultUsersServiceTest {
     @Test
     void storeProfilePhoto_WillSendCommandAndWaitForCompletion() {
         defaultUsersService.storeProfilePhoto(USER_ID, PROFILE_PHOTO_FILE_ID);
-        verify(commandGateway).sendAndWait(new RegisterUploadedUserProfilePhotoCommand(USER_ID, PROFILE_PHOTO_FILE_ID));
+        verify(commandGateway).send(new RegisterUploadedUserProfilePhotoCommand(USER_ID, PROFILE_PHOTO_FILE_ID));
     }
 
     @Test
     void deleteAndForget_WillSendCommandAndWaitForCompletion() {
         defaultUsersService.deleteAndForget(ADMIN_ID, USER_ID, "User requested and we do the right thing");
-        verify(commandGateway).sendAndWait(new DeleteAndForgetUserCommand(USER_ID, ADMIN_ID, "User requested and we do the right thing"));
+        verify(commandGateway).send(new DeleteAndForgetUserCommand(USER_ID, ADMIN_ID, "User requested and we do the right thing"));
     }
 }

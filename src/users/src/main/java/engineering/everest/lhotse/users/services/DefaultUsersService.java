@@ -2,9 +2,9 @@ package engineering.everest.lhotse.users.services;
 
 import engineering.everest.axon.HazelcastCommandGateway;
 import engineering.everest.axon.exceptions.RemoteCommandExecutionException;
+import engineering.everest.lhotse.api.exceptions.KeycloakSynchronizationException;
+import engineering.everest.lhotse.api.services.KeycloakSynchronizationService;
 import engineering.everest.lhotse.axon.common.domain.UserAttribute;
-import engineering.everest.lhotse.axon.common.exceptions.KeycloakSynchronizationException;
-import engineering.everest.lhotse.axon.common.services.KeycloakSynchronizationService;
 import engineering.everest.lhotse.users.domain.commands.CreateUserCommand;
 import engineering.everest.lhotse.users.domain.commands.DeleteAndForgetUserCommand;
 import engineering.everest.lhotse.users.domain.commands.RegisterUploadedUserProfilePhotoCommand;
@@ -35,12 +35,12 @@ public class DefaultUsersService implements UsersService {
 
     @Override
     public void updateUser(UUID requestingUserId, UUID userId, String emailChange, String displayNameChange) {
-        commandGateway.sendAndWait(new UpdateUserDetailsCommand(userId, emailChange, displayNameChange, requestingUserId));
+        commandGateway.send(new UpdateUserDetailsCommand(userId, emailChange, displayNameChange, requestingUserId));
     }
 
     @Override
     public void updateUserRoles(UUID requestingUserId, UUID userId, Set<Role> roles) {
-        commandGateway.sendAndWait(new UpdateUserRolesCommand(userId, roles, requestingUserId));
+        commandGateway.send(new UpdateUserRolesCommand(userId, roles, requestingUserId));
     }
 
     @Override
@@ -70,12 +70,12 @@ public class DefaultUsersService implements UsersService {
 
     @Override
     public void storeProfilePhoto(UUID requestingUserId, UUID profilePhotoFileId) {
-        commandGateway.sendAndWait(new RegisterUploadedUserProfilePhotoCommand(requestingUserId, profilePhotoFileId));
+        commandGateway.send(new RegisterUploadedUserProfilePhotoCommand(requestingUserId, profilePhotoFileId));
     }
 
     @Override
     public void deleteAndForget(UUID requestingUserId, UUID userId, String requestReason) {
-        commandGateway.sendAndWait(new DeleteAndForgetUserCommand(userId, requestingUserId, requestReason));
+        commandGateway.send(new DeleteAndForgetUserCommand(userId, requestingUserId, requestReason));
     }
 
     private UUID getUserId(String username) {

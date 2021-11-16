@@ -126,7 +126,8 @@ public class UserAggregate implements Serializable {
     }
 
     private void validateAtLeastOneChangeIsBeingMade(UpdateUserDetailsCommand command) {
-        boolean changesMade = command.getDisplayNameChange() != null || command.getEmailChange() != null;
+        boolean changesMade = command.getDisplayNameChange() != null
+                || command.getEmailChange() != null;
         if (!changesMade) {
             TranslatableExceptionFactory.throwForKey(USER_UPDATE_NO_FIELDS_CHANGED);
         }

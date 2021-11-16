@@ -53,49 +53,43 @@ public class FilterConfigTest {
     }
 
     @Test
-    void shouldNotFilterWillReturnTrueForRootPath() {
+    void shouldNotFilterMethod_WillReturnTrueForRootPath() {
         when(httpServletRequest.getServletPath()).thenReturn("/");
         assertTrue(filterConfig.shouldNotFilter(httpServletRequest));
     }
 
     @Test
-    void shouldNotFilterWillReturnTrueForInvalidPath() {
+    void shouldNotFilterMethod_WillReturnTrueForInvalidPath() {
         when(httpServletRequest.getServletPath()).thenReturn("/invalid");
         assertTrue(filterConfig.shouldNotFilter(httpServletRequest));
     }
 
     @Test
-    void shouldNotFilterWillReturnTrueForRegisterOrganizationsAPIPath() {
-        when(httpServletRequest.getServletPath()).thenReturn("/api/organizations/register");
-        assertTrue(filterConfig.shouldNotFilter(httpServletRequest));
-    }
-
-    @Test
-    void shouldNotFilterWillReturnTrueForVersionApiPath() {
+    void shouldNotFilterMethod_WillReturnTrueForVersionApiPath() {
         when(httpServletRequest.getServletPath()).thenReturn("/api/version");
         assertTrue(filterConfig.shouldNotFilter(httpServletRequest));
     }
 
     @Test
-    void shouldNotFilterWillReturnFalseForUserApiPath() {
+    void shouldNotFilterMethod_WillReturnFalseForUserApiPath() {
         when(httpServletRequest.getServletPath()).thenReturn("/api/user");
         assertFalse(filterConfig.shouldNotFilter(httpServletRequest));
     }
 
     @Test
-    void shouldNotFilterWillReturnFalseForUsersApiPath() {
+    void shouldNotFilterMethod_WillReturnFalseForUsersApiPath() {
         when(httpServletRequest.getServletPath()).thenReturn("/api/users");
         assertFalse(filterConfig.shouldNotFilter(httpServletRequest));
     }
 
     @Test
-    void shouldNotFilterWillReturnFalseForOrganizationsApiPath() {
+    void shouldNotFilterMethod_WillReturnFalseForOrganizationsApiPath() {
         when(httpServletRequest.getServletPath()).thenReturn("/api/organizations");
         assertFalse(filterConfig.shouldNotFilter(httpServletRequest));
     }
 
     @Test
-    void shouldNotFilterWillReturnFalseForAdminApiPath() {
+    void shouldNotFilterMethod_WillReturnFalseForAdminApiPath() {
         when(httpServletRequest.getServletPath()).thenReturn("/admin");
         assertFalse(filterConfig.shouldNotFilter(httpServletRequest));
     }
@@ -138,7 +132,7 @@ public class FilterConfigTest {
         verify(usersReadService, never()).exists(any());
         verify(organizationsReadService, never()).exists(any());
         verify(usersReadService, never()).getById(any());
-        verify(hazelcastCommandGateway, never()).sendAndWait(any());
+        verify(hazelcastCommandGateway, never()).send(any());
         verifyNoMoreInteractions(hazelcastCommandGateway, createSelfRegisteredOrganizationCommand);
     }
 }

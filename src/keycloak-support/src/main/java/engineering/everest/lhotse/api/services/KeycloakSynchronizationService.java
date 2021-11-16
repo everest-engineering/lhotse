@@ -1,8 +1,8 @@
-package engineering.everest.lhotse.axon.common.services;
+package engineering.everest.lhotse.api.services;
 
+import engineering.everest.lhotse.api.exceptions.KeycloakSynchronizationException;
 import engineering.everest.lhotse.axon.common.domain.Role;
 import engineering.everest.lhotse.axon.common.domain.UserAttribute;
-import engineering.everest.lhotse.axon.common.exceptions.KeycloakSynchronizationException;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.json.JSONArray;
@@ -11,6 +11,7 @@ import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -22,13 +23,16 @@ import java.util.Set;
 import java.util.Map;
 import java.util.HashMap;
 
+import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.HttpMethod.DELETE;
+
 @Slf4j
 @Component
 public class KeycloakSynchronizationService {
     private static final String BEARER = "Bearer ";
     private static final String AUTHORIZATION = "Authorization";
     private static final String VALUE_KEY = "value";
-
 
     private final String keycloakServerAuthUrl;
     private final String keycloakAdminUser;
@@ -52,81 +56,78 @@ public class KeycloakSynchronizationService {
     }
 
     private Keycloak getAdminKeycloakClientInstance() {
-        return KeycloakBuilder.builder().serverUrl(keycloakServerAuthUrl).grantType(OAuth2Constants.PASSWORD)
-                .realm("master").clientId(keycloakMasterRealmAdminClientId).username(keycloakAdminUser)
+        return KeycloakBuilder.builder()
+                .serverUrl(keycloakServerAuthUrl)
+                .grantType(OAuth2Constants.PASSWORD)
+                .realm("master")
+                .clientId(keycloakMasterRealmAdminClientId)
+                .username(keycloakAdminUser)
                 .password(keycloakAdminPassword)
-                .resteasyClient(new ResteasyClientBuilder().connectionPoolSize(keycloakServerConnectionPoolSize).build()).build();
+                .resteasyClient(new ResteasyClientBuilder()
+                        .connectionPoolSize(keycloakServerConnectionPoolSize).build())
+                .build();
     }
 
     public void updateUserAttributes(UUID userId, Map<String, Object> attributes) {
-        var usersUri = String.format("%s/admin/realms/default/users/%s", keycloakServerAuthUrl, userId);
-        var accessToken = BEARER + getAdminKeycloakClientInstance().tokenManager().getAccessToken().getToken();
-
-        WebClient.create(usersUri).put().header(AUTHORIZATION, accessToken).contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON).bodyValue(attributes)
-                .exchangeToMono(res -> Mono.just(res.statusCode())).block();
+        webclient(constructUrlPath("/users/%s", userId), GET)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(attributes)
+                .exchangeToMono(res -> Mono.just(res.statusCode()))
+                .block();
     }
 
     public void deleteUser(UUID userId) {
-        var usersUri = String.format("%s/admin/realms/default/users/%s", keycloakServerAuthUrl, userId);
-        var accessToken = BEARER + getAdminKeycloakClientInstance().tokenManager().getAccessToken().getToken();
-
-        WebClient.create(usersUri).delete().header(AUTHORIZATION, accessToken)
-                .exchangeToMono(res -> Mono.just(res.statusCode())).block();
+        webclient(constructUrlPath("/users/%s", userId), DELETE)
+                .exchangeToMono(res -> Mono.just(res.statusCode()))
+                .block();
     }
 
     public void createUser(Map<String, Object> userDetails) {
-        var usersUri = String.format("%s/admin/realms/default/users", keycloakServerAuthUrl);
-        var accessToken = BEARER + getAdminKeycloakClientInstance().tokenManager().getAccessToken().getToken();
-
-        WebClient.create(usersUri).post().header(AUTHORIZATION, accessToken).contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON).bodyValue(userDetails)
-                .exchangeToMono(res -> Mono.just(res.statusCode())).block();
+        webclient(constructUrlPath("/users", ""), POST)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(userDetails)
+                .exchangeToMono(res -> Mono.just(res.statusCode()))
+                .block();
     }
 
     public String getUsers(Map<String, Object> queryFilters) {
-        var usersUri = String.format("%s/admin/realms/default/users", keycloakServerAuthUrl);
-        var accessToken = BEARER + getAdminKeycloakClientInstance().tokenManager().getAccessToken().getToken();
-
-        usersUri += getFilters(queryFilters);
-        return WebClient.create(usersUri).get().header(AUTHORIZATION, accessToken).retrieve().bodyToMono(String.class)
+        var usersUri = constructUrlPath("/users", "") + getFilters(queryFilters);
+        return webclient(usersUri, GET)
+                .retrieve()
+                .bodyToMono(String.class)
                 .block();
     }
 
     public String getClientDetails(Map<String, Object> queryFilters) {
-        var clientsUri = String.format("%s/admin/realms/default/clients", keycloakServerAuthUrl);
-        var accessToken = BEARER + getAdminKeycloakClientInstance().tokenManager().getAccessToken().getToken();
-
-        clientsUri += getFilters(queryFilters);
-        return WebClient.create(clientsUri).get().header(AUTHORIZATION, accessToken).retrieve().bodyToMono(String.class)
+        var clientsUri = constructUrlPath("/clients", "") + getFilters(queryFilters);
+        return webclient(clientsUri, GET)
+                .retrieve()
+                .bodyToMono(String.class)
                 .block();
     }
 
     public String getClientLevelRoleMappings(UUID userId, UUID clientId) {
-        var clientLevelAvailableRolesUri =
-                String.format("%s/admin/realms/default/users/%s/role-mappings/clients/%s/available",
-                        keycloakServerAuthUrl, userId, clientId);
-        var accessToken = BEARER + getAdminKeycloakClientInstance().tokenManager().getAccessToken().getToken();
-
-        return WebClient.create(clientLevelAvailableRolesUri).get().header(AUTHORIZATION, accessToken).retrieve().bodyToMono(String.class)
+        return webclient(constructUrlPath("/users/%s/role-mappings/clients/%s/available", userId, clientId), GET)
+                .retrieve()
+                .bodyToMono(String.class)
                 .block();
     }
 
     public void updateUserRoles(UUID userId, UUID clientId, List<Map<String, Object>> roles) {
-        var userClientRolesMappingUri =
-                String.format("%s/admin/realms/default/users/%s/role-mappings/clients/%s", keycloakServerAuthUrl, userId, clientId);
-        var accessToken = BEARER + getAdminKeycloakClientInstance().tokenManager().getAccessToken().getToken();
-
-        WebClient.create(userClientRolesMappingUri).post().header(AUTHORIZATION, accessToken).contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON).bodyValue(roles)
-                .exchangeToMono(res -> Mono.just(res.statusCode())).block();
+        webclient(constructUrlPath("/users/%s/role-mappings/clients/%s", userId, clientId), POST)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(roles)
+                .exchangeToMono(res -> Mono.just(res.statusCode()))
+                .block();
     }
 
     public String getClientSecret(UUID clientId) {
-        var clientSecretUri = String.format("%s/admin/realms/default/clients/%s/client-secret", keycloakServerAuthUrl, clientId);
-        var accessToken = BEARER + getAdminKeycloakClientInstance().tokenManager().getAccessToken().getToken();
-
-        return WebClient.create(clientSecretUri).get().header(AUTHORIZATION, accessToken).retrieve().bodyToMono(String.class)
+        return webclient(constructUrlPath("/clients/%s/client-secret", clientId), GET)
+                .retrieve()
+                .bodyToMono(String.class)
                 .block();
     }
 
@@ -185,5 +186,22 @@ public class KeycloakSynchronizationService {
             throw (KeycloakSynchronizationException)new KeycloakSynchronizationException(e.getMessage()).initCause(e);
         }
         return userDetails;
+    }
+
+    private String constructUrlPath(String path, Object...params) {
+        return String.format(keycloakServerAuthUrl + "/admin/realms/default" + path, params);
+    }
+
+    private String accessToken() {
+        return BEARER + getAdminKeycloakClientInstance()
+                .tokenManager()
+                .getAccessToken()
+                .getToken();
+    }
+
+    private WebClient.RequestBodySpec webclient(String url, HttpMethod method) {
+        return WebClient.create(url)
+                .method(method)
+                .header(AUTHORIZATION, accessToken());
     }
 }

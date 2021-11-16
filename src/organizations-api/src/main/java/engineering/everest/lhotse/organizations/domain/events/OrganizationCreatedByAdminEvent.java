@@ -1,18 +1,18 @@
 package engineering.everest.lhotse.organizations.domain.events;
 
+import engineering.everest.lhotse.axon.command.validation.ValidatableCommand;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.axonframework.serialization.Revision;
 
-import java.io.Serializable;
 import java.util.UUID;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Revision("0")
-public class OrganizationCreatedByAdminEvent implements Serializable {
+public class OrganizationCreatedByAdminEvent implements ValidatableCommand {
     private UUID organizationId;
     private UUID registeringUserId;
     private String organizationName;

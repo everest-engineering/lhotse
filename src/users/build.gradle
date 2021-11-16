@@ -8,6 +8,7 @@ dependencies {
     implementation project(':common')
     implementation project(':command-validation-support')
     implementation project(':i18n-support')
+    implementation project(':keycloak-support')
     implementation project(':organizations-api')
     implementation project(':users-persistence')
 

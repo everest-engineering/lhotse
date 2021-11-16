@@ -1,4 +1,4 @@
-package engineering.everest.lhotse.axon.common.exceptions;
+package engineering.everest.lhotse.api.exceptions;
 
 public class KeycloakSynchronizationException extends RuntimeException {
     public KeycloakSynchronizationException(String message) {

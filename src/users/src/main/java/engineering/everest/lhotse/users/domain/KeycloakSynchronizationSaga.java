@@ -1,9 +1,9 @@
 package engineering.everest.lhotse.users.domain;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import engineering.everest.lhotse.api.services.KeycloakSynchronizationService;
 import engineering.everest.lhotse.axon.common.RetryWithExponentialBackoff;
 import engineering.everest.lhotse.axon.common.domain.UserAttribute;
-import engineering.everest.lhotse.axon.common.services.KeycloakSynchronizationService;
 import engineering.everest.lhotse.users.domain.events.UserDeletedAndForgottenEvent;
 import engineering.everest.lhotse.users.domain.events.UserDetailsUpdatedByAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserRolesUpdatedByAdminEvent;
@@ -14,11 +14,8 @@ import org.axonframework.modelling.saga.StartSaga;
 import org.axonframework.serialization.Revision;
 import org.axonframework.spring.stereotype.Saga;
 
-import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.Callable;
-
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 @Saga
 @Revision("0")
@@ -74,7 +71,6 @@ public class KeycloakSynchronizationSaga {
     // Failure here will result in the saga not completing.
     // Rollback has not been implemented in this example.
     private void waitForTheProjectionUpdate(Callable<Boolean> condition, String message) throws Exception {
-        new RetryWithExponentialBackoff(Duration.ofMillis(200), 2L, Duration.ofMinutes(1),
-                x -> MILLISECONDS.sleep(x.toMillis())).waitOrThrow(condition, message);
+        RetryWithExponentialBackoff.oneMinuteWaiter().waitOrThrow(condition, message);
     }
 }

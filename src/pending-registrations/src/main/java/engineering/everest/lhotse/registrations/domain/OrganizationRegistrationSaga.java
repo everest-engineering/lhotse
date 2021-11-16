@@ -2,10 +2,10 @@ package engineering.everest.lhotse.registrations.domain;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import engineering.everest.lhotse.api.services.KeycloakSynchronizationService;
 import engineering.everest.lhotse.axon.common.RetryWithExponentialBackoff;
 import engineering.everest.lhotse.axon.common.domain.Role;
 import engineering.everest.lhotse.axon.common.domain.UserAttribute;
-import engineering.everest.lhotse.axon.common.services.KeycloakSynchronizationService;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationCreatedForNewSelfRegisteredUserEvent;
 import engineering.everest.lhotse.organizations.domain.events.UserPromotedToOrganizationAdminEvent;
 import engineering.everest.lhotse.organizations.services.OrganizationsReadService;
@@ -22,12 +22,10 @@ import org.axonframework.spring.stereotype.Saga;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
 import static java.util.Map.entry;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 @Saga
 @Revision("0")
@@ -85,7 +83,6 @@ public class OrganizationRegistrationSaga {
     // Failure here will result in the saga not completing
     // Rollback has not been implemented in this example.
     private void waitForTheProjectionUpdate(Callable<Boolean> condition, String message) throws Exception {
-        new RetryWithExponentialBackoff(Duration.ofMillis(200), 2L, Duration.ofMinutes(1),
-                x -> MILLISECONDS.sleep(x.toMillis())).waitOrThrow(condition, message);
+        RetryWithExponentialBackoff.oneMinuteWaiter().waitOrThrow(condition, message);
     }
 }

@@ -1,9 +1,8 @@
 package engineering.everest.lhotse.registrations.domain;
 
-import engineering.everest.axon.HazelcastCommandGateway;
+import engineering.everest.lhotse.api.services.KeycloakSynchronizationService;
 import engineering.everest.lhotse.axon.common.domain.Role;
 import engineering.everest.lhotse.axon.common.domain.User;
-import engineering.everest.lhotse.axon.common.services.KeycloakSynchronizationService;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationCreatedForNewSelfRegisteredUserEvent;
 import engineering.everest.lhotse.organizations.domain.events.UserPromotedToOrganizationAdminEvent;
 import engineering.everest.lhotse.organizations.services.OrganizationsReadService;
@@ -51,8 +50,6 @@ class OrganizationRegistrationSagaTest {
     private OrganizationsReadService organizationsReadService;
     @Mock
     private KeycloakSynchronizationService keycloakSynchronizationService;
-    @Mock
-    private HazelcastCommandGateway hazelcastCommandGateway;
 
     @BeforeEach
     void setUp() {

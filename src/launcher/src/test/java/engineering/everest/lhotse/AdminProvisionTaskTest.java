@@ -1,7 +1,7 @@
 package engineering.everest.lhotse;
 
 import engineering.everest.lhotse.axon.common.domain.Role;
-import engineering.everest.lhotse.axon.common.services.KeycloakSynchronizationService;
+import engineering.everest.lhotse.api.services.KeycloakSynchronizationService;
 import engineering.everest.lhotse.users.persistence.PersistableUser;
 import engineering.everest.lhotse.users.persistence.UsersRepository;
 import org.junit.jupiter.api.BeforeEach;

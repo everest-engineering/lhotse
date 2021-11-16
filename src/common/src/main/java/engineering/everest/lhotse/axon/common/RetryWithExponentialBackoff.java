@@ -8,6 +8,7 @@ import java.util.concurrent.Callable;
 import java.util.function.Predicate;
 
 import static java.time.Duration.ZERO;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 @Log4j2
 public class RetryWithExponentialBackoff {
@@ -64,5 +65,10 @@ public class RetryWithExponentialBackoff {
             nextSleepDuration = maxDuration.minus(elapsed);
         }
         return nextSleepDuration;
+    }
+
+    public static RetryWithExponentialBackoff oneMinuteWaiter() {
+        return new RetryWithExponentialBackoff(Duration.ofMillis(200), 2L, Duration.ofMinutes(1),
+                sleepDuration -> MILLISECONDS.sleep(sleepDuration.toMillis()));
     }
 }

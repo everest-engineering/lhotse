@@ -24,6 +24,7 @@ import springfox.documentation.swagger.web.SecurityConfiguration;
 import springfox.documentation.swagger.web.SecurityConfigurationBuilder;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -42,17 +43,17 @@ import static springfox.documentation.builders.PathSelectors.regex;
 })
 public class SwaggerConfig {
 
-    private String authServer;
-    private String clientSecret;
-    private String cliendId;
-    private String realm;
+    private final String authServer;
+    private final String clientSecret;
+    private final String clientId;
+    private final String realm;
 
     public SwaggerConfig(@Value("${keycloak.auth-server-url}") String authServer,
                          @Value("${keycloak.credentials.secret}") String clientSecret,
-                         @Value("${keycloak.resource}") String cliendId,
+                         @Value("${keycloak.resource}") String clientId,
                          @Value("${keycloak.realm}") String realm) {
         this.authServer = authServer;
-        this.cliendId = cliendId;
+        this.clientId = clientId;
         this.clientSecret = clientSecret;
         this.realm = realm;
     }
@@ -67,15 +68,15 @@ public class SwaggerConfig {
             .apis(RequestHandlerSelectors.any())
             .paths(pathsToDocument())
             .build()
-            .securitySchemes(Arrays.asList(securityScheme()))
-            .securityContexts(Arrays.asList(securityContext()));
+            .securitySchemes(List.of(securityScheme()))
+            .securityContexts(List.of(securityContext()));
     }
 
     @Bean
     public SecurityConfiguration security() {
         return SecurityConfigurationBuilder.builder()
             .realm(realm)
-            .clientId(cliendId)
+            .clientId(clientId)
             .clientSecret(clientSecret)
             .scopeSeparator(" ")
             .useBasicAuthenticationWithAccessCodeGrant(true)
@@ -103,14 +104,14 @@ public class SwaggerConfig {
         new ResourceOwnerPasswordCredentialsGrant(authServer + "/realms/" + realm + "/protocol/openid-connect/token");    
         
         return new OAuthBuilder().name("Spring OAuth2")
-            .grantTypes(Arrays.asList(grantType))
+            .grantTypes(List.of(grantType))
             .scopes(Arrays.asList(scopes()))
             .build();
     }
 
     private SecurityContext securityContext() {
         return SecurityContext.builder()
-            .securityReferences(Arrays.asList(new SecurityReference("Spring OAuth2", scopes())))
+            .securityReferences(List.of(new SecurityReference("Spring OAuth2", scopes())))
             .build();
     }
 

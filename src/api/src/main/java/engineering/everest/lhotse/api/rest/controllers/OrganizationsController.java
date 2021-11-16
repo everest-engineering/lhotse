@@ -4,12 +4,9 @@ import engineering.everest.lhotse.api.rest.annotations.AdminOrAdminOfTargetOrgan
 import engineering.everest.lhotse.api.rest.annotations.AdminOrUserOfTargetOrganization;
 import engineering.everest.lhotse.api.rest.converters.DtoConverter;
 import engineering.everest.lhotse.api.rest.requests.NewUserRequest;
-import engineering.everest.lhotse.api.rest.requests.RegisterOrganizationRequest;
 import engineering.everest.lhotse.api.rest.requests.UpdateOrganizationRequest;
-import engineering.everest.lhotse.api.rest.responses.OrganizationRegistrationResponse;
 import engineering.everest.lhotse.api.rest.responses.OrganizationResponse;
 import engineering.everest.lhotse.api.rest.responses.UserResponse;
-import engineering.everest.lhotse.axon.common.RandomFieldsGenerator;
 import engineering.everest.lhotse.organizations.services.OrganizationsReadService;
 import engineering.everest.lhotse.organizations.services.OrganizationsService;
 import engineering.everest.lhotse.users.services.UsersReadService;
@@ -49,21 +46,18 @@ public class OrganizationsController {
     private final OrganizationsReadService organizationsReadService;
     private final UsersService usersService;
     private final UsersReadService usersReadService;
-    private final RandomFieldsGenerator randomFieldsGenerator;
 
     @Autowired
     public OrganizationsController(DtoConverter dtoConverter,
                                    OrganizationsService organizationsService,
                                    OrganizationsReadService organizationsReadService,
                                    UsersService usersService,
-                                   UsersReadService usersReadService,
-                                   RandomFieldsGenerator randomFieldsGenerator) {
+                                   UsersReadService usersReadService) {
         this.dtoConverter = dtoConverter;
         this.organizationsService = organizationsService;
         this.organizationsReadService = organizationsReadService;
         this.usersService = usersService;
         this.usersReadService = usersReadService;
-        this.randomFieldsGenerator = randomFieldsGenerator;
     }
 
     @GetMapping("/{organizationId}")
@@ -72,18 +66,6 @@ public class OrganizationsController {
     @AdminOrUserOfTargetOrganization
     public OrganizationResponse getOrganization(@ApiIgnore Principal principal, @PathVariable UUID organizationId) {
         return dtoConverter.convert(organizationsReadService.getById(organizationId));
-    }
-
-    @PostMapping("/register")
-    @ResponseStatus(CREATED)
-    @ApiOperation("Register a new organization")
-    public OrganizationRegistrationResponse registerOrganization(@RequestBody @Valid RegisterOrganizationRequest request) {
-        var requestingUserId = randomFieldsGenerator.genRandomUUID();
-        var organizationId = organizationsService.createOrganization(requestingUserId, request.getOrganizationName(),
-                request.getStreet(), request.getCity(), request.getState(), request.getCountry(),
-                request.getPostalCode(), request.getWebsiteUrl(), request.getContactName(),
-                request.getContactPhoneNumber(), request.getContactEmail());
-        return new OrganizationRegistrationResponse(organizationId, requestingUserId);
     }
 
     @PutMapping("/{organizationId}")

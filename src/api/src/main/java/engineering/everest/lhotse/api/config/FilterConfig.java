@@ -19,17 +19,15 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.stream.Stream;
 
 import static java.util.UUID.randomUUID;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 @Slf4j
 @Component
@@ -88,18 +86,19 @@ public class FilterConfig extends OncePerRequestFilter {
                 var organizationName = accessToken.getPreferredUsername();
                 var displayName = otherClaims.getOrDefault(DISPLAY_NAME_KEY, "Guest").toString().trim();
 
-                commandGateway.sendAndWait(new CreateSelfRegisteredOrganizationCommand(organizationId, registeringUserId,
+                commandGateway.send(new CreateSelfRegisteredOrganizationCommand(organizationId, registeringUserId,
                         organizationName, ORGANIZATION_STREET, ORGANIZATION_CITY, ORGANIZATION_STATE,
                         ORGANIZATION_COUNTRY, ORGANIZATION_POSTAL_CODE, ORGANIZATION_WEBSITE_URL, displayName,
                         ORGANIZATION_CONTACT_PHONE_NUMBER, userEmailAddress));
 
-                var waiter = new RetryWithExponentialBackoff(Duration.ofMillis(200), 2L, Duration.ofMinutes(1),
-                        sleepDuration -> MILLISECONDS.sleep(sleepDuration.toMillis()));
                 Callable<Boolean> projectionsDone = () -> usersReadService.exists(registeringUserId)
                         && organizationsReadService.exists(organizationId)
                         && usersReadService.getById(registeringUserId).getRoles()
                         .contains(Role.ORG_ADMIN);
-                waiter.waitOrThrow(projectionsDone, "user and organization self registration projection update");
+
+                RetryWithExponentialBackoff
+                        .oneMinuteWaiter()
+                        .waitOrThrow(projectionsDone, "user and organization self registration projection update");
 
                 var user = usersReadService.getById(registeringUserId);
                 LOGGER.info("Newly registered user details: " + user);
@@ -115,7 +114,6 @@ public class FilterConfig extends OncePerRequestFilter {
         } finally {
             filterChain.doFilter(httpServletRequest, httpServletResponse);
         }
-
     }
 
     // We are using this method as shouldFilter by doing noneMatch for provided patterns and request paths.
@@ -124,17 +122,7 @@ public class FilterConfig extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest httpServletRequest) {
         final AntPathMatcher pathMatcher = new AntPathMatcher();
 
-        if (pathMatcher.match("/api/organizations/register", httpServletRequest.getServletPath())) {
-            return true;
-        }
-
-        List<String> includeUrlPatterns = new ArrayList<>();
-        includeUrlPatterns.add("/api/user/**");
-        includeUrlPatterns.add("/api/users/**");
-        includeUrlPatterns.add("/api/organizations/**");
-        includeUrlPatterns.add("/admin/**");
-
-        return includeUrlPatterns.stream()
+        return Stream.of("/api/user/**", "/api/users/**", "/api/organizations/**", "/admin/**")
                 .noneMatch(pattern -> pathMatcher.match(pattern, httpServletRequest.getServletPath()));
     }
 }
