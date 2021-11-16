@@ -1,5 +1,6 @@
 package engineering.everest.lhotse.registrations.domain;
 
+import engineering.everest.axon.HazelcastCommandGateway;
 import engineering.everest.lhotse.axon.common.domain.Role;
 import engineering.everest.lhotse.axon.common.domain.User;
 import engineering.everest.lhotse.axon.common.services.KeycloakSynchronizationService;
@@ -50,12 +51,15 @@ class OrganizationRegistrationSagaTest {
     private OrganizationsReadService organizationsReadService;
     @Mock
     private KeycloakSynchronizationService keycloakSynchronizationService;
+    @Mock
+    private HazelcastCommandGateway hazelcastCommandGateway;
 
     @BeforeEach
     void setUp() {
         testFixture = new SagaTestFixture<>(OrganizationRegistrationSaga.class);
         testFixture.registerResource(usersReadService);
         testFixture.registerResource(organizationsReadService);
+        testFixture.registerResource(keycloakSynchronizationService);
     }
 
     @Test

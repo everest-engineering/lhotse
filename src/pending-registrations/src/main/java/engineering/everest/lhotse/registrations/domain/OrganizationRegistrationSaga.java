@@ -26,8 +26,8 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.Map.entry;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 @Saga
 @Revision("0")
@@ -37,28 +37,11 @@ public class OrganizationRegistrationSaga {
 
     @JsonIgnore
     private transient CommandGateway commandGateway;
-    @JsonIgnore
-    private transient UsersReadService usersReadService;
-    @JsonIgnore
-    private transient OrganizationsReadService organizationsReadService;
-
-    @Autowired
-    private KeycloakSynchronizationService keycloakSynchronizationService;
 
     @Autowired
     @Qualifier("hazelcastCommandGateway")
     public void setCommandGateway(CommandGateway commandGateway) {
         this.commandGateway = commandGateway;
-    }
-
-    @Autowired
-    public void setUsersReadService(UsersReadService usersReadService) {
-        this.usersReadService = usersReadService;
-    }
-
-    @Autowired
-    public void setOrganizationsReadService(OrganizationsReadService organizationsReadService) {
-        this.organizationsReadService = organizationsReadService;
     }
 
     @StartSaga
@@ -74,7 +57,9 @@ public class OrganizationRegistrationSaga {
     }
 
     @SagaEventHandler(associationProperty = ORGANIZATION_PROPERTY)
-    public void on(UserCreatedForNewlyRegisteredOrganizationEvent event) throws Exception {
+    public void on(UserCreatedForNewlyRegisteredOrganizationEvent event,
+                   UsersReadService usersReadService,
+                   OrganizationsReadService organizationsReadService) throws Exception {
         waitForTheProjectionUpdate(
                 () -> usersReadService.exists(event.getUserId())
                         && organizationsReadService.exists(event.getOrganizationId()),
@@ -85,7 +70,9 @@ public class OrganizationRegistrationSaga {
 
     @EndSaga
     @SagaEventHandler(associationProperty = ORGANIZATION_PROPERTY)
-    public void on(UserPromotedToOrganizationAdminEvent event) throws Exception {
+    public void on(UserPromotedToOrganizationAdminEvent event,
+                   UsersReadService usersReadService,
+                   KeycloakSynchronizationService keycloakSynchronizationService) throws Exception {
         waitForTheProjectionUpdate(
                 () -> usersReadService.getById(event.getPromotedUserId()).getRoles().contains(Role.ORG_ADMIN),
                 "user roles projection update");
@@ -95,7 +82,7 @@ public class OrganizationRegistrationSaga {
                         usersReadService.getById(event.getPromotedUserId()).getDisplayName()))));
     }
 
-    // Failure here will result in the saga not completing.
+    // Failure here will result in the saga not completing
     // Rollback has not been implemented in this example.
     private void waitForTheProjectionUpdate(Callable<Boolean> condition, String message) throws Exception {
         new RetryWithExponentialBackoff(Duration.ofMillis(200), 2L, Duration.ofMinutes(1),

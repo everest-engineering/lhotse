@@ -57,7 +57,7 @@ The container system is [Docker](https://www.docker.com/).
 
 [Project Lombok](https://projectlombok.org/) greatly reduces the need for hand cranking tedious boilerplate code.
 
-The build system is [Gradle](https://gradle.org/) and it supports all of the above.
+The build system is [Gradle](https://gradle.org/) and it supports all the above.
 
 ## IntelliJ configuration
 
