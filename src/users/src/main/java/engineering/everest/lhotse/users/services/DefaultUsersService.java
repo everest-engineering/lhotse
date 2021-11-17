@@ -1,8 +1,6 @@
 package engineering.everest.lhotse.users.services;
 
 import engineering.everest.axon.HazelcastCommandGateway;
-import engineering.everest.axon.exceptions.RemoteCommandExecutionException;
-import engineering.everest.lhotse.api.exceptions.KeycloakSynchronizationException;
 import engineering.everest.lhotse.api.services.KeycloakSynchronizationService;
 import engineering.everest.lhotse.axon.common.domain.UserAttribute;
 import engineering.everest.lhotse.users.domain.commands.CreateUserCommand;
@@ -45,27 +43,8 @@ public class DefaultUsersService implements UsersService {
 
     @Override
     public UUID createUser(UUID requestingUserId, UUID organizationId, String username, String displayName) {
-        try {
-            // Create user in the keycloak first so that we can get a newly created user id and map it in our app db.
-            keycloakSynchronizationService.createUser(
-                    Map.of("username", username,
-                            "email", username,
-                            "enabled", true,
-                            "attributes", new UserAttribute(organizationId, Set.of(Role.ORG_USER), "Guest"),
-                            "credentials", List.of(
-                                    Map.of("type", "password",
-                                            "value", "changeme",
-                                            "temporary", true))));
-
-            return commandGateway.sendAndWait(new CreateUserCommand(getUserId(username), organizationId,
-                    requestingUserId, username, displayName));
-        } catch (RemoteCommandExecutionException tex) {
-            LOGGER.info("Keycloak createUser error: " + tex);
-            return commandGateway.sendAndWait(new CreateUserCommand(getUserId(username), organizationId,
-                    requestingUserId, username, displayName));
-        } catch (Exception e) {
-            throw (KeycloakSynchronizationException)new KeycloakSynchronizationException(e.getMessage()).initCause(e);
-        }
+        return commandGateway.sendAndWait(new CreateUserCommand(getUserId(username, organizationId), organizationId,
+                requestingUserId, username, displayName));
     }
 
     @Override
@@ -78,7 +57,19 @@ public class DefaultUsersService implements UsersService {
         commandGateway.send(new DeleteAndForgetUserCommand(userId, requestingUserId, requestReason));
     }
 
-    private UUID getUserId(String username) {
+    private UUID getUserId(String username, UUID organizationId) {
+        try {
+            keycloakSynchronizationService
+                    .createUser(Map.of("username", username,
+                            "email", username,
+                            "enabled", true,
+                            "attributes", new UserAttribute(organizationId, Set.of(Role.ORG_USER), "Guest"),
+                            "credentials", List.of(Map.of("type", "password",
+                                    "value", "changeme",
+                                    "temporary", true))));
+        } catch (Exception e) {
+            LOGGER.error("Keycloak createUser error: " + e);
+        }
         return UUID.fromString(
                 new JSONArray(keycloakSynchronizationService.getUsers(Map.of("username", username)))
                         .getJSONObject(0).getString("id"));

@@ -26,6 +26,7 @@ import java.util.HashMap;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.HttpMethod.DELETE;
+import static org.springframework.http.HttpMethod.PUT;
 
 @Slf4j
 @Component
@@ -69,7 +70,7 @@ public class KeycloakSynchronizationService {
     }
 
     public void updateUserAttributes(UUID userId, Map<String, Object> attributes) {
-        webclient(constructUrlPath("/users/%s", userId), GET)
+        webclient(constructUrlPath("/users/%s", userId), PUT)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(attributes)

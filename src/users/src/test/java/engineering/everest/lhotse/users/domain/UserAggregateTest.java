@@ -54,7 +54,6 @@ class UserAggregateTest {
 
     private static final UserCreatedByAdminEvent USER_CREATED_BY_ADMIN_EVENT =
             new UserCreatedByAdminEvent(USER_ID, ORGANIZATION_ID, ADMIN_ID, USER_DISPLAY_NAME, USERNAME);
-    public static final UUID CONFIRMATION_CODE = randomUUID();
 
     private FixtureConfiguration<UserAggregate> testFixture;
 

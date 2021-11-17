@@ -25,13 +25,22 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.Set;
+import java.util.UUID;
 
 import static java.util.UUID.randomUUID;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @ExtendWith(MockitoExtension.class)
 public class FilterConfigTest {
+
+    private final UUID USER_ID = randomUUID();
+    private final UUID ORGANIZATION_ID = randomUUID();
 
     private FilterConfig filterConfig;
 
@@ -71,26 +80,41 @@ public class FilterConfigTest {
     }
 
     @Test
-    void shouldNotFilterMethod_WillReturnFalseForUserApiPath() {
+    void shouldNotFilterMethod_WillReturnFalseForProtectedApiPaths() {
+        when(httpServletRequest.getServletPath()).thenReturn("/admin/organizations");
+        assertFalse(filterConfig.shouldNotFilter(httpServletRequest));
+
+        when(httpServletRequest.getServletPath())
+                .thenReturn(String.format("/admin/organizations/%s", ORGANIZATION_ID));
+        assertFalse(filterConfig.shouldNotFilter(httpServletRequest));
+
+        when(httpServletRequest.getServletPath())
+                .thenReturn(String.format("/api/organizations/%s", ORGANIZATION_ID));
+        assertFalse(filterConfig.shouldNotFilter(httpServletRequest));
+
+        when(httpServletRequest.getServletPath())
+                .thenReturn(String.format("/api/organizations/%s/users", ORGANIZATION_ID));
+        assertFalse(filterConfig.shouldNotFilter(httpServletRequest));
+
         when(httpServletRequest.getServletPath()).thenReturn("/api/user");
         assertFalse(filterConfig.shouldNotFilter(httpServletRequest));
-    }
 
-    @Test
-    void shouldNotFilterMethod_WillReturnFalseForUsersApiPath() {
+        when(httpServletRequest.getServletPath()).thenReturn("/api/user/profile-photo");
+        assertFalse(filterConfig.shouldNotFilter(httpServletRequest));
+
+        when(httpServletRequest.getServletPath()).thenReturn("/api/user/profile-photo/thumbnail");
+        assertFalse(filterConfig.shouldNotFilter(httpServletRequest));
+
         when(httpServletRequest.getServletPath()).thenReturn("/api/users");
         assertFalse(filterConfig.shouldNotFilter(httpServletRequest));
-    }
 
-    @Test
-    void shouldNotFilterMethod_WillReturnFalseForOrganizationsApiPath() {
-        when(httpServletRequest.getServletPath()).thenReturn("/api/organizations");
+        when(httpServletRequest.getServletPath()).thenReturn(String.format("/api/users/%s", USER_ID));
         assertFalse(filterConfig.shouldNotFilter(httpServletRequest));
-    }
 
-    @Test
-    void shouldNotFilterMethod_WillReturnFalseForAdminApiPath() {
-        when(httpServletRequest.getServletPath()).thenReturn("/admin");
+        when(httpServletRequest.getServletPath()).thenReturn(String.format("/api/users/%s/forget", USER_ID));
+        assertFalse(filterConfig.shouldNotFilter(httpServletRequest));
+
+        when(httpServletRequest.getServletPath()).thenReturn(String.format("/api/users/%s/roles", USER_ID));
         assertFalse(filterConfig.shouldNotFilter(httpServletRequest));
     }
 

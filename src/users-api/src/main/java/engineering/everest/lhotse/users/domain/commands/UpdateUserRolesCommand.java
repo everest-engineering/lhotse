@@ -1,11 +1,11 @@
 package engineering.everest.lhotse.users.domain.commands;
 
-import java.io.Serializable;
 import java.util.Set;
 import java.util.UUID;
 
 import javax.validation.constraints.NotNull;
 
+import engineering.everest.lhotse.axon.command.validation.ValidatableCommand;
 import org.axonframework.modelling.command.TargetAggregateIdentifier;
 
 import engineering.everest.lhotse.axon.common.domain.Role;
@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpdateUserRolesCommand implements Serializable {
+public class UpdateUserRolesCommand implements ValidatableCommand {
     @TargetAggregateIdentifier
     private UUID userId;
     private Set<Role> roles;

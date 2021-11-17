@@ -71,9 +71,9 @@ To build the entire application, including running unit and functional tests:
 `./gradlew startServer && ./gradlew build`
 
 (Note that functional tests share the same port number for embedded database as for the containerised database, if
-tests fail try running `./gradlew composeDown` first. Free-up port for the keycloak test server as well).
+tests fail try running `docker-compose down` first. Free-up port for the keycloak test server as well).
 
-Create a `.env` file in the project root directory and do the env variables setup for keycloak:
+Update the `.env` file present in the project root directory and do the env variables setup for keycloak:
 
 ```
 KEYCLOAK_SERVER_PORT=8180
@@ -343,6 +343,23 @@ by its simple class name. To help managing increasing number of `ReadService`, t
 
 When adding new controllers and security configurations, it is important to refer to existing patterns and ensure
 consistency. This also applies to tests where fixtures are provided to support the necessary _automagic_ behaviours.
+
+#### Custom method security expression handlers
+
+We have introduced the `hasCustomRole` and `memberOfOrg` custom expression handlers to evaluate app related roles.
+Roles like `ORG_USER` and `ORG_ADMIN` which are configured in app side can't be evaluated using obvious and default 
+expression handlers like `hasRole` and `hasAnyRole`, `hasAuthority` and `hasAnyAuthority` etc,.
+The reason for this is, an app related roles are stored as attributes in the keycloak user object.
+User attributes are simply an extra claims stored in a keycloak authentication token for later authorization purpose.
+These were injected by intercepting requests at runtime.
+
+We can make any user as a superuser by assigning the `ADMIN` role from keycloak console.
+Since it is a keycloak specific role, it can only be evaluated by the default expression handlers.
+This is the reason we have both `hasRole` and `hasCustomRole` expression handlers.
+
+`hasRole` to evaluate roles configured in keycloak.
+
+`hasCustomRole` to evaluate roles configured in app.
 
 ## File support
 

@@ -119,10 +119,18 @@ public class FilterConfig extends OncePerRequestFilter {
     // We are using this method as shouldFilter by doing noneMatch for provided patterns and request paths.
     // That means, doFilterInternal checks can be applied to only specified includeUrlPatterns.
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest httpServletRequest) {
-        final AntPathMatcher pathMatcher = new AntPathMatcher();
-
-        return Stream.of("/api/user/**", "/api/users/**", "/api/organizations/**", "/admin/**")
-                .noneMatch(pattern -> pathMatcher.match(pattern, httpServletRequest.getServletPath()));
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        return Stream.of("/admin/organizations",
+                        "/admin/organizations/**",
+                        "/api/organizations/**",
+                        "/api/organizations/**/users",
+                        "/api/user",
+                        "/api/user/profile-photo",
+                        "/api/user/profile-photo/thumbnail",
+                        "/api/users",
+                        "/api/users/**",
+                        "/api/users/**/forget",
+                        "/api/users/**/roles")
+                .noneMatch(pattern -> new AntPathMatcher().match(pattern, request.getServletPath()));
     }
 }
