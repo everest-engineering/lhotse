@@ -37,12 +37,12 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @ExtendWith(MockitoExtension.class)
-public class FilterConfigTest {
+public class FirstTimeUserBootstrappingFilterTest {
 
     private final UUID USER_ID = randomUUID();
     private final UUID ORGANIZATION_ID = randomUUID();
 
-    private FilterConfig filterConfig;
+    private FirstTimeUserBootstrappingFilter filterConfig;
 
     @Mock
     private HttpServletRequest httpServletRequest;
@@ -58,7 +58,7 @@ public class FilterConfigTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        filterConfig = new FilterConfig();
+        filterConfig = new FirstTimeUserBootstrappingFilter();
     }
 
     @Test

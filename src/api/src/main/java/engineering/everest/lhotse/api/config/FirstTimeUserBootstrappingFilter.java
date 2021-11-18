@@ -25,13 +25,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
-import java.util.stream.Stream;
 
 import static java.util.UUID.randomUUID;
 
 @Slf4j
 @Component
-public class FilterConfig extends OncePerRequestFilter {
+public class FirstTimeUserBootstrappingFilter extends OncePerRequestFilter {
     private static final String ORGANIZATION_STREET = "street";
     private static final String ORGANIZATION_CITY = "city";
     private static final String ORGANIZATION_STATE = "state";
@@ -42,6 +41,20 @@ public class FilterConfig extends OncePerRequestFilter {
 
     private static final String ORGANIZATION_ID_KEY = "organizationId";
     private static final String DISPLAY_NAME_KEY = "displayName";
+
+    private static final Set<String> NOT_INCLUDE_ANT_PATTERNS = Set.of(
+            "/admin/organizations",
+            "/admin/organizations/**",
+            "/api/organizations/**",
+            "/api/organizations/**/users",
+            "/api/user",
+            "/api/user/profile-photo",
+            "/api/user/profile-photo/thumbnail",
+            "/api/users",
+            "/api/users/**",
+            "/api/users/**/forget",
+            "/api/users/**/roles"
+    );
 
     @Autowired
     private HazelcastCommandGateway commandGateway;
@@ -120,17 +133,8 @@ public class FilterConfig extends OncePerRequestFilter {
     // That means, doFilterInternal checks can be applied to only specified includeUrlPatterns.
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return Stream.of("/admin/organizations",
-                        "/admin/organizations/**",
-                        "/api/organizations/**",
-                        "/api/organizations/**/users",
-                        "/api/user",
-                        "/api/user/profile-photo",
-                        "/api/user/profile-photo/thumbnail",
-                        "/api/users",
-                        "/api/users/**",
-                        "/api/users/**/forget",
-                        "/api/users/**/roles")
-                .noneMatch(pattern -> new AntPathMatcher().match(pattern, request.getServletPath()));
+        var pathMatcher = new AntPathMatcher();
+        return NOT_INCLUDE_ANT_PATTERNS.stream()
+                .noneMatch(pattern -> pathMatcher.match(pattern, request.getServletPath()));
     }
 }
