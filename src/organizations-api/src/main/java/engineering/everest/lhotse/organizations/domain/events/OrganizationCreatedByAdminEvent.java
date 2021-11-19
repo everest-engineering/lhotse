@@ -1,5 +1,7 @@
 package engineering.everest.lhotse.organizations.domain.events;
 
+import engineering.everest.axon.cryptoshredding.annotations.EncryptedField;
+import engineering.everest.axon.cryptoshredding.annotations.EncryptionKeyIdentifier;
 import engineering.everest.lhotse.axon.command.validation.ValidatableCommand;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,6 +16,7 @@ import java.util.UUID;
 @Revision("0")
 public class OrganizationCreatedByAdminEvent implements ValidatableCommand {
     private UUID organizationId;
+    @EncryptionKeyIdentifier
     private UUID registeringUserId;
     private String organizationName;
     private String websiteUrl;
@@ -22,7 +25,10 @@ public class OrganizationCreatedByAdminEvent implements ValidatableCommand {
     private String state;
     private String country;
     private String postalCode;
+    @EncryptedField
     private String contactName;
+    @EncryptedField
     private String contactPhoneNumber;
+    @EncryptedField
     private String contactEmail;
 }
