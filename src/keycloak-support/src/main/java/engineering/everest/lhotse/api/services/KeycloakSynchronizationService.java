@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.Map;
 import java.util.HashMap;
 
+import static java.util.UUID.fromString;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.HttpMethod.DELETE;
@@ -33,6 +34,7 @@ import static org.springframework.http.HttpMethod.PUT;
 public class KeycloakSynchronizationService {
     private static final String BEARER = "Bearer ";
     private static final String AUTHORIZATION = "Authorization";
+    private static final String NAME_KEY = "name";
     private static final String VALUE_KEY = "value";
 
     private final String keycloakServerAuthUrl;
@@ -109,20 +111,46 @@ public class KeycloakSynchronizationService {
                 .block();
     }
 
-    public String getClientLevelRoleMappings(UUID userId, UUID clientId) {
-        return webclient(constructUrlPath("/users/%s/role-mappings/clients/%s/available", userId, clientId), GET)
+    public String getClientRoles(String type, UUID userId, UUID clientId) {
+        return webclient(constructUrlPath("/users/%s/role-mappings/clients/%s/%s", userId, clientId, type), GET)
                 .retrieve()
                 .bodyToMono(String.class)
                 .block();
     }
 
-    public void updateUserRoles(UUID userId, UUID clientId, List<Map<String, Object>> roles) {
-        webclient(constructUrlPath("/users/%s/role-mappings/clients/%s", userId, clientId), POST)
+    private void updateClientRoles(String path, HttpMethod method, Object data) {
+        webclient(path, method)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(roles)
+                .bodyValue(data)
                 .exchangeToMono(res -> Mono.just(res.statusCode()))
                 .block();
+    }
+
+    private String getClientRolesPath(UUID userId, UUID clientId) {
+        return constructUrlPath("/users/%s/role-mappings/clients/%s", userId, clientId);
+    }
+
+    public void addClientLevelUserRoles(UUID userId, Set<Role> roles) {
+        var clientId = getClientIdFromClientDetails();
+        var availableClientRoles = new JSONArray(getClientRoles("available", userId, clientId));
+        for (var i = 0; i < availableClientRoles.length(); i++) {
+            var role = availableClientRoles.getJSONObject(i);
+            if (roles.contains(Role.valueOf(role.getString(NAME_KEY)))) {
+                updateClientRoles(getClientRolesPath(userId, clientId), POST, getClientLevelRolesRequestData(role));
+            }
+        }
+    }
+
+    public void removeClientLevelUserRoles(UUID userId, Set<Role> roles) {
+        var clientId = getClientIdFromClientDetails();
+        var availableClientRoles = new JSONArray(getClientRoles("", userId, clientId));
+        for (var i = 0; i < availableClientRoles.length(); i++) {
+            var role = availableClientRoles.getJSONObject(i);
+            if (roles.contains(Role.valueOf(role.getString(NAME_KEY)))) {
+                updateClientRoles(getClientRolesPath(userId, clientId), DELETE, getClientLevelRolesRequestData(role));
+            }
+        }
     }
 
     public String getClientSecret(UUID clientId) {
@@ -149,44 +177,36 @@ public class KeycloakSynchronizationService {
                                                  Set<Role> roles, String displayName, String password, boolean passwordTemporary) {
         var userDetails = new HashMap<String, Object>();
         try {
-            createUser(Map.of("username", username,
-                    "email", email,
-                    "enabled", enabled,
-                    "attributes", new UserAttribute(organizationId, roles, displayName),
-                    "credentials", List.of(Map.of("type", "password",
-                            VALUE_KEY, password,
-                            "temporary", passwordTemporary))));
+            createUser(
+                    Map.of("username", username,
+                            "email", email,
+                            "enabled", enabled,
+                            "attributes", new UserAttribute(organizationId, displayName),
+                            "credentials",
+                            List.of(
+                                    Map.of("type", "password",
+                                            VALUE_KEY, password,
+                                            "temporary", passwordTemporary))));
 
-            var userId = UUID.fromString(new JSONArray(getUsers(Map.of("username", username)))
-                    .getJSONObject(0).getString("id"));
-            userDetails.put("userId", userId);
-
-            var clientId = UUID.fromString(new JSONArray(getClientDetails(Map.of("clientId", keycloakDefaultRealmDefaultClientId)))
-                    .getJSONObject(0).getString("id"));
-            userDetails.put("clientId", clientId);
-
-            var clientSecret = getClientSecret(clientId);
+            var clientSecret = getClientSecret(getClientIdFromClientDetails());
             if (clientSecret.contains(VALUE_KEY)) {
                 userDetails.put("clientSecret", new JSONObject(clientSecret).getString(VALUE_KEY));
             }
 
-            var clientLevelMappingArray = new JSONArray(getClientLevelRoleMappings(userId, clientId));
-            if (clientLevelMappingArray.length() > 0) {
-                var clientLevelMappingDetails = clientLevelMappingArray.getJSONObject(0);
-                updateUserRoles(userId, clientId, List.of(Map.of(
-                        "id", clientLevelMappingDetails.getString("id"),
-                        "name", clientLevelMappingDetails.getString("name"),
-                        "description", clientLevelMappingDetails.getString("description"),
-                        "composite", clientLevelMappingDetails.getBoolean("composite"),
-                        "clientRole", clientLevelMappingDetails.getBoolean("clientRole"),
-                        "containerId", clientLevelMappingDetails.getString("containerId"))));
-            } else {
-                LOGGER.warn("Roles are already mapped or no role mappings found.");
-            }
+            var userId = fromString(new JSONArray(getUsers(Map.of("username", username)))
+                    .getJSONObject(0).getString("id"));
+            userDetails.put("userId", userId);
+
+            addClientLevelUserRoles(userId, roles);
         } catch (Exception e) {
             throw (KeycloakSynchronizationException)new KeycloakSynchronizationException(e.getMessage()).initCause(e);
         }
         return userDetails;
+    }
+
+    private UUID getClientIdFromClientDetails() {
+        return fromString(new JSONArray(getClientDetails(Map.of("clientId", keycloakDefaultRealmDefaultClientId)))
+                .getJSONObject(0).getString("id"));
     }
 
     private String constructUrlPath(String path, Object...params) {
@@ -204,5 +224,14 @@ public class KeycloakSynchronizationService {
         return WebClient.create(url)
                 .method(method)
                 .header(AUTHORIZATION, accessToken());
+    }
+
+    private List<Map<Object, Object>> getClientLevelRolesRequestData(JSONObject role) {
+        return List.of(Map.of("id", role.getString("id"),
+                NAME_KEY, role.getString(NAME_KEY),
+                "description", role.getString("description"),
+                "composite", role.getBoolean("composite"),
+                "clientRole", role.getBoolean("clientRole"),
+                "containerId", role.getString("containerId")));
     }
 }

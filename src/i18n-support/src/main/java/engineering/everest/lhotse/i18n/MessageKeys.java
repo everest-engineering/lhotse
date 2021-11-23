@@ -15,7 +15,6 @@ public class MessageKeys {
     public static final String USER_NOT_MEMBER_OF_ORGANIZATION = "USER_NOT_MEMBER_OF_ORGANIZATION";
     public static final String USER_UPDATE_NO_FIELDS_CHANGED = "USER_UPDATE_NO_FIELDS_CHANGED";
     public static final String USER_UPDATE_NO_ROLES_SPECIFIED = "USER_UPDATE_NO_ROLES_SPECIFIED";
-    public static final String USER_UPDATE_UNALLOWED_ROLE_ADMIN = "USER_UPDATE_UNALLOWED_ROLE_ADMIN";
 
     private MessageKeys() {
     }

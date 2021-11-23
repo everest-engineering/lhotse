@@ -10,6 +10,7 @@ import engineering.everest.lhotse.users.services.UsersReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -19,18 +20,18 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
+import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 
 @Slf4j
 @Component
 public class FirstTimeUserBootstrappingFilter extends OncePerRequestFilter {
+
     private static final String ORGANIZATION_STREET = "street";
     private static final String ORGANIZATION_CITY = "city";
     private static final String ORGANIZATION_STATE = "state";
@@ -65,7 +66,13 @@ public class FirstTimeUserBootstrappingFilter extends OncePerRequestFilter {
     @Autowired
     private OrganizationsReadService organizationsReadService;
 
-    @SuppressWarnings("unchecked")
+    private final String defaultKeycloakClientId;
+
+    public FirstTimeUserBootstrappingFilter(@Value("${keycloak.resource}") String defaultKeycloakClientId) {
+        super();
+        this.defaultKeycloakClientId = defaultKeycloakClientId;
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse,
                                     FilterChain filterChain) throws ServletException, IOException {
@@ -80,21 +87,17 @@ public class FirstTimeUserBootstrappingFilter extends OncePerRequestFilter {
             LOGGER.info("Other claims: " + otherClaims);
 
             if (otherClaims.containsKey(ORGANIZATION_ID_KEY)) {
-                Set<Role> roles = new HashSet<>();
-                var rolesObject = otherClaims.get("roles");
-                if (rolesObject instanceof Set) {
-                    roles.addAll((Set<Role>) rolesObject);
-                } else {
-                    roles.addAll((ArrayList<Role>) rolesObject);
-                }
-
-                LOGGER.info("Already registered user details: " + new User(UUID.fromString(accessToken.getSubject()),
-                        UUID.fromString(otherClaims.get(ORGANIZATION_ID_KEY).toString()),
-                        accessToken.getPreferredUsername(), otherClaims.get(DISPLAY_NAME_KEY).toString(),
-                        accessToken.getEmail(), false, roles));
+                LOGGER.info("Already registered user details: "
+                        + new User(UUID.fromString(accessToken.getSubject()),
+                                fromString(otherClaims.get(ORGANIZATION_ID_KEY).toString()),
+                                accessToken.getPreferredUsername(),
+                                otherClaims.get(DISPLAY_NAME_KEY).toString(),
+                                accessToken.getEmail(), false));
+                LOGGER.info("Already registered user roles: "
+                        + accessToken.getResourceAccess(defaultKeycloakClientId).getRoles());
             } else {
                 var organizationId = randomUUID();
-                var registeringUserId = UUID.fromString(accessToken.getSubject());
+                var registeringUserId = fromString(accessToken.getSubject());
                 var userEmailAddress = accessToken.getEmail();
                 var organizationName = accessToken.getPreferredUsername();
                 var displayName = otherClaims.getOrDefault(DISPLAY_NAME_KEY, "Guest").toString().trim();
@@ -105,9 +108,7 @@ public class FirstTimeUserBootstrappingFilter extends OncePerRequestFilter {
                         ORGANIZATION_CONTACT_PHONE_NUMBER, userEmailAddress));
 
                 Callable<Boolean> projectionsDone = () -> usersReadService.exists(registeringUserId)
-                        && organizationsReadService.exists(organizationId)
-                        && usersReadService.getById(registeringUserId).getRoles()
-                        .contains(Role.ORG_ADMIN);
+                        && organizationsReadService.exists(organizationId);
 
                 RetryWithExponentialBackoff
                         .oneMinuteWaiter()
@@ -118,7 +119,8 @@ public class FirstTimeUserBootstrappingFilter extends OncePerRequestFilter {
 
                 // Updating the access token with user claims to avoid token regeneration
                 accessToken.getOtherClaims().putAll(Map.of(ORGANIZATION_ID_KEY, organizationId, DISPLAY_NAME_KEY,
-                        user.getDisplayName(), "roles", user.getRoles()));
+                        user.getDisplayName()));
+                accessToken.getResourceAccess(defaultKeycloakClientId).addRole(Role.ORG_ADMIN.name());
                 LOGGER.info("Updated user access token with custom claims.");
             }
 

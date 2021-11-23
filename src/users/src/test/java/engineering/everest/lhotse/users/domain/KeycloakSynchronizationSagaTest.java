@@ -6,7 +6,8 @@ import engineering.everest.lhotse.axon.common.domain.User;
 import engineering.everest.lhotse.axon.common.domain.UserAttribute;
 import engineering.everest.lhotse.users.domain.events.UserDeletedAndForgottenEvent;
 import engineering.everest.lhotse.users.domain.events.UserDetailsUpdatedByAdminEvent;
-import engineering.everest.lhotse.users.domain.events.UserRolesUpdatedByAdminEvent;
+import engineering.everest.lhotse.users.domain.events.UserRolesAddedByAdminEvent;
+import engineering.everest.lhotse.users.domain.events.UserRolesRemovedByAdminEvent;
 import engineering.everest.lhotse.users.services.UsersReadService;
 import org.axonframework.test.saga.SagaTestFixture;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,8 +36,10 @@ public class KeycloakSynchronizationSagaTest {
     private static final String DISPLAY_NAME = "Tester";
     private static final Set<Role> roles = Set.of(Role.ORG_USER);
     private static final String EMAIL_ID = "tester@everest.engineering";
-    private static final UserRolesUpdatedByAdminEvent USER_ROLES_UPDATED_BY_ADMIN_EVENT =
-            new UserRolesUpdatedByAdminEvent(REGISTERING_USER_ID, roles, REQUESTING_USER_ID);
+    private static final UserRolesAddedByAdminEvent USER_ROLES_ADDED_BY_ADMIN_EVENT =
+            new UserRolesAddedByAdminEvent(REGISTERING_USER_ID, roles, REQUESTING_USER_ID);
+    private static final UserRolesRemovedByAdminEvent USER_ROLES_REMOVED_BY_ADMIN_EVENT =
+            new UserRolesRemovedByAdminEvent(REGISTERING_USER_ID, roles, REQUESTING_USER_ID);
     private static final UserDetailsUpdatedByAdminEvent USER_DETAILS_UPDATED_BY_ADMIN_EVENT =
             new UserDetailsUpdatedByAdminEvent(REGISTERING_USER_ID, ORGANIZATION_ID, DISPLAY_NAME, EMAIL_ID,REQUESTING_USER_ID);
     private static final UserDeletedAndForgottenEvent USER_DELETED_AND_FORGOTTEN_EVENT =
@@ -58,17 +61,23 @@ public class KeycloakSynchronizationSagaTest {
     }
 
     @Test
-    void userRolesUpdatedByAdminEvent_WillFireAnApiCallToUpdateRolesInKeycloak() {
-        USER.setRoles(roles);
-        when(usersReadService.getById(USER.getId())).thenReturn(USER);
-
+    void userRolesAddedByAdminEvent_WillFireAnApiCallToAddRolesInKeycloak() {
         testFixture.givenAggregate(REGISTERING_USER_ID.toString()).published()
-                .whenAggregate(REGISTERING_USER_ID.toString()).publishes(USER_ROLES_UPDATED_BY_ADMIN_EVENT)
+                .whenAggregate(REGISTERING_USER_ID.toString()).publishes(USER_ROLES_ADDED_BY_ADMIN_EVENT)
                 .expectNoDispatchedCommands()
                 .expectActiveSagas(0);
 
-        verify(keycloakSynchronizationService).updateUserAttributes(USER.getId(),
-                Map.of("attributes", new UserAttribute(USER.getOrganizationId(), USER.getRoles(), USER.getDisplayName())));
+        verify(keycloakSynchronizationService).addClientLevelUserRoles(USER.getId(), roles);
+    }
+
+    @Test
+    void userRolesRemovedByAdminEvent_WillFireAnApiCallToRemoveRolesInKeycloak() {
+        testFixture.givenAggregate(REGISTERING_USER_ID.toString()).published()
+                .whenAggregate(REGISTERING_USER_ID.toString()).publishes(USER_ROLES_REMOVED_BY_ADMIN_EVENT)
+                .expectNoDispatchedCommands()
+                .expectActiveSagas(0);
+
+        verify(keycloakSynchronizationService).removeClientLevelUserRoles(USER.getId(), roles);
     }
 
     @Test
@@ -81,7 +90,7 @@ public class KeycloakSynchronizationSagaTest {
                 .expectActiveSagas(0);
 
         verify(keycloakSynchronizationService).updateUserAttributes(USER_2.getId(),
-                Map.of("attributes", new UserAttribute(USER_2.getOrganizationId(), USER_2.getRoles(), USER_2.getDisplayName()),
+                Map.of("attributes", new UserAttribute(USER_2.getOrganizationId(), USER_2.getDisplayName()),
                         "email", USER_2.getEmail()));
     }
 

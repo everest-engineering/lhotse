@@ -1,6 +1,5 @@
 package engineering.everest.lhotse.axon.common.domain;
 
-import java.util.Set;
 import java.util.UUID;
 
 import lombok.AllArgsConstructor;
@@ -12,6 +11,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UserAttribute {
     private UUID organizationId;
-    private Set<Role> roles;
     private String displayName;
 }

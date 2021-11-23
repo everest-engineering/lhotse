@@ -11,7 +11,9 @@ public interface UsersService {
 
     void updateUser(UUID requestingUserId, UUID userId, String emailChange, String displayNameChange);
 
-    void updateUserRoles(UUID requestingUserId, UUID userId, Set<Role> roles);
+    void addUserRoles(UUID requestingUserId, UUID userId, Set<Role> roles);
+
+    void removeUserRoles(UUID requestingUserId, UUID userId, Set<Role> roles);
 
     void storeProfilePhoto(UUID requestingUserId, UUID profilePhotoFileId);
 

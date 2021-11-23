@@ -6,8 +6,9 @@ import engineering.everest.lhotse.axon.common.domain.Role;
 import engineering.everest.lhotse.users.domain.commands.CreateUserCommand;
 import engineering.everest.lhotse.users.domain.commands.DeleteAndForgetUserCommand;
 import engineering.everest.lhotse.users.domain.commands.RegisterUploadedUserProfilePhotoCommand;
+import engineering.everest.lhotse.users.domain.commands.RemoveUserRolesCommand;
 import engineering.everest.lhotse.users.domain.commands.UpdateUserDetailsCommand;
-import engineering.everest.lhotse.users.domain.commands.UpdateUserRolesCommand;
+import engineering.everest.lhotse.users.domain.commands.AddUserRolesCommand;
 import org.json.JSONArray;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,7 +45,7 @@ class DefaultUsersServiceTest {
     }
 
     @Test
-    void updateUserDetails_WillSendCommandAndWaitForCompletion() {
+    void updateUserDetails_WillSendCommand() {
         defaultUsersService.updateUser(ADMIN_ID, USER_ID, "email-change",
                 "display-name-change");
 
@@ -53,10 +54,17 @@ class DefaultUsersServiceTest {
     }
 
     @Test
-    void updateUserRoles_WillSendCommandAndWaitForCompletion() {
+    void addUserRoles_WillSendCommand() {
         var roles = Set.of(Role.ORG_ADMIN, Role.ORG_USER);
-        defaultUsersService.updateUserRoles(ADMIN_ID, USER_ID, roles);
-        verify(commandGateway).send(new UpdateUserRolesCommand(USER_ID, roles, ADMIN_ID));
+        defaultUsersService.addUserRoles(ADMIN_ID, USER_ID, roles);
+        verify(commandGateway).send(new AddUserRolesCommand(USER_ID, roles, ADMIN_ID));
+    }
+
+    @Test
+    void removeUserRoles_WillSendCommand() {
+        var roles = Set.of(Role.ORG_ADMIN, Role.ADMIN);
+        defaultUsersService.removeUserRoles(ADMIN_ID, USER_ID, roles);
+        verify(commandGateway).send(new RemoveUserRolesCommand(USER_ID, roles, ADMIN_ID));
     }
 
     @Test
@@ -68,13 +76,13 @@ class DefaultUsersServiceTest {
     }
 
     @Test
-    void storeProfilePhoto_WillSendCommandAndWaitForCompletion() {
+    void storeProfilePhoto_WillSendCommand() {
         defaultUsersService.storeProfilePhoto(USER_ID, PROFILE_PHOTO_FILE_ID);
         verify(commandGateway).send(new RegisterUploadedUserProfilePhotoCommand(USER_ID, PROFILE_PHOTO_FILE_ID));
     }
 
     @Test
-    void deleteAndForget_WillSendCommandAndWaitForCompletion() {
+    void deleteAndForget_WillSendCommand() {
         defaultUsersService.deleteAndForget(ADMIN_ID, USER_ID, "User requested and we do the right thing");
         verify(commandGateway).send(new DeleteAndForgetUserCommand(USER_ID, ADMIN_ID, "User requested and we do the right thing"));
     }

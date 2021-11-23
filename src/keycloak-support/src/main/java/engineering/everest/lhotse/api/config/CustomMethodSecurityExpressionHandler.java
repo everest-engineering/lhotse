@@ -8,7 +8,7 @@ import org.springframework.security.core.Authentication;
 public class CustomMethodSecurityExpressionHandler extends DefaultMethodSecurityExpressionHandler {
     @Override
     protected MethodSecurityExpressionOperations createSecurityExpressionRoot(Authentication authentication,
-            MethodInvocation invocation) {
+                                                                              MethodInvocation invocation) {
         return new CustomMethodSecurityExpression(authentication);
     }
 }

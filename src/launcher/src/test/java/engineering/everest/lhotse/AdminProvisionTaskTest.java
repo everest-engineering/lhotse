@@ -13,7 +13,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.EnumSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -29,7 +28,6 @@ class AdminProvisionTaskTest {
     private static final String ADMIN_DISPLAY_NAME = "Admin";
     private static final String ADMIN_USERNAME = "admin-username";
     private static final String ADMIN_PASSWORD = "admin-raw-password";
-    private static final EnumSet<Role> ROLES = EnumSet.of(Role.ORG_USER, Role.ORG_ADMIN);
 
     private AdminProvisionTask adminProvisionTask;
 
@@ -56,14 +54,14 @@ class AdminProvisionTaskTest {
 
         verify(usersRepository).save(
                 new PersistableUser(ADMIN_ID, AdminProvisionTask.ORGANIZATION_ID, ADMIN_USERNAME,
-                        ADMIN_DISPLAY_NAME, false, ROLES, Instant.now(clock)));
+                        ADMIN_DISPLAY_NAME, false, Instant.now(clock)));
     }
 
     @Test
     void run_WillSkipCreatingAdminUser_WhenAdminUserAlreadyExists() {
         when(usersRepository.findByUsernameIgnoreCase(ADMIN_USERNAME)).thenReturn(Optional.of(
                 new PersistableUser(ADMIN_ID, AdminProvisionTask.ORGANIZATION_ID, ADMIN_USERNAME, ADMIN_DISPLAY_NAME,
-                        false, ROLES, Instant.now(clock))
+                        false, Instant.now(clock))
         ));
         adminProvisionTask.run();
 
@@ -75,14 +73,15 @@ class AdminProvisionTaskTest {
         adminProvisionTask.replayCompleted();
 
         verify(usersRepository).save(
-                new PersistableUser(ADMIN_ID, AdminProvisionTask.ORGANIZATION_ID, ADMIN_USERNAME, ADMIN_DISPLAY_NAME, false, ROLES, Instant.now(clock)));
+                new PersistableUser(ADMIN_ID, AdminProvisionTask.ORGANIZATION_ID, ADMIN_USERNAME, ADMIN_DISPLAY_NAME,
+                        false, Instant.now(clock)));
     }
 
     @Test
     void replayCompleted_WillSkipCreatingAdminUser_WhenAdminUserAlreadyExists() {
         when(usersRepository.findByUsernameIgnoreCase(ADMIN_USERNAME)).thenReturn(Optional.of(
                 new PersistableUser(ADMIN_ID, AdminProvisionTask.ORGANIZATION_ID, ADMIN_USERNAME, ADMIN_DISPLAY_NAME,
-                        false, ROLES, Instant.now(clock))));
+                        false, Instant.now(clock))));
         adminProvisionTask.replayCompleted();
 
         verify(usersRepository, never()).save(any(PersistableUser.class));

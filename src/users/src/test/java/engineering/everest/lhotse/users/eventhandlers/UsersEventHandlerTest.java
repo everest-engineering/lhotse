@@ -2,7 +2,6 @@ package engineering.everest.lhotse.users.eventhandlers;
 
 import engineering.everest.axon.cryptoshredding.CryptoShreddingKeyService;
 import engineering.everest.axon.cryptoshredding.TypeDifferentiatedSecretKeyId;
-import engineering.everest.lhotse.organizations.domain.events.UserPromotedToOrganizationAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserCreatedByAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserCreatedForNewlyRegisteredOrganizationEvent;
 import engineering.everest.lhotse.users.domain.events.UserDeletedAndForgottenEvent;
@@ -18,10 +17,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
-import static engineering.everest.lhotse.axon.common.domain.Role.ORG_ADMIN;
 import static engineering.everest.lhotse.axon.common.domain.User.ADMIN_ID;
 import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -124,18 +121,6 @@ class UsersEventHandlerTest {
         usersEventHandler.on(new UserProfilePhotoUploadedEvent(USER_ID, PROFILE_PHOTO_FILE_ID));
 
         assertEquals(PROFILE_PHOTO_FILE_ID, persistableUser.getProfilePhotoFileId());
-        verify(usersRepository).save(persistableUser);
-    }
-
-    @Test
-    void onUserPromotedToOrganizationAdminEvent_WillAddOrgAdminRoleToPromotedUser() {
-        PersistableUser persistableUser = createPersistableUser();
-
-        when(usersRepository.findById(USER_ID)).thenReturn(Optional.of(persistableUser));
-
-        usersEventHandler.on(new UserPromotedToOrganizationAdminEvent(ORGANIZATION_ID, USER_ID));
-
-        assertEquals(Set.of(ORG_ADMIN), persistableUser.getRoles());
         verify(usersRepository).save(persistableUser);
     }
 

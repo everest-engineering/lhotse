@@ -10,13 +10,13 @@ import engineering.everest.lhotse.users.domain.commands.CreateUserForNewlyRegist
 import engineering.everest.lhotse.users.domain.commands.DeleteAndForgetUserCommand;
 import engineering.everest.lhotse.users.domain.commands.RegisterUploadedUserProfilePhotoCommand;
 import engineering.everest.lhotse.users.domain.commands.UpdateUserDetailsCommand;
-import engineering.everest.lhotse.users.domain.commands.UpdateUserRolesCommand;
+import engineering.everest.lhotse.users.domain.commands.AddUserRolesCommand;
 import engineering.everest.lhotse.users.domain.events.UserCreatedByAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserCreatedForNewlyRegisteredOrganizationEvent;
 import engineering.everest.lhotse.users.domain.events.UserDeletedAndForgottenEvent;
 import engineering.everest.lhotse.users.domain.events.UserDetailsUpdatedByAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserProfilePhotoUploadedEvent;
-import engineering.everest.lhotse.users.domain.events.UserRolesUpdatedByAdminEvent;
+import engineering.everest.lhotse.users.domain.events.UserRolesAddedByAdminEvent;
 import engineering.everest.lhotse.users.services.UsersReadService;
 import org.axonframework.eventsourcing.AggregateDeletedException;
 import org.axonframework.spring.stereotype.Aggregate;
@@ -213,26 +213,17 @@ class UserAggregateTest {
     @Test
     void updateUserRolesCommandEmitsUserRoles_WhenCommandAccepted() {
         testFixture.given(USER_CREATED_BY_ADMIN_EVENT)
-                .when(new UpdateUserRolesCommand(USER_ID, Set.of(Role.ORG_USER, Role.ORG_ADMIN), ADMIN_ID))
-                .expectEvents(new UserRolesUpdatedByAdminEvent(USER_ID, Set.of(Role.ORG_USER, Role.ORG_ADMIN), ADMIN_ID));
+                .when(new AddUserRolesCommand(USER_ID, Set.of(Role.ORG_USER, Role.ORG_ADMIN), ADMIN_ID))
+                .expectEvents(new UserRolesAddedByAdminEvent(USER_ID, Set.of(Role.ORG_USER, Role.ORG_ADMIN), ADMIN_ID));
     }
 
     @Test
     void rejectsUpdateUserRolesCommand_WhenRolesAreEmpty() {
         testFixture.given(USER_CREATED_BY_ADMIN_EVENT)
-                .when(new UpdateUserRolesCommand(USER_ID, Set.of(), ADMIN_ID))
+                .when(new AddUserRolesCommand(USER_ID, Set.of(), ADMIN_ID))
                 .expectNoEvents()
                 .expectException(RuntimeException.class)
                 .expectExceptionMessage("Invalid message key for translatable exception USER_UPDATE_NO_ROLES_SPECIFIED");
-    }
-
-    @Test
-    void rejectsUpdateUserRolesCommand_WhenAdminRoleProvided() {
-        testFixture.given(USER_CREATED_BY_ADMIN_EVENT)
-                .when(new UpdateUserRolesCommand(USER_ID, Set.of(Role.ORG_ADMIN, Role.ADMIN), ADMIN_ID))
-                .expectNoEvents()
-                .expectException(RuntimeException.class)
-                .expectExceptionMessage("Invalid message key for translatable exception USER_UPDATE_UNALLOWED_ROLE_ADMIN");
     }
 
     @Test

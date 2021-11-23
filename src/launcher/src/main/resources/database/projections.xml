@@ -50,14 +50,5 @@
         <createIndex tableName="users" indexName="INDEX_users_organization_id">
             <column name="organizationid"/>
         </createIndex>
-
-        <createTable tableName="users_roles">
-            <column name="users_id" type="uuid"/>
-            <column name="roles" type="integer"/>
-        </createTable>
-        <addForeignKeyConstraint baseTableName="users_roles" baseColumnNames="users_id"
-                                 constraintName="FK_users_roles_users_id"
-                                 referencedTableName="users"
-                                 referencedColumnNames="id"/>
     </changeSet>
 </databaseChangeLog>

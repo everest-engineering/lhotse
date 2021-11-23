@@ -3,13 +3,11 @@ package engineering.everest.lhotse.users.eventhandlers;
 import engineering.everest.axon.cryptoshredding.CryptoShreddingKeyService;
 import engineering.everest.axon.cryptoshredding.TypeDifferentiatedSecretKeyId;
 import engineering.everest.lhotse.axon.replay.ReplayCompletionAware;
-import engineering.everest.lhotse.organizations.domain.events.UserPromotedToOrganizationAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserCreatedByAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserCreatedForNewlyRegisteredOrganizationEvent;
 import engineering.everest.lhotse.users.domain.events.UserDeletedAndForgottenEvent;
 import engineering.everest.lhotse.users.domain.events.UserDetailsUpdatedByAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserProfilePhotoUploadedEvent;
-import engineering.everest.lhotse.users.domain.events.UserRolesUpdatedByAdminEvent;
 import engineering.everest.lhotse.users.persistence.UsersRepository;
 import lombok.extern.log4j.Log4j2;
 import org.axonframework.eventhandling.EventHandler;
@@ -20,7 +18,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 
-import static engineering.everest.lhotse.axon.common.domain.Role.ORG_ADMIN;
 import static engineering.everest.lhotse.axon.common.domain.User.ADMIN_ID;
 
 @Service
@@ -69,26 +66,10 @@ public class UsersEventHandler implements ReplayCompletionAware {
     }
 
     @EventHandler
-    void on(UserRolesUpdatedByAdminEvent event) {
-        LOGGER.info("User {} roles updated by admin {}", event.getUserId(), event.getRoles());
-        var persistableUser = usersRepository.findById(event.getUserId()).orElseThrow();
-        persistableUser.setRoles(event.getRoles());
-        usersRepository.save(persistableUser);
-    }
-
-    @EventHandler
     void on(UserProfilePhotoUploadedEvent event) {
         LOGGER.info("User {} uploaded photo with fileId {}", event.getUserId(), event.getProfilePhotoFileId());
         var persistableUser = usersRepository.findById(event.getUserId()).orElseThrow();
         persistableUser.setProfilePhotoFileId(event.getProfilePhotoFileId());
-        usersRepository.save(persistableUser);
-    }
-
-    @EventHandler
-    void on(UserPromotedToOrganizationAdminEvent event) {
-        LOGGER.info("Adding role {} to user {}", ORG_ADMIN, event.getPromotedUserId());
-        var persistableUser = usersRepository.findById(event.getPromotedUserId()).orElseThrow();
-        persistableUser.addRole(ORG_ADMIN);
         usersRepository.save(persistableUser);
     }
 

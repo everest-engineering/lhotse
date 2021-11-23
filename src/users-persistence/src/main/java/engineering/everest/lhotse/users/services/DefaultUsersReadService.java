@@ -89,6 +89,6 @@ public class DefaultUsersReadService implements UsersReadService {
     private User convert(PersistableUser persistableUser) {
         return new User(persistableUser.getId(), persistableUser.getOrganizationId(), persistableUser.getUsername(),
                 persistableUser.getDisplayName(), persistableUser.getEmail(),
-                persistableUser.isDisabled(), persistableUser.getRoles());
+                persistableUser.isDisabled());
     }
 }

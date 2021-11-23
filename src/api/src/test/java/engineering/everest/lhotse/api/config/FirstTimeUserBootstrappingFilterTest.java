@@ -58,7 +58,7 @@ public class FirstTimeUserBootstrappingFilterTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        filterConfig = new FirstTimeUserBootstrappingFilter();
+        filterConfig = new FirstTimeUserBootstrappingFilter("");
     }
 
     @Test

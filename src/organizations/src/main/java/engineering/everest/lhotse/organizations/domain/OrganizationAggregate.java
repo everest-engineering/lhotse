@@ -1,12 +1,10 @@
 package engineering.everest.lhotse.organizations.domain;
 
 import engineering.everest.lhotse.i18n.TranslatableExceptionFactory;
-import engineering.everest.lhotse.organizations.domain.commands.CreateAdminRegisteredOrganizationCommand;
 import engineering.everest.lhotse.organizations.domain.commands.CreateSelfRegisteredOrganizationCommand;
 import engineering.everest.lhotse.organizations.domain.commands.DisableOrganizationCommand;
 import engineering.everest.lhotse.organizations.domain.commands.EnableOrganizationCommand;
 import engineering.everest.lhotse.organizations.domain.commands.UpdateOrganizationCommand;
-import engineering.everest.lhotse.organizations.domain.events.OrganizationCreatedByAdminEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationCreatedForNewSelfRegisteredUserEvent;
 import engineering.everest.lhotse.organizations.domain.events.UserPromotedToOrganizationAdminEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationDisabledByAdminEvent;
@@ -43,14 +41,6 @@ public class OrganizationAggregate implements Serializable {
     private Set<UUID> organizationAdminIds;
 
     protected OrganizationAggregate() {
-    }
-
-    @CommandHandler
-    public OrganizationAggregate(CreateAdminRegisteredOrganizationCommand command) {
-        apply(new OrganizationCreatedByAdminEvent(command.getOrganizationId(), command.getRequestingUserId(),
-                command.getOrganizationName(), command.getWebsiteUrl(), command.getStreet(), command.getCity(),
-                command.getState(), command.getCountry(), command.getPostalCode(), command.getContactName(),
-                command.getPhoneNumber(), command.getEmailAddress()));
     }
 
     @CommandHandler
@@ -102,13 +92,6 @@ public class OrganizationAggregate implements Serializable {
             apply(new OrganizationAddressUpdatedEvent(command.getOrganizationId(), command.getStreet(), command.getCity(),
                     command.getState(), command.getCountry(), command.getPostalCode(), command.getRequestingUserId()));
         }
-    }
-
-    @EventSourcingHandler
-    void on(OrganizationCreatedByAdminEvent event) {
-        id = event.getOrganizationId();
-        organizationAdminIds = new HashSet<>();
-        disabled = false;
     }
 
     @EventSourcingHandler

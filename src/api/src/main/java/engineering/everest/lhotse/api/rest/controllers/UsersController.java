@@ -1,7 +1,6 @@
 package engineering.everest.lhotse.api.rest.controllers;
 
 import engineering.everest.lhotse.api.rest.annotations.AdminOnly;
-import engineering.everest.lhotse.api.rest.annotations.AdminOrOrgAdmin;
 import engineering.everest.lhotse.api.rest.annotations.AdminOrOrgAdminOrOrgUser;
 import engineering.everest.lhotse.api.rest.converters.DtoConverter;
 import engineering.everest.lhotse.api.rest.requests.DeleteAndForgetUserRequest;
@@ -13,6 +12,7 @@ import engineering.everest.lhotse.users.services.UsersService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -81,12 +81,21 @@ public class UsersController {
                 request.getDisplayName());
     }
 
-    @PutMapping("/{userId}/roles")
+    @PostMapping("/{userId}/roles")
     @ResponseStatus(OK)
-    @ApiOperation("Update user roles")
-    @AdminOrOrgAdmin
-    public void updateUserRoles(@ApiIgnore Principal principal, @PathVariable UUID userId,
+    @ApiOperation("Add user roles")
+    @AdminOnly
+    public void addUserRoles(@ApiIgnore Principal principal, @PathVariable UUID userId,
                                 @RequestBody Set<Role> roles) {
-        usersService.updateUserRoles(UUID.fromString(principal.getName()), userId, roles);
+        usersService.addUserRoles(UUID.fromString(principal.getName()), userId, roles);
+    }
+
+    @DeleteMapping("/{userId}/roles")
+    @ResponseStatus(OK)
+    @ApiOperation("Remove user roles")
+    @AdminOnly
+    public void removeUserRoles(@ApiIgnore Principal principal, @PathVariable UUID userId,
+                                @RequestBody Set<Role> roles) {
+        usersService.removeUserRoles(UUID.fromString(principal.getName()), userId, roles);
     }
 }

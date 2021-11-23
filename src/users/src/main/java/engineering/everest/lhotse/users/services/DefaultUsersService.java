@@ -6,8 +6,9 @@ import engineering.everest.lhotse.axon.common.domain.UserAttribute;
 import engineering.everest.lhotse.users.domain.commands.CreateUserCommand;
 import engineering.everest.lhotse.users.domain.commands.DeleteAndForgetUserCommand;
 import engineering.everest.lhotse.users.domain.commands.RegisterUploadedUserProfilePhotoCommand;
+import engineering.everest.lhotse.users.domain.commands.RemoveUserRolesCommand;
 import engineering.everest.lhotse.users.domain.commands.UpdateUserDetailsCommand;
-import engineering.everest.lhotse.users.domain.commands.UpdateUserRolesCommand;
+import engineering.everest.lhotse.users.domain.commands.AddUserRolesCommand;
 import engineering.everest.lhotse.axon.common.domain.Role;
 
 import lombok.extern.log4j.Log4j2;
@@ -37,8 +38,13 @@ public class DefaultUsersService implements UsersService {
     }
 
     @Override
-    public void updateUserRoles(UUID requestingUserId, UUID userId, Set<Role> roles) {
-        commandGateway.send(new UpdateUserRolesCommand(userId, roles, requestingUserId));
+    public void addUserRoles(UUID requestingUserId, UUID userId, Set<Role> roles) {
+        commandGateway.send(new AddUserRolesCommand(userId, roles, requestingUserId));
+    }
+
+    @Override
+    public void removeUserRoles(UUID requestingUserId, UUID userId, Set<Role> roles) {
+        commandGateway.send(new RemoveUserRolesCommand(userId, roles, requestingUserId));
     }
 
     @Override
@@ -60,13 +66,16 @@ public class DefaultUsersService implements UsersService {
     private UUID getUserId(String username, UUID organizationId) {
         try {
             keycloakSynchronizationService
-                    .createUser(Map.of("username", username,
-                            "email", username,
-                            "enabled", true,
-                            "attributes", new UserAttribute(organizationId, Set.of(Role.ORG_USER), "Guest"),
-                            "credentials", List.of(Map.of("type", "password",
-                                    "value", "changeme",
-                                    "temporary", true))));
+                    .createUser(
+                            Map.of("username", username,
+                                    "email", username,
+                                    "enabled", true,
+                                    "attributes", new UserAttribute(organizationId, "Guest"),
+                                    "credentials",
+                                    List.of(
+                                            Map.of("type", "password",
+                                                    "value", "changeme",
+                                                    "temporary", true))));
         } catch (Exception e) {
             LOGGER.error("Keycloak createUser error: " + e);
         }

@@ -21,12 +21,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.time.Instant;
-import java.util.EnumSet;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
-import static engineering.everest.lhotse.axon.common.domain.Role.ORG_ADMIN;
-import static engineering.everest.lhotse.axon.common.domain.Role.ORG_USER;
 import static java.time.Instant.ofEpochSecond;
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
@@ -65,13 +62,13 @@ class UsersReadServiceIntegrationTest {
     private static final Instant CREATED_ON_4 = ofEpochSecond(800000L);
     private static final Instant CREATED_ON_3 = ofEpochSecond(800000L);
 
-    private static final User ORG_1_USER_1 = new User(ORG_1_USER_ID_1, ORGANIZATION_ID_1, USERNAME_1, USER_DISPLAY_NAME_1, USERNAME_1, false, EnumSet.of(ORG_USER, ORG_ADMIN));
+    private static final User ORG_1_USER_1 = new User(ORG_1_USER_ID_1, ORGANIZATION_ID_1, USERNAME_1, USER_DISPLAY_NAME_1, USERNAME_1, false);
     private static final User ORG_1_USER_2 = new User(ORG_1_USER_ID_2, ORGANIZATION_ID_1, USERNAME_2, USER_DISPLAY_NAME_2, false);
     private static final User ORG_1_USER_3_DISABLED = new User(ORG_1_USER_ID_3, ORGANIZATION_ID_1, USERNAME_3, USER_DISPLAY_NAME_3, true);
     private static final User ORG_2_USER_1 = new User(ORG_2_USER_ID_1, ORGANIZATION_ID_2, USERNAME_4, USER_DISPLAY_NAME_4, false);
 
     private static final PersistableUser PERSISTABLE_ORG_1_USER_1 = new PersistableUser(ORG_1_USER_ID_1, ORGANIZATION_ID_1, USERNAME_1, USER_DISPLAY_NAME_1,
-            USERNAME_1, false, EnumSet.of(ORG_USER, ORG_ADMIN), CREATED_ON_1, PROFILE_PHOTO_ID);
+            USERNAME_1, false, CREATED_ON_1, PROFILE_PHOTO_ID);
     private static final PersistableUser PERSISTABLE_ORG_1_USER_3 = new PersistableUser(ORG_1_USER_ID_3, ORGANIZATION_ID_1, USERNAME_3, USER_DISPLAY_NAME_3,
             true, CREATED_ON_3);
     public static final String PROFILE_PHOTO_FILE_CONTENTS = "my profile photo";

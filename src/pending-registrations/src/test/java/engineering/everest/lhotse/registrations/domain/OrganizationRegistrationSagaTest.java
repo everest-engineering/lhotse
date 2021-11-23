@@ -1,7 +1,6 @@
 package engineering.everest.lhotse.registrations.domain;
 
 import engineering.everest.lhotse.api.services.KeycloakSynchronizationService;
-import engineering.everest.lhotse.axon.common.domain.Role;
 import engineering.everest.lhotse.axon.common.domain.User;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationCreatedForNewSelfRegisteredUserEvent;
 import engineering.everest.lhotse.organizations.domain.events.UserPromotedToOrganizationAdminEvent;
@@ -17,7 +16,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Set;
 import java.util.UUID;
 
 import static java.util.UUID.randomUUID;
@@ -84,7 +82,6 @@ class OrganizationRegistrationSagaTest {
     @Test
     void userPromotedToOrganizationAdminEvent_WillEndSaga() {
         var user = new User(REGISTERING_USER_ID, ORGANIZATION_ID, "test", "tester");
-        user.setRoles(Set.of(Role.ORG_ADMIN));
         when(usersReadService.exists(REGISTERING_USER_ID)).thenReturn(true);
         when(organizationsReadService.exists(ORGANIZATION_ID)).thenReturn(true);
         when(usersReadService.getById(user.getId())).thenReturn(user);

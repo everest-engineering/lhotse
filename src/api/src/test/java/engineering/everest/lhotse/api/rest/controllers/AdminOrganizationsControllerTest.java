@@ -3,9 +3,7 @@ package engineering.everest.lhotse.api.rest.controllers;
 import com.c4_soft.springaddons.security.oauth2.test.annotations.keycloak.WithMockKeycloakAuth;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import engineering.everest.lhotse.api.config.TestApiConfig;
-import engineering.everest.lhotse.api.rest.requests.NewOrganizationRequest;
 import engineering.everest.lhotse.api.rest.responses.OrganizationResponse;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -29,7 +27,6 @@ import static java.util.UUID.fromString;
 import static org.assertj.core.util.Lists.newArrayList;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -90,37 +87,6 @@ public class AdminOrganizationsControllerTest {
                 .andExpect(jsonPath("$.[1].id", is(ORGANIZATION_2.getId().toString())))
                 .andExpect(jsonPath("$.[0].organizationName", is(ORGANIZATION_1.getOrganizationName())))
                 .andExpect(jsonPath("$.[1].organizationName", is(ORGANIZATION_2.getOrganizationName())));
-    }
-
-    @Test
-    @WithMockKeycloakAuth(authorities = ROLE_ADMIN)
-    void creatingRegisteredOrganizationWillFail_WhenNameIsEmpty() throws Exception {
-        mockMvc.perform(post("/admin/organizations")
-                        .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new NewOrganizationRequest("", ORGANIZATION_1.getOrganizationAddress().getStreet(),
-                                ORGANIZATION_1.getOrganizationAddress().getCity(), ORGANIZATION_1.getOrganizationAddress().getState(), ORGANIZATION_1.getOrganizationAddress().getCountry(), ORGANIZATION_1.getOrganizationAddress().getPostalCode(), ORGANIZATION_1.getWebsiteUrl(),
-                                ORGANIZATION_1.getContactName(), ORGANIZATION_1.getPhoneNumber(), ORGANIZATION_1.getEmailAddress()))))
-                .andExpect(status().isBadRequest());
-
-        verifyNoInteractions(organizationsService);
-    }
-
-    @Test
-    @WithMockKeycloakAuth(authorities = ROLE_ADMIN)
-    void creatingRegisteredOrganizationWillDelegate_WhenRequestingUserIsAdmin() throws Exception {
-        mockMvc.perform(post("/admin/organizations")
-                        .principal(principal)
-                        .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new NewOrganizationRequest(ORGANIZATION_1.getOrganizationName(), ORGANIZATION_1.getOrganizationAddress().getStreet(),
-                                ORGANIZATION_1.getOrganizationAddress().getCity(), ORGANIZATION_1.getOrganizationAddress().getState(), ORGANIZATION_1.getOrganizationAddress().getCountry(),
-                                ORGANIZATION_1.getOrganizationAddress().getPostalCode(), ORGANIZATION_1.getWebsiteUrl(),
-                                ORGANIZATION_1.getContactName(), ORGANIZATION_1.getPhoneNumber(), ORGANIZATION_1.getEmailAddress()))))
-                .andExpect(status().isCreated())
-                .andExpect(content().string(Matchers.any(String.class)));
-
-        verify(organizationsService).createOrganization(ADMIN_USER.getId(), ORGANIZATION_1.getOrganizationName(), ORGANIZATION_1.getOrganizationAddress().getStreet(),
-                ORGANIZATION_1.getOrganizationAddress().getCity(), ORGANIZATION_1.getOrganizationAddress().getState(), ORGANIZATION_1.getOrganizationAddress().getCountry(), ORGANIZATION_1.getOrganizationAddress().getPostalCode(), ORGANIZATION_1.getWebsiteUrl(),
-                ORGANIZATION_1.getContactName(), ORGANIZATION_1.getPhoneNumber(), ORGANIZATION_1.getEmailAddress());
     }
 
     @Test

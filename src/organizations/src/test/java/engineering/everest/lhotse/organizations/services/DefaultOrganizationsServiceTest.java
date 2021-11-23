@@ -1,7 +1,6 @@
 package engineering.everest.lhotse.organizations.services;
 
 import engineering.everest.axon.HazelcastCommandGateway;
-import engineering.everest.lhotse.axon.common.RandomFieldsGenerator;
 import engineering.everest.lhotse.organizations.domain.commands.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,9 +12,7 @@ import java.util.UUID;
 
 import static engineering.everest.lhotse.axon.common.domain.User.ADMIN_ID;
 import static java.util.UUID.randomUUID;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class DefaultOrganizationsServiceTest {
@@ -33,30 +30,13 @@ class DefaultOrganizationsServiceTest {
     private static final String ORGANIZATION_PHONE_NUMBER_1 = "phoneNumber";
 
     @Mock
-    private RandomFieldsGenerator randomFieldsGenerator;
-    @Mock
     private HazelcastCommandGateway commandGateway;
 
     private DefaultOrganizationsService defaultOrganizationService;
 
     @BeforeEach
     void setUp() {
-        defaultOrganizationService = new DefaultOrganizationsService(randomFieldsGenerator, commandGateway);
-    }
-
-    @Test
-    void createOrganisation_WillSendCommandAndWaitForCompletion() {
-        var expectedCommand = new CreateAdminRegisteredOrganizationCommand(ORGANIZATION_ID, ADMIN_ID,
-                ORGANIZATION_NAME, ORGANIZATION_STREET_1, ORGANIZATION_CITY_1, ORGANIZATION_STATE_1, ORGANIZATION_COUNTRY_1, ORGANIZATION_POSTAL_CODE_1, ORGANIZATION_WEBSITE_URL_1, ORGANIZATION_CONTACT_NAME_1, ORGANIZATION_PHONE_NUMBER_1, ORG_ADMIN_EMAIL_ADDRESS_1);
-
-        when(randomFieldsGenerator.genRandomUUID()).thenReturn(ORGANIZATION_ID);
-        when(commandGateway.sendAndWait(expectedCommand)).thenReturn(ORGANIZATION_ID);
-
-        var newOrgId = defaultOrganizationService.createOrganization(ADMIN_ID, ORGANIZATION_NAME, ORGANIZATION_STREET_1, ORGANIZATION_CITY_1, ORGANIZATION_STATE_1,
-                ORGANIZATION_COUNTRY_1, ORGANIZATION_POSTAL_CODE_1, ORGANIZATION_WEBSITE_URL_1, ORGANIZATION_CONTACT_NAME_1, ORGANIZATION_PHONE_NUMBER_1, ORG_ADMIN_EMAIL_ADDRESS_1);
-
-        assertEquals(ORGANIZATION_ID, newOrgId);
-        verify(commandGateway).sendAndWait(expectedCommand);
+        defaultOrganizationService = new DefaultOrganizationsService(commandGateway);
     }
 
     @Test

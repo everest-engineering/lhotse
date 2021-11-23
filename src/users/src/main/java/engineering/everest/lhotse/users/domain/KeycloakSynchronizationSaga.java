@@ -6,7 +6,8 @@ import engineering.everest.lhotse.axon.common.RetryWithExponentialBackoff;
 import engineering.everest.lhotse.axon.common.domain.UserAttribute;
 import engineering.everest.lhotse.users.domain.events.UserDeletedAndForgottenEvent;
 import engineering.everest.lhotse.users.domain.events.UserDetailsUpdatedByAdminEvent;
-import engineering.everest.lhotse.users.domain.events.UserRolesUpdatedByAdminEvent;
+import engineering.everest.lhotse.users.domain.events.UserRolesAddedByAdminEvent;
+import engineering.everest.lhotse.users.domain.events.UserRolesRemovedByAdminEvent;
 import engineering.everest.lhotse.users.services.UsersReadService;
 import org.axonframework.modelling.saga.EndSaga;
 import org.axonframework.modelling.saga.SagaEventHandler;
@@ -27,16 +28,17 @@ public class KeycloakSynchronizationSaga {
     @StartSaga
     @EndSaga
     @SagaEventHandler(associationProperty = USER_ID_PROPERTY)
-    public void on(UserRolesUpdatedByAdminEvent event,
-                   UsersReadService usersReadService,
-                   KeycloakSynchronizationService keycloakSynchronizationService) throws Exception {
-        var user = usersReadService.getById(event.getUserId());
+    public void on(UserRolesAddedByAdminEvent event,
+                   KeycloakSynchronizationService keycloakSynchronizationService) {
+        keycloakSynchronizationService.addClientLevelUserRoles(event.getUserId(), event.getRoles());
+    }
 
-        waitForTheProjectionUpdate(() -> user.getRoles().equals(event.getRoles()),
-                "user roles projection update");
-
-        keycloakSynchronizationService.updateUserAttributes(event.getUserId(),
-                Map.of("attributes", new UserAttribute(user.getOrganizationId(), event.getRoles(), user.getDisplayName())));
+    @StartSaga
+    @EndSaga
+    @SagaEventHandler(associationProperty = USER_ID_PROPERTY)
+    public void on(UserRolesRemovedByAdminEvent event,
+                   KeycloakSynchronizationService keycloakSynchronizationService) {
+        keycloakSynchronizationService.removeClientLevelUserRoles(event.getUserId(), event.getRoles());
     }
 
     @StartSaga
@@ -52,7 +54,7 @@ public class KeycloakSynchronizationSaga {
                 "user email or displayName projection update");
 
         keycloakSynchronizationService.updateUserAttributes(event.getUserId(),
-                Map.of("attributes", new UserAttribute(user.getOrganizationId(), user.getRoles(), event.getDisplayNameChange()),
+                Map.of("attributes", new UserAttribute(user.getOrganizationId(), event.getDisplayNameChange()),
                         "email", event.getEmailChange()));
     }
 

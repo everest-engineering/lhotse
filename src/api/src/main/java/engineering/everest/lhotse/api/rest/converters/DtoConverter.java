@@ -11,7 +11,7 @@ public class DtoConverter {
 
     public UserResponse convert(User user) {
         return new UserResponse(user.getId(), user.getOrganizationId(), user.getUsername(), user.getDisplayName(),
-                user.getEmail(), user.isDisabled(), user.getRoles());
+                user.getEmail(), user.isDisabled());
     }
 
     public OrganizationResponse convert(Organization organization) {

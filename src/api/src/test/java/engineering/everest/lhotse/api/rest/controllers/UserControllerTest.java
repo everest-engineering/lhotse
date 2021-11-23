@@ -163,7 +163,6 @@ class UserControllerTest {
                 UserControllerTest.ORG_1_USER_1.getUsername(),
                 UserControllerTest.ORG_1_USER_1.getDisplayName(),
                 UserControllerTest.ORG_1_USER_1.getEmail(),
-                UserControllerTest.ORG_1_USER_1.isDisabled(),
-                UserControllerTest.ORG_1_USER_1.getRoles());
+                UserControllerTest.ORG_1_USER_1.isDisabled());
     }
 }

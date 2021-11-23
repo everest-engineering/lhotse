@@ -206,8 +206,7 @@ class OrganizationsControllerTest {
                 OrganizationsControllerTest.ORG_1_USER_1.getUsername(),
                 OrganizationsControllerTest.ORG_1_USER_1.getDisplayName(),
                 OrganizationsControllerTest.ORG_1_USER_1.getEmail(),
-                OrganizationsControllerTest.ORG_1_USER_1.isDisabled(),
-                OrganizationsControllerTest.ORG_1_USER_1.getRoles());
+                OrganizationsControllerTest.ORG_1_USER_1.isDisabled());
     }
 
     private static OrganizationResponse getOrganizationResponse() {

@@ -11,15 +11,12 @@ import org.springframework.stereotype.Component;
 
 import java.time.Clock;
 import java.time.Instant;
-import java.util.EnumSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import javax.annotation.PostConstruct;
 
-import static engineering.everest.lhotse.axon.common.domain.Role.ORG_USER;
-import static engineering.everest.lhotse.axon.common.domain.Role.ORG_ADMIN;
 import static engineering.everest.lhotse.axon.common.domain.User.ADMIN_ID;
 import static java.util.UUID.fromString;
 
@@ -59,7 +56,7 @@ public class AdminProvisionTask implements ReplayCompletionAware {
 
         LOGGER.info("Provisioning admin user");
         usersRepository.save(new PersistableUser(UUID.fromString(userDetails.getOrDefault("userId", ADMIN_ID).toString()),
-                ORGANIZATION_ID, adminUsername, ADMIN_DISPLAY_NAME, false, EnumSet.of(ORG_USER, ORG_ADMIN), Instant.now(clock)));
+                ORGANIZATION_ID, adminUsername, ADMIN_DISPLAY_NAME, false, Instant.now(clock)));
 
         return userDetails;
     }

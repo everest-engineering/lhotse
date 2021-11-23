@@ -1,7 +1,5 @@
 package engineering.everest.lhotse.api.rest.controllers;
 
-import com.c4_soft.springaddons.security.oauth2.test.annotations.ClaimSet;
-import com.c4_soft.springaddons.security.oauth2.test.annotations.StringClaim;
 import com.c4_soft.springaddons.security.oauth2.test.annotations.keycloak.WithMockKeycloakAuth;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import engineering.everest.lhotse.api.config.TestApiConfig;
@@ -53,8 +51,8 @@ class UsersControllerTest {
     private static final User ORG_2_USER_1 = new User(USER_ID_2, ORGANIZATION_ID_2, "org-2-user-1", "org-2-user-1-display");
     private static final String USER_USERNAME = "user@umbrella.com";
     private static final String ROLE_ADMIN = "ROLE_ADMIN";
-    private static final String ROLE_ORGANIZATION_ADMIN = "ORG_ADMIN";
-    private static final String ROLE_ORGANIZATION_USER = "ORG_USER";
+    private static final String ROLE_ORGANIZATION_ADMIN = "ROLE_ORG_ADMIN";
+    private static final String ROLE_ORGANIZATION_USER = "ROLE_ORG_USER";
 
     private MockMvc mockMvc;
 
@@ -132,23 +130,38 @@ class UsersControllerTest {
 
     @Test
     @WithMockKeycloakAuth(authorities = ROLE_ADMIN)
-    void updateUserRolesWillDelegate_WhenRequestingUserIsAdmin() throws Exception {
+    void addUserRolesWillDelegate_WhenRequestingUserIsAdmin() throws Exception {
         var roles = Set.of(Role.ORG_USER, Role.ORG_ADMIN);
         when(dtoConverter.convert(ORG_2_USER_1)).thenReturn(getUserResponse(ORG_2_USER_1));
         when(usersReadService.getById(ORG_2_USER_1.getId())).thenReturn(ORG_2_USER_1);
 
-        mockMvc.perform(put("/api/users/{userId}/roles", ORG_2_USER_1.getId())
+        mockMvc.perform(post("/api/users/{userId}/roles", ORG_2_USER_1.getId())
                         .principal(() -> ADMIN_USER.getId().toString())
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(roles)))
                 .andExpect(status().isOk());
 
-        verify(usersService).updateUserRoles(ADMIN_USER.getId(), ORG_2_USER_1.getId(), roles);
+        verify(usersService).addUserRoles(ADMIN_USER.getId(), ORG_2_USER_1.getId(), roles);
     }
 
     @Test
-    @WithMockKeycloakAuth(otherClaims = @ClaimSet(stringClaims = {
-                    @StringClaim(name = "roles", value = ROLE_ORGANIZATION_ADMIN)}))
+    @WithMockKeycloakAuth(authorities = ROLE_ADMIN)
+    void removeUserRolesWillDelegate_WhenRequestingUserIsAdmin() throws Exception {
+        var roles = Set.of(Role.ADMIN);
+        when(dtoConverter.convert(ORG_2_USER_1)).thenReturn(getUserResponse(ORG_2_USER_1));
+        when(usersReadService.getById(ORG_2_USER_1.getId())).thenReturn(ORG_2_USER_1);
+
+        mockMvc.perform(delete("/api/users/{userId}/roles", ORG_2_USER_1.getId())
+                        .principal(() -> ADMIN_USER.getId().toString())
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(roles)))
+                .andExpect(status().isOk());
+
+        verify(usersService).removeUserRoles(ADMIN_USER.getId(), ORG_2_USER_1.getId(), roles);
+    }
+
+    @Test
+    @WithMockKeycloakAuth(authorities = { ROLE_ORGANIZATION_ADMIN })
     void updateUserDetailsWillDelegate_WhenRequestingUserIsAdminOfOrganization() throws Exception {
         var authUser = new User(randomUUID(), ORG_1_USER_1.getOrganizationId(), USER_USERNAME, "user");
         var aUser = new User(randomUUID(), authUser.getOrganizationId(), USER_USERNAME, "user");
@@ -164,8 +177,7 @@ class UsersControllerTest {
     }
 
     @Test
-    @WithMockKeycloakAuth(otherClaims = @ClaimSet(stringClaims = {
-            @StringClaim(name = "roles", value = ROLE_ORGANIZATION_USER)}))
+    @WithMockKeycloakAuth(authorities = { ROLE_ORGANIZATION_USER })
     void updateUserDetailsWillDelegate_WhenRequestingUserIsTargetUser() throws Exception {
         var authUser = new User(randomUUID(), ORG_1_USER_1.getOrganizationId(), USER_USERNAME, "user");
         when(usersReadService.getById(authUser.getId())).thenReturn(authUser);
@@ -181,8 +193,7 @@ class UsersControllerTest {
     }
 
     @Test
-    @WithMockKeycloakAuth(otherClaims = @ClaimSet(stringClaims = {
-            @StringClaim(name = "roles", value = ROLE_ORGANIZATION_USER)}))
+    @WithMockKeycloakAuth(authorities = { ROLE_ORGANIZATION_USER })
     void getUserById_WillDelegate() throws Exception {
         var authUser = new User(randomUUID(), ORG_1_USER_1.getOrganizationId(), USER_USERNAME, "user");
         var targetUser = new User(randomUUID(), authUser.getOrganizationId(), "other@umbrella.com", "other");
@@ -211,8 +222,7 @@ class UsersControllerTest {
     }
 
     @Test
-    @WithMockKeycloakAuth(otherClaims = @ClaimSet(stringClaims = {
-            @StringClaim(name = "roles", value = ROLE_ORGANIZATION_ADMIN)}))
+    @WithMockKeycloakAuth(authorities = { ROLE_ORGANIZATION_ADMIN })
     void updateUser_WillDelegate() throws Exception {
         var authUser = new User(randomUUID(), ORG_1_USER_1.getOrganizationId(), USER_USERNAME, "user");
         UUID targetUserId = randomUUID();
@@ -241,32 +251,12 @@ class UsersControllerTest {
         verify(usersService).deleteAndForget(authUser.getId(), targetUserId, "Submitted GDPR request");
     }
 
-    @Test
-    @WithMockKeycloakAuth(otherClaims = @ClaimSet(stringClaims = {
-            @StringClaim(name = "roles", value = ROLE_ORGANIZATION_ADMIN)}))
-    void updateUserRolesWillDelegate_WhenRequestingUserIsOrgAdmin() throws Exception {
-        var roles = Set.of(Role.ORG_USER, Role.ORG_ADMIN);
-        var authUser = new User(randomUUID(), ORG_2_USER_1.getOrganizationId(), USER_USERNAME, "user");
-        authUser.setRoles(roles);
-        when(dtoConverter.convert(ORG_2_USER_1)).thenReturn(getUserResponse(ORG_2_USER_1));
-        when(usersReadService.getById(ORG_2_USER_1.getId())).thenReturn(ORG_2_USER_1);
-
-        mockMvc.perform(put("/api/users/{userId}/roles", ORG_2_USER_1.getId())
-                        .principal(() -> authUser.getId().toString())
-                        .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(roles)))
-                .andExpect(status().isOk());
-
-        verify(usersService).updateUserRoles(authUser.getId(), ORG_2_USER_1.getId(), roles);
-    }
-
     private static UserResponse getUserResponse(User user) {
         return new UserResponse(user.getId(),
                 user.getOrganizationId(),
                 user.getUsername(),
                 user.getDisplayName(),
                 user.getEmail(),
-                user.isDisabled(),
-                user.getRoles());
+                user.isDisabled());
     }
 }

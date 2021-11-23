@@ -3,7 +3,6 @@ package engineering.everest.lhotse.organizations.eventhandlers;
 import engineering.everest.lhotse.axon.replay.ReplayCompletionAware;
 import engineering.everest.lhotse.organizations.OrganizationAddress;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationCreatedForNewSelfRegisteredUserEvent;
-import engineering.everest.lhotse.organizations.domain.events.OrganizationCreatedByAdminEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationDisabledByAdminEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationEnabledByAdminEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationNameChangedEvent;
@@ -40,16 +39,6 @@ public class OrganizationsEventHandler implements ReplayCompletionAware {
     @EventHandler
     void on(OrganizationCreatedForNewSelfRegisteredUserEvent event, @Timestamp Instant creationTime) {
         LOGGER.info("Creating new registered organization {}", event.getOrganizationId());
-        var organizationAddress = new OrganizationAddress(event.getStreet(), event.getCity(), event.getState(),
-                event.getCountry(), event.getPostalCode());
-        organizationsRepository.createOrganization(event.getOrganizationId(), event.getOrganizationName(),
-                organizationAddress, event.getWebsiteUrl(), event.getContactName(), event.getContactPhoneNumber(),
-                event.getContactEmail(), false, creationTime);
-    }
-
-    @EventHandler
-    void on(OrganizationCreatedByAdminEvent event, @Timestamp Instant creationTime) {
-        LOGGER.info("Creating new organization {}", event.getOrganizationId());
         var organizationAddress = new OrganizationAddress(event.getStreet(), event.getCity(), event.getState(),
                 event.getCountry(), event.getPostalCode());
         organizationsRepository.createOrganization(event.getOrganizationId(), event.getOrganizationName(),

@@ -23,7 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.Map;
-import java.util.concurrent.Callable;
+import java.util.Set;
 
 import static java.util.Map.entry;
 
@@ -54,12 +54,13 @@ public class OrganizationRegistrationSaga {
                 registeringUserEmail, registeringUserDisplayName));
     }
 
+    // Failure here will result in the saga not completing.
+    // Rollback has not been implemented in this example.
     @SagaEventHandler(associationProperty = ORGANIZATION_PROPERTY)
     public void on(UserCreatedForNewlyRegisteredOrganizationEvent event,
                    UsersReadService usersReadService,
                    OrganizationsReadService organizationsReadService) throws Exception {
-        waitForTheProjectionUpdate(
-                () -> usersReadService.exists(event.getUserId())
+        RetryWithExponentialBackoff.oneMinuteWaiter().waitOrThrow(() -> usersReadService.exists(event.getUserId())
                         && organizationsReadService.exists(event.getOrganizationId()),
                 "user and organization self registration projection update");
 
@@ -70,19 +71,12 @@ public class OrganizationRegistrationSaga {
     @SagaEventHandler(associationProperty = ORGANIZATION_PROPERTY)
     public void on(UserPromotedToOrganizationAdminEvent event,
                    UsersReadService usersReadService,
-                   KeycloakSynchronizationService keycloakSynchronizationService) throws Exception {
-        waitForTheProjectionUpdate(
-                () -> usersReadService.getById(event.getPromotedUserId()).getRoles().contains(Role.ORG_ADMIN),
-                "user roles projection update");
+                   KeycloakSynchronizationService keycloakSynchronizationService) {
 
-        keycloakSynchronizationService.updateUserAttributes(event.getPromotedUserId(), Map.ofEntries(entry("attributes",
-                new UserAttribute(event.getOrganizationId(), usersReadService.getById(event.getPromotedUserId()).getRoles(),
+        keycloakSynchronizationService.updateUserAttributes(event.getPromotedUserId(),
+                Map.ofEntries(entry("attributes", new UserAttribute(event.getOrganizationId(),
                         usersReadService.getById(event.getPromotedUserId()).getDisplayName()))));
-    }
 
-    // Failure here will result in the saga not completing
-    // Rollback has not been implemented in this example.
-    private void waitForTheProjectionUpdate(Callable<Boolean> condition, String message) throws Exception {
-        RetryWithExponentialBackoff.oneMinuteWaiter().waitOrThrow(condition, message);
+        keycloakSynchronizationService.addClientLevelUserRoles(event.getPromotedUserId(), Set.of(Role.ORG_ADMIN));
     }
 }

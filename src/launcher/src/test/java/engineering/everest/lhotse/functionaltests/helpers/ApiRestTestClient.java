@@ -3,9 +3,7 @@ package engineering.everest.lhotse.functionaltests.helpers;
 import engineering.everest.lhotse.AdminProvisionTask;
 import engineering.everest.lhotse.api.rest.requests.NewOrganizationRequest;
 import engineering.everest.lhotse.api.rest.requests.NewUserRequest;
-import engineering.everest.lhotse.api.rest.requests.RegisterOrganizationRequest;
 import engineering.everest.lhotse.api.rest.requests.UpdateUserRequest;
-import engineering.everest.lhotse.api.rest.responses.OrganizationRegistrationResponse;
 import engineering.everest.lhotse.api.rest.responses.OrganizationResponse;
 import engineering.everest.lhotse.api.rest.responses.UserResponse;
 import engineering.everest.lhotse.api.services.KeycloakSynchronizationService;
@@ -111,19 +109,6 @@ public class ApiRestTestClient {
                 .exchange()
                 .expectStatus().isEqualTo(expectedHttpStatus)
                 .returnResult(UserResponse.class).getResponseBody().buffer().blockFirst();
-    }
-
-    public UUID createOrganization(NewOrganizationRequest request, HttpStatus expectedHttpStatus) {
-        ResponseSpec responseSpec = webTestClient.post().uri("/admin/organizations")
-                .header("Authorization", "Bearer " + accessToken)
-                .contentType(APPLICATION_JSON)
-                .body(fromValue(request))
-                .exchange()
-                .expectStatus().isEqualTo(expectedHttpStatus);
-        if (expectedHttpStatus == CREATED) {
-            return responseSpec.returnResult(UUID.class).getResponseBody().blockFirst();
-        }
-        return null;
     }
 
     public List<OrganizationResponse> getAllOrganizations(HttpStatus expectedHttpStatus) {
