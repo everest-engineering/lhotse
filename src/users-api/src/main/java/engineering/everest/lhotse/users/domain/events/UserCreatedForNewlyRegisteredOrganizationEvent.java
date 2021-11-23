@@ -14,8 +14,8 @@ import java.util.UUID;
 @AllArgsConstructor
 @Revision("0")
 public class UserCreatedForNewlyRegisteredOrganizationEvent {
-    @EncryptionKeyIdentifier
     private UUID organizationId;
+    @EncryptionKeyIdentifier
     private UUID userId;
     @EncryptedField
     private String userDisplayName;

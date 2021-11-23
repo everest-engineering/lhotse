@@ -1,9 +1,11 @@
 package engineering.everest.lhotse.functionaltests.scenarios;
 
+import engineering.everest.lhotse.AdminProvisionTask;
 import engineering.everest.lhotse.Launcher;
 import engineering.everest.lhotse.api.rest.requests.NewUserRequest;
 import engineering.everest.lhotse.axon.CommandValidatingMessageHandlerInterceptor;
 import engineering.everest.lhotse.api.services.KeycloakSynchronizationService;
+import engineering.everest.lhotse.axon.common.RetryWithExponentialBackoff;
 import engineering.everest.lhotse.functionaltests.helpers.ApiRestTestClient;
 import engineering.everest.lhotse.organizations.services.OrganizationsReadService;
 import engineering.everest.lhotse.users.services.UsersReadService;
@@ -19,11 +21,11 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.util.Map;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.DEFINED_PORT;
+import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.web.reactive.function.BodyInserters.fromValue;
@@ -75,7 +77,7 @@ class ApplicationFunctionalTests {
 
         var newUserRequest = new NewUserRequest("a-user", "");
         var response = webTestClient.post().uri("/api/organizations/{organizationId}/users",
-                        UUID.randomUUID())
+                        AdminProvisionTask.ORGANIZATION_ID)
                 .header("Authorization", "Bearer " + apiRestTestClient.getAccessToken())
                 .header("Accept-Language", "de-DE")
                 .contentType(APPLICATION_JSON)
@@ -89,13 +91,16 @@ class ApplicationFunctionalTests {
     }
 
     @Test
-    void domainValidationErrorMessagesAreInternationalized() {
+    void domainValidationErrorMessagesAreInternationalized() throws Exception {
         apiRestTestClient.createAdminUserAndLogin();
 
         var newUserRequest = new NewUserRequest("user123@example.com", "Captain Fancypants");
-        var organizationId = UUID.randomUUID();
-        var response = webTestClient.post().uri("/api/organizations/{organizationId}/users",
-                        organizationId)
+        var userId = apiRestTestClient.createUser(AdminProvisionTask.ORGANIZATION_ID, newUserRequest, CREATED);
+        RetryWithExponentialBackoff
+                .oneMinuteWaiter()
+                .waitOrThrow(() -> usersReadService.exists(userId), "user registration projection update");
+
+        var response = webTestClient.post().uri("/api/organizations/{organizationId}/users", AdminProvisionTask.ORGANIZATION_ID)
                 .header("Authorization", "Bearer " + apiRestTestClient.getAccessToken())
                 .header("Accept-Language", "de-DE")
                 .contentType(APPLICATION_JSON)
@@ -105,6 +110,6 @@ class ApplicationFunctionalTests {
                 .getResponseBody()
                 .blockFirst();
         assertNotNull(response);
-        assertEquals(String.format("Organisation %s existiert nicht", organizationId), response.getMessage());
+        assertEquals("Diese E-Mail Adresse ist bereits vergeben", response.getMessage());
     }
 }

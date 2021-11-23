@@ -2,6 +2,7 @@ package engineering.everest.lhotse;
 
 import engineering.everest.lhotse.axon.common.domain.Role;
 import engineering.everest.lhotse.api.services.KeycloakSynchronizationService;
+import engineering.everest.lhotse.organizations.persistence.OrganizationsRepository;
 import engineering.everest.lhotse.users.persistence.PersistableUser;
 import engineering.everest.lhotse.users.persistence.UsersRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,11 +36,14 @@ class AdminProvisionTaskTest {
     @Mock
     private UsersRepository usersRepository;
     @Mock
+    private OrganizationsRepository organizationsRepository;
+    @Mock
     private KeycloakSynchronizationService keycloakSynchronizationService;
 
     @BeforeEach
     void setUp() {
-        adminProvisionTask = new AdminProvisionTask(clock, usersRepository, keycloakSynchronizationService, ADMIN_USERNAME, ADMIN_PASSWORD);
+        adminProvisionTask = new AdminProvisionTask(clock, usersRepository, organizationsRepository, keycloakSynchronizationService,
+                ADMIN_USERNAME, ADMIN_PASSWORD);
 
         when(keycloakSynchronizationService.setupKeycloakUser(ADMIN_USERNAME, ADMIN_USERNAME, true, AdminProvisionTask.ORGANIZATION_ID,
                 Set.of(Role.ORG_USER, Role.ORG_ADMIN), ADMIN_DISPLAY_NAME, ADMIN_PASSWORD, false)).thenReturn(

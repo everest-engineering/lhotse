@@ -111,12 +111,6 @@ public class TestApiConfig extends GlobalMethodSecurityConfiguration {
             super(authentication);
         }
 
-        public boolean hasCustomRole(String role) {
-            var otherClaims = principal.getKeycloakSecurityContext().getToken().getOtherClaims();
-            return  otherClaims != null && otherClaims.containsKey("roles")
-                        && otherClaims.get("roles").toString().trim().contains(role);
-        }
-
         public boolean memberOfOrg(UUID organizationId) {
             var otherClaims = principal.getKeycloakSecurityContext().getToken().getOtherClaims();
             return otherClaims != null && otherClaims.containsKey("organizationId")
