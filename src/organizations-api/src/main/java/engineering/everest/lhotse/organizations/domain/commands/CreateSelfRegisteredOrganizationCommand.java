@@ -26,6 +26,7 @@ public class CreateSelfRegisteredOrganizationCommand implements ValidatableComma
     private String country;
     private String postalCode;
     private String websiteUrl;
+    @NotBlank
     private String contactName;
     private String phoneNumber;
     @NotBlank

@@ -16,7 +16,7 @@ public class CreateUserForNewlyRegisteredOrganizationCommand implements Validata
     UUID organizationId;
     @NotNull
     UUID userId;
-    @NotNull
+    @NotBlank
     String userEmail;
     @NotBlank
     String displayName;

@@ -1,15 +1,15 @@
 package engineering.everest.lhotse.api.config;
 
 import engineering.everest.axon.HazelcastCommandGateway;
+import engineering.everest.lhotse.axon.common.RandomFieldsGenerator;
 import engineering.everest.lhotse.axon.common.RetryWithExponentialBackoff;
 import engineering.everest.lhotse.axon.common.domain.Role;
-import engineering.everest.lhotse.axon.common.domain.User;
 import engineering.everest.lhotse.organizations.domain.commands.CreateSelfRegisteredOrganizationCommand;
 import engineering.everest.lhotse.organizations.services.OrganizationsReadService;
 import engineering.everest.lhotse.users.services.UsersReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.keycloak.representations.AccessToken;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
@@ -23,26 +23,15 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.Callable;
 
 import static java.util.UUID.fromString;
-import static java.util.UUID.randomUUID;
 
 @Slf4j
 @Component
 public class FirstTimeUserBootstrappingFilter extends OncePerRequestFilter {
 
-    private static final String ORGANIZATION_STREET = "street";
-    private static final String ORGANIZATION_CITY = "city";
-    private static final String ORGANIZATION_STATE = "state";
-    private static final String ORGANIZATION_COUNTRY = "country";
-    private static final String ORGANIZATION_POSTAL_CODE = "postal";
-    private static final String ORGANIZATION_WEBSITE_URL = "website-url";
-    private static final String ORGANIZATION_CONTACT_PHONE_NUMBER = "0000000000";
-
     private static final String ORGANIZATION_ID_KEY = "organizationId";
     private static final String DISPLAY_NAME_KEY = "displayName";
-
     private static final Set<String> NOT_INCLUDE_ANT_PATTERNS = Set.of(
             "/admin/organizations",
             "/admin/organizations/**",
@@ -57,78 +46,80 @@ public class FirstTimeUserBootstrappingFilter extends OncePerRequestFilter {
             "/api/users/**/roles"
     );
 
-    @Autowired
-    private HazelcastCommandGateway commandGateway;
-
-    @Autowired
-    private UsersReadService usersReadService;
-
-    @Autowired
-    private OrganizationsReadService organizationsReadService;
-
+    private final HazelcastCommandGateway commandGateway;
+    private final UsersReadService usersReadService;
+    private final OrganizationsReadService organizationsReadService;
     private final String defaultKeycloakClientId;
+    private final RandomFieldsGenerator randomFieldsGenerator;
 
-    public FirstTimeUserBootstrappingFilter(@Value("${keycloak.resource}") String defaultKeycloakClientId) {
+    public FirstTimeUserBootstrappingFilter(@Value("${keycloak.resource}") String defaultKeycloakClientId,
+                                            HazelcastCommandGateway commandGateway,
+                                            UsersReadService usersReadService,
+                                            OrganizationsReadService organizationsReadService,
+                                            RandomFieldsGenerator randomFieldsGenerator) {
         super();
         this.defaultKeycloakClientId = defaultKeycloakClientId;
+        this.commandGateway = commandGateway;
+        this.usersReadService = usersReadService;
+        this.organizationsReadService = organizationsReadService;
+        this.randomFieldsGenerator = randomFieldsGenerator;
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse,
+    protected void doFilterInternal(HttpServletRequest httpServletRequest,
+                                    HttpServletResponse httpServletResponse,
                                     FilterChain filterChain) throws ServletException, IOException {
-        var requestUri = httpServletRequest.getRequestURI();
-        LOGGER.info("Filtering request: " + requestUri);
-
-        KeycloakAuthenticationToken keycloakAuthenticationToken = (KeycloakAuthenticationToken) httpServletRequest
-                .getUserPrincipal();
+        LOGGER.info("Filtering request: {}", httpServletRequest.getRequestURI());
+        var keycloakAuthenticationToken = (KeycloakAuthenticationToken) httpServletRequest.getUserPrincipal();
         var accessToken = keycloakAuthenticationToken.getAccount().getKeycloakSecurityContext().getToken();
+
         try {
             var otherClaims = accessToken.getOtherClaims();
-            LOGGER.info("Other claims: " + otherClaims);
-
-            if (otherClaims.containsKey(ORGANIZATION_ID_KEY)) {
-                LOGGER.info("Already registered user details: "
-                        + new User(UUID.fromString(accessToken.getSubject()),
-                                fromString(otherClaims.get(ORGANIZATION_ID_KEY).toString()),
-                                accessToken.getPreferredUsername(),
-                                otherClaims.get(DISPLAY_NAME_KEY).toString(),
-                                accessToken.getEmail(), false));
-                LOGGER.info("Already registered user roles: "
-                        + accessToken.getResourceAccess(defaultKeycloakClientId).getRoles());
-            } else {
-                var organizationId = randomUUID();
-                var registeringUserId = fromString(accessToken.getSubject());
-                var userEmailAddress = accessToken.getEmail();
-                var organizationName = accessToken.getPreferredUsername();
-                var displayName = otherClaims.getOrDefault(DISPLAY_NAME_KEY, "Guest").toString().trim();
-
-                commandGateway.send(new CreateSelfRegisteredOrganizationCommand(organizationId, registeringUserId,
-                        organizationName, ORGANIZATION_STREET, ORGANIZATION_CITY, ORGANIZATION_STATE,
-                        ORGANIZATION_COUNTRY, ORGANIZATION_POSTAL_CODE, ORGANIZATION_WEBSITE_URL, displayName,
-                        ORGANIZATION_CONTACT_PHONE_NUMBER, userEmailAddress));
-
-                Callable<Boolean> projectionsDone = () -> usersReadService.exists(registeringUserId)
-                        && organizationsReadService.exists(organizationId);
-
-                RetryWithExponentialBackoff
-                        .oneMinuteWaiter()
-                        .waitOrThrow(projectionsDone, "user and organization self registration projection update");
-
-                var user = usersReadService.getById(registeringUserId);
-                LOGGER.info("Newly registered user details: " + user);
-
-                // Updating the access token with user claims to avoid token regeneration
-                accessToken.getOtherClaims().putAll(Map.of(ORGANIZATION_ID_KEY, organizationId, DISPLAY_NAME_KEY,
-                        user.getDisplayName()));
-                accessToken.getResourceAccess(defaultKeycloakClientId).addRole(Role.ORG_ADMIN.name());
-                LOGGER.info("Updated user access token with custom claims.");
+            if (!otherClaims.containsKey(ORGANIZATION_ID_KEY)) {
+                var userId = fromString(accessToken.getSubject());
+                bootstrapMissingNewlyRegisteredUser(accessToken, userId, otherClaims);
+                augmentAccessTokenForRecentlyRegisteredUser(accessToken, userId);
             }
-
+            LOGGER.info("Registered user {} with roles {} on organisation {}",
+                    UUID.fromString(accessToken.getSubject()),
+                    accessToken.getResourceAccess(defaultKeycloakClientId).getRoles(),
+                    UUID.fromString(otherClaims.get(ORGANIZATION_ID_KEY).toString()));
+            LOGGER.debug("Other claims: {}", otherClaims);
         } catch (Exception e) {
             LOGGER.error("doFilterInternal error: ", e);
         } finally {
             filterChain.doFilter(httpServletRequest, httpServletResponse);
         }
+    }
+
+    private void bootstrapMissingNewlyRegisteredUser(AccessToken accessToken, UUID userId,
+                                                     Map<String, Object> otherClaims) throws Exception {
+        if (!usersReadService.exists(userId)) {
+            LOGGER.info("Bootstrapping newly registered user {}", userId);
+            var newOrganizationId = randomFieldsGenerator.genRandomUUID();
+            var userEmailAddress = accessToken.getEmail();
+            var organizationName = accessToken.getPreferredUsername();
+            var displayName = otherClaims.getOrDefault(DISPLAY_NAME_KEY, "Guest").toString().trim();
+
+            // You really want to disconnect the load balancer when doing a replay.... This would fail nicely if the user
+            // were being created first, preventing bogus organisations from being created.
+            commandGateway.send(new CreateSelfRegisteredOrganizationCommand(newOrganizationId, userId,
+                    organizationName, null, null, null, null, null, null,
+                    displayName, null, userEmailAddress));
+
+            RetryWithExponentialBackoff.oneMinuteWaiter().waitOrThrow(
+                    () -> usersReadService.exists(userId) && organizationsReadService.exists(newOrganizationId),
+                    "user and organization self registration projection update");
+        }
+    }
+
+    private void augmentAccessTokenForRecentlyRegisteredUser(AccessToken accessToken, UUID userId) {
+        var user = usersReadService.getById(userId);
+        LOGGER.info("User {} is recently registered, - augmenting access token with missing fields", userId);
+        accessToken.getOtherClaims().putAll(
+                Map.of(ORGANIZATION_ID_KEY, user.getOrganizationId(),
+                        DISPLAY_NAME_KEY, user.getDisplayName()));
+        accessToken.getResourceAccess(defaultKeycloakClientId).addRole(Role.ORG_ADMIN.name());
     }
 
     // We are using this method as shouldFilter by doing noneMatch for provided patterns and request paths.

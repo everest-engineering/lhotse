@@ -68,6 +68,9 @@ public class KeycloakSynchronizationSaga {
                 "user deletion projection update");
 
         keycloakSynchronizationService.deleteUser(event.getDeletedUserId());
+
+        // If this user is the last one on the organisation then it might also need to be removed.
+        // This isn't catered for in this contrived example.
     }
 
     // Failure here will result in the saga not completing.
