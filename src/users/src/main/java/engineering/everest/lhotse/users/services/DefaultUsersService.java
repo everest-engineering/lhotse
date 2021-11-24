@@ -34,17 +34,17 @@ public class DefaultUsersService implements UsersService {
 
     @Override
     public void updateUser(UUID requestingUserId, UUID userId, String emailChange, String displayNameChange) {
-        commandGateway.send(new UpdateUserDetailsCommand(userId, emailChange, displayNameChange, requestingUserId));
+        commandGateway.sendAndWait(new UpdateUserDetailsCommand(userId, emailChange, displayNameChange, requestingUserId));
     }
 
     @Override
     public void addUserRoles(UUID requestingUserId, UUID userId, Set<Role> roles) {
-        commandGateway.send(new AddUserRolesCommand(userId, roles, requestingUserId));
+        commandGateway.sendAndWait(new AddUserRolesCommand(userId, roles, requestingUserId));
     }
 
     @Override
     public void removeUserRoles(UUID requestingUserId, UUID userId, Set<Role> roles) {
-        commandGateway.send(new RemoveUserRolesCommand(userId, roles, requestingUserId));
+        commandGateway.sendAndWait(new RemoveUserRolesCommand(userId, roles, requestingUserId));
     }
 
     @Override
@@ -55,12 +55,12 @@ public class DefaultUsersService implements UsersService {
 
     @Override
     public void storeProfilePhoto(UUID requestingUserId, UUID profilePhotoFileId) {
-        commandGateway.send(new RegisterUploadedUserProfilePhotoCommand(requestingUserId, profilePhotoFileId));
+        commandGateway.sendAndWait(new RegisterUploadedUserProfilePhotoCommand(requestingUserId, profilePhotoFileId));
     }
 
     @Override
     public void deleteAndForget(UUID requestingUserId, UUID userId, String requestReason) {
-        commandGateway.send(new DeleteAndForgetUserCommand(userId, requestingUserId, requestReason));
+        commandGateway.sendAndWait(new DeleteAndForgetUserCommand(userId, requestingUserId, requestReason));
     }
 
     private UUID getUserId(String username, UUID organizationId) {

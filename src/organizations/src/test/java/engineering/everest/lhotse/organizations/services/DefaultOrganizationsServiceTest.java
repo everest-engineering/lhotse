@@ -46,7 +46,7 @@ class DefaultOrganizationsServiceTest {
                 ORGANIZATION_COUNTRY_1, ORGANIZATION_POSTAL_CODE_1, ORGANIZATION_WEBSITE_URL_1, ORGANIZATION_CONTACT_NAME_1,
                 ORGANIZATION_PHONE_NUMBER_1, ORG_ADMIN_EMAIL_ADDRESS_1);
 
-        verify(commandGateway).send(new UpdateOrganizationCommand(ORGANIZATION_ID, ADMIN_ID, ORGANIZATION_NAME,
+        verify(commandGateway).sendAndWait(new UpdateOrganizationCommand(ORGANIZATION_ID, ADMIN_ID, ORGANIZATION_NAME,
                 ORGANIZATION_STREET_1, ORGANIZATION_CITY_1, ORGANIZATION_STATE_1,
                 ORGANIZATION_COUNTRY_1, ORGANIZATION_POSTAL_CODE_1, ORGANIZATION_WEBSITE_URL_1, ORGANIZATION_CONTACT_NAME_1,
                 ORGANIZATION_PHONE_NUMBER_1, ORG_ADMIN_EMAIL_ADDRESS_1));
@@ -55,12 +55,12 @@ class DefaultOrganizationsServiceTest {
     @Test
     void enableOrganisation_WillSendCommandAndWaitForCompletion() {
         defaultOrganizationService.enableOrganization(ADMIN_ID, ORGANIZATION_ID);
-        verify(commandGateway).send(new EnableOrganizationCommand(ORGANIZATION_ID, ADMIN_ID));
+        verify(commandGateway).sendAndWait(new EnableOrganizationCommand(ORGANIZATION_ID, ADMIN_ID));
     }
 
     @Test
     void disableOrganisation_WillSendCommandAndWaitForCompletion() {
         defaultOrganizationService.disableOrganization(ADMIN_ID, ORGANIZATION_ID);
-        verify(commandGateway).send(new DisableOrganizationCommand(ORGANIZATION_ID, ADMIN_ID));
+        verify(commandGateway).sendAndWait(new DisableOrganizationCommand(ORGANIZATION_ID, ADMIN_ID));
     }
 }

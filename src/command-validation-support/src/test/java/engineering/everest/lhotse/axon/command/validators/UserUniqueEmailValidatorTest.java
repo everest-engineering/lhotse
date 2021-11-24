@@ -9,6 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
@@ -32,8 +33,9 @@ public class UserUniqueEmailValidatorTest {
     void validate_WillFail_WhenUserWithEmailAlreadyExists() {
         when(usersReadService.hasUserWithEmail(EXISTING_USER_EMAIL_1)).thenReturn(true);
 
-        assertThrows(TranslatableIllegalStateException.class, () ->
+        var thrownException = assertThrows(TranslatableIllegalStateException.class, () ->
                 usersUniqueEmailValidator.validate((UserUniqueEmailValidatableCommand) () -> EXISTING_USER_EMAIL_1));
+        assertEquals("EMAIL_ADDRESS_ALREADY_EXISTS", thrownException.getMessage());
     }
 
     @Test

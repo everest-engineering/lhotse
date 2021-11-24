@@ -1,6 +1,6 @@
 package engineering.everest.lhotse.users.domain.commands;
 
-import engineering.everest.lhotse.axon.command.validation.ValidatableCommand;
+import engineering.everest.lhotse.axon.command.validation.UsersStatusValidatableCommand;
 import engineering.everest.lhotse.axon.common.domain.Role;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,11 +14,16 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class RemoveUserRolesCommand implements ValidatableCommand {
+public class RemoveUserRolesCommand implements UsersStatusValidatableCommand {
     @TargetAggregateIdentifier
     private UUID userId;
     private Set<Role> roles;
 
     @NotNull
     private UUID requestingUserId;
+
+    @Override
+    public Set<UUID> getUserIds() {
+        return Set.of(userId, requestingUserId);
+    }
 }

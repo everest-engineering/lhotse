@@ -22,17 +22,17 @@ public class DefaultOrganizationsService implements OrganizationsService {
     public void updateOrganization(UUID requestingUserId, UUID organizationId, String organizationName,
                                    String street, String city, String state, String country, String postalCode,
                                    String websiteUrl, String contactName, String phoneNumber, String emailAddress) {
-        commandGateway.send(new UpdateOrganizationCommand(organizationId, requestingUserId, organizationName, street, city,
+        commandGateway.sendAndWait(new UpdateOrganizationCommand(organizationId, requestingUserId, organizationName, street, city,
                 state, country, postalCode, websiteUrl, contactName, phoneNumber, emailAddress));
     }
 
     @Override
     public void disableOrganization(UUID requestingUserId, UUID organizationId) {
-        commandGateway.send(new DisableOrganizationCommand(organizationId, requestingUserId));
+        commandGateway.sendAndWait(new DisableOrganizationCommand(organizationId, requestingUserId));
     }
 
     @Override
     public void enableOrganization(UUID requestingUserId, UUID organizationId) {
-        commandGateway.send(new EnableOrganizationCommand(organizationId, requestingUserId));
+        commandGateway.sendAndWait(new EnableOrganizationCommand(organizationId, requestingUserId));
     }
 }
