@@ -41,8 +41,9 @@ public class UsersEventHandler implements ReplayCompletionAware {
 
     @EventHandler
     void on(UserCreatedByAdminEvent event, @Timestamp Instant creationTime) {
-        LOGGER.info("User {} created for admin created organization {}", event.getUserId(), event.getOrganizationId());
-        var userEmail = event.getUserEmail() == null ? String.format("%s@deleted", event.getUserId())
+        LOGGER.info("User {} created by admin {} on organization {}", event.getUserId(), event.getAdminId(), event.getOrganizationId());
+        var userEmail = event.getUserEmail() == null
+                ? String.format("%s@deleted", event.getUserId())
                 : event.getUserEmail();
         usersRepository.createUser(event.getUserId(), event.getOrganizationId(), event.getUserDisplayName(), userEmail, creationTime);
     }

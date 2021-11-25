@@ -1,13 +1,13 @@
 package engineering.everest.lhotse.users.domain;
 
 import engineering.everest.lhotse.i18n.TranslatableExceptionFactory;
-import engineering.everest.lhotse.users.domain.commands.CreateUserCommand;
+import engineering.everest.lhotse.users.domain.commands.AddUserRolesCommand;
+import engineering.everest.lhotse.users.domain.commands.CreateOrganizationUserCommand;
 import engineering.everest.lhotse.users.domain.commands.CreateUserForNewlyRegisteredOrganizationCommand;
 import engineering.everest.lhotse.users.domain.commands.DeleteAndForgetUserCommand;
 import engineering.everest.lhotse.users.domain.commands.RegisterUploadedUserProfilePhotoCommand;
 import engineering.everest.lhotse.users.domain.commands.RemoveUserRolesCommand;
 import engineering.everest.lhotse.users.domain.commands.UpdateUserDetailsCommand;
-import engineering.everest.lhotse.users.domain.commands.AddUserRolesCommand;
 import engineering.everest.lhotse.users.domain.events.UserCreatedByAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserCreatedForNewlyRegisteredOrganizationEvent;
 import engineering.everest.lhotse.users.domain.events.UserDeletedAndForgottenEvent;
@@ -43,15 +43,15 @@ public class UserAggregate implements Serializable {
     }
 
     @CommandHandler
-    public UserAggregate(CreateUserCommand command) {
-        apply(new UserCreatedByAdminEvent(command.getUserId(), command.getOrganizationId(),
-                command.getRequestingUserId(), command.getUserDisplayName(), command.getEmailAddress()));
-    }
-
-    @CommandHandler
     public UserAggregate(CreateUserForNewlyRegisteredOrganizationCommand command) {
         apply(new UserCreatedForNewlyRegisteredOrganizationEvent(command.getOrganizationId(), command.getUserId(),
                 command.getDisplayName(), command.getUserEmail()));
+    }
+
+    @CommandHandler
+    public UserAggregate(CreateOrganizationUserCommand command) {
+        apply(new UserCreatedByAdminEvent(command.getUserId(), command.getOrganizationId(),
+                command.getRequestingUserId(), command.getUserDisplayName(), command.getEmailAddress()));
     }
 
     @CommandHandler

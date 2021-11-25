@@ -4,7 +4,7 @@ import engineering.everest.axon.HazelcastCommandGateway;
 import engineering.everest.lhotse.api.services.KeycloakSynchronizationService;
 import engineering.everest.lhotse.axon.common.domain.Role;
 import engineering.everest.lhotse.users.domain.commands.AddUserRolesCommand;
-import engineering.everest.lhotse.users.domain.commands.CreateUserCommand;
+import engineering.everest.lhotse.users.domain.commands.CreateOrganizationUserCommand;
 import engineering.everest.lhotse.users.domain.commands.DeleteAndForgetUserCommand;
 import engineering.everest.lhotse.users.domain.commands.RegisterUploadedUserProfilePhotoCommand;
 import engineering.everest.lhotse.users.domain.commands.RemoveUserRolesCommand;
@@ -43,9 +43,10 @@ public class DefaultUsersService implements UsersService {
     }
 
     @Override
-    public UUID createUser(UUID requestingUserId, UUID organizationId, String username, String displayName) {
+    public UUID createOrganizationUser(UUID requestingUserId, UUID organizationId, String username, String displayName) {
         var keycloakUserId = createUserAndRetrieveKeycloakUserId(username, organizationId, displayName);
-        return commandGateway.sendAndWait(new CreateUserCommand(keycloakUserId, organizationId, requestingUserId, username, displayName));
+        return commandGateway.sendAndWait(
+                new CreateOrganizationUserCommand(keycloakUserId, organizationId, requestingUserId, username, displayName));
     }
 
     @Override
@@ -59,6 +60,6 @@ public class DefaultUsersService implements UsersService {
     }
 
     private UUID createUserAndRetrieveKeycloakUserId(String username, UUID organizationId, String displayName) {
-        return keycloakSynchronizationService.createUser(username, organizationId, displayName);
+        return keycloakSynchronizationService.createNewKeycloakUserAndSendVerificationEmail(username, organizationId, displayName);
     }
 }

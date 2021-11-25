@@ -6,7 +6,7 @@ import engineering.everest.lhotse.axon.command.validators.UserStatusValidator;
 import engineering.everest.lhotse.axon.command.validators.UsersUniqueEmailValidator;
 import engineering.everest.lhotse.axon.common.domain.Role;
 import engineering.everest.lhotse.i18n.exceptions.TranslatableIllegalArgumentException;
-import engineering.everest.lhotse.users.domain.commands.CreateUserCommand;
+import engineering.everest.lhotse.users.domain.commands.CreateOrganizationUserCommand;
 import engineering.everest.lhotse.users.domain.commands.CreateUserForNewlyRegisteredOrganizationCommand;
 import engineering.everest.lhotse.users.domain.commands.DeleteAndForgetUserCommand;
 import engineering.everest.lhotse.users.domain.commands.RegisterUploadedUserProfilePhotoCommand;
@@ -89,9 +89,9 @@ class UserAggregateTest {
     }
 
     @Test
-    void createUserCommandEmits_WhenAllMandatoryFieldsArePresentInCreationCommand() {
+    void createOrganizationUserCommandEmits_WhenAllMandatoryFieldsArePresentInCreationCommand() {
         testFixture.givenNoPriorActivity()
-                .when(new CreateUserCommand(USER_ID, ORGANIZATION_ID, ADMIN_ID, USERNAME, USER_DISPLAY_NAME))
+                .when(new CreateOrganizationUserCommand(USER_ID, ORGANIZATION_ID, ADMIN_ID, USERNAME, USER_DISPLAY_NAME))
                 .expectEvents(new UserCreatedByAdminEvent(USER_ID, ORGANIZATION_ID, ADMIN_ID, USER_DISPLAY_NAME, USERNAME));
     }
 
@@ -103,8 +103,8 @@ class UserAggregateTest {
     }
 
     @Test
-    void rejectsCreateUserCommand_WhenEmailValidatorFails() {
-        var command = new CreateUserCommand(USER_ID, ORGANIZATION_ID, ADMIN_ID, null, USER_DISPLAY_NAME);
+    void rejectsCreateOrganizationUserCommand_WhenEmailValidatorFails() {
+        var command = new CreateOrganizationUserCommand(USER_ID, ORGANIZATION_ID, ADMIN_ID, null, USER_DISPLAY_NAME);
 
         testFixture.givenNoPriorActivity()
                 .when(command)
@@ -121,9 +121,9 @@ class UserAggregateTest {
     }
 
     @Test
-    void rejectsCreateUserCommand_WhenDisplayNameIsBlank() {
+    void rejectsCreateOrganizationUserCommand_WhenDisplayNameIsBlank() {
         testFixture.givenNoPriorActivity()
-                .when(new CreateUserCommand(USER_ID, ORGANIZATION_ID, ADMIN_ID, USERNAME, ""))
+                .when(new CreateOrganizationUserCommand(USER_ID, ORGANIZATION_ID, ADMIN_ID, USERNAME, ""))
                 .expectNoEvents()
                 .expectException(ConstraintViolationException.class);
     }
@@ -137,9 +137,9 @@ class UserAggregateTest {
     }
 
     @Test
-    void rejectsCreateUserCommand_WhenDisplayNameIsNull() {
+    void rejectsCreateOrganizationUserCommand_WhenDisplayNameIsNull() {
         testFixture.givenNoPriorActivity()
-                .when(new CreateUserCommand(USER_ID, ORGANIZATION_ID, ADMIN_ID, USERNAME, null))
+                .when(new CreateOrganizationUserCommand(USER_ID, ORGANIZATION_ID, ADMIN_ID, USERNAME, null))
                 .expectNoEvents()
                 .expectException(ConstraintViolationException.class);
     }
@@ -153,8 +153,8 @@ class UserAggregateTest {
     }
 
     @Test
-    void rejectsCreateUserCommand_WhenRequestingUserIsNull() {
-        var command = new CreateUserCommand(USER_ID, ORGANIZATION_ID, null, USERNAME, USER_DISPLAY_NAME);
+    void rejectsCreateOrganizationUserCommand_WhenRequestingUserIsNull() {
+        var command = new CreateOrganizationUserCommand(USER_ID, ORGANIZATION_ID, null, USERNAME, USER_DISPLAY_NAME);
 
         testFixture.givenNoPriorActivity()
                 .when(command)
@@ -171,8 +171,8 @@ class UserAggregateTest {
     }
 
     @Test
-    void rejectsCreateUserCommand_WhenOrganizationIdIsInvalid() {
-        var command = new CreateUserCommand(USER_ID, ORGANIZATION_ID, ADMIN_ID, USERNAME, USER_DISPLAY_NAME);
+    void rejectsCreateOrganizationUserCommand_WhenOrganizationIdIsInvalid() {
+        var command = new CreateOrganizationUserCommand(USER_ID, ORGANIZATION_ID, ADMIN_ID, USERNAME, USER_DISPLAY_NAME);
         doThrow(IllegalStateException.class).when(organizationStatusValidator).validate(command);
 
         testFixture.givenNoPriorActivity()
@@ -182,8 +182,8 @@ class UserAggregateTest {
     }
 
     @Test
-    void rejectsCreateUserCommand_WhenUniqueUserEmailValidatorFails() {
-        var command = new CreateUserCommand(USER_ID, ORGANIZATION_ID, ADMIN_ID, USERNAME, USER_DISPLAY_NAME);
+    void rejectsCreateOrganizationUserCommand_WhenUniqueUserEmailValidatorFails() {
+        var command = new CreateOrganizationUserCommand(USER_ID, ORGANIZATION_ID, ADMIN_ID, USERNAME, USER_DISPLAY_NAME);
         doThrow(IllegalArgumentException.class).when(usersUniqueEmailValidator).validate(command);
 
         testFixture.givenNoPriorActivity()
@@ -200,9 +200,9 @@ class UserAggregateTest {
     }
 
     @Test
-    void createUserCommandEmits() {
+    void createOrganizationUserCommandEmits() {
         testFixture.givenNoPriorActivity()
-                .when(new CreateUserCommand(USER_ID, ORGANIZATION_ID, ADMIN_ID, USERNAME, USER_DISPLAY_NAME))
+                .when(new CreateOrganizationUserCommand(USER_ID, ORGANIZATION_ID, ADMIN_ID, USERNAME, USER_DISPLAY_NAME))
                 .expectEvents(new UserCreatedByAdminEvent(USER_ID, ORGANIZATION_ID, ADMIN_ID, USER_DISPLAY_NAME, USERNAME));
     }
 

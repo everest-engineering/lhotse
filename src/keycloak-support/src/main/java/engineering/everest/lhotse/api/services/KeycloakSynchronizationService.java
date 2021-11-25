@@ -11,21 +11,21 @@ import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-import java.util.UUID;
 import java.util.List;
-import java.util.Set;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 import static java.util.UUID.fromString;
+import static org.springframework.http.HttpMethod.DELETE;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
-import static org.springframework.http.HttpMethod.DELETE;
 import static org.springframework.http.HttpMethod.PUT;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @Slf4j
 @Component
@@ -71,8 +71,8 @@ public class KeycloakSynchronizationService {
 
     public void updateUserAttributes(UUID userId, Map<String, Object> attributes) {
         webclient(constructUrlPath("/users/%s", userId), PUT)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
+                .contentType(APPLICATION_JSON)
+                .accept(APPLICATION_JSON)
                 .bodyValue(attributes)
                 .exchangeToMono(res -> Mono.just(res.statusCode()))
                 .block();
@@ -84,31 +84,13 @@ public class KeycloakSynchronizationService {
                 .block();
     }
 
-    public void createUser(Map<String, Object> userDetails) {
-        try {
-            webclient(constructUrlPath("/users", ""), POST)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .accept(MediaType.APPLICATION_JSON)
-                    .bodyValue(userDetails)
-                    .exchangeToMono(res -> Mono.just(res.statusCode()))
-                    .block();
-        } catch (Exception e) {
-            LOGGER.error("Keycloak createUser error: " + e);
-        }
-    }
-
-    public UUID createUser(String username, UUID organizationId, String displayName) {
-        return createUser(username, username, true, new UserAttribute(organizationId, displayName), "changeme", true);
-    }
-
-    public UUID createUser(String username, String email, boolean enabled, UserAttribute userAttribute, String password,
-                           boolean passwordTemporary) {
-        createUser(Map.of("username", username,
-                "email", email,
-                "enabled", enabled,
-                "attributes", userAttribute,
+    public UUID createNewKeycloakUserAndSendVerificationEmail(String username, UUID organizationId, String displayName) {
+        createNewKeycloakUser(Map.of("username", username,
+                "email", username,
+                "enabled", true,
+                "attributes", new UserAttribute(organizationId, displayName),
                 "credentials",
-                List.of(Map.of("type", "password", VALUE_KEY, password, "temporary", passwordTemporary))));
+                List.of(Map.of("type", "password", VALUE_KEY, "changeme", "temporary", true))));
 
         var userId = getUserId(username);
         sendUserVerificationEmail(userId);
@@ -144,10 +126,23 @@ public class KeycloakSynchronizationService {
                 .block();
     }
 
+    private void createNewKeycloakUser(Map<String, Object> userDetails) {
+        try {
+            webclient(constructUrlPath("/users", ""), POST)
+                    .contentType(APPLICATION_JSON)
+                    .accept(APPLICATION_JSON)
+                    .bodyValue(userDetails)
+                    .exchangeToMono(res -> Mono.just(res.statusCode()))
+                    .block();
+        } catch (Exception e) {
+            LOGGER.error("Keycloak createUser error: " + e);
+        }
+    }
+
     private void updateClientRoles(String path, HttpMethod method, Object data) {
         webclient(path, method)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
+                .contentType(APPLICATION_JSON)
+                .accept(APPLICATION_JSON)
                 .bodyValue(data)
                 .exchangeToMono(res -> Mono.just(res.statusCode()))
                 .block();
@@ -188,8 +183,8 @@ public class KeycloakSynchronizationService {
 
     public void sendUserVerificationEmail(UUID userId) {
         webclient(constructUrlPath("/users/%s/send-verify-email", userId), PUT)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
+                .contentType(APPLICATION_JSON)
+                .accept(APPLICATION_JSON)
                 .exchangeToMono(res -> Mono.just(res.statusCode()))
                 .block();
     }
@@ -209,7 +204,16 @@ public class KeycloakSynchronizationService {
 
     public Map<String, Object> setupKeycloakUser(String username, String email, boolean enabled, UUID organizationId,
                                                  Set<Role> roles, String displayName, String password, boolean passwordTemporary) {
-        var userId = createUser(username, email, enabled, new UserAttribute(organizationId, displayName), password, passwordTemporary);
+        createNewKeycloakUser(Map.of("username", username,
+                "email", email,
+                "enabled", enabled,
+                "attributes", new UserAttribute(organizationId, displayName),
+                "credentials",
+                List.of(Map.of("type", "password", VALUE_KEY, password, "temporary", passwordTemporary))));
+
+        var userId1 = getUserId(username);
+        sendUserVerificationEmail(userId1);
+        var userId = userId1;
         addClientLevelUserRoles(userId, roles);
 
         var secret = getClientSecret(getClientIdFromClientDetails());

@@ -6,7 +6,7 @@ import engineering.everest.lhotse.axon.command.validators.UsersUniqueEmailValida
 import engineering.everest.lhotse.i18n.exceptions.TranslatableIllegalStateException;
 import engineering.everest.lhotse.organizations.Organization;
 import engineering.everest.lhotse.organizations.services.OrganizationsReadService;
-import engineering.everest.lhotse.users.domain.commands.CreateUserCommand;
+import engineering.everest.lhotse.users.domain.commands.CreateOrganizationUserCommand;
 import engineering.everest.lhotse.users.services.UsersReadService;
 import org.axonframework.commandhandling.CommandMessage;
 import org.axonframework.messaging.InterceptorChain;
@@ -78,8 +78,8 @@ class CommandValidatingMessageHandlerInterceptorTest {
 
     @Test
     void willValidateSuperInterfaceFirst() {
-        var createUserSubClassCommand = mock(CreateUserSubclassCommand.class);
-        Mockito.<Class<?>>when(commandMessage.getPayloadType()).thenReturn(CreateUserSubclassCommand.class);
+        var createUserSubClassCommand = mock(CreateUserSubclassTestCommand.class);
+        Mockito.<Class<?>>when(commandMessage.getPayloadType()).thenReturn(CreateUserSubclassTestCommand.class);
         Mockito.<Object>when(commandMessage.getPayload()).thenReturn(createUserSubClassCommand);
 
         when(createUserSubClassCommand.getOrganizationId()).thenReturn(ORGANIZATION_ID);
@@ -93,9 +93,9 @@ class CommandValidatingMessageHandlerInterceptorTest {
 
     @Test
     void willValidateCommandWithMultipleInterfaces() throws Exception {
-        CreateUserCommand createUserCommand = mock(CreateUserCommand.class);
+        var createUserCommand = mock(CreateOrganizationUserCommand.class);
         when(createUserCommand.getOrganizationId()).thenReturn(ORGANIZATION_ID);
-        Mockito.<Class<?>>when(commandMessage.getPayloadType()).thenReturn(CreateUserCommand.class);
+        Mockito.<Class<?>>when(commandMessage.getPayloadType()).thenReturn(CreateOrganizationUserCommand.class);
         Mockito.<Object>when(commandMessage.getPayload()).thenReturn(createUserCommand);
         when(organizationsReadService.getById(ORGANIZATION_ID)).thenReturn(ORGANIZATION);
 
@@ -107,10 +107,10 @@ class CommandValidatingMessageHandlerInterceptorTest {
 
     @Test
     void willThrow_WhenJavaBeanValidatorFails() {
-        CreateUserCommand createUserCommand = mock(CreateUserCommand.class);
+        var createUserCommand = mock(CreateOrganizationUserCommand.class);
 
         Mockito.<Object>when(javaBeanValidator.validate(any())).thenReturn(of(mock(ConstraintViolation.class)));
-        Mockito.<Class<?>>when(commandMessage.getPayloadType()).thenReturn(CreateUserCommand.class);
+        Mockito.<Class<?>>when(commandMessage.getPayloadType()).thenReturn(CreateOrganizationUserCommand.class);
         Mockito.<Object>when(commandMessage.getPayload()).thenReturn(createUserCommand);
 
         assertThrows(ConstraintViolationException.class,
@@ -119,15 +119,15 @@ class CommandValidatingMessageHandlerInterceptorTest {
 
     @Test
     void willValidateCommandWithSuperClass() throws Exception {
-        CreateUserSubclassCommand createUserSubclassCommand = mock(CreateUserSubclassCommand.class);
-        when(createUserSubclassCommand.getOrganizationId()).thenReturn(ORGANIZATION_ID);
-        Mockito.<Class<?>>when(commandMessage.getPayloadType()).thenReturn(CreateUserSubclassCommand.class);
-        Mockito.<Object>when(commandMessage.getPayload()).thenReturn(createUserSubclassCommand);
+        var createUserSubclassTestCommand = mock(CreateUserSubclassTestCommand.class);
+        when(createUserSubclassTestCommand.getOrganizationId()).thenReturn(ORGANIZATION_ID);
+        Mockito.<Class<?>>when(commandMessage.getPayloadType()).thenReturn(CreateUserSubclassTestCommand.class);
+        Mockito.<Object>when(commandMessage.getPayload()).thenReturn(createUserSubclassTestCommand);
         when(organizationsReadService.getById(ORGANIZATION_ID)).thenReturn(ORGANIZATION);
 
         commandValidatingMessageHandlerInterceptor.handle(unitOfWork, interceptorChain);
 
-        verify(createUserSubclassCommand, times(2)).getEmailAddress();
-        verify(createUserSubclassCommand, times(2)).getOrganizationId();
+        verify(createUserSubclassTestCommand, times(2)).getEmailAddress();
+        verify(createUserSubclassTestCommand, times(2)).getOrganizationId();
     }
 }

@@ -3,7 +3,7 @@ package engineering.everest.lhotse.users.services;
 import engineering.everest.axon.HazelcastCommandGateway;
 import engineering.everest.lhotse.api.services.KeycloakSynchronizationService;
 import engineering.everest.lhotse.users.domain.commands.AddUserRolesCommand;
-import engineering.everest.lhotse.users.domain.commands.CreateUserCommand;
+import engineering.everest.lhotse.users.domain.commands.CreateOrganizationUserCommand;
 import engineering.everest.lhotse.users.domain.commands.DeleteAndForgetUserCommand;
 import engineering.everest.lhotse.users.domain.commands.RegisterUploadedUserProfilePhotoCommand;
 import engineering.everest.lhotse.users.domain.commands.RemoveUserRolesCommand;
@@ -70,11 +70,12 @@ class DefaultUsersServiceTest {
     }
 
     @Test
-    void createNewUser_WillSendCommandAndWaitForCompletion() {
-        when(keycloakSynchronizationService.createUser(NEW_USER_EMAIL, ORGANIZATION_ID, NEW_USER_DISPLAY_NAME)).thenReturn(USER_ID);
+    void createNewKeycloakUser_WillSendCommandAndWaitForCompletion() {
+        when(keycloakSynchronizationService.createNewKeycloakUserAndSendVerificationEmail(NEW_USER_EMAIL, ORGANIZATION_ID, NEW_USER_DISPLAY_NAME))
+                .thenReturn(USER_ID);
 
-        defaultUsersService.createUser(ADMIN_ID, ORGANIZATION_ID, NEW_USER_EMAIL, NEW_USER_DISPLAY_NAME);
-        verify(commandGateway).sendAndWait(new CreateUserCommand(USER_ID, ORGANIZATION_ID, ADMIN_ID, NEW_USER_EMAIL, NEW_USER_DISPLAY_NAME));
+        defaultUsersService.createOrganizationUser(ADMIN_ID, ORGANIZATION_ID, NEW_USER_EMAIL, NEW_USER_DISPLAY_NAME);
+        verify(commandGateway).sendAndWait(new CreateOrganizationUserCommand(USER_ID, ORGANIZATION_ID, ADMIN_ID, NEW_USER_EMAIL, NEW_USER_DISPLAY_NAME));
     }
 
     @Test

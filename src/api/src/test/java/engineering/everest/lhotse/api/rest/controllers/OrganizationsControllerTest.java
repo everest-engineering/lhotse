@@ -178,7 +178,7 @@ class OrganizationsControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(content().string(Matchers.any(String.class)));
 
-        verify(usersService).createUser(ORG_2_USER_2.getId(), ORGANIZATION_2.getId(), NEW_USER_USERNAME, NEW_USER_DISPLAY_NAME);
+        verify(usersService).createOrganizationUser(ORG_2_USER_2.getId(), ORGANIZATION_2.getId(), NEW_USER_USERNAME, NEW_USER_DISPLAY_NAME);
     }
 
     @Test
