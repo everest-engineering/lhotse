@@ -1,6 +1,5 @@
 package engineering.everest.lhotse.api.services;
 
-import engineering.everest.lhotse.api.exceptions.KeycloakSynchronizationException;
 import engineering.everest.lhotse.axon.common.domain.Role;
 import engineering.everest.lhotse.axon.common.domain.UserAttribute;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +20,6 @@ import java.util.UUID;
 import java.util.List;
 import java.util.Set;
 import java.util.Map;
-import java.util.HashMap;
 
 import static java.util.UUID.fromString;
 import static org.springframework.http.HttpMethod.GET;
@@ -87,12 +85,40 @@ public class KeycloakSynchronizationService {
     }
 
     public void createUser(Map<String, Object> userDetails) {
-        webclient(constructUrlPath("/users", ""), POST)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(userDetails)
-                .exchangeToMono(res -> Mono.just(res.statusCode()))
-                .block();
+        try {
+            webclient(constructUrlPath("/users", ""), POST)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .bodyValue(userDetails)
+                    .exchangeToMono(res -> Mono.just(res.statusCode()))
+                    .block();
+        } catch (Exception e) {
+            LOGGER.error("Keycloak createUser error: " + e);
+        }
+    }
+
+    public UUID createUser(String username, UUID organizationId, String displayName) {
+        return createUser(username, username, true, new UserAttribute(organizationId, displayName), "changeme", true);
+    }
+
+    public UUID createUser(String username, String email, boolean enabled, UserAttribute userAttribute, String password,
+                           boolean passwordTemporary) {
+        createUser(Map.of("username", username,
+                "email", email,
+                "enabled", enabled,
+                "attributes", userAttribute,
+                "credentials",
+                List.of(Map.of("type", "password", VALUE_KEY, password, "temporary", passwordTemporary))));
+
+        var userId = getUserId(username);
+        sendUserVerificationEmail(userId);
+        return userId;
+    }
+
+    public UUID getUserId(String username) {
+        return fromString(new JSONArray(getUsers(Map.of("username", username)))
+                .getJSONObject(0)
+                .getString("id"));
     }
 
     public String getUsers(Map<String, Object> queryFilters) {
@@ -160,6 +186,14 @@ public class KeycloakSynchronizationService {
                 .block();
     }
 
+    public void sendUserVerificationEmail(UUID userId) {
+        webclient(constructUrlPath("/users/%s/send-verify-email", userId), PUT)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchangeToMono(res -> Mono.just(res.statusCode()))
+                .block();
+    }
+
     private StringBuilder getFilters(Map<String, Object> queryFilters) {
         var filters = new StringBuilder("?");
         if (!queryFilters.isEmpty()) {
@@ -175,33 +209,12 @@ public class KeycloakSynchronizationService {
 
     public Map<String, Object> setupKeycloakUser(String username, String email, boolean enabled, UUID organizationId,
                                                  Set<Role> roles, String displayName, String password, boolean passwordTemporary) {
-        var userDetails = new HashMap<String, Object>();
-        try {
-            createUser(
-                    Map.of("username", username,
-                            "email", email,
-                            "enabled", enabled,
-                            "attributes", new UserAttribute(organizationId, displayName),
-                            "credentials",
-                            List.of(
-                                    Map.of("type", "password",
-                                            VALUE_KEY, password,
-                                            "temporary", passwordTemporary))));
+        var userId = createUser(username, email, enabled, new UserAttribute(organizationId, displayName), password, passwordTemporary);
+        addClientLevelUserRoles(userId, roles);
 
-            var clientSecret = getClientSecret(getClientIdFromClientDetails());
-            if (clientSecret.contains(VALUE_KEY)) {
-                userDetails.put("clientSecret", new JSONObject(clientSecret).getString(VALUE_KEY));
-            }
-
-            var userId = fromString(new JSONArray(getUsers(Map.of("username", username)))
-                    .getJSONObject(0).getString("id"));
-            userDetails.put("userId", userId);
-
-            addClientLevelUserRoles(userId, roles);
-        } catch (Exception e) {
-            throw (KeycloakSynchronizationException)new KeycloakSynchronizationException(e.getMessage()).initCause(e);
-        }
-        return userDetails;
+        var secret = getClientSecret(getClientIdFromClientDetails());
+        return Map.of("userId", userId,
+                "clientSecret", secret.contains(VALUE_KEY) ? new JSONObject(secret).getString(VALUE_KEY) : "");
     }
 
     private UUID getClientIdFromClientDetails() {

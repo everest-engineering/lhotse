@@ -3,7 +3,6 @@ package engineering.everest.lhotse.users.services;
 import engineering.everest.axon.HazelcastCommandGateway;
 import engineering.everest.lhotse.api.services.KeycloakSynchronizationService;
 import engineering.everest.lhotse.axon.common.domain.Role;
-import engineering.everest.lhotse.axon.common.domain.UserAttribute;
 import engineering.everest.lhotse.users.domain.commands.AddUserRolesCommand;
 import engineering.everest.lhotse.users.domain.commands.CreateUserCommand;
 import engineering.everest.lhotse.users.domain.commands.DeleteAndForgetUserCommand;
@@ -11,11 +10,8 @@ import engineering.everest.lhotse.users.domain.commands.RegisterUploadedUserProf
 import engineering.everest.lhotse.users.domain.commands.RemoveUserRolesCommand;
 import engineering.everest.lhotse.users.domain.commands.UpdateUserDetailsCommand;
 import lombok.extern.log4j.Log4j2;
-import org.json.JSONArray;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -63,23 +59,6 @@ public class DefaultUsersService implements UsersService {
     }
 
     private UUID createUserAndRetrieveKeycloakUserId(String username, UUID organizationId, String displayName) {
-        try {
-            keycloakSynchronizationService
-                    .createUser(
-                            Map.of("username", username,
-                                    "email", username,
-                                    "enabled", true,
-                                    "attributes", new UserAttribute(organizationId, displayName),
-                                    "credentials",
-                                    List.of(
-                                            Map.of("type", "password",
-                                                    "value", "changeme",
-                                                    "temporary", true))));
-        } catch (Exception e) {
-            LOGGER.error("Keycloak createUser error: " + e);
-        }
-        return UUID.fromString(
-                new JSONArray(keycloakSynchronizationService.getUsers(Map.of("username", username)))
-                        .getJSONObject(0).getString("id"));
+        return keycloakSynchronizationService.createUser(username, organizationId, displayName);
     }
 }

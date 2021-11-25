@@ -8,14 +8,12 @@ import engineering.everest.lhotse.users.domain.commands.DeleteAndForgetUserComma
 import engineering.everest.lhotse.users.domain.commands.RegisterUploadedUserProfilePhotoCommand;
 import engineering.everest.lhotse.users.domain.commands.RemoveUserRolesCommand;
 import engineering.everest.lhotse.users.domain.commands.UpdateUserDetailsCommand;
-import org.json.JSONArray;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -73,8 +71,8 @@ class DefaultUsersServiceTest {
 
     @Test
     void createNewUser_WillSendCommandAndWaitForCompletion() {
-        when(keycloakSynchronizationService.getUsers(Map.of("username", NEW_USER_EMAIL)))
-                .thenReturn(new JSONArray().put(0, Map.of("id", USER_ID)).toString());
+        when(keycloakSynchronizationService.createUser(NEW_USER_EMAIL, ORGANIZATION_ID, NEW_USER_DISPLAY_NAME)).thenReturn(USER_ID);
+
         defaultUsersService.createUser(ADMIN_ID, ORGANIZATION_ID, NEW_USER_EMAIL, NEW_USER_DISPLAY_NAME);
         verify(commandGateway).sendAndWait(new CreateUserCommand(USER_ID, ORGANIZATION_ID, ADMIN_ID, NEW_USER_EMAIL, NEW_USER_DISPLAY_NAME));
     }
