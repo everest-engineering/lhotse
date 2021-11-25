@@ -2,13 +2,12 @@ package engineering.everest.lhotse.users.services;
 
 import engineering.everest.axon.HazelcastCommandGateway;
 import engineering.everest.lhotse.api.services.KeycloakSynchronizationService;
-import engineering.everest.lhotse.axon.common.domain.Role;
+import engineering.everest.lhotse.users.domain.commands.AddUserRolesCommand;
 import engineering.everest.lhotse.users.domain.commands.CreateUserCommand;
 import engineering.everest.lhotse.users.domain.commands.DeleteAndForgetUserCommand;
 import engineering.everest.lhotse.users.domain.commands.RegisterUploadedUserProfilePhotoCommand;
 import engineering.everest.lhotse.users.domain.commands.RemoveUserRolesCommand;
 import engineering.everest.lhotse.users.domain.commands.UpdateUserDetailsCommand;
-import engineering.everest.lhotse.users.domain.commands.AddUserRolesCommand;
 import org.json.JSONArray;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,8 +15,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.*;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
+import static engineering.everest.lhotse.axon.common.domain.Role.ADMIN;
+import static engineering.everest.lhotse.axon.common.domain.Role.ORG_ADMIN;
+import static engineering.everest.lhotse.axon.common.domain.Role.ORG_USER;
 import static engineering.everest.lhotse.axon.common.domain.User.ADMIN_ID;
 import static java.util.UUID.randomUUID;
 import static org.mockito.Mockito.verify;
@@ -55,14 +59,14 @@ class DefaultUsersServiceTest {
 
     @Test
     void addUserRoles_WillSendCommand() {
-        var roles = Set.of(Role.ORG_ADMIN, Role.ORG_USER);
+        var roles = Set.of(ORG_ADMIN, ORG_USER);
         defaultUsersService.addUserRoles(ADMIN_ID, USER_ID, roles);
         verify(commandGateway).sendAndWait(new AddUserRolesCommand(USER_ID, roles, ADMIN_ID));
     }
 
     @Test
     void removeUserRoles_WillSendCommand() {
-        var roles = Set.of(Role.ORG_ADMIN, Role.ADMIN);
+        var roles = Set.of(ORG_ADMIN, ADMIN);
         defaultUsersService.removeUserRoles(ADMIN_ID, USER_ID, roles);
         verify(commandGateway).sendAndWait(new RemoveUserRolesCommand(USER_ID, roles, ADMIN_ID));
     }

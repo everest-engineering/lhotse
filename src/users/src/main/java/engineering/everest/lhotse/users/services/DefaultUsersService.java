@@ -2,23 +2,22 @@ package engineering.everest.lhotse.users.services;
 
 import engineering.everest.axon.HazelcastCommandGateway;
 import engineering.everest.lhotse.api.services.KeycloakSynchronizationService;
+import engineering.everest.lhotse.axon.common.domain.Role;
 import engineering.everest.lhotse.axon.common.domain.UserAttribute;
+import engineering.everest.lhotse.users.domain.commands.AddUserRolesCommand;
 import engineering.everest.lhotse.users.domain.commands.CreateUserCommand;
 import engineering.everest.lhotse.users.domain.commands.DeleteAndForgetUserCommand;
 import engineering.everest.lhotse.users.domain.commands.RegisterUploadedUserProfilePhotoCommand;
 import engineering.everest.lhotse.users.domain.commands.RemoveUserRolesCommand;
 import engineering.everest.lhotse.users.domain.commands.UpdateUserDetailsCommand;
-import engineering.everest.lhotse.users.domain.commands.AddUserRolesCommand;
-import engineering.everest.lhotse.axon.common.domain.Role;
-
 import lombok.extern.log4j.Log4j2;
 import org.json.JSONArray;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 @Service
 @Log4j2
@@ -49,8 +48,8 @@ public class DefaultUsersService implements UsersService {
 
     @Override
     public UUID createUser(UUID requestingUserId, UUID organizationId, String username, String displayName) {
-        return commandGateway.sendAndWait(new CreateUserCommand(getUserId(username, organizationId), organizationId,
-                requestingUserId, username, displayName));
+        var keycloakUserId = createUserAndRetrieveKeycloakUserId(username, organizationId, displayName);
+        return commandGateway.sendAndWait(new CreateUserCommand(keycloakUserId, organizationId, requestingUserId, username, displayName));
     }
 
     @Override
@@ -63,14 +62,14 @@ public class DefaultUsersService implements UsersService {
         commandGateway.sendAndWait(new DeleteAndForgetUserCommand(userId, requestingUserId, requestReason));
     }
 
-    private UUID getUserId(String username, UUID organizationId) {
+    private UUID createUserAndRetrieveKeycloakUserId(String username, UUID organizationId, String displayName) {
         try {
             keycloakSynchronizationService
                     .createUser(
                             Map.of("username", username,
                                     "email", username,
                                     "enabled", true,
-                                    "attributes", new UserAttribute(organizationId, "Guest"),
+                                    "attributes", new UserAttribute(organizationId, displayName),
                                     "credentials",
                                     List.of(
                                             Map.of("type", "password",
