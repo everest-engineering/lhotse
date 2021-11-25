@@ -3,7 +3,10 @@ services:
   notebook:
     build:
       context: .
+    container_name: jupyter-notebook
     volumes:
       - ./files:/home/jovyan/work
-    network_mode: "host"
- 
+    network_mode: host
+    environment:
+      - JUPYTER_ENABLE_LAB=yes
+

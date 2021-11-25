@@ -31,12 +31,11 @@ class DefaultAuthServerUserReadServiceTest {
     void getByUsername_WillReturnAuthServerRepresentationOfPeristableUser() {
         PersistableUser persistableUser = mock(PersistableUser.class);
         when(persistableUser.getUsername()).thenReturn("found-username");
-        when(persistableUser.getEncodedPassword()).thenReturn("encoded-password");
         when(persistableUser.isDisabled()).thenReturn(false);
 
         when(usersRepository.findByUsernameIgnoreCase("username")).thenReturn(Optional.of(persistableUser));
 
-        AuthServerUser expectedAuthServerUser = new AuthServerUser("found-username", "encoded-password", false);
+        AuthServerUser expectedAuthServerUser = new AuthServerUser("found-username", false);
         assertEquals(expectedAuthServerUser, defaultAuthServerUserReadService.getByUsername("username"));
     }
 }

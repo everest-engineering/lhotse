@@ -15,31 +15,36 @@ import static engineering.everest.lhotse.i18n.MessageKeys.ORGANIZATION_ALREADY_E
 import static engineering.everest.lhotse.i18n.MessageKeys.ORGANIZATION_DOES_NOT_EXIST;
 import static engineering.everest.lhotse.i18n.MessageKeys.ORGANIZATION_IS_DEREGISTERED;
 import static engineering.everest.lhotse.i18n.MessageKeys.ORGANIZATION_IS_DISABLED;
-import static engineering.everest.lhotse.i18n.MessageKeys.ORGANIZATION_REGISTRATION_TOKEN_FOR_ANOTHER_ORG;
 import static engineering.everest.lhotse.i18n.MessageKeys.ORGANIZATION_UPDATE_NO_FIELDS_CHANGED;
 import static engineering.everest.lhotse.i18n.MessageKeys.USER_ALREADY_ORGANIZATION_ADMIN;
 import static engineering.everest.lhotse.i18n.MessageKeys.USER_DISPLAY_NAME_MISSING;
+import static engineering.everest.lhotse.i18n.MessageKeys.USER_IS_DISABLED;
+import static engineering.everest.lhotse.i18n.MessageKeys.USER_IS_UNKNOWN;
 import static engineering.everest.lhotse.i18n.MessageKeys.USER_NOT_MEMBER_OF_ORGANIZATION;
 import static engineering.everest.lhotse.i18n.MessageKeys.USER_UPDATE_NO_FIELDS_CHANGED;
+import static engineering.everest.lhotse.i18n.MessageKeys.USER_UPDATE_NO_ROLES_SPECIFIED;
 import static java.util.stream.Collectors.toConcurrentMap;
 
 @SuppressWarnings("PMD.ClassNamingConventions")
 public class TranslatableExceptionFactory {
 
     @SuppressWarnings("PMD.UseConcurrentHashMap")
+    // TODO: ghetto, this won't scale. See https://github.com/everest-engineering/lhotse/issues/57
     private static final Map<String, Class<?>> KEY_TO_EXCEPTION_MAPPING = Stream.of(
-            new AbstractMap.SimpleEntry<>(EMAIL_ADDRESS_ALREADY_EXISTS, TranslatableIllegalStateException.class),
-            new AbstractMap.SimpleEntry<>(EMAIL_ADDRESS_MALFORMED, TranslatableIllegalArgumentException.class),
-            new AbstractMap.SimpleEntry<>(ORGANIZATION_ALREADY_ENABLED, TranslatableIllegalStateException.class),
-            new AbstractMap.SimpleEntry<>(ORGANIZATION_DOES_NOT_EXIST, TranslatableIllegalStateException.class),
-            new AbstractMap.SimpleEntry<>(ORGANIZATION_IS_DEREGISTERED, TranslatableIllegalStateException.class),
-            new AbstractMap.SimpleEntry<>(ORGANIZATION_IS_DISABLED, TranslatableIllegalStateException.class),
-            new AbstractMap.SimpleEntry<>(ORGANIZATION_REGISTRATION_TOKEN_FOR_ANOTHER_ORG, TranslatableIllegalArgumentException.class),
-            new AbstractMap.SimpleEntry<>(ORGANIZATION_UPDATE_NO_FIELDS_CHANGED, TranslatableIllegalArgumentException.class),
-            new AbstractMap.SimpleEntry<>(USER_ALREADY_ORGANIZATION_ADMIN, TranslatableIllegalStateException.class),
-            new AbstractMap.SimpleEntry<>(USER_DISPLAY_NAME_MISSING, TranslatableIllegalArgumentException.class),
-            new AbstractMap.SimpleEntry<>(USER_NOT_MEMBER_OF_ORGANIZATION, TranslatableIllegalArgumentException.class),
-            new AbstractMap.SimpleEntry<>(USER_UPDATE_NO_FIELDS_CHANGED, TranslatableIllegalArgumentException.class))
+                    new AbstractMap.SimpleEntry<>(EMAIL_ADDRESS_ALREADY_EXISTS, TranslatableIllegalStateException.class),
+                    new AbstractMap.SimpleEntry<>(EMAIL_ADDRESS_MALFORMED, TranslatableIllegalArgumentException.class),
+                    new AbstractMap.SimpleEntry<>(ORGANIZATION_ALREADY_ENABLED, TranslatableIllegalStateException.class),
+                    new AbstractMap.SimpleEntry<>(ORGANIZATION_DOES_NOT_EXIST, TranslatableIllegalStateException.class),
+                    new AbstractMap.SimpleEntry<>(ORGANIZATION_IS_DEREGISTERED, TranslatableIllegalStateException.class),
+                    new AbstractMap.SimpleEntry<>(ORGANIZATION_IS_DISABLED, TranslatableIllegalStateException.class),
+                    new AbstractMap.SimpleEntry<>(ORGANIZATION_UPDATE_NO_FIELDS_CHANGED, TranslatableIllegalArgumentException.class),
+                    new AbstractMap.SimpleEntry<>(USER_ALREADY_ORGANIZATION_ADMIN, TranslatableIllegalStateException.class),
+                    new AbstractMap.SimpleEntry<>(USER_DISPLAY_NAME_MISSING, TranslatableIllegalArgumentException.class),
+                    new AbstractMap.SimpleEntry<>(USER_IS_DISABLED, TranslatableIllegalStateException.class),
+                    new AbstractMap.SimpleEntry<>(USER_IS_UNKNOWN, TranslatableIllegalStateException.class),
+                    new AbstractMap.SimpleEntry<>(USER_NOT_MEMBER_OF_ORGANIZATION, TranslatableIllegalArgumentException.class),
+                    new AbstractMap.SimpleEntry<>(USER_UPDATE_NO_FIELDS_CHANGED, TranslatableIllegalArgumentException.class),
+                    new AbstractMap.SimpleEntry<>(USER_UPDATE_NO_ROLES_SPECIFIED, TranslatableIllegalArgumentException.class))
             .collect(toConcurrentMap(Map.Entry::getKey, Map.Entry::getValue));
 
     private TranslatableExceptionFactory() {

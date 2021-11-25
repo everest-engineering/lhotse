@@ -2,12 +2,12 @@ package engineering.everest.lhotse.organizations.eventhandlers;
 
 import engineering.everest.lhotse.axon.replay.ReplayCompletionAware;
 import engineering.everest.lhotse.organizations.OrganizationAddress;
-import engineering.everest.lhotse.organizations.domain.events.OrganizationAddressUpdatedEvent;
-import engineering.everest.lhotse.organizations.domain.events.OrganizationContactDetailsUpdatedEvent;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationCreatedForNewSelfRegisteredUserEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationDisabledByAdminEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationEnabledByAdminEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationNameChangedEvent;
-import engineering.everest.lhotse.organizations.domain.events.OrganizationRegisteredEvent;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationContactDetailsUpdatedEvent;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationAddressUpdatedEvent;
 import engineering.everest.lhotse.organizations.persistence.Address;
 import engineering.everest.lhotse.organizations.persistence.OrganizationsRepository;
 import lombok.extern.log4j.Log4j2;
@@ -37,7 +37,7 @@ public class OrganizationsEventHandler implements ReplayCompletionAware {
     }
 
     @EventHandler
-    void on(OrganizationRegisteredEvent event, @Timestamp Instant creationTime) {
+    void on(OrganizationCreatedForNewSelfRegisteredUserEvent event, @Timestamp Instant creationTime) {
         LOGGER.info("Creating new registered organization {}", event.getOrganizationId());
         var organizationAddress = new OrganizationAddress(event.getStreet(), event.getCity(), event.getState(),
                 event.getCountry(), event.getPostalCode());

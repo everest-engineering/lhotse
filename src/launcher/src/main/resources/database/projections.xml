@@ -35,7 +35,6 @@
             </column>
             <column name="displayname" type="varchar(255)"/>
             <column name="email" type="varchar(255)"/>
-            <column name="encodedpassword" type="varchar(255)"/>
             <column name="organizationid" type="uuid"/>
             <column name="profilephotofileid" type="uuid"/>
             <column name="username" type="varchar(255)">
@@ -50,28 +49,6 @@
         </createIndex>
         <createIndex tableName="users" indexName="INDEX_users_organization_id">
             <column name="organizationid"/>
-        </createIndex>
-
-        <createTable tableName="users_roles">
-            <column name="users_id" type="uuid"/>
-            <column name="roles" type="integer"/>
-        </createTable>
-        <addForeignKeyConstraint baseTableName="users_roles" baseColumnNames="users_id"
-                                 constraintName="FK_users_roles_users_id"
-                                 referencedTableName="users"
-                                 referencedColumnNames="id"/>
-
-        <createTable tableName="pendingregistrations">
-            <column name="confirmationcode" type="uuid">
-                <constraints primaryKey="true" primaryKeyName="PK_pending_registrations"/>
-            </column>
-            <column name="organizationid" type="uuid"/>
-            <column name="userid" type="uuid"/>
-            <column name="useremail" type="varchar(255)"/>
-            <column name="registeredon" type="timestamp"/>
-        </createTable>
-        <createIndex tableName="pendingregistrations" indexName="INDEX_pendingregistrations_email">
-            <column name="useremail"/>
         </createIndex>
     </changeSet>
 </databaseChangeLog>

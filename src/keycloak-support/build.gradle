@@ -1,0 +1,19 @@
+apply plugin: 'jacoco'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(':organizations-api')
+    implementation project(':users-api')
+
+    implementation "org.json:json:${jsonHelperVersion}"
+    implementation "org.keycloak:keycloak-spring-boot-starter:${keycloakVersion}"
+    implementation "org.keycloak:keycloak-admin-client:${keycloakVersion}"
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation "org.springframework.boot:spring-boot-starter-webflux:${webfluxVersion}"
+
+    testImplementation "org.springframework.boot:spring-boot-starter-test"
+    testImplementation "org.springframework.security:spring-security-test"
+}  

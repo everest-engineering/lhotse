@@ -113,8 +113,8 @@ public class ReplayEndpoint {
 
     private List<ReplayableEventProcessor> getReplayableEventProcessors() {
         return axonConfiguration.eventProcessingConfiguration().eventProcessors().values().stream()
-                .filter(e -> e instanceof ReplayableEventProcessor)
-                .map(e -> (ReplayableEventProcessor) e)
+                .filter(ReplayableEventProcessor.class::isInstance)
+                .map(ReplayableEventProcessor.class::cast)
                 .collect(toList());
     }
 

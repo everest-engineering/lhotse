@@ -29,7 +29,6 @@ public class OrganizationRepositoryConfig {
     public Repository<OrganizationAggregate> repositoryForOrganization(EventStore eventStore,
                                                                        Snapshotter snapshotter,
                                                                        JCacheAdapter cacheAdapter) {
-
         return CachingEventSourcingRepository.builder(OrganizationAggregate.class)
                 .aggregateFactory(new GenericAggregateFactory<>(OrganizationAggregate.class))
                 .parameterResolverFactory(parameterResolverFactory)

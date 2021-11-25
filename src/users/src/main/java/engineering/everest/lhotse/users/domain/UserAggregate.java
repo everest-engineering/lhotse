@@ -1,17 +1,20 @@
 package engineering.everest.lhotse.users.domain;
 
 import engineering.everest.lhotse.i18n.TranslatableExceptionFactory;
-import engineering.everest.lhotse.users.domain.commands.CreateUserCommand;
+import engineering.everest.lhotse.users.domain.commands.AddUserRolesCommand;
+import engineering.everest.lhotse.users.domain.commands.CreateOrganizationUserCommand;
 import engineering.everest.lhotse.users.domain.commands.CreateUserForNewlyRegisteredOrganizationCommand;
 import engineering.everest.lhotse.users.domain.commands.DeleteAndForgetUserCommand;
 import engineering.everest.lhotse.users.domain.commands.RegisterUploadedUserProfilePhotoCommand;
+import engineering.everest.lhotse.users.domain.commands.RemoveUserRolesCommand;
 import engineering.everest.lhotse.users.domain.commands.UpdateUserDetailsCommand;
 import engineering.everest.lhotse.users.domain.events.UserCreatedByAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserCreatedForNewlyRegisteredOrganizationEvent;
 import engineering.everest.lhotse.users.domain.events.UserDeletedAndForgottenEvent;
 import engineering.everest.lhotse.users.domain.events.UserDetailsUpdatedByAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserProfilePhotoUploadedEvent;
-import lombok.extern.log4j.Log4j2;
+import engineering.everest.lhotse.users.domain.events.UserRolesAddedByAdminEvent;
+import engineering.everest.lhotse.users.domain.events.UserRolesRemovedByAdminEvent;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.modelling.command.AggregateIdentifier;
@@ -22,12 +25,12 @@ import java.util.UUID;
 
 import static engineering.everest.lhotse.i18n.MessageKeys.USER_DISPLAY_NAME_MISSING;
 import static engineering.everest.lhotse.i18n.MessageKeys.USER_UPDATE_NO_FIELDS_CHANGED;
+import static engineering.everest.lhotse.i18n.MessageKeys.USER_UPDATE_NO_ROLES_SPECIFIED;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.axonframework.modelling.command.AggregateLifecycle.apply;
 import static org.axonframework.modelling.command.AggregateLifecycle.markDeleted;
 
 @Aggregate(repository = "repositoryForUser")
-@Log4j2
 public class UserAggregate implements Serializable {
 
     @AggregateIdentifier
@@ -40,16 +43,15 @@ public class UserAggregate implements Serializable {
     }
 
     @CommandHandler
-    public UserAggregate(CreateUserCommand command) {
-        apply(new UserCreatedByAdminEvent(command.getUserId(), command.getOrganizationId(),
-                command.getRequestingUserId(), command.getUserDisplayName(), command.getEmailAddress(),
-                command.getEncodedPassword()));
+    public UserAggregate(CreateUserForNewlyRegisteredOrganizationCommand command) {
+        apply(new UserCreatedForNewlyRegisteredOrganizationEvent(command.getOrganizationId(), command.getUserId(),
+                command.getDisplayName(), command.getUserEmail()));
     }
 
     @CommandHandler
-    public UserAggregate(CreateUserForNewlyRegisteredOrganizationCommand command) {
-        apply(new UserCreatedForNewlyRegisteredOrganizationEvent(command.getUserId(), command.getOrganizationId(),
-                command.getDisplayName(), command.getUserEmail(), command.getEncodedPassword()));
+    public UserAggregate(CreateOrganizationUserCommand command) {
+        apply(new UserCreatedByAdminEvent(command.getUserId(), command.getOrganizationId(),
+                command.getRequestingUserId(), command.getUserDisplayName(), command.getEmailAddress()));
     }
 
     @CommandHandler
@@ -60,8 +62,21 @@ public class UserAggregate implements Serializable {
             validateDisplayNameIsPresent(command.getDisplayNameChange());
         }
         apply(new UserDetailsUpdatedByAdminEvent(command.getUserId(), userOnOrganizationId,
-                command.getDisplayNameChange(), command.getEmailChange(), command.getPasswordChange(),
-                command.getRequestingUserId()));
+                command.getDisplayNameChange(), command.getEmailChange(), command.getRequestingUserId()));
+    }
+
+    @CommandHandler
+    void handle(AddUserRolesCommand command) {
+        validateAtLeastOneRoleIsPresent(command);
+
+        apply(new UserRolesAddedByAdminEvent(command.getUserId(), command.getRoles(), command.getRequestingUserId()));
+    }
+
+    @CommandHandler
+    void handle(RemoveUserRolesCommand command) {
+        validateAtLeastOneRoleIsPresent(command);
+
+        apply(new UserRolesRemovedByAdminEvent(command.getUserId(), command.getRoles(), command.getRequestingUserId()));
     }
 
     @CommandHandler
@@ -72,7 +87,13 @@ public class UserAggregate implements Serializable {
 
     @CommandHandler
     void handle(DeleteAndForgetUserCommand command) {
-        apply(new UserDeletedAndForgottenEvent(command.getUserId(), command.getRequestingUserId(), command.getRequestReason()));
+        apply(new UserDeletedAndForgottenEvent(command.getUserId(), command.getRequestingUserId(),
+                command.getRequestReason()));
+    }
+
+    @EventSourcingHandler
+    void on(UserRolesAddedByAdminEvent event) {
+        userId = event.getRequestingUserId();
     }
 
     @EventSourcingHandler
@@ -112,10 +133,21 @@ public class UserAggregate implements Serializable {
 
     private void validateAtLeastOneChangeIsBeingMade(UpdateUserDetailsCommand command) {
         boolean changesMade = command.getDisplayNameChange() != null
-                || command.getEmailChange() != null
-                || command.getPasswordChange() != null;
+                || command.getEmailChange() != null;
         if (!changesMade) {
             TranslatableExceptionFactory.throwForKey(USER_UPDATE_NO_FIELDS_CHANGED);
+        }
+    }
+
+    private void validateAtLeastOneRoleIsPresent(AddUserRolesCommand command) {
+        if (command.getRoles().isEmpty()) {
+            TranslatableExceptionFactory.throwForKey(USER_UPDATE_NO_ROLES_SPECIFIED);
+        }
+    }
+
+    private void validateAtLeastOneRoleIsPresent(RemoveUserRolesCommand command) {
+        if (command.getRoles().isEmpty()) {
+            TranslatableExceptionFactory.throwForKey(USER_UPDATE_NO_ROLES_SPECIFIED);
         }
     }
 

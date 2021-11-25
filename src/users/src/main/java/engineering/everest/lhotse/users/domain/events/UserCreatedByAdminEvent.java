@@ -22,5 +22,4 @@ public class UserCreatedByAdminEvent {
     private String userDisplayName;
     @EncryptedField
     private String userEmail;
-    private String encodedPassword;
 }

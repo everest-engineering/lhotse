@@ -21,11 +21,6 @@ public class NewUserRequest {
     @NotBlank
     @Size(max = 100)
     @ApiModelProperty(required = true)
-    private String password; // MVP only; we need a proper user on-boarding experience for beta.
-
-    @NotBlank
-    @Size(max = 100)
-    @ApiModelProperty(required = true)
     private String displayName;
 
 }

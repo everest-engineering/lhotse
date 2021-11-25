@@ -27,7 +27,6 @@ public class UsersRepositoryConfig {
 
     @Bean
     public Repository<UserAggregate> repositoryForUser(EventStore eventStore, Snapshotter snapshotter, JCacheAdapter cacheAdapter) {
-
         return CachingEventSourcingRepository.builder(UserAggregate.class)
                 .aggregateFactory(new GenericAggregateFactory<>(UserAggregate.class))
                 .parameterResolverFactory(parameterResolverFactory)

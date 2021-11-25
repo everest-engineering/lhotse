@@ -13,6 +13,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
-@PreAuthorize("hasAnyRole('ADMIN', 'ORGANIZATION_ADMIN')")
+@PreAuthorize("hasAnyRole('ADMIN', 'ORG_ADMIN')")
 public @interface AdminOrOrgAdmin {
 }

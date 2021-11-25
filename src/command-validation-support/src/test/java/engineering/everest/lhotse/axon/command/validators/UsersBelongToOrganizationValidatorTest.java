@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Set;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.lenient;
 
@@ -49,8 +50,9 @@ class UsersBelongToOrganizationValidatorTest {
 
     @Test
     void validate_WillFail_WhenAnyEveryUserBelongsToDifferentOrganization() {
-        assertThrows(TranslatableIllegalArgumentException.class, () ->
+        var thrownException = assertThrows(TranslatableIllegalArgumentException.class, () ->
                 usersBelongToOrganizationValidator.validate(createValidatableCommand(Set.of(USER_ID_1, USER_ID_2, USER_ID_3))));
+        assertEquals("USER_NOT_MEMBER_OF_ORGANIZATION", thrownException.getMessage());
     }
 
     private UsersBelongToOrganizationValidatableCommand createValidatableCommand(Set<UUID> userIds) {

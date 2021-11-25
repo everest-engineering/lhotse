@@ -11,8 +11,8 @@ import java.util.UUID;
 @Repository
 public interface UsersRepository extends JpaRepository<PersistableUser, UUID> {
 
-    default void createUser(UUID id, UUID organizationId, String displayName, String email, String hashedPassword, Instant createdOn) {
-        save(new PersistableUser(id, organizationId, displayName, email, hashedPassword, createdOn));
+    default void createUser(UUID id, UUID organizationId, String displayName, String email, Instant createdOn) {
+        save(new PersistableUser(id, organizationId, displayName, email, createdOn));
     }
 
     List<PersistableUser> findByOrganizationId(UUID organizationId);

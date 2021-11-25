@@ -1,9 +1,7 @@
 package engineering.everest.lhotse.api.rest.controllers;
 
 import engineering.everest.lhotse.api.rest.annotations.AdminOrAdminOfTargetOrganization;
-import engineering.everest.lhotse.api.rest.annotations.AdminOrExpertOfTargetOrganization;
 import engineering.everest.lhotse.api.rest.annotations.AdminOrUserOfTargetOrganization;
-import engineering.everest.lhotse.axon.common.domain.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
@@ -14,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.security.Principal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -22,10 +21,10 @@ import static java.util.stream.Collectors.toList;
 
 class CustomSecurityAnnotationConsistencyTest {
 
-    private static final String REQUESTING_USER = "requestingUser";
+    private static final String PRINCIPAL = "principal";
     private static final String ORGANIZATION_ID = "organizationId";
 
-    private DefaultSecurityParameterNameDiscoverer parameterNameDiscoverer = new DefaultSecurityParameterNameDiscoverer();
+    private final DefaultSecurityParameterNameDiscoverer parameterNameDiscoverer = new DefaultSecurityParameterNameDiscoverer();
 
     @Test
     void allControllerHandlerMethodsHaveMatchingAnnotationAndSignature() {
@@ -61,19 +60,18 @@ class CustomSecurityAnnotationConsistencyTest {
 
     private boolean isSecurityAnnotationPresent(Method method) {
         return method.isAnnotationPresent(AdminOrAdminOfTargetOrganization.class)
-                || method.isAnnotationPresent(AdminOrUserOfTargetOrganization.class)
-                || method.isAnnotationPresent(AdminOrExpertOfTargetOrganization.class);
+                || method.isAnnotationPresent(AdminOrUserOfTargetOrganization.class);
     }
 
     private boolean isMethodSignatureConsistentWithSecurityAnnotation(Method method) {
         Parameter[] parameters = method.getParameters();
         String[] parameterNames = parameterNameDiscoverer.getParameterNames(method);
-        return isRequestingUserParameterPresent(parameters, parameterNames) && isOrganizationIdParameterPresent(parameters, parameterNames);
+        return isPrincipalParameterPresent(parameters, parameterNames) && isOrganizationIdParameterPresent(parameters, parameterNames);
     }
 
-    private boolean isRequestingUserParameterPresent(Parameter[] parameters, String[] parameterNames) {
+    private boolean isPrincipalParameterPresent(Parameter[] parameters, String[] parameterNames) {
         for (int i = 0; i < parameters.length; i++) {
-            if (parameters[i].getType().equals(User.class) && parameterNames[i].equals(REQUESTING_USER)) {
+            if (parameters[i].getType().equals(Principal.class) && parameterNames[i].equals(PRINCIPAL)) {
                 return true;
             }
         }

@@ -15,7 +15,6 @@ public class DefaultAuthServerUserReadService implements AuthServerUserReadServi
     @Override
     public AuthServerUser getByUsername(String username) {
         var persistableUser = usersRepository.findByUsernameIgnoreCase(username).orElseThrow();
-        return new AuthServerUser(persistableUser.getUsername(), persistableUser.getEncodedPassword(),
-                persistableUser.isDisabled());
+        return new AuthServerUser(persistableUser.getUsername(), persistableUser.isDisabled());
     }
 }

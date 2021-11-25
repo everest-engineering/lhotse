@@ -29,6 +29,42 @@ public class RetryWithExponentialBackoffTest {
     }
 
     @Test
+    void waitAndReturnOrThrow_WillRetryWithBackupAndThrowWhenMaxDurationReached() throws Exception {
+        var exceptionThrown = assertThrows(RetryTimedOutException.class,
+                () -> retryWithExponentialBackoff.waitAndReturnOrThrow(() -> null, x -> false, "test"));
+        assertEquals("Timed out while waiting PT30M for 'test'", exceptionThrown.getMessage());
+
+        verify(sleeper).sleep(Duration.ofSeconds(5));
+        verify(sleeper).sleep(Duration.ofSeconds(10));
+        verify(sleeper).sleep(Duration.ofSeconds(20));
+        verify(sleeper).sleep(Duration.ofSeconds(40));
+        verify(sleeper).sleep(Duration.ofSeconds(80));
+        verify(sleeper).sleep(Duration.ofSeconds(160));
+        verify(sleeper).sleep(Duration.ofSeconds(320));
+        verify(sleeper).sleep(Duration.ofSeconds(640));
+        verify(sleeper).sleep(Duration.ofSeconds(525));
+        verifyNoMoreInteractions(sleeper);
+    }
+
+    @Test
+    void waitAndReturnOrThrow_WillNotSleeperWhenPredicateReturnsTrue() throws Exception {
+        retryWithExponentialBackoff.waitAndReturnOrThrow(() -> null, x -> true, "test");
+        verifyNoMoreInteractions(sleeper);
+    }
+
+    @Test
+    void waitAndReturnOrThrow_WillRetryUntilPredicateReturnsTrue() throws Exception {
+        final AtomicInteger countdown = new AtomicInteger(4);
+
+        retryWithExponentialBackoff.waitAndReturnOrThrow(countdown::decrementAndGet, x -> countdown.get() == 0, "test");
+
+        verify(sleeper).sleep(Duration.ofSeconds(5));
+        verify(sleeper).sleep(Duration.ofSeconds(10));
+        verify(sleeper).sleep(Duration.ofSeconds(20));
+        verifyNoMoreInteractions(sleeper);
+    }
+
+    @Test
     void waitOrThrow_WillRetryWithBackupAndThrowWhenMaxDurationReached() throws Exception {
         var exceptionThrown = assertThrows(RetryTimedOutException.class,
                 () -> retryWithExponentialBackoff.waitOrThrow(() -> false, "test"));

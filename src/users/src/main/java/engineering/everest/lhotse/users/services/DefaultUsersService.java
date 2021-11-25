@@ -1,45 +1,52 @@
 package engineering.everest.lhotse.users.services;
 
 import engineering.everest.axon.HazelcastCommandGateway;
-import engineering.everest.lhotse.axon.common.RandomFieldsGenerator;
-import engineering.everest.lhotse.users.domain.commands.CreateUserCommand;
+import engineering.everest.lhotse.api.services.KeycloakSynchronizationService;
+import engineering.everest.lhotse.axon.common.domain.Role;
+import engineering.everest.lhotse.users.domain.commands.AddUserRolesCommand;
+import engineering.everest.lhotse.users.domain.commands.CreateOrganizationUserCommand;
 import engineering.everest.lhotse.users.domain.commands.DeleteAndForgetUserCommand;
 import engineering.everest.lhotse.users.domain.commands.RegisterUploadedUserProfilePhotoCommand;
+import engineering.everest.lhotse.users.domain.commands.RemoveUserRolesCommand;
 import engineering.everest.lhotse.users.domain.commands.UpdateUserDetailsCommand;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
+import java.util.Set;
 import java.util.UUID;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
 @Service
+@Log4j2
 public class DefaultUsersService implements UsersService {
 
     private final HazelcastCommandGateway commandGateway;
-    private final RandomFieldsGenerator randomFieldsGenerator;
-    private final PasswordEncoder passwordEncoder;
+    private final KeycloakSynchronizationService keycloakSynchronizationService;
 
-    public DefaultUsersService(HazelcastCommandGateway commandGateway,
-                               RandomFieldsGenerator randomFieldsGenerator,
-                               PasswordEncoder passwordEncoder) {
+    public DefaultUsersService(HazelcastCommandGateway commandGateway, KeycloakSynchronizationService keycloakSynchronizationService) {
         this.commandGateway = commandGateway;
-        this.randomFieldsGenerator = randomFieldsGenerator;
-        this.passwordEncoder = passwordEncoder;
+        this.keycloakSynchronizationService = keycloakSynchronizationService;
     }
 
     @Override
-    public void updateUser(UUID requestingUserId, UUID userId, String emailChange,
-                           String displayNameChange, String passwordChange) {
-
-        commandGateway.sendAndWait(new UpdateUserDetailsCommand(userId, emailChange,
-                displayNameChange, encodePasswordIfNotBlank(passwordChange), requestingUserId));
+    public void updateUser(UUID requestingUserId, UUID userId, String emailChange, String displayNameChange) {
+        commandGateway.sendAndWait(new UpdateUserDetailsCommand(userId, emailChange, displayNameChange, requestingUserId));
     }
 
     @Override
-    public UUID createUser(UUID requestingUserId, UUID organizationId, String username, String displayName, String rawPassword) {
-        return commandGateway.sendAndWait(new CreateUserCommand(randomFieldsGenerator.genRandomUUID(), organizationId, requestingUserId,
-                username, encodePasswordIfNotBlank(rawPassword), displayName));
+    public void addUserRoles(UUID requestingUserId, UUID userId, Set<Role> roles) {
+        commandGateway.sendAndWait(new AddUserRolesCommand(userId, roles, requestingUserId));
+    }
+
+    @Override
+    public void removeUserRoles(UUID requestingUserId, UUID userId, Set<Role> roles) {
+        commandGateway.sendAndWait(new RemoveUserRolesCommand(userId, roles, requestingUserId));
+    }
+
+    @Override
+    public UUID createOrganizationUser(UUID requestingUserId, UUID organizationId, String username, String displayName) {
+        var keycloakUserId = createUserAndRetrieveKeycloakUserId(username, organizationId, displayName);
+        return commandGateway.sendAndWait(
+                new CreateOrganizationUserCommand(keycloakUserId, organizationId, requestingUserId, username, displayName));
     }
 
     @Override
@@ -52,7 +59,7 @@ public class DefaultUsersService implements UsersService {
         commandGateway.sendAndWait(new DeleteAndForgetUserCommand(userId, requestingUserId, requestReason));
     }
 
-    private String encodePasswordIfNotBlank(String passwordChange) {
-        return isBlank(passwordChange) ? passwordChange : passwordEncoder.encode(passwordChange);
+    private UUID createUserAndRetrieveKeycloakUserId(String username, UUID organizationId, String displayName) {
+        return keycloakSynchronizationService.createNewKeycloakUserAndSendVerificationEmail(username, organizationId, displayName);
     }
 }

@@ -3,7 +3,6 @@ package engineering.everest.lhotse.users.eventhandlers;
 import engineering.everest.axon.cryptoshredding.CryptoShreddingKeyService;
 import engineering.everest.axon.cryptoshredding.TypeDifferentiatedSecretKeyId;
 import engineering.everest.lhotse.axon.replay.ReplayCompletionAware;
-import engineering.everest.lhotse.organizations.domain.events.UserPromotedToOrganizationAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserCreatedByAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserCreatedForNewlyRegisteredOrganizationEvent;
 import engineering.everest.lhotse.users.domain.events.UserDeletedAndForgottenEvent;
@@ -19,7 +18,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 
-import static engineering.everest.lhotse.axon.common.domain.Role.ORG_ADMIN;
 import static engineering.everest.lhotse.axon.common.domain.User.ADMIN_ID;
 
 @Service
@@ -43,28 +41,28 @@ public class UsersEventHandler implements ReplayCompletionAware {
 
     @EventHandler
     void on(UserCreatedByAdminEvent event, @Timestamp Instant creationTime) {
-        LOGGER.info("User {} created for admin created organization {}", event.getUserId(), event.getOrganizationId());
-        var userEmail = event.getUserEmail() == null ? String.format("%s@deleted", event.getUserId()) : event.getUserEmail();
-        usersRepository.createUser(event.getUserId(), event.getOrganizationId(), event.getUserDisplayName(),
-                userEmail, event.getEncodedPassword(), creationTime);
+        LOGGER.info("User {} created by admin {} on organization {}", event.getUserId(), event.getAdminId(), event.getOrganizationId());
+        var userEmail = event.getUserEmail() == null
+                ? String.format("%s@deleted", event.getUserId())
+                : event.getUserEmail();
+        usersRepository.createUser(event.getUserId(), event.getOrganizationId(), event.getUserDisplayName(), userEmail, creationTime);
     }
 
     @EventHandler
     void on(UserCreatedForNewlyRegisteredOrganizationEvent event, @Timestamp Instant creationTime) {
-        LOGGER.info("User {} created for self registered organization {}", event.getUserId(), event.getOrganizationId());
+        LOGGER.info("User {} created for self registered organization {}", event.getUserId(),
+                event.getOrganizationId());
         usersRepository.createUser(event.getUserId(), event.getOrganizationId(), event.getUserDisplayName(),
-                event.getUserEmail(), event.getEncodedPassword(), creationTime);
-
-        // You may also want a non-replayable event handler for sending a welcome email to new users
+                event.getUserEmail(), creationTime);
     }
 
     @EventHandler
     void on(UserDetailsUpdatedByAdminEvent event) {
         LOGGER.info("User {} details updated by admin {}", event.getUserId(), event.getAdminId());
         var persistableUser = usersRepository.findById(event.getUserId()).orElseThrow();
-        persistableUser.setDisplayName(selectDesiredState(event.getDisplayNameChange(), persistableUser.getDisplayName()));
+        persistableUser.setDisplayName(selectDesiredState(event.getDisplayNameChange(),
+                persistableUser.getDisplayName()));
         persistableUser.setEmail(selectDesiredState(event.getEmailChange(), persistableUser.getEmail()));
-        persistableUser.setEncodedPassword(selectDesiredState(event.getEncodedPasswordChange(), persistableUser.getEncodedPassword()));
         usersRepository.save(persistableUser);
     }
 
@@ -77,18 +75,11 @@ public class UsersEventHandler implements ReplayCompletionAware {
     }
 
     @EventHandler
-    void on(UserPromotedToOrganizationAdminEvent event) {
-        LOGGER.info("Adding role {} to user {}", ORG_ADMIN, event.getPromotedUserId());
-        var persistableUser = usersRepository.findById(event.getPromotedUserId()).orElseThrow();
-        persistableUser.addRole(ORG_ADMIN);
-        usersRepository.save(persistableUser);
-    }
-
-    @EventHandler
     void on(UserDeletedAndForgottenEvent event) {
         LOGGER.info("Deleting user {}", event.getDeletedUserId());
         usersRepository.deleteById(event.getDeletedUserId());
-        cryptoShreddingKeyService.deleteSecretKey(new TypeDifferentiatedSecretKeyId(event.getDeletedUserId().toString(), ""));
+        cryptoShreddingKeyService.deleteSecretKey(new TypeDifferentiatedSecretKeyId(event.getDeletedUserId()
+                .toString(), ""));
     }
 
     private String selectDesiredState(String desiredState, String currentState) {

@@ -4,7 +4,7 @@ import engineering.everest.lhotse.axon.command.validators.EmailAddressValidator;
 import engineering.everest.lhotse.axon.command.validators.UsersBelongToOrganizationValidator;
 import engineering.everest.lhotse.i18n.exceptions.TranslatableIllegalArgumentException;
 import engineering.everest.lhotse.i18n.exceptions.TranslatableIllegalStateException;
-import engineering.everest.lhotse.organizations.domain.commands.CreateRegisteredOrganizationCommand;
+import engineering.everest.lhotse.organizations.domain.commands.CreateSelfRegisteredOrganizationCommand;
 import engineering.everest.lhotse.organizations.domain.commands.DisableOrganizationCommand;
 import engineering.everest.lhotse.organizations.domain.commands.EnableOrganizationCommand;
 import engineering.everest.lhotse.organizations.domain.commands.UpdateOrganizationCommand;
@@ -13,7 +13,7 @@ import engineering.everest.lhotse.organizations.domain.events.OrganizationContac
 import engineering.everest.lhotse.organizations.domain.events.OrganizationDisabledByAdminEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationEnabledByAdminEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationNameChangedEvent;
-import engineering.everest.lhotse.organizations.domain.events.OrganizationRegisteredEvent;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationCreatedForNewSelfRegisteredUserEvent;
 import engineering.everest.lhotse.organizations.domain.events.UserPromotedToOrganizationAdminEvent;
 import engineering.everest.lhotse.users.domain.commands.PromoteUserToOrganizationAdminCommand;
 import org.axonframework.spring.stereotype.Aggregate;
@@ -49,8 +49,8 @@ class OrganizationAggregateTest {
     private static final String ORGANIZATION_CONTACT_NAME = "contact-name";
     private static final String ORGANIZATION_CONTACT_PHONE_NUMBER = "phone-number";
     private static final String ORGANIZATION_CONTACT_EMAIL_ADDRESS = "email@domain.com";
-    private static final OrganizationRegisteredEvent ORGANIZATION_REGISTERED_BY_ADMIN_EVENT =
-            new OrganizationRegisteredEvent(ORGANIZATION_ID, ADMIN_ID, ORGANIZATION_NAME, ORGANIZATION_WEBSITE_URL,
+    private static final OrganizationCreatedForNewSelfRegisteredUserEvent ORGANIZATION_CREATED_FOR_NEW_SELF_REGISTERED_USER_EVENT =
+            new OrganizationCreatedForNewSelfRegisteredUserEvent(ORGANIZATION_ID, ADMIN_ID, ORGANIZATION_NAME, ORGANIZATION_WEBSITE_URL,
                     ORGANIZATION_STREET, ORGANIZATION_CITY, ORGANIZATION_STATE, ORGANIZATION_COUNTRY, ORGANIZATION_POSTAL_CODE,
                     ORGANIZATION_CONTACT_NAME, ORGANIZATION_CONTACT_PHONE_NUMBER, ORGANIZATION_CONTACT_EMAIL_ADDRESS);
 
@@ -78,17 +78,17 @@ class OrganizationAggregateTest {
     }
 
     @Test
-    void emits_WhenCreateRegisteredOrganizationCommandIsValid() {
+    void emits_WhenCreateSelfRegisteredOrganizationCommandIsValid() {
         testFixture.givenNoPriorActivity()
-                .when(new CreateRegisteredOrganizationCommand(ORGANIZATION_ID, ADMIN_ID, ORGANIZATION_NAME, ORGANIZATION_STREET,
+                .when(new CreateSelfRegisteredOrganizationCommand(ORGANIZATION_ID, ADMIN_ID, ORGANIZATION_NAME, ORGANIZATION_STREET,
                         ORGANIZATION_CITY, ORGANIZATION_STATE, ORGANIZATION_COUNTRY, ORGANIZATION_POSTAL_CODE,
                         ORGANIZATION_WEBSITE_URL, ORGANIZATION_CONTACT_NAME, ORGANIZATION_CONTACT_PHONE_NUMBER, ORGANIZATION_CONTACT_EMAIL_ADDRESS))
-                .expectEvents(ORGANIZATION_REGISTERED_BY_ADMIN_EVENT);
+                .expectEvents(ORGANIZATION_CREATED_FOR_NEW_SELF_REGISTERED_USER_EVENT);
     }
 
     @Test
-    void organizationsCreatedByAdminAreEnabled() {
-        testFixture.given(ORGANIZATION_REGISTERED_BY_ADMIN_EVENT)
+    void organizationsCreatedForNewSelfRegisteredUsersAreEnabled() {
+        testFixture.given(ORGANIZATION_CREATED_FOR_NEW_SELF_REGISTERED_USER_EVENT)
                 .when(new EnableOrganizationCommand(ORGANIZATION_ID, ADMIN_ID))
                 .expectNoEvents()
                 .expectException(TranslatableIllegalStateException.class)
@@ -96,8 +96,8 @@ class OrganizationAggregateTest {
     }
 
     @Test
-    void rejectsCreateRegisteredOrganizationCommand_WhenRequestingUserIdIsNull() {
-        var command = new CreateRegisteredOrganizationCommand(ORGANIZATION_ID, null, ORGANIZATION_NAME, ORGANIZATION_STREET,
+    void rejectsCreateRegisteredOrganizationCommand_WhenRequestingSelfRegisteredUserIdIsNull() {
+        var command = new CreateSelfRegisteredOrganizationCommand(ORGANIZATION_ID, null, ORGANIZATION_NAME, ORGANIZATION_STREET,
                 ORGANIZATION_CITY, ORGANIZATION_STATE, ORGANIZATION_COUNTRY, ORGANIZATION_POSTAL_CODE,
                 ORGANIZATION_WEBSITE_URL, ORGANIZATION_CONTACT_NAME, ORGANIZATION_CONTACT_PHONE_NUMBER, ORGANIZATION_CONTACT_EMAIL_ADDRESS);
 
@@ -108,9 +108,9 @@ class OrganizationAggregateTest {
     }
 
     @Test
-    void rejectsCreateRegisteredOrganizationCommand_WhenOrganizationNameIsBlank() {
+    void rejectsCreateRegisteredOrganizationCommand_WhenSelfRegisteredOrganizationNameIsBlank() {
         testFixture.givenNoPriorActivity()
-                .when(new CreateRegisteredOrganizationCommand(ORGANIZATION_ID, ADMIN_ID, NO_CHANGE, ORGANIZATION_STREET,
+                .when(new CreateSelfRegisteredOrganizationCommand(ORGANIZATION_ID, ADMIN_ID, NO_CHANGE, ORGANIZATION_STREET,
                         ORGANIZATION_CITY, ORGANIZATION_STATE, ORGANIZATION_COUNTRY, ORGANIZATION_POSTAL_CODE,
                         ORGANIZATION_WEBSITE_URL, ORGANIZATION_CONTACT_NAME, ORGANIZATION_CONTACT_PHONE_NUMBER, ORGANIZATION_CONTACT_EMAIL_ADDRESS))
                 .expectException(ConstraintViolationException.class)
@@ -118,9 +118,9 @@ class OrganizationAggregateTest {
     }
 
     @Test
-    void rejectsCreateRegisteredOrganizationCommand_WhenOrganizationNameIsNull() {
+    void rejectsCreateRegisteredOrganizationCommand_WhenSelfRegisteredOrganizationNameIsNull() {
         testFixture.givenNoPriorActivity()
-                .when(new CreateRegisteredOrganizationCommand(ORGANIZATION_ID, ADMIN_ID, MISSING_ARGUMENT, ORGANIZATION_STREET,
+                .when(new CreateSelfRegisteredOrganizationCommand(ORGANIZATION_ID, ADMIN_ID, MISSING_ARGUMENT, ORGANIZATION_STREET,
                         ORGANIZATION_CITY, ORGANIZATION_STATE, ORGANIZATION_COUNTRY, ORGANIZATION_POSTAL_CODE,
                         ORGANIZATION_WEBSITE_URL, ORGANIZATION_CONTACT_NAME, ORGANIZATION_CONTACT_PHONE_NUMBER, ORGANIZATION_CONTACT_EMAIL_ADDRESS))
                 .expectException(ConstraintViolationException.class)
@@ -128,23 +128,23 @@ class OrganizationAggregateTest {
     }
 
     @Test
-    void emits_WhenDisableOrganizationCommandIsValid() {
-        testFixture.given(ORGANIZATION_REGISTERED_BY_ADMIN_EVENT)
+    void emits_WhenDisableSelfRegisteredOrganizationCommandIsValid() {
+        testFixture.given(ORGANIZATION_CREATED_FOR_NEW_SELF_REGISTERED_USER_EVENT)
                 .when(new DisableOrganizationCommand(ORGANIZATION_ID, ADMIN_ID))
                 .expectEvents(new OrganizationDisabledByAdminEvent(ORGANIZATION_ID, ADMIN_ID));
     }
 
     @Test
-    void emits_WhenEnableOrganizationCommandIsValid() {
-        testFixture.given(ORGANIZATION_REGISTERED_BY_ADMIN_EVENT,
+    void emits_WhenSelfRegisteredEnableOrganizationCommandIsValid() {
+        testFixture.given(ORGANIZATION_CREATED_FOR_NEW_SELF_REGISTERED_USER_EVENT,
                 new OrganizationDisabledByAdminEvent(ORGANIZATION_ID, ADMIN_ID))
                 .when(new EnableOrganizationCommand(ORGANIZATION_ID, ADMIN_ID))
                 .expectEvents(new OrganizationEnabledByAdminEvent(ORGANIZATION_ID, ADMIN_ID));
     }
 
     @Test
-    void rejectsEnableOrganizationCommand_WhenOrganizationIsAlreadyEnabled() {
-        testFixture.given(ORGANIZATION_REGISTERED_BY_ADMIN_EVENT)
+    void rejectsEnableOrganizationCommand_WhenSelfRegisteredOrganizationIsAlreadyEnabled() {
+        testFixture.given(ORGANIZATION_CREATED_FOR_NEW_SELF_REGISTERED_USER_EVENT)
                 .when(new EnableOrganizationCommand(ORGANIZATION_ID, ADMIN_ID))
                 .expectNoEvents()
                 .expectException(TranslatableIllegalStateException.class)
@@ -152,8 +152,8 @@ class OrganizationAggregateTest {
     }
 
     @Test
-    void rejectsDisableOrganizationCommand_WhenOrganizationIsAlreadyDisabled() {
-        testFixture.given(ORGANIZATION_REGISTERED_BY_ADMIN_EVENT, ORGANIZATION_DISABLED_BY_ADMIN_EVENT)
+    void rejectsDisableOrganizationCommand_WhenSelfRegisteredOrganizationIsAlreadyDisabled() {
+        testFixture.given(ORGANIZATION_CREATED_FOR_NEW_SELF_REGISTERED_USER_EVENT, ORGANIZATION_DISABLED_BY_ADMIN_EVENT)
                 .when(new DisableOrganizationCommand(ORGANIZATION_ID, ADMIN_ID))
                 .expectNoEvents()
                 .expectException(TranslatableIllegalStateException.class)
@@ -161,10 +161,10 @@ class OrganizationAggregateTest {
     }
 
     @Test
-    void rejectsDisableOrganizationCommand_WhenRequestingUserIdIsNull() {
+    void rejectsDisableOrganizationCommand_WhenSelfRegisteredRequestingUserIdIsNull() {
         var command = new DisableOrganizationCommand(ORGANIZATION_ID, null);
 
-        testFixture.given(ORGANIZATION_REGISTERED_BY_ADMIN_EVENT)
+        testFixture.given(ORGANIZATION_CREATED_FOR_NEW_SELF_REGISTERED_USER_EVENT)
                 .when(command)
                 .expectNoEvents()
                 .expectException(ConstraintViolationException.class)
@@ -172,46 +172,46 @@ class OrganizationAggregateTest {
     }
 
     @Test
-    void updateOrganizationCommandEmitsSingleEvent_WhenOnlyOrganizationNameChanged() {
+    void updateOrganizationCommandEmitsSingleEvent_WhenOnlySelfRegisteredUserOrganizationNameChanged() {
         var command = new UpdateOrganizationCommand(ORGANIZATION_ID, ADMIN_ID, "new org name",
                 NO_CHANGE, NO_CHANGE, NO_CHANGE, NO_CHANGE, NO_CHANGE, NO_CHANGE, NO_CHANGE, NO_CHANGE, NO_CHANGE);
 
-        testFixture.given(ORGANIZATION_REGISTERED_BY_ADMIN_EVENT)
+        testFixture.given(ORGANIZATION_CREATED_FOR_NEW_SELF_REGISTERED_USER_EVENT)
                 .when(command)
                 .expectEvents(new OrganizationNameChangedEvent(ORGANIZATION_ID, "new org name", ADMIN_ID));
     }
 
     @Test
-    void updateOrganizationCommandEmitsSingleEvent_WhenOnlyOrganizationContactDetailsChanged() {
+    void updateOrganizationCommandEmitsSingleEvent_WhenOnlySelfRegisteredUserOrganizationContactDetailsChanged() {
         var command = new UpdateOrganizationCommand(ORGANIZATION_ID, ADMIN_ID, NO_CHANGE, NO_CHANGE, NO_CHANGE,
                 NO_CHANGE, NO_CHANGE, NO_CHANGE, ORGANIZATION_WEBSITE_URL, ORGANIZATION_CONTACT_NAME, ORGANIZATION_CONTACT_PHONE_NUMBER,
                 ORGANIZATION_CONTACT_EMAIL_ADDRESS);
 
-        testFixture.given(ORGANIZATION_REGISTERED_BY_ADMIN_EVENT)
+        testFixture.given(ORGANIZATION_CREATED_FOR_NEW_SELF_REGISTERED_USER_EVENT)
                 .when(command)
                 .expectEvents(
                         new OrganizationContactDetailsUpdatedEvent(ORGANIZATION_ID, ORGANIZATION_CONTACT_NAME, ORGANIZATION_CONTACT_PHONE_NUMBER, ORGANIZATION_CONTACT_EMAIL_ADDRESS, ORGANIZATION_WEBSITE_URL, ADMIN_ID));
     }
 
     @Test
-    void updateOrganizationCommandEmitsSingleEvent_WhenOnlyOrganizationAddressChanged() {
+    void updateOrganizationCommandEmitsSingleEvent_WhenOnlySelfRegisteredUserOrganizationAddressChanged() {
         var command = new UpdateOrganizationCommand(ORGANIZATION_ID, ADMIN_ID, NO_CHANGE, ORGANIZATION_STREET, ORGANIZATION_CITY,
                 ORGANIZATION_STATE, ORGANIZATION_COUNTRY, ORGANIZATION_POSTAL_CODE, NO_CHANGE, NO_CHANGE, NO_CHANGE, NO_CHANGE);
 
-        testFixture.given(ORGANIZATION_REGISTERED_BY_ADMIN_EVENT)
+        testFixture.given(ORGANIZATION_CREATED_FOR_NEW_SELF_REGISTERED_USER_EVENT)
                 .when(command)
                 .expectEvents(
                         new OrganizationAddressUpdatedEvent(ORGANIZATION_ID, ORGANIZATION_STREET, ORGANIZATION_CITY, ORGANIZATION_STATE, ORGANIZATION_COUNTRY, ORGANIZATION_POSTAL_CODE, ADMIN_ID));
     }
 
     @Test
-    void updateOrganizationCommandEmitsMultipleEvents_WhenOrganiztionNameChangedAndContactDetailsChangedAndAddressChanged() {
+    void updateOrganizationCommandEmitsMultipleEvents_WhenSelfRegisteredUserOrganiztionNameChangedAndContactDetailsChangedAndAddressChanged() {
         var command = new UpdateOrganizationCommand(ORGANIZATION_ID, ADMIN_ID, "new org name",
                 ORGANIZATION_STREET, ORGANIZATION_CITY, ORGANIZATION_STATE,
                 ORGANIZATION_COUNTRY, ORGANIZATION_POSTAL_CODE,
                 ORGANIZATION_WEBSITE_URL, ORGANIZATION_CONTACT_NAME, ORGANIZATION_CONTACT_PHONE_NUMBER, ORGANIZATION_CONTACT_EMAIL_ADDRESS);
 
-        testFixture.given(ORGANIZATION_REGISTERED_BY_ADMIN_EVENT)
+        testFixture.given(ORGANIZATION_CREATED_FOR_NEW_SELF_REGISTERED_USER_EVENT)
                 .when(command)
                 .expectEvents(
                         new OrganizationNameChangedEvent(ORGANIZATION_ID, "new org name", ADMIN_ID),
@@ -220,13 +220,13 @@ class OrganizationAggregateTest {
     }
 
     @Test
-    void rejectsUpdateOrganizationCommand_WhenRequestingUserIdIsNull() {
+    void rejectsUpdateOrganizationCommand_WhenSelfRegisteredRequestingUserIdIsNull() {
         var command = new UpdateOrganizationCommand(ORGANIZATION_ID, null, ORGANIZATION_NAME,
                 ORGANIZATION_STREET, ORGANIZATION_CITY, ORGANIZATION_STATE,
                 ORGANIZATION_COUNTRY, ORGANIZATION_POSTAL_CODE,
                 ORGANIZATION_WEBSITE_URL, ORGANIZATION_CONTACT_NAME, ORGANIZATION_CONTACT_PHONE_NUMBER, ORGANIZATION_CONTACT_EMAIL_ADDRESS);
 
-        testFixture.given(ORGANIZATION_REGISTERED_BY_ADMIN_EVENT)
+        testFixture.given(ORGANIZATION_CREATED_FOR_NEW_SELF_REGISTERED_USER_EVENT)
                 .when(command)
                 .expectNoEvents()
                 .expectException(ConstraintViolationException.class)
@@ -234,13 +234,13 @@ class OrganizationAggregateTest {
     }
 
     @Test
-    void rejectsUpdateOrganizationCommand_WhenOrganizationIsAlreadyDisabled() {
+    void rejectsUpdateOrganizationCommand_WhenSelfRegisteredOrganizationIsAlreadyDisabled() {
         var command = new UpdateOrganizationCommand(ORGANIZATION_ID, ADMIN_ID, ORGANIZATION_NAME,
                 ORGANIZATION_STREET, ORGANIZATION_CITY, ORGANIZATION_STATE,
                 ORGANIZATION_COUNTRY, ORGANIZATION_POSTAL_CODE,
                 ORGANIZATION_WEBSITE_URL, ORGANIZATION_CONTACT_NAME, ORGANIZATION_CONTACT_PHONE_NUMBER, ORGANIZATION_CONTACT_EMAIL_ADDRESS);
 
-        testFixture.given(ORGANIZATION_REGISTERED_BY_ADMIN_EVENT, ORGANIZATION_DISABLED_BY_ADMIN_EVENT)
+        testFixture.given(ORGANIZATION_CREATED_FOR_NEW_SELF_REGISTERED_USER_EVENT, ORGANIZATION_DISABLED_BY_ADMIN_EVENT)
                 .when(command)
                 .expectNoEvents()
                 .expectException(TranslatableIllegalStateException.class)
@@ -248,11 +248,11 @@ class OrganizationAggregateTest {
     }
 
     @Test
-    void rejectsUpdateOrganizationCommand_WhenNoFieldsAreBeingChanged() {
+    void rejectsUpdateOrganizationCommand_WhenSelfRegisteredUserNoFieldsAreBeingChanged() {
         var command = new UpdateOrganizationCommand(ORGANIZATION_ID, ADMIN_ID, NO_CHANGE, NO_CHANGE,
                 NO_CHANGE, NO_CHANGE, NO_CHANGE, NO_CHANGE, NO_CHANGE, NO_CHANGE, NO_CHANGE, NO_CHANGE);
 
-        testFixture.given(ORGANIZATION_REGISTERED_BY_ADMIN_EVENT)
+        testFixture.given(ORGANIZATION_CREATED_FOR_NEW_SELF_REGISTERED_USER_EVENT)
                 .when(command)
                 .expectNoEvents()
                 .expectException(TranslatableIllegalArgumentException.class)
@@ -261,14 +261,14 @@ class OrganizationAggregateTest {
 
     @Test
     void emits_WhenPromoteUserToOrganizationAdminCommandIsValid() {
-        testFixture.given(ORGANIZATION_REGISTERED_BY_ADMIN_EVENT)
+        testFixture.given(ORGANIZATION_CREATED_FOR_NEW_SELF_REGISTERED_USER_EVENT)
                 .when(new PromoteUserToOrganizationAdminCommand(ORGANIZATION_ID, REGISTERING_USER_ID))
                 .expectEvents(new UserPromotedToOrganizationAdminEvent(ORGANIZATION_ID, REGISTERING_USER_ID));
     }
 
     @Test
     void rejectsPromoteUserToOrganizationAdminCommand_WhenOrganizationIsDisabled() {
-        testFixture.given(ORGANIZATION_REGISTERED_BY_ADMIN_EVENT, new OrganizationDisabledByAdminEvent(ORGANIZATION_ID, ADMIN_ID))
+        testFixture.given(ORGANIZATION_CREATED_FOR_NEW_SELF_REGISTERED_USER_EVENT, new OrganizationDisabledByAdminEvent(ORGANIZATION_ID, ADMIN_ID))
                 .when(new PromoteUserToOrganizationAdminCommand(ORGANIZATION_ID, REGISTERING_USER_ID))
                 .expectNoEvents()
                 .expectException(TranslatableIllegalStateException.class)
@@ -277,7 +277,7 @@ class OrganizationAggregateTest {
 
     @Test
     void rejectsPromoteUserToOrganizationAdminCommand_WhenUserIsAlreadyAnAdmin() {
-        testFixture.given(ORGANIZATION_REGISTERED_BY_ADMIN_EVENT, new UserPromotedToOrganizationAdminEvent(ORGANIZATION_ID, REGISTERING_USER_ID))
+        testFixture.given(ORGANIZATION_CREATED_FOR_NEW_SELF_REGISTERED_USER_EVENT, new UserPromotedToOrganizationAdminEvent(ORGANIZATION_ID, REGISTERING_USER_ID))
                 .when(new PromoteUserToOrganizationAdminCommand(ORGANIZATION_ID, REGISTERING_USER_ID))
                 .expectNoEvents()
                 .expectException(TranslatableIllegalStateException.class)

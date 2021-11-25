@@ -5,7 +5,7 @@ import engineering.everest.lhotse.organizations.domain.events.OrganizationAddres
 import engineering.everest.lhotse.organizations.domain.events.OrganizationContactDetailsUpdatedEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationDisabledByAdminEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationNameChangedEvent;
-import engineering.everest.lhotse.organizations.domain.events.OrganizationRegisteredEvent;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationCreatedForNewSelfRegisteredUserEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationEnabledByAdminEvent;
 import engineering.everest.lhotse.organizations.persistence.Address;
 import engineering.everest.lhotse.organizations.persistence.OrganizationsRepository;
@@ -77,7 +77,7 @@ class OrganizationsEventHandlerTest {
 
     @Test
     void onOrganizationRegisteredByAdminEvent_willDelegate() {
-        organizationsEventHandler.on(new OrganizationRegisteredEvent(ORGANIZATION_ID, ADMIN_ID, ORGANIZATION_NAME,
+        organizationsEventHandler.on(new OrganizationCreatedForNewSelfRegisteredUserEvent(ORGANIZATION_ID, ADMIN_ID, ORGANIZATION_NAME,
                 ORGANIZATION_WEBSITE_URL, ORGANIZATION_STREET, ORGANIZATION_CITY, ORGANIZATION_STATE, ORGANIZATION_COUNTRY,
                 ORGANIZATION_POSTAL_CODE, ORGANIZATION_CONTACT_NAME, ORGANIZATION_PHONE_NUMBER, ORGANIZATION_EMAIL_ADDRESS), ORG_CREATION_TIME);
 

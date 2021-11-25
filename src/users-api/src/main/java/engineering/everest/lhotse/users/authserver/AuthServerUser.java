@@ -10,6 +10,5 @@ import lombok.NoArgsConstructor;
 public class AuthServerUser {
 
     private String username;
-    private String encodedPassword;
     private boolean disabled;
 }

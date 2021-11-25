@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
@@ -45,15 +46,17 @@ class OrganizationStatusValidatorTest {
     void validate_WillFail_WhenOrganizationIsDisabled() {
         when(organizationsReadService.getById(ORGANIZATION_ID_2)).thenReturn(DISABLED_ORGANIZATION);
 
-        assertThrows(TranslatableIllegalStateException.class, () ->
+        var thrownException = assertThrows(TranslatableIllegalStateException.class, () ->
                 organizationStatusValidator.validate((OrganizationStatusValidatableCommand) () -> ORGANIZATION_ID_2));
+        assertEquals("ORGANIZATION_IS_DEREGISTERED", thrownException.getMessage());
     }
 
     @Test
     void validate_WillFail_WhenOrganizationDoesNotExist() {
         when(organizationsReadService.getById(ORGANIZATION_ID_1)).thenThrow(NoSuchElementException.class);
 
-        assertThrows(TranslatableIllegalStateException.class, () ->
+        var thrownException = assertThrows(TranslatableIllegalStateException.class, () ->
                 organizationStatusValidator.validate((OrganizationStatusValidatableCommand) () -> ORGANIZATION_ID_1));
+        assertEquals("ORGANIZATION_DOES_NOT_EXIST", thrownException.getMessage());
     }
 }

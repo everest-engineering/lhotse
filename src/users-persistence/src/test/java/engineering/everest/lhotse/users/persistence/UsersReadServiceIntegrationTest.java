@@ -2,7 +2,6 @@ package engineering.everest.lhotse.users.persistence;
 
 import engineering.everest.lhotse.axon.common.domain.User;
 import engineering.everest.lhotse.users.config.TestUserSessionsJpaConfig;
-import engineering.everest.lhotse.users.config.UserSessionsJpaConfig;
 import engineering.everest.lhotse.users.services.UsersReadService;
 import engineering.everest.starterkit.filestorage.FileService;
 import engineering.everest.starterkit.filestorage.InputStreamOfKnownLength;
@@ -22,12 +21,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.time.Instant;
-import java.util.EnumSet;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
-import static engineering.everest.lhotse.axon.common.domain.Role.ORG_ADMIN;
-import static engineering.everest.lhotse.axon.common.domain.Role.ORG_USER;
 import static java.time.Instant.ofEpochSecond;
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
@@ -36,13 +32,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
-import static org.springframework.context.annotation.FilterType.ASSIGNABLE_TYPE;
 
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
 @EnableAutoConfiguration
-@ComponentScan(basePackages = "engineering.everest.lhotse.users",
-        excludeFilters = @ComponentScan.Filter(type = ASSIGNABLE_TYPE, value = UserSessionsJpaConfig.class))
+@ComponentScan(basePackages = "engineering.everest.lhotse.users")
 @ContextConfiguration(classes = {TestUserSessionsJpaConfig.class})
 class UsersReadServiceIntegrationTest {
 
@@ -63,23 +57,19 @@ class UsersReadServiceIntegrationTest {
     private static final String USERNAME_3 = "user3@email.com";
     private static final String USERNAME_4 = "user4@email.com";
     private static final String USER_EMAIL_DOES_NOT_EXIST = "unknown@email.com";
-    private static final String USER_ENCODED_PASSWORD_1 = "encoded-password-1";
-    private static final String USER_ENCODED_PASSWORD_2 = "encoded-password-2";
-    private static final String USER_ENCODED_PASSWORD_4 = "encoded-password-3";
-    private static final String USER_ENCODED_PASSWORD_3 = "encoded-password-4";
     private static final Instant CREATED_ON_1 = ofEpochSecond(800000L);
     private static final Instant CREATED_ON_2 = ofEpochSecond(800000L);
     private static final Instant CREATED_ON_4 = ofEpochSecond(800000L);
     private static final Instant CREATED_ON_3 = ofEpochSecond(800000L);
 
-    private static final User ORG_1_USER_1 = new User(ORG_1_USER_ID_1, ORGANIZATION_ID_1, USERNAME_1, USER_DISPLAY_NAME_1, USERNAME_1, false, EnumSet.of(ORG_USER, ORG_ADMIN));
+    private static final User ORG_1_USER_1 = new User(ORG_1_USER_ID_1, ORGANIZATION_ID_1, USERNAME_1, USER_DISPLAY_NAME_1, USERNAME_1, false);
     private static final User ORG_1_USER_2 = new User(ORG_1_USER_ID_2, ORGANIZATION_ID_1, USERNAME_2, USER_DISPLAY_NAME_2, false);
     private static final User ORG_1_USER_3_DISABLED = new User(ORG_1_USER_ID_3, ORGANIZATION_ID_1, USERNAME_3, USER_DISPLAY_NAME_3, true);
     private static final User ORG_2_USER_1 = new User(ORG_2_USER_ID_1, ORGANIZATION_ID_2, USERNAME_4, USER_DISPLAY_NAME_4, false);
 
-    private static final PersistableUser PERSISTABLE_ORG_1_USER_1 = new PersistableUser(ORG_1_USER_ID_1, ORGANIZATION_ID_1, USERNAME_1, USER_ENCODED_PASSWORD_1, USER_DISPLAY_NAME_1,
-            USERNAME_1, false, EnumSet.of(ORG_USER, ORG_ADMIN), CREATED_ON_1, PROFILE_PHOTO_ID);
-    private static final PersistableUser PERSISTABLE_ORG_1_USER_3 = new PersistableUser(ORG_1_USER_ID_3, ORGANIZATION_ID_1, USERNAME_3, USER_ENCODED_PASSWORD_3, USER_DISPLAY_NAME_3,
+    private static final PersistableUser PERSISTABLE_ORG_1_USER_1 = new PersistableUser(ORG_1_USER_ID_1, ORGANIZATION_ID_1, USERNAME_1, USER_DISPLAY_NAME_1,
+            USERNAME_1, false, CREATED_ON_1, PROFILE_PHOTO_ID);
+    private static final PersistableUser PERSISTABLE_ORG_1_USER_3 = new PersistableUser(ORG_1_USER_ID_3, ORGANIZATION_ID_1, USERNAME_3, USER_DISPLAY_NAME_3,
             true, CREATED_ON_3);
     public static final String PROFILE_PHOTO_FILE_CONTENTS = "my profile photo";
 
@@ -95,9 +85,9 @@ class UsersReadServiceIntegrationTest {
     @BeforeEach
     void setUp() {
         usersRepository.save(PERSISTABLE_ORG_1_USER_1);
-        usersRepository.createUser(ORG_1_USER_ID_2, ORGANIZATION_ID_1, USER_DISPLAY_NAME_2, USERNAME_2, USER_ENCODED_PASSWORD_2, CREATED_ON_2);
+        usersRepository.createUser(ORG_1_USER_ID_2, ORGANIZATION_ID_1, USER_DISPLAY_NAME_2, USERNAME_2, CREATED_ON_2);
         usersRepository.save(PERSISTABLE_ORG_1_USER_3);
-        usersRepository.createUser(ORG_2_USER_ID_1, ORGANIZATION_ID_2, USER_DISPLAY_NAME_4, USERNAME_4, USER_ENCODED_PASSWORD_4, CREATED_ON_4);
+        usersRepository.createUser(ORG_2_USER_ID_1, ORGANIZATION_ID_2, USER_DISPLAY_NAME_4, USERNAME_4, CREATED_ON_4);
     }
 
     @Test

@@ -1,11 +1,12 @@
 buildscript {
     repositories {
-        jcenter()
+        mavenCentral()
     }
 }
 
 plugins {
     id 'org.springframework.boot'
+    id "de.undercouch.download" version "${undercouchVersion}"
 }
 
 apply plugin: 'jacoco'
@@ -40,12 +41,11 @@ dependencies {
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     implementation "engineering.everest.axon:crypto-shredding-extension:${axonCryptoShreddingVersion}"
     implementation "engineering.everest.axon:command-distribution-extension:${axonHazelcastCommandDistributionVersion}"
-    implementation "engineering.everest.starterkit:security:${securityVersion}"
     implementation "engineering.everest.starterkit:storage:${storageVersion}"
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
-    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.keycloak:keycloak-spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation "com.h2database:h2:${h2Version}"
     implementation "org.axonframework:axon-micrometer:${axonVersion}"
@@ -78,4 +78,45 @@ dependencies {
     testImplementation "org.apache.commons:commons-text:${commonsTextVersion}"
     testImplementation "org.bouncycastle:bcpkix-jdk15on:${bouncyCastleVersion}"
     testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo'
+    testImplementation "org.keycloak:keycloak-admin-client:${keycloakVersion}"
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "org.keycloak.bom:keycloak-adapter-bom:${keycloakVersion}"
+	}
+}
+
+task downloadKeycloakZipFile(type: Download) {
+    outputs.cacheIf {true}
+    src "https://github.com/keycloak/keycloak/releases/download/${keycloakVersion}/keycloak-${keycloakVersion}.zip"
+    dest new File(buildDir, "keycloak-${keycloakVersion}.zip")
+    onlyIfModified true
+}
+
+task downloadAndUnzipKeycloakFile(dependsOn: downloadKeycloakZipFile, type: Copy) {
+    from zipTree(downloadKeycloakZipFile.dest)
+    into buildDir
+}
+
+task startServer(dependsOn: 'downloadAndUnzipKeycloakFile') {
+    doLast {
+        def keycloakDir = "$buildDir/keycloak-${keycloakVersion}"
+        def port = 8180
+        def waitTime = 10000
+        def testUser = "admin@everest.engineering"
+        def testPass = "ac0n3x72"
+
+        def createUser = "$keycloakDir/bin/add-user-keycloak.sh -r master -u $testUser -p $testPass".execute()
+        createUser.consumeProcessOutput(System.out, System.err)
+        createUser.waitForOrKill(waitTime)
+
+        def startServer = "$keycloakDir/bin/standalone.sh -Djboss.http.port=$port".execute()
+        startServer.consumeProcessOutput(System.out, System.err)
+        startServer.waitForOrKill(3 * waitTime)
+
+        def createRealm = "$keycloakDir/bin/kcadm.sh create realms -f $rootDir/keycloak/imports/realm-export.json --no-config --server http://localhost:$port/auth --realm master --user $testUser --password $testPass".execute()
+        createRealm.consumeProcessOutput(System.out, System.err)
+        createRealm.waitForOrKill(waitTime)
+    }
 }

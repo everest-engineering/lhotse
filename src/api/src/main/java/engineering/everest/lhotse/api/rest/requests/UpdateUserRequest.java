@@ -13,5 +13,4 @@ public class UpdateUserRequest {
 
     private String displayName;
     private String email;
-    private String password; // Don't do this. Example only!
 }

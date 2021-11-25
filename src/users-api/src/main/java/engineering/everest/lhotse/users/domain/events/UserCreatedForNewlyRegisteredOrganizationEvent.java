@@ -14,12 +14,11 @@ import java.util.UUID;
 @AllArgsConstructor
 @Revision("0")
 public class UserCreatedForNewlyRegisteredOrganizationEvent {
+    private UUID organizationId;
     @EncryptionKeyIdentifier
     private UUID userId;
-    private UUID organizationId;
     @EncryptedField
     private String userDisplayName;
     @EncryptedField
     private String userEmail;
-    private String encodedPassword;
 }
