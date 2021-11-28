@@ -58,7 +58,7 @@ class ReplayEndpointTest {
     void setUp() {
         lenient().when(axonConfiguration.eventProcessingConfiguration()).thenReturn(eventProcessingConfiguration);
         lenient().when(eventProcessingConfiguration.eventProcessors()).thenReturn(Map.of("default",
-                replayMarkerAwareTrackingEventProcessor));
+            replayMarkerAwareTrackingEventProcessor));
         lenient().when(replayMarkerAwareTrackingEventProcessor.isReplaying()).thenReturn(false);
         replayEndpoint = new ReplayEndpoint(axonConfiguration, List.of(replayCompletionAware), taskExecutor);
     }
@@ -67,8 +67,8 @@ class ReplayEndpointTest {
     void willGetReplayStatus() {
         Map<String, Object> status = replayEndpoint.status();
         assertEquals(Map.of("ReplayableEventProcessors", 1,
-                "currentlyReplaying", 0,
-                "isReplaying", false), status);
+            "currentlyReplaying", 0,
+            "isReplaying", false), status);
     }
 
     @Test
@@ -94,8 +94,8 @@ class ReplayEndpointTest {
         Map<String, Object> status = replayEndpoint.status();
         // Status should show currently replaying processors
         assertEquals(Map.of("ReplayableEventProcessors", 1,
-                "currentlyReplaying", 1,
-                "isReplaying", true), status);
+            "currentlyReplaying", 1,
+            "isReplaying", true), status);
 
         // Now complete the replay
         listener.get().accept(replayMarkerAwareTrackingEventProcessor);
@@ -106,7 +106,7 @@ class ReplayEndpointTest {
     @Test
     void triggerReplayWillThrowIllegalStateException_WhenNoMatchingEventProcessorFound() {
         when(eventProcessingConfiguration.eventProcessorByProcessingGroup(
-                "foo", ReplayableEventProcessor.class)).thenReturn(Optional.empty());
+            "foo", ReplayableEventProcessor.class)).thenReturn(Optional.empty());
         assertThrows(IllegalStateException.class, () -> replayEndpoint.startReplay(Set.of("foo"), null));
     }
 }

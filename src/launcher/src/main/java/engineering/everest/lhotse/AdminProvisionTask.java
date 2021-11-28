@@ -40,7 +40,8 @@ public class AdminProvisionTask implements ReplayCompletionAware {
     private final String adminUsername;
     private final String adminPassword;
 
-    public AdminProvisionTask(Clock clock, UsersRepository usersRepository,
+    public AdminProvisionTask(Clock clock,
+                              UsersRepository usersRepository,
                               OrganizationsRepository organizationsRepository,
                               KeycloakSynchronizationService keycloakSynchronizationService,
                               @Value("${kc.server.admin-user}") String adminUsername,
@@ -56,7 +57,7 @@ public class AdminProvisionTask implements ReplayCompletionAware {
     @PostConstruct
     public Map<String, Object> run() {
         var userDetails = keycloakSynchronizationService.setupKeycloakUser(adminUsername, adminUsername, true, ORGANIZATION_ID,
-                Set.of(ORG_USER, ORG_ADMIN, ADMIN), ADMIN_DISPLAY_NAME, adminPassword, false);
+            Set.of(ORG_USER, ORG_ADMIN, ADMIN), ADMIN_DISPLAY_NAME, adminPassword, false);
 
         Optional<PersistableUser> adminUser = usersRepository.findByUsernameIgnoreCase(adminUsername);
         if (adminUser.isPresent()) {
@@ -64,12 +65,12 @@ public class AdminProvisionTask implements ReplayCompletionAware {
         } else {
             LOGGER.info("Provisioning admin organization");
             organizationsRepository.save(new PersistableOrganization(ORGANIZATION_ID, ORGANIZATION_NAME,
-                    new Address(null, null, null, null, null), null,
-                    ADMIN_DISPLAY_NAME, null, adminUsername, ORGANIZATION_DISABLED, Instant.now(clock)));
+                new Address(null, null, null, null, null), null,
+                ADMIN_DISPLAY_NAME, null, adminUsername, ORGANIZATION_DISABLED, Instant.now(clock)));
 
             LOGGER.info("Provisioning admin user");
             usersRepository.save(new PersistableUser(fromString(userDetails.getOrDefault("userId", ADMIN_ID).toString()),
-                    ORGANIZATION_ID, adminUsername, ADMIN_DISPLAY_NAME, false, Instant.now(clock)));
+                ORGANIZATION_ID, adminUsername, ADMIN_DISPLAY_NAME, false, Instant.now(clock)));
         }
         return userDetails;
     }

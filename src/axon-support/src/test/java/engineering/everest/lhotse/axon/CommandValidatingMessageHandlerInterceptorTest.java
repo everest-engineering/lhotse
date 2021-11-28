@@ -69,12 +69,11 @@ class CommandValidatingMessageHandlerInterceptorTest {
         usersUniqueEmailValidator = new UsersUniqueEmailValidator(usersReadService);
         organizationStatusValidator = new OrganizationStatusValidator(organizationsReadService);
         commandValidatingMessageHandlerInterceptor = new CommandValidatingMessageHandlerInterceptor(
-                List.of(emailAddressValidator,
-                        usersUniqueEmailValidator,
-                        organizationStatusValidator),
-                javaBeanValidator);
+            List.of(emailAddressValidator,
+                usersUniqueEmailValidator,
+                organizationStatusValidator),
+            javaBeanValidator);
     }
-
 
     @Test
     void willValidateSuperInterfaceFirst() {
@@ -86,7 +85,7 @@ class CommandValidatingMessageHandlerInterceptorTest {
         when(organizationsReadService.getById(ORGANIZATION_ID)).thenThrow(NoSuchElementException.class);
 
         var exception = assertThrows(TranslatableIllegalStateException.class,
-                () -> commandValidatingMessageHandlerInterceptor.handle(unitOfWork, interceptorChain));
+            () -> commandValidatingMessageHandlerInterceptor.handle(unitOfWork, interceptorChain));
 
         assertEquals("ORGANIZATION_DOES_NOT_EXIST", exception.getMessage());
     }
@@ -114,7 +113,7 @@ class CommandValidatingMessageHandlerInterceptorTest {
         Mockito.<Object>when(commandMessage.getPayload()).thenReturn(createUserCommand);
 
         assertThrows(ConstraintViolationException.class,
-                () -> commandValidatingMessageHandlerInterceptor.handle(unitOfWork, interceptorChain));
+            () -> commandValidatingMessageHandlerInterceptor.handle(unitOfWork, interceptorChain));
     }
 
     @Test

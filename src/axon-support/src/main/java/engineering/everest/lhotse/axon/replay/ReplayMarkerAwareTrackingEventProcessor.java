@@ -85,14 +85,13 @@ public class ReplayMarkerAwareTrackingEventProcessor extends TrackingEventProces
             synchronized (this) {
                 LOGGER.info("Replay completed: {}", numberOfActiveSegments);
                 targetMarkerEventHolder.set(null);
-                taskExecutor.execute(() ->
-                        List.copyOf(replayCompletionListener).forEach(l -> {
-                            try {
-                                l.accept(this);
-                            } catch (Exception e) {
-                                LOGGER.error("Error running replay completion listener", e);
-                            }
-                        }));
+                taskExecutor.execute(() -> List.copyOf(replayCompletionListener).forEach(l -> {
+                    try {
+                        l.accept(this);
+                    } catch (Exception e) {
+                        LOGGER.error("Error running replay completion listener", e);
+                    }
+                }));
             }
         }
     }
@@ -161,7 +160,7 @@ public class ReplayMarkerAwareTrackingEventProcessor extends TrackingEventProces
 
         @Override
         public Builder trackingEventProcessorConfiguration(
-                TrackingEventProcessorConfiguration trackingEventProcessorConfiguration) {
+                                                           TrackingEventProcessorConfiguration trackingEventProcessorConfiguration) {
             super.trackingEventProcessorConfiguration(trackingEventProcessorConfiguration);
             this.initialSegmentsCount = trackingEventProcessorConfiguration.getInitialSegmentsCount();
             return this;

@@ -36,10 +36,10 @@ public class CommandValidatingMessageHandlerInterceptor implements MessageHandle
         Map<Class<?>, Validates<?>> m = new ConcurrentHashMap<>();
         for (Validates<?> validator : validators) {
             Type validatableCommandType = Arrays.stream(validator.getClass().getGenericInterfaces())
-                    .map(ParameterizedType.class::cast)
-                    .filter(e -> Validates.class == e.getRawType())
-                    .map(e -> e.getActualTypeArguments()[0])
-                    .findFirst().orElseThrow();
+                .map(ParameterizedType.class::cast)
+                .filter(e -> Validates.class == e.getRawType())
+                .map(e -> e.getActualTypeArguments()[0])
+                .findFirst().orElseThrow();
             m.put((Class<?>) validatableCommandType, validator);
         }
         validatorLookup = unmodifiableMap(m);
@@ -73,15 +73,15 @@ public class CommandValidatingMessageHandlerInterceptor implements MessageHandle
 
     private List<Class<?>> getValidatableInterfaces(Class<?> commandClass) {
         List<Class<?>> interfaces = Arrays.stream(commandClass.getInterfaces())
-                .filter(e -> e != ValidatableCommand.class)
-                .filter(ValidatableCommand.class::isAssignableFrom)
-                .collect(toList());
+            .filter(e -> e != ValidatableCommand.class)
+            .filter(ValidatableCommand.class::isAssignableFrom)
+            .collect(toList());
 
         // Add super-interfaces first
         interfaces.addAll(0, interfaces.stream()
-                .map(this::getValidatableInterfaces)
-                .flatMap(Collection::stream)
-                .collect(toList()));
+            .map(this::getValidatableInterfaces)
+            .flatMap(Collection::stream)
+            .collect(toList()));
 
         if (commandClass.getSuperclass() != null) {
             interfaces.addAll(0, getValidatableInterfaces(commandClass.getSuperclass()));

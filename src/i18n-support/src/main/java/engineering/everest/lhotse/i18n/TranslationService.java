@@ -1,6 +1,5 @@
 package engineering.everest.lhotse.i18n;
 
-
 import org.springframework.context.support.ResourceBundleMessageSource;
 
 import java.util.Locale;

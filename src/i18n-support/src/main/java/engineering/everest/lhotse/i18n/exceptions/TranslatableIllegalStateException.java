@@ -1,7 +1,7 @@
 package engineering.everest.lhotse.i18n.exceptions;
 
 public class TranslatableIllegalStateException extends TranslatableException {
-    
+
     public TranslatableIllegalStateException(String i18nMessageKey) {
         super(i18nMessageKey);
     }

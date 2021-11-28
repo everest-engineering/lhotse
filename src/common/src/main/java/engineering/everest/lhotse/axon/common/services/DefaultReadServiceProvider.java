@@ -24,8 +24,8 @@ public class DefaultReadServiceProvider implements ReadServiceProvider {
 
         for (ReadService<? extends Identifiable> readService : readServices) {
             readerServicesLookup.put(
-                    readService.getClass().getMethod(GET_BY_ID_METHOD, UUID.class).getReturnType().getSimpleName(),
-                    readService);
+                readService.getClass().getMethod(GET_BY_ID_METHOD, UUID.class).getReturnType().getSimpleName(),
+                readService);
         }
         LOGGER.info("Read Services loaded ({}): {}", readerServicesLookup.size(), readerServicesLookup);
     }

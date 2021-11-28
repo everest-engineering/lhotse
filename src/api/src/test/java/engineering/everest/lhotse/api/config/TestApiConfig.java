@@ -55,7 +55,7 @@ public class TestApiConfig extends GlobalMethodSecurityConfiguration {
     public ReadServiceProvider readServiceProvider() {
         return mock(ReadServiceProvider.class);
     }
-    
+
     @Configuration
     @Order(HIGHEST_PRECEDENCE)
     public static class TestWebSecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
@@ -83,26 +83,26 @@ public class TestApiConfig extends GlobalMethodSecurityConfiguration {
             super.configure(http);
 
             http.cors()
-                    .and()
-                    .csrf()
-                    .and()
-                    .headers()
-                    .cacheControl()
-                    .and()
-                    .disable()
-                    .authorizeRequests()
-                    .antMatchers("/api/organizations/**", "/api/version",
-                            "/actuator/health/**", "/api/doc/**", "/swagger-ui/**", "/swagger-resources/**", "/sso/login*")
-                    .permitAll()
-                    .antMatchers("/api/**", "/actuator/prometheus/**").authenticated()
-                    .antMatchers("/admin/**", "/actuator/**").hasRole("ADMIN").anyRequest().permitAll()
-                    .and()
-                    .logout().logoutRequestMatcher(new AntPathRequestMatcher("/logout", "GET")).logoutSuccessUrl("/");
+                .and()
+                .csrf()
+                .and()
+                .headers()
+                .cacheControl()
+                .and()
+                .disable()
+                .authorizeRequests()
+                .antMatchers("/api/organizations/**", "/api/version",
+                    "/actuator/health/**", "/api/doc/**", "/swagger-ui/**", "/swagger-resources/**", "/sso/login*")
+                .permitAll()
+                .antMatchers("/api/**", "/actuator/prometheus/**").authenticated()
+                .antMatchers("/admin/**", "/actuator/**").hasRole("ADMIN").anyRequest().permitAll()
+                .and()
+                .logout().logoutRequestMatcher(new AntPathRequestMatcher("/logout", "GET")).logoutSuccessUrl("/");
         }
     }
 
     public class CustomMethodSecurityExpression extends SecurityExpressionRoot
-            implements MethodSecurityExpressionOperations {
+        implements MethodSecurityExpressionOperations {
 
         private final KeycloakAuthenticationToken token = (KeycloakAuthenticationToken) this.authentication;
         private final KeycloakPrincipal principal = (KeycloakPrincipal) token.getPrincipal();
@@ -113,8 +113,9 @@ public class TestApiConfig extends GlobalMethodSecurityConfiguration {
 
         public boolean memberOfOrg(UUID organizationId) {
             var otherClaims = principal.getKeycloakSecurityContext().getToken().getOtherClaims();
-            return otherClaims != null && otherClaims.containsKey("organizationId")
-                    && organizationId.compareTo(UUID.fromString(otherClaims.get("organizationId").toString())) == 0;
+            return otherClaims != null
+                && otherClaims.containsKey("organizationId")
+                && organizationId.compareTo(UUID.fromString(otherClaims.get("organizationId").toString())) == 0;
         }
 
         @Override
@@ -156,4 +157,3 @@ public class TestApiConfig extends GlobalMethodSecurityConfiguration {
         }
     }
 }
-

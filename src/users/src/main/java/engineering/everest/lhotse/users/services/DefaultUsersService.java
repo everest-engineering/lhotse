@@ -46,7 +46,7 @@ public class DefaultUsersService implements UsersService {
     public UUID createOrganizationUser(UUID requestingUserId, UUID organizationId, String username, String displayName) {
         var keycloakUserId = createUserAndRetrieveKeycloakUserId(username, organizationId, displayName);
         return commandGateway.sendAndWait(
-                new CreateOrganizationUserCommand(keycloakUserId, organizationId, requestingUserId, username, displayName));
+            new CreateOrganizationUserCommand(keycloakUserId, organizationId, requestingUserId, username, displayName));
     }
 
     @Override

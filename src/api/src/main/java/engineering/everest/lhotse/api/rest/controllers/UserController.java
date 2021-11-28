@@ -40,8 +40,10 @@ public class UserController {
     private final UsersReadService usersReadService;
 
     @Autowired
-    public UserController(DtoConverter dtoConverter, UsersService usersService, FileService fileService,
-            UsersReadService usersReadService) {
+    public UserController(DtoConverter dtoConverter,
+                          UsersService usersService,
+                          FileService fileService,
+                          UsersReadService usersReadService) {
         this.dtoConverter = dtoConverter;
         this.usersService = usersService;
         this.fileService = fileService;
@@ -59,14 +61,14 @@ public class UserController {
     public void updateUser(@ApiIgnore Principal principal, @RequestBody UpdateUserRequest updateUserRequest) {
         var userId = UUID.fromString(principal.getName());
         usersService.updateUser(userId, userId, updateUserRequest.getEmail(),
-                updateUserRequest.getDisplayName());
+            updateUserRequest.getDisplayName());
     }
 
     @PostMapping("/profile-photo")
     public void uploadProfilePhoto(@ApiIgnore Principal principal, @RequestParam("file") MultipartFile uploadedFile)
-            throws IOException {
+        throws IOException {
         var persistedFileId = fileService.transferToPermanentStore(uploadedFile.getOriginalFilename(),
-                uploadedFile.getSize(), uploadedFile.getInputStream());
+            uploadedFile.getSize(), uploadedFile.getInputStream());
         usersService.storeProfilePhoto(UUID.fromString(principal.getName()), persistedFileId);
     }
 
@@ -78,21 +80,22 @@ public class UserController {
             }
         };
         return ResponseEntity.ok()
-                .contentType(APPLICATION_OCTET_STREAM)
-                .body(streamingResponse);
+            .contentType(APPLICATION_OCTET_STREAM)
+            .body(streamingResponse);
     }
 
     @GetMapping(value = "/profile-photo/thumbnail", produces = APPLICATION_OCTET_STREAM_VALUE)
     public ResponseEntity<StreamingResponseBody> streamProfilePhotoThumbnail(@ApiIgnore Principal principal,
-            @RequestParam int width, @RequestParam int height) {
+                                                                             @RequestParam int width,
+                                                                             @RequestParam int height) {
         StreamingResponseBody streamingResponse = outputStream -> {
             try (var inputStream = usersReadService.getProfilePhotoThumbnailStream(UUID.fromString(principal.getName()),
-                    width, height)) {
+                width, height)) {
                 inputStream.transferTo(outputStream);
             }
         };
         return ResponseEntity.ok()
-                .contentType(APPLICATION_OCTET_STREAM)
-                .body(streamingResponse);
+            .contentType(APPLICATION_OCTET_STREAM)
+            .body(streamingResponse);
     }
 }

@@ -1,6 +1,5 @@
 package engineering.everest.lhotse.organizations.services;
 
-
 import engineering.everest.axon.HazelcastCommandGateway;
 import engineering.everest.lhotse.organizations.domain.commands.UpdateOrganizationCommand;
 import engineering.everest.lhotse.organizations.domain.commands.DisableOrganizationCommand;
@@ -19,11 +18,20 @@ public class DefaultOrganizationsService implements OrganizationsService {
     }
 
     @Override
-    public void updateOrganization(UUID requestingUserId, UUID organizationId, String organizationName,
-                                   String street, String city, String state, String country, String postalCode,
-                                   String websiteUrl, String contactName, String phoneNumber, String emailAddress) {
+    public void updateOrganization(UUID requestingUserId,
+                                   UUID organizationId,
+                                   String organizationName,
+                                   String street,
+                                   String city,
+                                   String state,
+                                   String country,
+                                   String postalCode,
+                                   String websiteUrl,
+                                   String contactName,
+                                   String phoneNumber,
+                                   String emailAddress) {
         commandGateway.sendAndWait(new UpdateOrganizationCommand(organizationId, requestingUserId, organizationName, street, city,
-                state, country, postalCode, websiteUrl, contactName, phoneNumber, emailAddress));
+            state, country, postalCode, websiteUrl, contactName, phoneNumber, emailAddress));
     }
 
     @Override

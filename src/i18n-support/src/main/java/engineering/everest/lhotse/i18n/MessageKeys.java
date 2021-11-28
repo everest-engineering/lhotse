@@ -17,6 +17,5 @@ public class MessageKeys {
     public static final String USER_IS_UNKNOWN = "USER_IS_UNKNOWN";
     public static final String USER_IS_DISABLED = "USER_IS_DISABLED";
 
-    private MessageKeys() {
-    }
+    private MessageKeys() {}
 }

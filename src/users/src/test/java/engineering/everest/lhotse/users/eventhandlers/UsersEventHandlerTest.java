@@ -59,7 +59,7 @@ class UsersEventHandlerTest {
     @Test
     void onUserCreatedByAdminEvent_WillDelegate() {
         usersEventHandler.on(new UserCreatedByAdminEvent(USER_ID, ORGANIZATION_ID, ADMIN_ID,
-                USER_DISPLAY_NAME, USER_USERNAME), CREATION_TIME);
+            USER_DISPLAY_NAME, USER_USERNAME), CREATION_TIME);
 
         verify(usersRepository).createUser(USER_ID, ORGANIZATION_ID, USER_DISPLAY_NAME, USER_USERNAME, CREATION_TIME);
     }
@@ -67,7 +67,7 @@ class UsersEventHandlerTest {
     @Test
     void onUserCreatedForNewlyRegisteredOrganizationEvent_WillDelegate() {
         usersEventHandler.on(new UserCreatedForNewlyRegisteredOrganizationEvent(ORGANIZATION_ID, USER_ID, USER_DISPLAY_NAME,
-                USER_USERNAME), CREATION_TIME);
+            USER_USERNAME), CREATION_TIME);
 
         verify(usersRepository).createUser(USER_ID, ORGANIZATION_ID, USER_DISPLAY_NAME, USER_USERNAME, CREATION_TIME);
     }
@@ -79,7 +79,7 @@ class UsersEventHandlerTest {
         when(usersRepository.findById(USER_ID)).thenReturn(Optional.of(persistableUser));
 
         usersEventHandler.on(new UserDetailsUpdatedByAdminEvent(USER_ID, ORGANIZATION_ID, "display-name-change",
-                "email-change", ADMIN_ID));
+            "email-change", ADMIN_ID));
 
         assertEquals("display-name-change", persistableUser.getDisplayName());
         assertEquals("email-change", persistableUser.getEmail());

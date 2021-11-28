@@ -14,5 +14,4 @@ import java.lang.annotation.Target;
 @Inherited
 @Documented
 @PreAuthorize("hasAnyRole('ADMIN', 'ORG_ADMIN', 'ORG_USER')")
-public @interface AdminOrOrgAdminOrOrgUser {
-}
+public @interface AdminOrOrgAdminOrOrgUser {}

@@ -24,8 +24,15 @@ public class PersistableOrganization {
     private String emailAddress;
     private boolean disabled;
 
-    public PersistableOrganization(UUID id, String organizationName, Address address, String websiteUrl, String contactName,
-                                   String phoneNumber, String emailAddress, boolean isDisabled, Instant registeredOn) {
+    public PersistableOrganization(UUID id,
+                                   String organizationName,
+                                   Address address,
+                                   String websiteUrl,
+                                   String contactName,
+                                   String phoneNumber,
+                                   String emailAddress,
+                                   boolean isDisabled,
+                                   Instant registeredOn) {
         this.id = id;
         this.organizationName = organizationName;
         this.registeredOn = registeredOn;

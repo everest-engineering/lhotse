@@ -67,7 +67,7 @@ class ReplayMarkerAwareTrackingEventProcessorTest {
     @BeforeEach
     void setUp() {
         doAnswer(invocation -> ((Supplier) invocation.getArgument(1)).get())
-                .when(configuration).getComponent(any(), any());
+            .when(configuration).getComponent(any(), any());
         when(eventProcessingModule.rollbackConfiguration(any())).thenReturn(mock(RollbackConfiguration.class));
         when(eventProcessingModule.errorHandler(any())).thenReturn(mock(ErrorHandler.class));
         when(eventProcessingModule.messageMonitor(any(), any())).thenReturn(mock(MessageMonitor.class));
@@ -80,10 +80,9 @@ class ReplayMarkerAwareTrackingEventProcessorTest {
             runnable.run();
             return null;
         }).when(taskExecutor).execute(any(Runnable.class));
-        processor = (ReplayMarkerAwareTrackingEventProcessor)
-                new CompositeEventProcessorBuilder(
-                        taskExecutor, eventProcessingModule, AxonConfig.EventProcessorType.TRACKING, 2)
-                        .build("default", configuration, eventHandlerInvoker);
+        processor = (ReplayMarkerAwareTrackingEventProcessor) new CompositeEventProcessorBuilder(
+            taskExecutor, eventProcessingModule, AxonConfig.EventProcessorType.TRACKING, 2)
+                .build("default", configuration, eventHandlerInvoker);
     }
 
     @Test
@@ -92,7 +91,7 @@ class ReplayMarkerAwareTrackingEventProcessorTest {
         replayMarkerAwareTrackingEventProcessor.startReplay(startPosition, replayMarkerEvent);
 
         var thrownException = assertThrows(RuntimeException.class,
-                () ->replayMarkerAwareTrackingEventProcessor.startReplay(startPosition, replayMarkerEvent));
+            () -> replayMarkerAwareTrackingEventProcessor.startReplay(startPosition, replayMarkerEvent));
         assertEquals("Previous replay is still running", thrownException.getMessage());
     }
 
@@ -100,8 +99,8 @@ class ReplayMarkerAwareTrackingEventProcessorTest {
     void startReplay_WillWorkStandalone() throws Exception {
         var replayMarkerAwareTrackingEventProcessor = spy(processor);
         when(replayMarkerAwareTrackingEventProcessor.processingStatus()).thenReturn(Map.of(
-                0, mock(EventTrackerStatus.class),
-                1, mock(EventTrackerStatus.class)));
+            0, mock(EventTrackerStatus.class),
+            1, mock(EventTrackerStatus.class)));
         CountDownLatch replayLatch = new CountDownLatch(1);
         Consumer<ReplayableEventProcessor> listener = p -> replayLatch.countDown();
         replayMarkerAwareTrackingEventProcessor.registerReplayCompletionListener(listener);
@@ -114,14 +113,14 @@ class ReplayMarkerAwareTrackingEventProcessorTest {
 
         // Feed the replay event
         replayMarkerAwareTrackingEventProcessor.canHandle(new GenericEventMessage<>(replayMarkerEvent),
-                List.of(mock(Segment.class)));
+            List.of(mock(Segment.class)));
         // one is not enough since we have two segments
         assertTrue(replayMarkerAwareTrackingEventProcessor.isReplaying());
         assertEquals(1, replayLatch.getCount());
 
         // Feed again the replay event
         replayMarkerAwareTrackingEventProcessor.canHandle(new GenericEventMessage<>(replayMarkerEvent),
-                List.of(mock(Segment.class)));
+            List.of(mock(Segment.class)));
         // Now the replay be completed
         replayLatch.await(1, TimeUnit.SECONDS);
         assertEquals(0, replayLatch.getCount());

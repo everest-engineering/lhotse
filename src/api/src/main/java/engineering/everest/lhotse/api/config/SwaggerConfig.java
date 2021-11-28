@@ -33,14 +33,15 @@ import static springfox.documentation.builders.PathSelectors.regex;
 
 @Profile("!prod")
 @Configuration
-@ComponentScan({"engineering.everest.lhotse.api"})
+@ComponentScan({ "engineering.everest.lhotse.api" })
 @PropertySource("swagger.properties")
-@SwaggerDefinition(tags = {
-    @Tag(name = "System", description = "Information on the system you are interacting with"),
-    @Tag(name = "Organizations", description = "Organization information and management"),
-    @Tag(name = "Users", description = "User information and management"),
-    @Tag(name = "OrgAdmins", description = "Organization Admin information and management"),
-})
+@SwaggerDefinition(
+    tags = {
+        @Tag(name = "System", description = "Information on the system you are interacting with"),
+        @Tag(name = "Organizations", description = "Organization information and management"),
+        @Tag(name = "Users", description = "User information and management"),
+        @Tag(name = "OrgAdmins", description = "Organization Admin information and management"),
+    })
 public class SwaggerConfig {
 
     private final String authServer;
@@ -100,9 +101,9 @@ public class SwaggerConfig {
     }
 
     private SecurityScheme securityScheme() {
-        GrantType grantType = 
-        new ResourceOwnerPasswordCredentialsGrant(authServer + "/realms/" + realm + "/protocol/openid-connect/token");    
-        
+        GrantType grantType =
+            new ResourceOwnerPasswordCredentialsGrant(authServer + "/realms/" + realm + "/protocol/openid-connect/token");
+
         return new OAuthBuilder().name("Spring OAuth2")
             .grantTypes(List.of(grantType))
             .scopes(Arrays.asList(scopes()))
@@ -116,8 +117,8 @@ public class SwaggerConfig {
     }
 
     private AuthorizationScope[] scopes() {
-        return new AuthorizationScope[] { 
-            new AuthorizationScope("read", "for read operations"), 
+        return new AuthorizationScope[] {
+            new AuthorizationScope("read", "for read operations"),
             new AuthorizationScope("write", "for write operations") };
     }
 }

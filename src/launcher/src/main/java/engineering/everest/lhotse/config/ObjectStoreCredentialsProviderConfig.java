@@ -13,8 +13,8 @@ public class ObjectStoreCredentialsProviderConfig {
 
     @Bean
     public AWSCredentialsProvider awsCredentialsProvider(
-            @Value("${application.filestore.awsS3.accessKeyId:}") String awsAccessKeyId,
-            @Value("${application.filestore.awsS3.secretKey:}") String awsSecretKey) {
+                                                         @Value("${application.filestore.awsS3.accessKeyId:}") String awsAccessKeyId,
+                                                         @Value("${application.filestore.awsS3.secretKey:}") String awsSecretKey) {
         if (!awsAccessKeyId.isBlank() || !awsSecretKey.isBlank()) {
             return new AWSStaticCredentialsProvider(new BasicAWSCredentials(awsAccessKeyId, awsSecretKey));
         }

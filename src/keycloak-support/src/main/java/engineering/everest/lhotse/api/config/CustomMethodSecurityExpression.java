@@ -8,9 +8,9 @@ import org.springframework.security.access.expression.SecurityExpressionRoot;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionOperations;
 import org.springframework.security.core.Authentication;
 
-@SuppressWarnings({ "rawtypes"})
+@SuppressWarnings({ "rawtypes" })
 public class CustomMethodSecurityExpression extends SecurityExpressionRoot
-        implements MethodSecurityExpressionOperations {
+    implements MethodSecurityExpressionOperations {
 
     private final KeycloakAuthenticationToken token = (KeycloakAuthenticationToken) this.authentication;
     private final KeycloakPrincipal principal = (KeycloakPrincipal) token.getPrincipal();
@@ -21,8 +21,9 @@ public class CustomMethodSecurityExpression extends SecurityExpressionRoot
 
     public boolean memberOfOrg(UUID organizationId) {
         var otherClaims = principal.getKeycloakSecurityContext().getToken().getOtherClaims();
-        return otherClaims != null && otherClaims.containsKey("organizationId")
-                && organizationId.compareTo(UUID.fromString(otherClaims.get("organizationId").toString())) == 0;
+        return otherClaims != null
+            && otherClaims.containsKey("organizationId")
+            && organizationId.compareTo(UUID.fromString(otherClaims.get("organizationId").toString())) == 0;
     }
 
     @Override

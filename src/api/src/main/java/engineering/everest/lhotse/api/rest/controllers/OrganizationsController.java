@@ -72,12 +72,13 @@ public class OrganizationsController {
     @ResponseStatus(OK)
     @ApiOperation("Update Organization")
     @AdminOrAdminOfTargetOrganization
-    public void updateOrganization(@ApiIgnore Principal principal, @PathVariable UUID organizationId,
-            @RequestBody @Valid UpdateOrganizationRequest request) {
+    public void updateOrganization(@ApiIgnore Principal principal,
+                                   @PathVariable UUID organizationId,
+                                   @RequestBody @Valid UpdateOrganizationRequest request) {
         organizationsService.updateOrganization(UUID.fromString(principal.getName()), organizationId,
-                request.getOrganizationName(), request.getStreet(), request.getCity(), request.getState(),
-                request.getCountry(), request.getPostalCode(), request.getWebsiteUrl(), request.getContactName(),
-                request.getPhoneNumber(), request.getEmailAddress());
+            request.getOrganizationName(), request.getStreet(), request.getCity(), request.getState(),
+            request.getCountry(), request.getPostalCode(), request.getWebsiteUrl(), request.getContactName(),
+            request.getPhoneNumber(), request.getEmailAddress());
     }
 
     @GetMapping("/{organizationId}/users")
@@ -85,17 +86,18 @@ public class OrganizationsController {
     @AdminOrUserOfTargetOrganization
     public List<UserResponse> listOrganizationUsers(@ApiIgnore Principal principal, @PathVariable UUID organizationId) {
         return usersReadService.getUsersForOrganization(organizationId)
-                .stream().map(dtoConverter::convert)
-                .collect(toList());
+            .stream().map(dtoConverter::convert)
+            .collect(toList());
     }
 
     @PostMapping("/{organizationId}/users")
     @ApiOperation("Create a new user for an organization")
     @ResponseStatus(CREATED)
     @AdminOrAdminOfTargetOrganization
-    public UUID createUser(@ApiIgnore Principal principal, @PathVariable UUID organizationId,
-            @RequestBody @Valid NewUserRequest request) {
+    public UUID createUser(@ApiIgnore Principal principal,
+                           @PathVariable UUID organizationId,
+                           @RequestBody @Valid NewUserRequest request) {
         return usersService.createOrganizationUser(UUID.fromString(principal.getName()), organizationId, request.getUsername(),
-                request.getDisplayName());
+            request.getDisplayName());
     }
 }

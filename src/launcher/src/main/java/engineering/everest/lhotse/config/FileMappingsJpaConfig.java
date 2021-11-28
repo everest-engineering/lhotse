@@ -25,12 +25,11 @@ import javax.sql.DataSource;
 @Slf4j
 @Configuration
 @EnableJpaRepositories(
-        entityManagerFactoryRef = "fileMappingsEntityManagerFactory",
-        transactionManagerRef = "fileMappingsPlatformTransactionManager",
-        basePackages = {
-                "engineering.everest.starterkit.filestorage",
-                "engineering.everest.starterkit.media.thumbnails"}
-)
+    entityManagerFactoryRef = "fileMappingsEntityManagerFactory",
+    transactionManagerRef = "fileMappingsPlatformTransactionManager",
+    basePackages = {
+        "engineering.everest.starterkit.filestorage",
+        "engineering.everest.starterkit.media.thumbnails" })
 @EnableTransactionManagement
 public class FileMappingsJpaConfig {
 
@@ -60,29 +59,29 @@ public class FileMappingsJpaConfig {
     @Bean
     @Qualifier(FILE_MAPPINGS_AUTO_CONFIG_QUALIFIER)
     public LocalContainerEntityManagerFactoryBean fileMappingsEntityManagerFactory(
-            EntityManagerFactoryBuilder builder,
-            @Qualifier(FILE_MAPPINGS_AUTO_CONFIG_QUALIFIER) DataSource dataSource,
-            @Qualifier(FILE_MAPPINGS_AUTO_CONFIG_QUALIFIER) JpaProperties jpaProperties) {
+                                                                                   EntityManagerFactoryBuilder builder,
+                                                                                   @Qualifier(FILE_MAPPINGS_AUTO_CONFIG_QUALIFIER) DataSource dataSource,
+                                                                                   @Qualifier(FILE_MAPPINGS_AUTO_CONFIG_QUALIFIER) JpaProperties jpaProperties) {
         return builder
-                .dataSource(dataSource)
-                .properties(jpaProperties.getProperties())
-                .packages("engineering.everest.starterkit.filestorage",
-                        "engineering.everest.starterkit.media.thumbnails")
-                .persistenceUnit(FILE_MAPPINGS_AUTO_CONFIG_QUALIFIER)
-                .build();
+            .dataSource(dataSource)
+            .properties(jpaProperties.getProperties())
+            .packages("engineering.everest.starterkit.filestorage",
+                "engineering.everest.starterkit.media.thumbnails")
+            .persistenceUnit(FILE_MAPPINGS_AUTO_CONFIG_QUALIFIER)
+            .build();
     }
 
     @Bean
     @Qualifier(FILE_MAPPINGS_AUTO_CONFIG_QUALIFIER)
     public PlatformTransactionManager fileMappingsPlatformTransactionManager(
-            @Qualifier(FILE_MAPPINGS_AUTO_CONFIG_QUALIFIER) EntityManagerFactory entityManagerFactory) {
+                                                                             @Qualifier(FILE_MAPPINGS_AUTO_CONFIG_QUALIFIER) EntityManagerFactory entityManagerFactory) {
         return new JpaTransactionManager(entityManagerFactory);
     }
 
     @Bean
     @Qualifier(FILE_MAPPINGS_AUTO_CONFIG_QUALIFIER)
     public EntityManager fileMappingsSharedEntityManager(
-            @Qualifier(FILE_MAPPINGS_AUTO_CONFIG_QUALIFIER) EntityManagerFactory entityManagerFactory) {
+                                                         @Qualifier(FILE_MAPPINGS_AUTO_CONFIG_QUALIFIER) EntityManagerFactory entityManagerFactory) {
         return SharedEntityManagerCreator.createSharedEntityManager(entityManagerFactory);
     }
 

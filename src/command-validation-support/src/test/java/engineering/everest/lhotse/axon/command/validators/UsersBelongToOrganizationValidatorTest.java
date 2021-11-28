@@ -50,8 +50,8 @@ class UsersBelongToOrganizationValidatorTest {
 
     @Test
     void validate_WillFail_WhenAnyEveryUserBelongsToDifferentOrganization() {
-        var thrownException = assertThrows(TranslatableIllegalArgumentException.class, () ->
-                usersBelongToOrganizationValidator.validate(createValidatableCommand(Set.of(USER_ID_1, USER_ID_2, USER_ID_3))));
+        var thrownException = assertThrows(TranslatableIllegalArgumentException.class,
+            () -> usersBelongToOrganizationValidator.validate(createValidatableCommand(Set.of(USER_ID_1, USER_ID_2, USER_ID_3))));
         assertEquals("USER_NOT_MEMBER_OF_ORGANIZATION", thrownException.getMessage());
     }
 

@@ -58,39 +58,39 @@ public class KeycloakSynchronizationService {
 
     private Keycloak getAdminKeycloakClientInstance() {
         return KeycloakBuilder.builder()
-                .serverUrl(keycloakServerAuthUrl)
-                .grantType(OAuth2Constants.PASSWORD)
-                .realm("master")
-                .clientId(keycloakMasterRealmAdminClientId)
-                .username(keycloakAdminUser)
-                .password(keycloakAdminPassword)
-                .resteasyClient(new ResteasyClientBuilder()
-                        .connectionPoolSize(keycloakServerConnectionPoolSize).build())
-                .build();
+            .serverUrl(keycloakServerAuthUrl)
+            .grantType(OAuth2Constants.PASSWORD)
+            .realm("master")
+            .clientId(keycloakMasterRealmAdminClientId)
+            .username(keycloakAdminUser)
+            .password(keycloakAdminPassword)
+            .resteasyClient(new ResteasyClientBuilder()
+                .connectionPoolSize(keycloakServerConnectionPoolSize).build())
+            .build();
     }
 
     public void updateUserAttributes(UUID userId, Map<String, Object> attributes) {
         webclient(constructUrlPath("/users/%s", userId), PUT)
-                .contentType(APPLICATION_JSON)
-                .accept(APPLICATION_JSON)
-                .bodyValue(attributes)
-                .exchangeToMono(res -> Mono.just(res.statusCode()))
-                .block();
+            .contentType(APPLICATION_JSON)
+            .accept(APPLICATION_JSON)
+            .bodyValue(attributes)
+            .exchangeToMono(res -> Mono.just(res.statusCode()))
+            .block();
     }
 
     public void deleteUser(UUID userId) {
         webclient(constructUrlPath("/users/%s", userId), DELETE)
-                .exchangeToMono(res -> Mono.just(res.statusCode()))
-                .block();
+            .exchangeToMono(res -> Mono.just(res.statusCode()))
+            .block();
     }
 
     public UUID createNewKeycloakUserAndSendVerificationEmail(String username, UUID organizationId, String displayName) {
         createNewKeycloakUser(Map.of("username", username,
-                "email", username,
-                "enabled", true,
-                "attributes", new UserAttribute(organizationId, displayName),
-                "credentials",
-                List.of(Map.of("type", "password", VALUE_KEY, "changeme", "temporary", true))));
+            "email", username,
+            "enabled", true,
+            "attributes", new UserAttribute(organizationId, displayName),
+            "credentials",
+            List.of(Map.of("type", "password", VALUE_KEY, "changeme", "temporary", true))));
 
         var userId = getUserId(username);
         sendUserVerificationEmail(userId);
@@ -99,41 +99,41 @@ public class KeycloakSynchronizationService {
 
     public UUID getUserId(String username) {
         return fromString(new JSONArray(getUsers(Map.of("username", username)))
-                .getJSONObject(0)
-                .getString("id"));
+            .getJSONObject(0)
+            .getString("id"));
     }
 
     public String getUsers(Map<String, Object> queryFilters) {
         var usersUri = constructUrlPath("/users", "") + getFilters(queryFilters);
         return webclient(usersUri, GET)
-                .retrieve()
-                .bodyToMono(String.class)
-                .block();
+            .retrieve()
+            .bodyToMono(String.class)
+            .block();
     }
 
     public String getClientDetails(Map<String, Object> queryFilters) {
         var clientsUri = constructUrlPath("/clients", "") + getFilters(queryFilters);
         return webclient(clientsUri, GET)
-                .retrieve()
-                .bodyToMono(String.class)
-                .block();
+            .retrieve()
+            .bodyToMono(String.class)
+            .block();
     }
 
     public String getClientRoles(String type, UUID userId, UUID clientId) {
         return webclient(constructUrlPath("/users/%s/role-mappings/clients/%s/%s", userId, clientId, type), GET)
-                .retrieve()
-                .bodyToMono(String.class)
-                .block();
+            .retrieve()
+            .bodyToMono(String.class)
+            .block();
     }
 
     private void createNewKeycloakUser(Map<String, Object> userDetails) {
         try {
             webclient(constructUrlPath("/users", ""), POST)
-                    .contentType(APPLICATION_JSON)
-                    .accept(APPLICATION_JSON)
-                    .bodyValue(userDetails)
-                    .exchangeToMono(res -> Mono.just(res.statusCode()))
-                    .block();
+                .contentType(APPLICATION_JSON)
+                .accept(APPLICATION_JSON)
+                .bodyValue(userDetails)
+                .exchangeToMono(res -> Mono.just(res.statusCode()))
+                .block();
         } catch (Exception e) {
             LOGGER.error("Keycloak createUser error: " + e);
         }
@@ -141,11 +141,11 @@ public class KeycloakSynchronizationService {
 
     private void updateClientRoles(String path, HttpMethod method, Object data) {
         webclient(path, method)
-                .contentType(APPLICATION_JSON)
-                .accept(APPLICATION_JSON)
-                .bodyValue(data)
-                .exchangeToMono(res -> Mono.just(res.statusCode()))
-                .block();
+            .contentType(APPLICATION_JSON)
+            .accept(APPLICATION_JSON)
+            .bodyValue(data)
+            .exchangeToMono(res -> Mono.just(res.statusCode()))
+            .block();
     }
 
     private String getClientRolesPath(UUID userId, UUID clientId) {
@@ -176,17 +176,17 @@ public class KeycloakSynchronizationService {
 
     public String getClientSecret(UUID clientId) {
         return webclient(constructUrlPath("/clients/%s/client-secret", clientId), GET)
-                .retrieve()
-                .bodyToMono(String.class)
-                .block();
+            .retrieve()
+            .bodyToMono(String.class)
+            .block();
     }
 
     public void sendUserVerificationEmail(UUID userId) {
         webclient(constructUrlPath("/users/%s/send-verify-email", userId), PUT)
-                .contentType(APPLICATION_JSON)
-                .accept(APPLICATION_JSON)
-                .exchangeToMono(res -> Mono.just(res.statusCode()))
-                .block();
+            .contentType(APPLICATION_JSON)
+            .accept(APPLICATION_JSON)
+            .exchangeToMono(res -> Mono.just(res.statusCode()))
+            .block();
     }
 
     private StringBuilder getFilters(Map<String, Object> queryFilters) {
@@ -202,14 +202,20 @@ public class KeycloakSynchronizationService {
         return filters;
     }
 
-    public Map<String, Object> setupKeycloakUser(String username, String email, boolean enabled, UUID organizationId,
-                                                 Set<Role> roles, String displayName, String password, boolean passwordTemporary) {
+    public Map<String, Object> setupKeycloakUser(String username,
+                                                 String email,
+                                                 boolean enabled,
+                                                 UUID organizationId,
+                                                 Set<Role> roles,
+                                                 String displayName,
+                                                 String password,
+                                                 boolean passwordTemporary) {
         createNewKeycloakUser(Map.of("username", username,
-                "email", email,
-                "enabled", enabled,
-                "attributes", new UserAttribute(organizationId, displayName),
-                "credentials",
-                List.of(Map.of("type", "password", VALUE_KEY, password, "temporary", passwordTemporary))));
+            "email", email,
+            "enabled", enabled,
+            "attributes", new UserAttribute(organizationId, displayName),
+            "credentials",
+            List.of(Map.of("type", "password", VALUE_KEY, password, "temporary", passwordTemporary))));
 
         var userId1 = getUserId(username);
         sendUserVerificationEmail(userId1);
@@ -218,37 +224,39 @@ public class KeycloakSynchronizationService {
 
         var secret = getClientSecret(getClientIdFromClientDetails());
         return Map.of("userId", userId,
-                "clientSecret", secret.contains(VALUE_KEY) ? new JSONObject(secret).getString(VALUE_KEY) : "");
+            "clientSecret", secret.contains(VALUE_KEY)
+                ? new JSONObject(secret).getString(VALUE_KEY)
+                : "");
     }
 
     private UUID getClientIdFromClientDetails() {
         return fromString(new JSONArray(getClientDetails(Map.of("clientId", keycloakDefaultRealmDefaultClientId)))
-                .getJSONObject(0).getString("id"));
+            .getJSONObject(0).getString("id"));
     }
 
-    private String constructUrlPath(String path, Object...params) {
+    private String constructUrlPath(String path, Object... params) {
         return String.format(keycloakServerAuthUrl + "/admin/realms/default" + path, params);
     }
 
     private String accessToken() {
         return BEARER + getAdminKeycloakClientInstance()
-                .tokenManager()
-                .getAccessToken()
-                .getToken();
+            .tokenManager()
+            .getAccessToken()
+            .getToken();
     }
 
     private WebClient.RequestBodySpec webclient(String url, HttpMethod method) {
         return WebClient.create(url)
-                .method(method)
-                .header(AUTHORIZATION, accessToken());
+            .method(method)
+            .header(AUTHORIZATION, accessToken());
     }
 
     private List<Map<Object, Object>> getClientLevelRolesRequestData(JSONObject role) {
         return List.of(Map.of("id", role.getString("id"),
-                NAME_KEY, role.getString(NAME_KEY),
-                "description", role.getString("description"),
-                "composite", role.getBoolean("composite"),
-                "clientRole", role.getBoolean("clientRole"),
-                "containerId", role.getString("containerId")));
+            NAME_KEY, role.getString(NAME_KEY),
+            "description", role.getString("description"),
+            "composite", role.getBoolean("composite"),
+            "clientRole", role.getBoolean("clientRole"),
+            "containerId", role.getString("containerId")));
     }
 }

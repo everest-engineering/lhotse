@@ -44,9 +44,9 @@ class OrganizationsEventHandlerTest {
     private static final String ORGANIZATION_EMAIL_ADDRESS = "email@domain.com";
 
     private static final OrganizationAddress ORGANIZATION_ADDRESS = new OrganizationAddress(ORGANIZATION_STREET,
-            ORGANIZATION_CITY, ORGANIZATION_STATE, ORGANIZATION_COUNTRY, ORGANIZATION_POSTAL_CODE);
+        ORGANIZATION_CITY, ORGANIZATION_STATE, ORGANIZATION_COUNTRY, ORGANIZATION_POSTAL_CODE);
     private static final Address ADDRESS = new Address(ORGANIZATION_STREET, ORGANIZATION_CITY,
-            ORGANIZATION_STATE, ORGANIZATION_COUNTRY, ORGANIZATION_POSTAL_CODE);
+        ORGANIZATION_STATE, ORGANIZATION_COUNTRY, ORGANIZATION_POSTAL_CODE);
     private static final String ORGANIZATION_NAME_UPDATE = "organization-name-update";
     private static final String ORGANIZATION_CONTACT_NAME_UPDATE = "contact-name-update";
     private static final String ORGANIZATION_PHONE_NUMBER_UPDATE = "phone-number-update";
@@ -78,11 +78,12 @@ class OrganizationsEventHandlerTest {
     @Test
     void onOrganizationRegisteredByAdminEvent_willDelegate() {
         organizationsEventHandler.on(new OrganizationCreatedForNewSelfRegisteredUserEvent(ORGANIZATION_ID, ADMIN_ID, ORGANIZATION_NAME,
-                ORGANIZATION_WEBSITE_URL, ORGANIZATION_STREET, ORGANIZATION_CITY, ORGANIZATION_STATE, ORGANIZATION_COUNTRY,
-                ORGANIZATION_POSTAL_CODE, ORGANIZATION_CONTACT_NAME, ORGANIZATION_PHONE_NUMBER, ORGANIZATION_EMAIL_ADDRESS), ORG_CREATION_TIME);
+            ORGANIZATION_WEBSITE_URL, ORGANIZATION_STREET, ORGANIZATION_CITY, ORGANIZATION_STATE, ORGANIZATION_COUNTRY,
+            ORGANIZATION_POSTAL_CODE, ORGANIZATION_CONTACT_NAME, ORGANIZATION_PHONE_NUMBER, ORGANIZATION_EMAIL_ADDRESS), ORG_CREATION_TIME);
 
-        verify(organizationsRepository).createOrganization(ORGANIZATION_ID, ORGANIZATION_NAME, ORGANIZATION_ADDRESS, ORGANIZATION_WEBSITE_URL,
-                ORGANIZATION_CONTACT_NAME, ORGANIZATION_PHONE_NUMBER, ORGANIZATION_EMAIL_ADDRESS, false, ORG_CREATION_TIME);
+        verify(organizationsRepository).createOrganization(ORGANIZATION_ID, ORGANIZATION_NAME, ORGANIZATION_ADDRESS,
+            ORGANIZATION_WEBSITE_URL,
+            ORGANIZATION_CONTACT_NAME, ORGANIZATION_PHONE_NUMBER, ORGANIZATION_EMAIL_ADDRESS, false, ORG_CREATION_TIME);
     }
 
     @Test
@@ -126,7 +127,8 @@ class OrganizationsEventHandlerTest {
         when(organizationsRepository.findById(ORGANIZATION_ID)).thenReturn(Optional.of(persistableOrganization));
 
         organizationsEventHandler.on(new OrganizationContactDetailsUpdatedEvent(ORGANIZATION_ID,
-                ORGANIZATION_CONTACT_NAME_UPDATE, ORGANIZATION_PHONE_NUMBER_UPDATE, ORGANIZATION_EMAIL_UPDATE, ORGANIZATION_WEBSITE_UPDATE, ADMIN_ID));
+            ORGANIZATION_CONTACT_NAME_UPDATE, ORGANIZATION_PHONE_NUMBER_UPDATE, ORGANIZATION_EMAIL_UPDATE, ORGANIZATION_WEBSITE_UPDATE,
+            ADMIN_ID));
 
         assertEquals(ORGANIZATION_CONTACT_NAME_UPDATE, persistableOrganization.getContactName());
         assertEquals(ORGANIZATION_PHONE_NUMBER_UPDATE, persistableOrganization.getPhoneNumber());
@@ -141,16 +143,16 @@ class OrganizationsEventHandlerTest {
         when(organizationsRepository.findById(ORGANIZATION_ID)).thenReturn(Optional.of(persistableOrganization));
 
         organizationsEventHandler.on(new OrganizationAddressUpdatedEvent(ORGANIZATION_ID, ORGANIZATION_STREET_UPDATE,
-                ORGANIZATION_CITY_UPDATE, ORGANIZATION_STATE_UPDATE, ORGANIZATION_COUNTRY_UPDATE, ORGANIZATION_POSTAL_CODE_UPDATE, ADMIN_ID));
+            ORGANIZATION_CITY_UPDATE, ORGANIZATION_STATE_UPDATE, ORGANIZATION_COUNTRY_UPDATE, ORGANIZATION_POSTAL_CODE_UPDATE, ADMIN_ID));
 
         var expectedAddress = new Address(ORGANIZATION_STREET_UPDATE, ORGANIZATION_CITY_UPDATE, ORGANIZATION_STATE_UPDATE,
-                ORGANIZATION_COUNTRY_UPDATE, ORGANIZATION_POSTAL_CODE_UPDATE);
+            ORGANIZATION_COUNTRY_UPDATE, ORGANIZATION_POSTAL_CODE_UPDATE);
         assertEquals(expectedAddress, persistableOrganization.getAddress());
         verify(organizationsRepository).save(persistableOrganization);
     }
 
     private PersistableOrganization createPersistableOrganization() {
         return new PersistableOrganization(ORGANIZATION_ID, ORGANIZATION_NAME, ADDRESS, ORGANIZATION_WEBSITE_URL,
-                ORGANIZATION_CONTACT_NAME, ORGANIZATION_PHONE_NUMBER, ORGANIZATION_EMAIL_ADDRESS, false, ORG_CREATION_TIME);
+            ORGANIZATION_CONTACT_NAME, ORGANIZATION_PHONE_NUMBER, ORGANIZATION_EMAIL_ADDRESS, false, ORG_CREATION_TIME);
     }
 }

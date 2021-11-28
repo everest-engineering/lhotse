@@ -10,8 +10,8 @@ public class ETagFilterConfig {
 
     @Bean
     public FilterRegistrationBean<ShallowEtagHeaderFilter> shallowEtagHeaderFilter() {
-        FilterRegistrationBean<ShallowEtagHeaderFilter> filterRegistrationBean
-                = new FilterRegistrationBean<>(new ShallowEtagHeaderFilter());
+        FilterRegistrationBean<ShallowEtagHeaderFilter> filterRegistrationBean =
+            new FilterRegistrationBean<>(new ShallowEtagHeaderFilter());
         filterRegistrationBean.addUrlPatterns("/*");
         filterRegistrationBean.setName("etagFilter");
         return filterRegistrationBean;

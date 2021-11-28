@@ -31,7 +31,7 @@ public class RetryWithExponentialBackoffTest {
     @Test
     void waitAndReturnOrThrow_WillRetryWithBackupAndThrowWhenMaxDurationReached() throws Exception {
         var exceptionThrown = assertThrows(RetryTimedOutException.class,
-                () -> retryWithExponentialBackoff.waitAndReturnOrThrow(() -> null, x -> false, "test"));
+            () -> retryWithExponentialBackoff.waitAndReturnOrThrow(() -> null, x -> false, "test"));
         assertEquals("Timed out while waiting PT30M for 'test'", exceptionThrown.getMessage());
 
         verify(sleeper).sleep(Duration.ofSeconds(5));
@@ -67,7 +67,7 @@ public class RetryWithExponentialBackoffTest {
     @Test
     void waitOrThrow_WillRetryWithBackupAndThrowWhenMaxDurationReached() throws Exception {
         var exceptionThrown = assertThrows(RetryTimedOutException.class,
-                () -> retryWithExponentialBackoff.waitOrThrow(() -> false, "test"));
+            () -> retryWithExponentialBackoff.waitOrThrow(() -> false, "test"));
         assertEquals("Timed out while waiting PT30M for 'test'", exceptionThrown.getMessage());
 
         verify(sleeper).sleep(Duration.ofSeconds(5));

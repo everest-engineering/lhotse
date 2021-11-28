@@ -69,6 +69,6 @@ public class RetryWithExponentialBackoff {
 
     public static RetryWithExponentialBackoff oneMinuteWaiter() {
         return new RetryWithExponentialBackoff(Duration.ofMillis(200), 2L, Duration.ofMinutes(1),
-                sleepDuration -> MILLISECONDS.sleep(sleepDuration.toMillis()));
+            sleepDuration -> MILLISECONDS.sleep(sleepDuration.toMillis()));
     }
 }

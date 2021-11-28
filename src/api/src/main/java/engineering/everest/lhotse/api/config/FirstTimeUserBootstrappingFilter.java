@@ -33,18 +33,17 @@ public class FirstTimeUserBootstrappingFilter extends OncePerRequestFilter {
     private static final String ORGANIZATION_ID_KEY = "organizationId";
     private static final String DISPLAY_NAME_KEY = "displayName";
     private static final Set<String> NOT_INCLUDE_ANT_PATTERNS = Set.of(
-            "/admin/organizations",
-            "/admin/organizations/**",
-            "/api/organizations/**",
-            "/api/organizations/**/users",
-            "/api/user",
-            "/api/user/profile-photo",
-            "/api/user/profile-photo/thumbnail",
-            "/api/users",
-            "/api/users/**",
-            "/api/users/**/forget",
-            "/api/users/**/roles"
-    );
+        "/admin/organizations",
+        "/admin/organizations/**",
+        "/api/organizations/**",
+        "/api/organizations/**/users",
+        "/api/user",
+        "/api/user/profile-photo",
+        "/api/user/profile-photo/thumbnail",
+        "/api/users",
+        "/api/users/**",
+        "/api/users/**/forget",
+        "/api/users/**/roles");
 
     private final HazelcastCommandGateway commandGateway;
     private final UsersReadService usersReadService;
@@ -68,7 +67,8 @@ public class FirstTimeUserBootstrappingFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest httpServletRequest,
                                     HttpServletResponse httpServletResponse,
-                                    FilterChain filterChain) throws ServletException, IOException {
+                                    FilterChain filterChain)
+        throws ServletException, IOException {
         LOGGER.info("Filtering request: {}", httpServletRequest.getRequestURI());
         var keycloakAuthenticationToken = (KeycloakAuthenticationToken) httpServletRequest.getUserPrincipal();
         var accessToken = keycloakAuthenticationToken.getAccount().getKeycloakSecurityContext().getToken();
@@ -81,9 +81,9 @@ public class FirstTimeUserBootstrappingFilter extends OncePerRequestFilter {
                 augmentAccessTokenForRecentlyRegisteredUser(accessToken, userId);
             }
             LOGGER.info("Registered user {} with roles {} on organisation {}",
-                    UUID.fromString(accessToken.getSubject()),
-                    accessToken.getResourceAccess(defaultKeycloakClientId).getRoles(),
-                    UUID.fromString(otherClaims.get(ORGANIZATION_ID_KEY).toString()));
+                UUID.fromString(accessToken.getSubject()),
+                accessToken.getResourceAccess(defaultKeycloakClientId).getRoles(),
+                UUID.fromString(otherClaims.get(ORGANIZATION_ID_KEY).toString()));
             LOGGER.debug("Other claims: {}", otherClaims);
         } catch (Exception e) {
             LOGGER.error("doFilterInternal error: ", e);
@@ -92,8 +92,10 @@ public class FirstTimeUserBootstrappingFilter extends OncePerRequestFilter {
         }
     }
 
-    private void bootstrapMissingNewlyRegisteredUser(AccessToken accessToken, UUID userId,
-                                                     Map<String, Object> otherClaims) throws Exception {
+    private void bootstrapMissingNewlyRegisteredUser(AccessToken accessToken,
+                                                     UUID userId,
+                                                     Map<String, Object> otherClaims)
+        throws Exception {
         if (!usersReadService.exists(userId)) {
             LOGGER.info("Bootstrapping newly registered user {}", userId);
             var newOrganizationId = randomFieldsGenerator.genRandomUUID();
@@ -104,12 +106,12 @@ public class FirstTimeUserBootstrappingFilter extends OncePerRequestFilter {
             // You really want to disconnect the load balancer when doing a replay.... This would fail nicely if the user
             // were being created first, preventing bogus organisations from being created.
             commandGateway.send(new CreateSelfRegisteredOrganizationCommand(newOrganizationId, userId,
-                    organizationName, null, null, null, null, null, null,
-                    displayName, null, userEmailAddress));
+                organizationName, null, null, null, null, null, null,
+                displayName, null, userEmailAddress));
 
             RetryWithExponentialBackoff.oneMinuteWaiter().waitOrThrow(
-                    () -> usersReadService.exists(userId) && organizationsReadService.exists(newOrganizationId),
-                    "user and organization self registration projection update");
+                () -> usersReadService.exists(userId) && organizationsReadService.exists(newOrganizationId),
+                "user and organization self registration projection update");
         }
     }
 
@@ -117,8 +119,8 @@ public class FirstTimeUserBootstrappingFilter extends OncePerRequestFilter {
         var user = usersReadService.getById(userId);
         LOGGER.info("User {} is recently registered, - augmenting access token with missing fields", userId);
         accessToken.getOtherClaims().putAll(
-                Map.of(ORGANIZATION_ID_KEY, user.getOrganizationId(),
-                        DISPLAY_NAME_KEY, user.getDisplayName()));
+            Map.of(ORGANIZATION_ID_KEY, user.getOrganizationId(),
+                DISPLAY_NAME_KEY, user.getDisplayName()));
         accessToken.getResourceAccess(defaultKeycloakClientId).addRole(Role.ORG_ADMIN.name());
     }
 
@@ -128,6 +130,6 @@ public class FirstTimeUserBootstrappingFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) {
         var pathMatcher = new AntPathMatcher();
         return NOT_INCLUDE_ANT_PATTERNS.stream()
-                .noneMatch(pattern -> pathMatcher.match(pattern, request.getServletPath()));
+            .noneMatch(pattern -> pathMatcher.match(pattern, request.getServletPath()));
     }
 }

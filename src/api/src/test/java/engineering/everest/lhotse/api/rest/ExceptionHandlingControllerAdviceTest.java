@@ -50,10 +50,10 @@ class ExceptionHandlingControllerAdviceTest {
     void willMapAggregateNotFoundExceptions() {
         var exception = new AggregateNotFoundException("aggregate-id", "not found here");
         var expectedResponse = ApiErrorResponse.builder()
-                .status(NOT_FOUND)
-                .message("not found here")
-                .timestamp(Instant.now(clock))
-                .build();
+            .status(NOT_FOUND)
+            .message("not found here")
+            .timestamp(Instant.now(clock))
+            .build();
 
         assertEquals(new ResponseEntity<>(expectedResponse, new HttpHeaders(), NOT_FOUND), controllerAdvice.handleExceptions(exception));
     }
@@ -62,10 +62,10 @@ class ExceptionHandlingControllerAdviceTest {
     void willMapRuntimeExceptions() {
         var exception = new RuntimeException("kaboom");
         var expectedResponse = ApiErrorResponse.builder()
-                .status(BAD_REQUEST)
-                .message("kaboom")
-                .timestamp(Instant.now(clock))
-                .build();
+            .status(BAD_REQUEST)
+            .message("kaboom")
+            .timestamp(Instant.now(clock))
+            .build();
 
         assertEquals(new ResponseEntity<>(expectedResponse, new HttpHeaders(), BAD_REQUEST), controllerAdvice.handleExceptions(exception));
     }
@@ -74,10 +74,10 @@ class ExceptionHandlingControllerAdviceTest {
     void willMapExecutionExceptions_WhenCauseIsNotAnExpectedValidationException() {
         var exception = new ExecutionException("outer exception", new RuntimeException("general case"));
         var expectedResponse = ApiErrorResponse.builder()
-                .status(BAD_REQUEST)
-                .message("outer exception")
-                .timestamp(Instant.now(clock))
-                .build();
+            .status(BAD_REQUEST)
+            .message("outer exception")
+            .timestamp(Instant.now(clock))
+            .build();
 
         assertEquals(new ResponseEntity<>(expectedResponse, new HttpHeaders(), BAD_REQUEST), controllerAdvice.handleExceptions(exception));
     }
@@ -86,10 +86,10 @@ class ExceptionHandlingControllerAdviceTest {
     void willMapExecutionExceptions_WhenCauseIsAnIllegalStateException() {
         var exception = new ExecutionException("outer exception", new IllegalStateException("widget disabled"));
         var expectedResponse = ApiErrorResponse.builder()
-                .status(BAD_REQUEST)
-                .message("widget disabled")
-                .timestamp(Instant.now(clock))
-                .build();
+            .status(BAD_REQUEST)
+            .message("widget disabled")
+            .timestamp(Instant.now(clock))
+            .build();
 
         assertEquals(new ResponseEntity<>(expectedResponse, new HttpHeaders(), BAD_REQUEST), controllerAdvice.handleExceptions(exception));
     }
@@ -98,22 +98,23 @@ class ExceptionHandlingControllerAdviceTest {
     void willMapExecutionExceptions_WhenCauseIsAnIllegalArgumentException() {
         var exception = new ExecutionException("outer exception", new IllegalArgumentException("bad argument"));
         var expectedResponse = ApiErrorResponse.builder()
-                .status(BAD_REQUEST)
-                .message("bad argument")
-                .timestamp(Instant.now(clock))
-                .build();
+            .status(BAD_REQUEST)
+            .message("bad argument")
+            .timestamp(Instant.now(clock))
+            .build();
 
         assertEquals(new ResponseEntity<>(expectedResponse, new HttpHeaders(), BAD_REQUEST), controllerAdvice.handleExceptions(exception));
     }
 
     @Test
     void willMapRemoteCommandExecutionExceptionWithNestedExecutionException() {
-        var exception = new RemoteCommandExecutionException(new ExecutionException("inner exception", new IllegalArgumentException("bad argument")));
+        var exception =
+            new RemoteCommandExecutionException(new ExecutionException("inner exception", new IllegalArgumentException("bad argument")));
         var expectedResponse = ApiErrorResponse.builder()
-                .status(BAD_REQUEST)
-                .message("bad argument")
-                .timestamp(Instant.now(clock))
-                .build();
+            .status(BAD_REQUEST)
+            .message("bad argument")
+            .timestamp(Instant.now(clock))
+            .build();
 
         assertEquals(new ResponseEntity<>(expectedResponse, new HttpHeaders(), BAD_REQUEST), controllerAdvice.handleExceptions(exception));
     }
@@ -122,22 +123,23 @@ class ExceptionHandlingControllerAdviceTest {
     void willMapRemoteCommandExecutionExceptionWithNestedInterruptedException() {
         var exception = new RemoteCommandExecutionException(new InterruptedException("inner exception"));
         var expectedResponse = ApiErrorResponse.builder()
-                .status(BAD_REQUEST)
-                .message("inner exception")
-                .timestamp(Instant.now(clock))
-                .build();
+            .status(BAD_REQUEST)
+            .message("inner exception")
+            .timestamp(Instant.now(clock))
+            .build();
 
         assertEquals(new ResponseEntity<>(expectedResponse, new HttpHeaders(), BAD_REQUEST), controllerAdvice.handleExceptions(exception));
     }
 
     @Test
     void willMapRemoteCommandExecutionExceptionWithNestedTranslatableException() {
-        var exception = new RemoteCommandExecutionException(new ExecutionException(new ExecutionException(new TranslatableException("USER_DISPLAY_NAME_MISSING"))));
+        var exception = new RemoteCommandExecutionException(
+            new ExecutionException(new ExecutionException(new TranslatableException("USER_DISPLAY_NAME_MISSING"))));
         var expectedResponse = ApiErrorResponse.builder()
-                .status(BAD_REQUEST)
-                .message("User display name is required")
-                .timestamp(Instant.now(clock))
-                .build();
+            .status(BAD_REQUEST)
+            .message("User display name is required")
+            .timestamp(Instant.now(clock))
+            .build();
 
         assertEquals(new ResponseEntity<>(expectedResponse, new HttpHeaders(), BAD_REQUEST), controllerAdvice.handleExceptions(exception));
     }
@@ -146,10 +148,10 @@ class ExceptionHandlingControllerAdviceTest {
     void willMapRemoteCommandExecutionExceptionWithNestedException() {
         var exception = new RemoteCommandExecutionException(new Exception("inner exception"));
         var expectedResponse = ApiErrorResponse.builder()
-                .status(BAD_REQUEST)
-                .message("inner exception")
-                .timestamp(Instant.now(clock))
-                .build();
+            .status(BAD_REQUEST)
+            .message("inner exception")
+            .timestamp(Instant.now(clock))
+            .build();
 
         assertEquals(new ResponseEntity<>(expectedResponse, new HttpHeaders(), BAD_REQUEST), controllerAdvice.handleExceptions(exception));
     }
@@ -158,27 +160,28 @@ class ExceptionHandlingControllerAdviceTest {
     void willMapMethodArgumentNotValidExceptions() throws Exception {
         var bindingResult = mock(BeanPropertyBindingResult.class);
         var errors = List.of(
-                new FieldError("a-name", "first-field-name", "must be provided"),
-                new FieldError("another-name", "second-field-name", "not an integer"));
+            new FieldError("a-name", "first-field-name", "must be provided"),
+            new FieldError("another-name", "second-field-name", "not an integer"));
         when(bindingResult.getFieldErrors()).thenReturn(errors);
 
         MethodArgumentNotValidException ex = new MethodArgumentNotValidException(mock(MethodParameter.class), bindingResult);
         var expectedResponse = ApiErrorResponse.builder()
-                .status(BAD_REQUEST)
-                .message("first-field-name: must be provided; second-field-name: not an integer")
-                .timestamp(Instant.now(clock))
-                .build();
-        assertEquals(new ResponseEntity<>(expectedResponse, new HttpHeaders(), BAD_REQUEST), controllerAdvice.handleException(ex, mock(WebRequest.class)));
+            .status(BAD_REQUEST)
+            .message("first-field-name: must be provided; second-field-name: not an integer")
+            .timestamp(Instant.now(clock))
+            .build();
+        assertEquals(new ResponseEntity<>(expectedResponse, new HttpHeaders(), BAD_REQUEST),
+            controllerAdvice.handleException(ex, mock(WebRequest.class)));
     }
 
     @Test
     void willMapTranslatableExceptions() {
         var exception = new TranslatableException("EMAIL_ADDRESS_ALREADY_EXISTS");
         var expectedResponse = ApiErrorResponse.builder()
-                .status(BAD_REQUEST)
-                .message("Email address already exists")
-                .timestamp(Instant.now(clock))
-                .build();
+            .status(BAD_REQUEST)
+            .message("Email address already exists")
+            .timestamp(Instant.now(clock))
+            .build();
 
         assertEquals(new ResponseEntity<>(expectedResponse, new HttpHeaders(), BAD_REQUEST), controllerAdvice.handleExceptions(exception));
     }

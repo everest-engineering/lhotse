@@ -28,11 +28,11 @@ public class UsersRepositoryConfig {
     @Bean
     public Repository<UserAggregate> repositoryForUser(EventStore eventStore, Snapshotter snapshotter, JCacheAdapter cacheAdapter) {
         return CachingEventSourcingRepository.builder(UserAggregate.class)
-                .aggregateFactory(new GenericAggregateFactory<>(UserAggregate.class))
-                .parameterResolverFactory(parameterResolverFactory)
-                .snapshotTriggerDefinition(new EventCountSnapshotTriggerDefinition(snapshotter, SNAPSHOT_EVENT_COUNT_THRESHOLD))
-                .eventStore(eventStore)
-                .cache(cacheAdapter)
-                .build();
+            .aggregateFactory(new GenericAggregateFactory<>(UserAggregate.class))
+            .parameterResolverFactory(parameterResolverFactory)
+            .snapshotTriggerDefinition(new EventCountSnapshotTriggerDefinition(snapshotter, SNAPSHOT_EVENT_COUNT_THRESHOLD))
+            .eventStore(eventStore)
+            .cache(cacheAdapter)
+            .build();
     }
 }

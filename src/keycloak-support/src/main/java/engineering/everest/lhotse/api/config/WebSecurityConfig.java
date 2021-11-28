@@ -37,14 +37,14 @@ public class WebSecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         super.configure(http);
-        
+
         http.cors()
             .and()
             .csrf()
             .disable()
             .authorizeRequests()
             .antMatchers("/api/organizations/**", "/api/version",
-                    "/actuator/health/**", "/api/doc/**", "/swagger-ui/**", "/swagger-resources/**", "/sso/login*")
+                "/actuator/health/**", "/api/doc/**", "/swagger-ui/**", "/swagger-resources/**", "/sso/login*")
             .permitAll()
             .antMatchers("/api/**", "/actuator/prometheus/**").authenticated()
             .antMatchers("/admin/**", "/actuator/**").hasRole("ADMIN").anyRequest().permitAll()

@@ -18,7 +18,7 @@ public class RequestParameterAcceptHeaderLocaleResolver extends AcceptHeaderLoca
     public Locale resolveLocale(HttpServletRequest request) {
         String locale = request.getParameter("locale");
         return locale == null
-                ? super.resolveLocale(request)
-                : parseLocaleString(locale);
+            ? super.resolveLocale(request)
+            : parseLocaleString(locale);
     }
 }

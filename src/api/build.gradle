@@ -28,10 +28,10 @@ dependencies {
     testImplementation "org.springframework.security:spring-security-test"
     testImplementation "org.apache.commons:commons-lang3:${commonsLangVersion}"
     testImplementation "com.c4-soft.springaddons:spring-security-oauth2-test-webmvc-addons:2.6.6"
-}  
+}
 
 dependencyManagement {
-	imports {
-		mavenBom "org.keycloak.bom:keycloak-adapter-bom:${keycloakVersion}"
-	}
+    imports {
+        mavenBom "org.keycloak.bom:keycloak-adapter-bom:${keycloakVersion}"
+    }
 }

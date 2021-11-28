@@ -37,7 +37,7 @@ import static org.mockito.Mockito.when;
 @DataJpaTest
 @EnableAutoConfiguration
 @ComponentScan(basePackages = "engineering.everest.lhotse.users")
-@ContextConfiguration(classes = {TestUserSessionsJpaConfig.class})
+@ContextConfiguration(classes = { TestUserSessionsJpaConfig.class })
 class UsersReadServiceIntegrationTest {
 
     private static final UUID ORG_1_USER_ID_1 = randomUUID();
@@ -62,14 +62,17 @@ class UsersReadServiceIntegrationTest {
     private static final Instant CREATED_ON_4 = ofEpochSecond(800000L);
     private static final Instant CREATED_ON_3 = ofEpochSecond(800000L);
 
-    private static final User ORG_1_USER_1 = new User(ORG_1_USER_ID_1, ORGANIZATION_ID_1, USERNAME_1, USER_DISPLAY_NAME_1, USERNAME_1, false);
+    private static final User ORG_1_USER_1 =
+        new User(ORG_1_USER_ID_1, ORGANIZATION_ID_1, USERNAME_1, USER_DISPLAY_NAME_1, USERNAME_1, false);
     private static final User ORG_1_USER_2 = new User(ORG_1_USER_ID_2, ORGANIZATION_ID_1, USERNAME_2, USER_DISPLAY_NAME_2, false);
     private static final User ORG_1_USER_3_DISABLED = new User(ORG_1_USER_ID_3, ORGANIZATION_ID_1, USERNAME_3, USER_DISPLAY_NAME_3, true);
     private static final User ORG_2_USER_1 = new User(ORG_2_USER_ID_1, ORGANIZATION_ID_2, USERNAME_4, USER_DISPLAY_NAME_4, false);
 
-    private static final PersistableUser PERSISTABLE_ORG_1_USER_1 = new PersistableUser(ORG_1_USER_ID_1, ORGANIZATION_ID_1, USERNAME_1, USER_DISPLAY_NAME_1,
+    private static final PersistableUser PERSISTABLE_ORG_1_USER_1 =
+        new PersistableUser(ORG_1_USER_ID_1, ORGANIZATION_ID_1, USERNAME_1, USER_DISPLAY_NAME_1,
             USERNAME_1, false, CREATED_ON_1, PROFILE_PHOTO_ID);
-    private static final PersistableUser PERSISTABLE_ORG_1_USER_3 = new PersistableUser(ORG_1_USER_ID_3, ORGANIZATION_ID_1, USERNAME_3, USER_DISPLAY_NAME_3,
+    private static final PersistableUser PERSISTABLE_ORG_1_USER_3 =
+        new PersistableUser(ORG_1_USER_ID_3, ORGANIZATION_ID_1, USERNAME_3, USER_DISPLAY_NAME_3,
             true, CREATED_ON_3);
     public static final String PROFILE_PHOTO_FILE_CONTENTS = "my profile photo";
 
@@ -108,7 +111,7 @@ class UsersReadServiceIntegrationTest {
     @Test
     void userListForOrganization_WillFilterToOrganization() {
         assertEquals(asList(ORG_1_USER_1, ORG_1_USER_2, ORG_1_USER_3_DISABLED),
-                usersReadService.getUsersForOrganization(ORGANIZATION_ID_1));
+            usersReadService.getUsersForOrganization(ORGANIZATION_ID_1));
     }
 
     @Test
@@ -139,7 +142,8 @@ class UsersReadServiceIntegrationTest {
     @Test
     void getProfilePhotoStream_WillReturnStreamForProfilePhoto() throws IOException {
         ByteArrayInputStream inputStream = new ByteArrayInputStream(PROFILE_PHOTO_FILE_CONTENTS.getBytes());
-        when(fileService.stream(PROFILE_PHOTO_ID)).thenReturn(new InputStreamOfKnownLength(inputStream, PROFILE_PHOTO_FILE_CONTENTS.length()));
+        when(fileService.stream(PROFILE_PHOTO_ID))
+            .thenReturn(new InputStreamOfKnownLength(inputStream, PROFILE_PHOTO_FILE_CONTENTS.length()));
 
         assertEquals(inputStream, usersReadService.getProfilePhotoStream(ORG_1_USER_1.getId()));
     }

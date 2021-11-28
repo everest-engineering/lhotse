@@ -57,8 +57,8 @@ public class ReplayEndpoint {
     public void startReplay(@Nullable Set<String> processingGroups,
                             @Nullable OffsetDateTime startTime) {
         var replayableEventProcessors = processingGroups == null
-                ? getReplayableEventProcessors()
-                : getReplayableEventProcessor(processingGroups);
+            ? getReplayableEventProcessors()
+            : getReplayableEventProcessor(processingGroups);
 
         if (replayableEventProcessors.isEmpty()) {
             throw new IllegalStateException("No matching replayable event processors");
@@ -69,8 +69,8 @@ public class ReplayEndpoint {
                 throw new IllegalStateException("Cannot start replay while an existing one is running");
             }
             var startPosition = startTime == null
-                    ? axonConfiguration.eventStore().createTailToken()
-                    : axonConfiguration.eventStore().createTokenAt(startTime.toInstant());
+                ? axonConfiguration.eventStore().createTailToken()
+                : axonConfiguration.eventStore().createTokenAt(startTime.toInstant());
 
             var replayMarkerEvent = new ReplayMarkerEvent(randomUUID());
             replayableEventProcessors.forEach(x -> {
@@ -113,17 +113,17 @@ public class ReplayEndpoint {
 
     private List<ReplayableEventProcessor> getReplayableEventProcessors() {
         return axonConfiguration.eventProcessingConfiguration().eventProcessors().values().stream()
-                .filter(ReplayableEventProcessor.class::isInstance)
-                .map(ReplayableEventProcessor.class::cast)
-                .collect(toList());
+            .filter(ReplayableEventProcessor.class::isInstance)
+            .map(ReplayableEventProcessor.class::cast)
+            .collect(toList());
     }
 
     private List<ReplayableEventProcessor> getReplayableEventProcessor(Set<String> processingGroups) {
         return processingGroups.stream()
-                .map(e -> axonConfiguration.eventProcessingConfiguration()
-                        .eventProcessorByProcessingGroup(e, ReplayableEventProcessor.class))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(toList());
+            .map(e -> axonConfiguration.eventProcessingConfiguration()
+                .eventProcessorByProcessingGroup(e, ReplayableEventProcessor.class))
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .collect(toList());
     }
 }

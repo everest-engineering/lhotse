@@ -12,4 +12,3 @@ dependencies {
     testImplementation 'org.springframework:spring-test'
     testRuntimeOnly "com.h2database:h2:${h2Version}"
 }
-

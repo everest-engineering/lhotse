@@ -43,17 +43,17 @@ public class UsersEventHandler implements ReplayCompletionAware {
     void on(UserCreatedByAdminEvent event, @Timestamp Instant creationTime) {
         LOGGER.info("User {} created by admin {} on organization {}", event.getUserId(), event.getAdminId(), event.getOrganizationId());
         var userEmail = event.getUserEmail() == null
-                ? String.format("%s@deleted", event.getUserId())
-                : event.getUserEmail();
+            ? String.format("%s@deleted", event.getUserId())
+            : event.getUserEmail();
         usersRepository.createUser(event.getUserId(), event.getOrganizationId(), event.getUserDisplayName(), userEmail, creationTime);
     }
 
     @EventHandler
     void on(UserCreatedForNewlyRegisteredOrganizationEvent event, @Timestamp Instant creationTime) {
         LOGGER.info("User {} created for self registered organization {}", event.getUserId(),
-                event.getOrganizationId());
+            event.getOrganizationId());
         usersRepository.createUser(event.getUserId(), event.getOrganizationId(), event.getUserDisplayName(),
-                event.getUserEmail(), creationTime);
+            event.getUserEmail(), creationTime);
     }
 
     @EventHandler
@@ -61,7 +61,7 @@ public class UsersEventHandler implements ReplayCompletionAware {
         LOGGER.info("User {} details updated by admin {}", event.getUserId(), event.getAdminId());
         var persistableUser = usersRepository.findById(event.getUserId()).orElseThrow();
         persistableUser.setDisplayName(selectDesiredState(event.getDisplayNameChange(),
-                persistableUser.getDisplayName()));
+            persistableUser.getDisplayName()));
         persistableUser.setEmail(selectDesiredState(event.getEmailChange(), persistableUser.getEmail()));
         usersRepository.save(persistableUser);
     }
@@ -79,10 +79,12 @@ public class UsersEventHandler implements ReplayCompletionAware {
         LOGGER.info("Deleting user {}", event.getDeletedUserId());
         usersRepository.deleteById(event.getDeletedUserId());
         cryptoShreddingKeyService.deleteSecretKey(new TypeDifferentiatedSecretKeyId(event.getDeletedUserId()
-                .toString(), ""));
+            .toString(), ""));
     }
 
     private String selectDesiredState(String desiredState, String currentState) {
-        return desiredState == null ? currentState : desiredState;
+        return desiredState == null
+            ? currentState
+            : desiredState;
     }
 }

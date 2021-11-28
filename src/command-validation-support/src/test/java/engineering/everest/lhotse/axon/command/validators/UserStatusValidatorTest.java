@@ -43,8 +43,8 @@ class UserStatusValidatorTest {
     void validate_WillFail_WhenUserDoesNotExist() {
         when(usersReadService.exists(USER_ID)).thenReturn(false);
 
-        var thrownException = assertThrows(TranslatableIllegalStateException.class, () ->
-                userStatusValidator.validate((UsersStatusValidatableCommand) () -> Set.of(USER_ID)));
+        var thrownException = assertThrows(TranslatableIllegalStateException.class,
+            () -> userStatusValidator.validate((UsersStatusValidatableCommand) () -> Set.of(USER_ID)));
         assertEquals("USER_IS_UNKNOWN", thrownException.getMessage());
     }
 
@@ -52,8 +52,8 @@ class UserStatusValidatorTest {
     void validate_WillFail_WhenUserIsDisabled() {
         when(user.isDisabled()).thenReturn(true);
 
-        var thrownException = assertThrows(TranslatableIllegalStateException.class, () ->
-                userStatusValidator.validate((UsersStatusValidatableCommand) () -> Set.of(USER_ID)));
+        var thrownException = assertThrows(TranslatableIllegalStateException.class,
+            () -> userStatusValidator.validate((UsersStatusValidatableCommand) () -> Set.of(USER_ID)));
         assertEquals("USER_IS_DISABLED", thrownException.getMessage());
     }
 

@@ -51,14 +51,15 @@ public class PeriodicFilesMarkedForDeletionRemovalTaskTest {
         when(cpSubsystem.getLock(PeriodicFilesMarkedForDeletionRemovalTask.class.getSimpleName())).thenReturn(singleAppNodeExecutionLock);
         lenient().when(singleAppNodeExecutionLock.isLockedByCurrentThread()).thenReturn(true);
 
-        periodicFilesMarkedForDeletionRemovalTask = new PeriodicFilesMarkedForDeletionRemovalTask(hazelcastInstance, fileService, BATCH_SIZE);
+        periodicFilesMarkedForDeletionRemovalTask =
+            new PeriodicFilesMarkedForDeletionRemovalTask(hazelcastInstance, fileService, BATCH_SIZE);
     }
 
     @Test
     void checkForFilesMarkedForDeletionToCleanUp_IsAnnotatedToRunPeriodically() {
         Method checkForFilesToDeleteMethod = stream(PeriodicFilesMarkedForDeletionRemovalTask.class.getDeclaredMethods())
-                .filter(method -> method.getName().equals("checkForFilesMarkedForDeletionToCleanUp"))
-                .findFirst().orElseThrow();
+            .filter(method -> method.getName().equals("checkForFilesMarkedForDeletionToCleanUp"))
+            .findFirst().orElseThrow();
 
         Scheduled schedule = checkForFilesToDeleteMethod.getAnnotation(Scheduled.class);
         assertTrue(schedule.fixedRate() > 0 || !schedule.fixedRateString().equals(""));
@@ -68,8 +69,8 @@ public class PeriodicFilesMarkedForDeletionRemovalTaskTest {
     @MethodSource("exampleTimeStrings")
     void expiryDetectionPeriodCheckRate_WillHandleArbitraryTimeUnits(String input, Duration expectedDuration) {
         Method checkForTimedOutHelpSessionsMethod = stream(PeriodicFilesMarkedForDeletionRemovalTask.class.getDeclaredMethods())
-                .filter(method -> method.getName().equals("checkForFilesMarkedForDeletionToCleanUp"))
-                .findFirst().orElseThrow();
+            .filter(method -> method.getName().equals("checkForFilesMarkedForDeletionToCleanUp"))
+            .findFirst().orElseThrow();
         Scheduled schedule = checkForTimedOutHelpSessionsMethod.getAnnotation(Scheduled.class);
 
         String expression = schedule.fixedRateString().replace("${storage.files.deletion.fixedRate:5m}", input);
@@ -122,8 +123,8 @@ public class PeriodicFilesMarkedForDeletionRemovalTaskTest {
 
     private static Stream<Arguments> exampleTimeStrings() {
         return Stream.of(
-                Arguments.of("1s", Duration.ofSeconds(1)),
-                Arguments.of("2m", Duration.ofMinutes(2)),
-                Arguments.of("3h", Duration.ofHours(3)));
+            Arguments.of("1s", Duration.ofSeconds(1)),
+            Arguments.of("2m", Duration.ofMinutes(2)),
+            Arguments.of("3h", Duration.ofHours(3)));
     }
 }

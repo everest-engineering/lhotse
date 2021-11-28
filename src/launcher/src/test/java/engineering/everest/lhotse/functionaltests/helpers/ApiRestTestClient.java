@@ -72,16 +72,16 @@ public class ApiRestTestClient {
 
     public void login(String username, String password) {
         Keycloak keycloak = KeycloakBuilder.builder()
-                .serverUrl(keycloakServerAuthUrl)
-                .grantType(OAuth2Constants.PASSWORD)
-                .realm(keycloakAdminRealm)
-                .clientId(keycloakAdminClientId)
-                .clientSecret(clientSecret)
-                .username(username)
-                .password(password)
-                .resteasyClient(new ResteasyClientBuilder()
-                        .connectionPoolSize(keycloakServerConnectionPoolSize).build())
-                .build();
+            .serverUrl(keycloakServerAuthUrl)
+            .grantType(OAuth2Constants.PASSWORD)
+            .realm(keycloakAdminRealm)
+            .clientId(keycloakAdminClientId)
+            .clientSecret(clientSecret)
+            .username(username)
+            .password(password)
+            .resteasyClient(new ResteasyClientBuilder()
+                .connectionPoolSize(keycloakServerConnectionPoolSize).build())
+            .build();
 
         assertNotNull(keycloak);
         var accessToken = keycloak.tokenManager().getAccessToken().getToken();
@@ -95,35 +95,35 @@ public class ApiRestTestClient {
 
     public UserResponse getUser(UUID userId, HttpStatus expectedHttpStatus) {
         return webTestClient.get().uri("/api/users/{userId}", userId)
-                .header("Authorization", "Bearer " + accessToken)
-                .exchange()
-                .expectStatus().isEqualTo(expectedHttpStatus)
-                .returnResult(UserResponse.class).getResponseBody().blockFirst();
+            .header("Authorization", "Bearer " + accessToken)
+            .exchange()
+            .expectStatus().isEqualTo(expectedHttpStatus)
+            .returnResult(UserResponse.class).getResponseBody().blockFirst();
     }
 
     public List<UserResponse> getAllUsers(HttpStatus expectedHttpStatus) {
         return webTestClient.get().uri("/api/users")
-                .header("Authorization", "Bearer " + accessToken)
-                .exchange()
-                .expectStatus().isEqualTo(expectedHttpStatus)
-                .returnResult(UserResponse.class).getResponseBody().buffer().blockFirst();
+            .header("Authorization", "Bearer " + accessToken)
+            .exchange()
+            .expectStatus().isEqualTo(expectedHttpStatus)
+            .returnResult(UserResponse.class).getResponseBody().buffer().blockFirst();
     }
 
     public List<OrganizationResponse> getAllOrganizations(HttpStatus expectedHttpStatus) {
         return webTestClient.get().uri("/admin/organizations")
-                .header("Authorization", "Bearer " + accessToken)
-                .exchange()
-                .expectStatus().isEqualTo(expectedHttpStatus)
-                .returnResult(OrganizationResponse.class).getResponseBody().buffer().blockFirst();
+            .header("Authorization", "Bearer " + accessToken)
+            .exchange()
+            .expectStatus().isEqualTo(expectedHttpStatus)
+            .returnResult(OrganizationResponse.class).getResponseBody().buffer().blockFirst();
     }
 
     public UUID createUser(UUID organizationId, NewUserRequest request, HttpStatus expectedHttpStatus) {
         var responseSpec = webTestClient.post().uri("/api/organizations/{organizationId}/users", organizationId)
-                .header("Authorization", "Bearer " + accessToken)
-                .contentType(APPLICATION_JSON)
-                .body(fromValue(request))
-                .exchange()
-                .expectStatus().isEqualTo(expectedHttpStatus);
+            .header("Authorization", "Bearer " + accessToken)
+            .contentType(APPLICATION_JSON)
+            .body(fromValue(request))
+            .exchange()
+            .expectStatus().isEqualTo(expectedHttpStatus);
         if (expectedHttpStatus == CREATED) {
             return responseSpec.returnResult(UUID.class).getResponseBody().blockFirst();
         }
@@ -132,28 +132,27 @@ public class ApiRestTestClient {
 
     public void updateUser(UUID userId, UpdateUserRequest request, HttpStatus expectedHttpStatus) {
         webTestClient.put().uri("/api/users/{userId}", userId)
-                .header("Authorization", "Bearer " + accessToken)
-                .contentType(APPLICATION_JSON)
-                .body(fromValue(request))
-                .exchange()
-                .expectStatus().isEqualTo(expectedHttpStatus)
-                .returnResult(UUID.class).getResponseBody().blockFirst();
+            .header("Authorization", "Bearer " + accessToken)
+            .contentType(APPLICATION_JSON)
+            .body(fromValue(request))
+            .exchange()
+            .expectStatus().isEqualTo(expectedHttpStatus)
+            .returnResult(UUID.class).getResponseBody().blockFirst();
     }
 
     public Map<String, Object> getReplayStatus(HttpStatus expectedHttpStatus) {
         return webTestClient.get().uri("/actuator/replay")
-                .header("Authorization", "Bearer " + accessToken)
-                .exchange()
-                .expectStatus().isEqualTo(expectedHttpStatus)
-                .returnResult(new ParameterizedTypeReference<Map<String, Object>>() {
-                }).getResponseBody().blockFirst();
+            .header("Authorization", "Bearer " + accessToken)
+            .exchange()
+            .expectStatus().isEqualTo(expectedHttpStatus)
+            .returnResult(new ParameterizedTypeReference<Map<String, Object>>() {}).getResponseBody().blockFirst();
     }
 
     public void triggerReplay(HttpStatus expectedHttpStatus) {
         webTestClient.post().uri("/actuator/replay")
-                .header("Authorization", "Bearer " + accessToken)
-                .contentType(APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isEqualTo(expectedHttpStatus);
+            .header("Authorization", "Bearer " + accessToken)
+            .contentType(APPLICATION_JSON)
+            .exchange()
+            .expectStatus().isEqualTo(expectedHttpStatus);
     }
 }

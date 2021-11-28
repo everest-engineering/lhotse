@@ -43,12 +43,11 @@ class AdminProvisionTaskTest {
     @BeforeEach
     void setUp() {
         adminProvisionTask = new AdminProvisionTask(clock, usersRepository, organizationsRepository, keycloakSynchronizationService,
-                ADMIN_USERNAME, ADMIN_PASSWORD);
+            ADMIN_USERNAME, ADMIN_PASSWORD);
 
         when(keycloakSynchronizationService.setupKeycloakUser(ADMIN_USERNAME, ADMIN_USERNAME, true, AdminProvisionTask.ORGANIZATION_ID,
-                Set.of(Role.ORG_USER, Role.ORG_ADMIN), ADMIN_DISPLAY_NAME, ADMIN_PASSWORD, false)).thenReturn(
-                        Map.of("userId", ADMIN_ID)
-        );
+            Set.of(Role.ORG_USER, Role.ORG_ADMIN), ADMIN_DISPLAY_NAME, ADMIN_PASSWORD, false)).thenReturn(
+                Map.of("userId", ADMIN_ID));
         when(usersRepository.findByUsernameIgnoreCase(ADMIN_USERNAME)).thenReturn(Optional.empty());
     }
 
@@ -57,16 +56,15 @@ class AdminProvisionTaskTest {
         adminProvisionTask.run();
 
         verify(usersRepository).save(
-                new PersistableUser(ADMIN_ID, AdminProvisionTask.ORGANIZATION_ID, ADMIN_USERNAME,
-                        ADMIN_DISPLAY_NAME, false, Instant.now(clock)));
+            new PersistableUser(ADMIN_ID, AdminProvisionTask.ORGANIZATION_ID, ADMIN_USERNAME,
+                ADMIN_DISPLAY_NAME, false, Instant.now(clock)));
     }
 
     @Test
     void run_WillSkipCreatingAdminUser_WhenAdminUserAlreadyExists() {
         when(usersRepository.findByUsernameIgnoreCase(ADMIN_USERNAME)).thenReturn(Optional.of(
-                new PersistableUser(ADMIN_ID, AdminProvisionTask.ORGANIZATION_ID, ADMIN_USERNAME, ADMIN_DISPLAY_NAME,
-                        false, Instant.now(clock))
-        ));
+            new PersistableUser(ADMIN_ID, AdminProvisionTask.ORGANIZATION_ID, ADMIN_USERNAME, ADMIN_DISPLAY_NAME,
+                false, Instant.now(clock))));
         adminProvisionTask.run();
 
         verify(usersRepository, never()).save(any(PersistableUser.class));
@@ -77,15 +75,15 @@ class AdminProvisionTaskTest {
         adminProvisionTask.replayCompleted();
 
         verify(usersRepository).save(
-                new PersistableUser(ADMIN_ID, AdminProvisionTask.ORGANIZATION_ID, ADMIN_USERNAME, ADMIN_DISPLAY_NAME,
-                        false, Instant.now(clock)));
+            new PersistableUser(ADMIN_ID, AdminProvisionTask.ORGANIZATION_ID, ADMIN_USERNAME, ADMIN_DISPLAY_NAME,
+                false, Instant.now(clock)));
     }
 
     @Test
     void replayCompleted_WillSkipCreatingAdminUser_WhenAdminUserAlreadyExists() {
         when(usersRepository.findByUsernameIgnoreCase(ADMIN_USERNAME)).thenReturn(Optional.of(
-                new PersistableUser(ADMIN_ID, AdminProvisionTask.ORGANIZATION_ID, ADMIN_USERNAME, ADMIN_DISPLAY_NAME,
-                        false, Instant.now(clock))));
+            new PersistableUser(ADMIN_ID, AdminProvisionTask.ORGANIZATION_ID, ADMIN_USERNAME, ADMIN_DISPLAY_NAME,
+                false, Instant.now(clock))));
         adminProvisionTask.replayCompleted();
 
         verify(usersRepository, never()).save(any(PersistableUser.class));

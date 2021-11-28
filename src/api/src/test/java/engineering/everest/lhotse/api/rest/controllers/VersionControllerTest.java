@@ -20,7 +20,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = { VersionController.class })
-@ContextConfiguration(classes = { TestApiConfig.class, VersionController.class, VersionControllerTest.VersionControllerTestConfiguration.class })
+@ContextConfiguration(
+    classes = { TestApiConfig.class, VersionController.class, VersionControllerTest.VersionControllerTestConfiguration.class })
 class VersionControllerTest {
 
     private static final String QUOTED_BUILD_TIME_VERSION_STRING = "'build time version string'";
@@ -39,8 +40,8 @@ class VersionControllerTest {
     @Test
     void willExposeBuildTimeApplicationVersion() throws Exception {
         mockMvc.perform(get("/api/version"))
-                .andExpect(status().isOk())
-                .andExpect(content().string(UNQUOTED_BUILD_TIME_VERSION_STRING));
+            .andExpect(status().isOk())
+            .andExpect(content().string(UNQUOTED_BUILD_TIME_VERSION_STRING));
     }
 
     @TestConfiguration

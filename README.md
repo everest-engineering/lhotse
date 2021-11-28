@@ -28,7 +28,7 @@ sample code demonstrates end-to-end command handling and event processing flows 
   - [Semantic versioning](#semantic-versioning)
   - [Jupyter notebook](#jupyter-notebook)
   - [Swagger documentation](#swagger-documentation)
-  - [Checkstyle and PMD configuration](#checkstyle-and-pmd-configuration)
+  - [Code style](#code-style)
 - [Features](#features)
   - [Axon: DDD and event sourcing](#axon-ddd-and-event-sourcing)
   - [Distributed command handling](#distributed-command-handling)
@@ -81,18 +81,20 @@ KEYCLOAK_USER=admin@everest.engineering
 KEYCLOAK_PASSWORD=******
 ```
 
-(Note: the above env variable values should match with the keycloak server details specified in the `application.properties` file and the `build.gradle` file present in the launcher module.
-Keycloak test server also uses the same credentials for authentication.)
+(Note: the above env variable values should match with the keycloak server details specified in the `application.properties` file and the 
+`build.gradle` file present in the launcher module. Keycloak test server also uses the same credentials for authentication.)
 
 Start up containers for Postgres, MongoDB and Keycloak:
 
 `docker-compose up`
 
-This project uses keycloak for authentication and authorization. `docker-compose up` will run the keycloak container on the `KEYCLOAK_SERVER_PORT` which is specified in the `.env` file.
+This project uses keycloak for authentication and authorization. `docker-compose up` will run the keycloak container on the 
+`KEYCLOAK_SERVER_PORT` which is specified in the `.env` file.
 
 #### Client secret
 
-We need to get the client secret from the keycloak server and configure it in the `application.properties` for `keycloak.credentials.secret` prop.
+We need to get the client secret from the keycloak server and configure it in the `application.properties` for `keycloak.credentials.secret`
+prop.
 
 Open the http://localhost:8180/auth url and login to app using `KEYCLOAK_USER` and `KEYCLOAK_PASSWORD`.
 
@@ -154,7 +156,17 @@ be found in `application.properties` along with the client ID and client secret.
 
 Functional tests generate a Swagger JSON API definition at `./launcher/build/web-app-api.json`
 
-## Checkstyle and PMD configuration
+## Code style
+
+[Spotless](https://github.com/diffplug/spotless) is run as part of the Gradle build to ensure consistency. Spotless has been configured
+to use the Eclipse formatter using the rules in 'build-config/eclipse-formatter-config.xml'. This file can be imported into IntelliJ
+(and, of course, Eclipse).
+
+Build checks will fail if the code is inconsistent with the standard. Automatic formatting can be applied by running:
+
+`./gradlew spotlessApply`
+
+Note that Spotless will not enforce joining of manually wrapped lines in order to keep builder pattern function chaining clean.
 
 [PMD](https://pmd.github.io/) and [Checkstyle](https://checkstyle.org/) quality checks are automatically applied to all
 sub-projects.

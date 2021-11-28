@@ -14,20 +14,22 @@ import static java.util.stream.Collectors.toList;
 
 public class AxonTestUtils {
 
-    public static CommandValidatingMessageHandlerInterceptor mockCommandValidatingMessageHandlerInterceptor(Validates<?>... mockValidators) {
+    public static CommandValidatingMessageHandlerInterceptor mockCommandValidatingMessageHandlerInterceptor(Validates<
+        ?>... mockValidators) {
         var validatorClasses = Arrays.stream(mockValidators).map(e -> e.getClass().getSuperclass()).collect(toList());
         Map<Class<?>, Validates<?>> validatorLookup = new ConcurrentHashMap<>();
         for (int i = 0; i < validatorClasses.size(); i++) {
             Class<?> validator = validatorClasses.get(i);
             Type validatableCommandType = Arrays.stream(validator.getGenericInterfaces())
-                    .map(e -> (ParameterizedType) e)
-                    .filter(e -> Validates.class == e.getRawType())
-                    .map(e -> e.getActualTypeArguments()[0])
-                    .findFirst().orElseThrow();
+                .map(e -> (ParameterizedType) e)
+                .filter(e -> Validates.class == e.getRawType())
+                .map(e -> e.getActualTypeArguments()[0])
+                .findFirst().orElseThrow();
             validatorLookup.put((Class<?>) validatableCommandType, mockValidators[i]);
         }
 
-        var commandHandlerInterceptor = new CommandValidatingMessageHandlerInterceptor(List.of(), Validation.buildDefaultValidatorFactory().getValidator());
+        var commandHandlerInterceptor =
+            new CommandValidatingMessageHandlerInterceptor(List.of(), Validation.buildDefaultValidatorFactory().getValidator());
         try {
             var validatorLookupField = commandHandlerInterceptor.getClass().getDeclaredField("validatorLookup");
             validatorLookupField.setAccessible(true);

@@ -11,21 +11,21 @@ public class DtoConverter {
 
     public UserResponse convert(User user) {
         return new UserResponse(user.getId(), user.getOrganizationId(), user.getUsername(), user.getDisplayName(),
-                user.getEmail(), user.isDisabled());
+            user.getEmail(), user.isDisabled());
     }
 
     public OrganizationResponse convert(Organization organization) {
         var address = organization.getOrganizationAddress();
         return new OrganizationResponse(organization.getId(), organization.getOrganizationName(),
-                address.getStreet(),
-                address.getCity(),
-                address.getState(),
-                address.getCountry(),
-                address.getPostalCode(),
-                organization.getWebsiteUrl(),
-                organization.getContactName(),
-                organization.getPhoneNumber(),
-                organization.getEmailAddress(),
-                organization.isDisabled());
+            address.getStreet(),
+            address.getCity(),
+            address.getState(),
+            address.getCountry(),
+            address.getPostalCode(),
+            organization.getWebsiteUrl(),
+            organization.getContactName(),
+            organization.getPhoneNumber(),
+            organization.getEmailAddress(),
+            organization.isDisabled());
     }
 }

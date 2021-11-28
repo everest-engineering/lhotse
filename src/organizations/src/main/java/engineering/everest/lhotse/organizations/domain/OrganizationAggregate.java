@@ -40,15 +40,14 @@ public class OrganizationAggregate implements Serializable {
     private boolean disabled;
     private Set<UUID> organizationAdminIds;
 
-    protected OrganizationAggregate() {
-    }
+    protected OrganizationAggregate() {}
 
     @CommandHandler
     public OrganizationAggregate(CreateSelfRegisteredOrganizationCommand command) {
         apply(new OrganizationCreatedForNewSelfRegisteredUserEvent(command.getOrganizationId(), command.getRequestingUserId(),
-                command.getOrganizationName(), command.getWebsiteUrl(), command.getStreet(), command.getCity(),
-                command.getState(), command.getCountry(), command.getPostalCode(), command.getContactName(),
-                command.getPhoneNumber(), command.getEmailAddress()));
+            command.getOrganizationName(), command.getWebsiteUrl(), command.getStreet(), command.getCity(),
+            command.getState(), command.getCountry(), command.getPostalCode(), command.getContactName(),
+            command.getPhoneNumber(), command.getEmailAddress()));
     }
 
     @CommandHandler
@@ -82,15 +81,15 @@ public class OrganizationAggregate implements Serializable {
 
         if (isNameUpdated(command)) {
             apply(new OrganizationNameChangedEvent(command.getOrganizationId(), command.getOrganizationName(),
-                    command.getRequestingUserId()));
+                command.getRequestingUserId()));
         }
         if (areContactDetailsUpdated(command)) {
             apply(new OrganizationContactDetailsUpdatedEvent(command.getOrganizationId(), command.getContactName(),
-                    command.getPhoneNumber(), command.getEmailAddress(), command.getWebsiteUrl(), command.getRequestingUserId()));
+                command.getPhoneNumber(), command.getEmailAddress(), command.getWebsiteUrl(), command.getRequestingUserId()));
         }
         if (isAddressUpdated(command)) {
             apply(new OrganizationAddressUpdatedEvent(command.getOrganizationId(), command.getStreet(), command.getCity(),
-                    command.getState(), command.getCountry(), command.getPostalCode(), command.getRequestingUserId()));
+                command.getState(), command.getCountry(), command.getPostalCode(), command.getRequestingUserId()));
         }
     }
 
@@ -135,16 +134,16 @@ public class OrganizationAggregate implements Serializable {
 
     private boolean areContactDetailsUpdated(UpdateOrganizationCommand command) {
         return command.getWebsiteUrl() != null
-                || command.getContactName() != null
-                || command.getPhoneNumber() != null
-                || command.getEmailAddress() != null;
+            || command.getContactName() != null
+            || command.getPhoneNumber() != null
+            || command.getEmailAddress() != null;
     }
 
     private boolean isAddressUpdated(UpdateOrganizationCommand command) {
         return command.getStreet() != null
-                || command.getCity() != null
-                || command.getState() != null
-                || command.getCountry() != null
-                || command.getPostalCode() != null;
+            || command.getCity() != null
+            || command.getState() != null
+            || command.getCountry() != null
+            || command.getPostalCode() != null;
     }
 }

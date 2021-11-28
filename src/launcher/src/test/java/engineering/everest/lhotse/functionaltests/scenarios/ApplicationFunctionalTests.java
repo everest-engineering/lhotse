@@ -57,9 +57,9 @@ class ApplicationFunctionalTests {
         apiRestTestClient.createAdminUserAndLogin();
 
         webTestClient.get().uri("/actuator/metrics/commandBus.successCounter")
-                .header("Authorization", "Bearer " + apiRestTestClient.getAccessToken())
-                .exchange()
-                .expectStatus().isEqualTo(OK);
+            .header("Authorization", "Bearer " + apiRestTestClient.getAccessToken())
+            .exchange()
+            .expectStatus().isEqualTo(OK);
     }
 
     @Data
@@ -77,15 +77,15 @@ class ApplicationFunctionalTests {
 
         var newUserRequest = new NewUserRequest("a-user", "");
         var response = webTestClient.post().uri("/api/organizations/{organizationId}/users",
-                        AdminProvisionTask.ORGANIZATION_ID)
-                .header("Authorization", "Bearer " + apiRestTestClient.getAccessToken())
-                .header("Accept-Language", "de-DE")
-                .contentType(APPLICATION_JSON)
-                .body(fromValue(newUserRequest))
-                .exchange()
-                .returnResult(ErrorResponse.class)
-                .getResponseBody()
-                .blockFirst();
+            AdminProvisionTask.ORGANIZATION_ID)
+            .header("Authorization", "Bearer " + apiRestTestClient.getAccessToken())
+            .header("Accept-Language", "de-DE")
+            .contentType(APPLICATION_JSON)
+            .body(fromValue(newUserRequest))
+            .exchange()
+            .returnResult(ErrorResponse.class)
+            .getResponseBody()
+            .blockFirst();
         assertNotNull(response);
         assertEquals("displayName: darf nicht leer sein", response.getMessage());
     }
@@ -97,18 +97,18 @@ class ApplicationFunctionalTests {
         var newUserRequest = new NewUserRequest("user123@example.com", "Captain Fancypants");
         var userId = apiRestTestClient.createUser(AdminProvisionTask.ORGANIZATION_ID, newUserRequest, CREATED);
         RetryWithExponentialBackoff
-                .oneMinuteWaiter()
-                .waitOrThrow(() -> usersReadService.exists(userId), "user registration projection update");
+            .oneMinuteWaiter()
+            .waitOrThrow(() -> usersReadService.exists(userId), "user registration projection update");
 
         var response = webTestClient.post().uri("/api/organizations/{organizationId}/users", AdminProvisionTask.ORGANIZATION_ID)
-                .header("Authorization", "Bearer " + apiRestTestClient.getAccessToken())
-                .header("Accept-Language", "de-DE")
-                .contentType(APPLICATION_JSON)
-                .body(fromValue(newUserRequest))
-                .exchange()
-                .returnResult(ErrorResponse.class)
-                .getResponseBody()
-                .blockFirst();
+            .header("Authorization", "Bearer " + apiRestTestClient.getAccessToken())
+            .header("Accept-Language", "de-DE")
+            .contentType(APPLICATION_JSON)
+            .body(fromValue(newUserRequest))
+            .exchange()
+            .returnResult(ErrorResponse.class)
+            .getResponseBody()
+            .blockFirst();
         assertNotNull(response);
         assertEquals("Diese E-Mail Adresse ist bereits vergeben", response.getMessage());
     }

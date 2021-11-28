@@ -40,45 +40,45 @@ public class CompositeEventProcessorBuilder implements EventProcessorBuilder {
                 return buildReplayMarkerAwareTrackingEventProcessor(name, configuration, eventHandlerInvoker);
             default:
                 throw new IllegalArgumentException(
-                        String.format("Invalid event processor type: %s", eventProcessorType));
+                    String.format("Invalid event processor type: %s", eventProcessorType));
         }
     }
 
     private SubscribingEventProcessor buildSubscribingEventProcessor(
-            String name,
-            Configuration configuration,
-            EventHandlerInvoker eventHandlerInvoker) {
+                                                                     String name,
+                                                                     Configuration configuration,
+                                                                     EventHandlerInvoker eventHandlerInvoker) {
         return SubscribingEventProcessor.builder()
-                .name(name)
-                .eventHandlerInvoker(eventHandlerInvoker)
-                .rollbackConfiguration(eventProcessingModule.rollbackConfiguration(name))
-                .messageMonitor(eventProcessingModule.messageMonitor(SubscribingEventProcessor.class, name))
-                .messageSource(configuration.eventBus())
-                .processingStrategy(DirectEventProcessingStrategy.INSTANCE)
-                .transactionManager(eventProcessingModule.transactionManager(name))
-                .build();
+            .name(name)
+            .eventHandlerInvoker(eventHandlerInvoker)
+            .rollbackConfiguration(eventProcessingModule.rollbackConfiguration(name))
+            .messageMonitor(eventProcessingModule.messageMonitor(SubscribingEventProcessor.class, name))
+            .messageSource(configuration.eventBus())
+            .processingStrategy(DirectEventProcessingStrategy.INSTANCE)
+            .transactionManager(eventProcessingModule.transactionManager(name))
+            .build();
     }
 
     @SuppressWarnings("unchecked")
     private ReplayMarkerAwareTrackingEventProcessor buildReplayMarkerAwareTrackingEventProcessor(
-            String name,
-            Configuration configuration,
-            EventHandlerInvoker eventHandlerInvoker) {
+                                                                                                 String name,
+                                                                                                 Configuration configuration,
+                                                                                                 EventHandlerInvoker eventHandlerInvoker) {
         var trackingEventProcessorConfiguration = configuration.getComponent(
-                TrackingEventProcessorConfiguration.class,
-                () -> TrackingEventProcessorConfiguration.forParallelProcessing(numberOfSegments));
+            TrackingEventProcessorConfiguration.class,
+            () -> TrackingEventProcessorConfiguration.forParallelProcessing(numberOfSegments));
 
         return ReplayMarkerAwareTrackingEventProcessor.builder()
-                .name(name)
-                .eventHandlerInvoker(eventHandlerInvoker)
-                .rollbackConfiguration(eventProcessingModule.rollbackConfiguration(name))
-                .errorHandler(eventProcessingModule.errorHandler(name))
-                .messageMonitor(eventProcessingModule.messageMonitor(TrackingEventProcessor.class, name))
-                .messageSource((StreamableMessageSource<TrackedEventMessage<?>>) configuration.eventBus())
-                .tokenStore(eventProcessingModule.tokenStore(name))
-                .transactionManager(eventProcessingModule.transactionManager(name))
-                .trackingEventProcessorConfiguration(trackingEventProcessorConfiguration)
-                .taskExecutor(taskExecutor)
-                .build();
+            .name(name)
+            .eventHandlerInvoker(eventHandlerInvoker)
+            .rollbackConfiguration(eventProcessingModule.rollbackConfiguration(name))
+            .errorHandler(eventProcessingModule.errorHandler(name))
+            .messageMonitor(eventProcessingModule.messageMonitor(TrackingEventProcessor.class, name))
+            .messageSource((StreamableMessageSource<TrackedEventMessage<?>>) configuration.eventBus())
+            .tokenStore(eventProcessingModule.tokenStore(name))
+            .transactionManager(eventProcessingModule.transactionManager(name))
+            .trackingEventProcessorConfiguration(trackingEventProcessorConfiguration)
+            .taskExecutor(taskExecutor)
+            .build();
     }
 }

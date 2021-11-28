@@ -39,19 +39,18 @@ public class UserAggregate implements Serializable {
     private String userEmail;
     private String displayName;
 
-    protected UserAggregate() {
-    }
+    protected UserAggregate() {}
 
     @CommandHandler
     public UserAggregate(CreateUserForNewlyRegisteredOrganizationCommand command) {
         apply(new UserCreatedForNewlyRegisteredOrganizationEvent(command.getOrganizationId(), command.getUserId(),
-                command.getDisplayName(), command.getUserEmail()));
+            command.getDisplayName(), command.getUserEmail()));
     }
 
     @CommandHandler
     public UserAggregate(CreateOrganizationUserCommand command) {
         apply(new UserCreatedByAdminEvent(command.getUserId(), command.getOrganizationId(),
-                command.getRequestingUserId(), command.getUserDisplayName(), command.getEmailAddress()));
+            command.getRequestingUserId(), command.getUserDisplayName(), command.getEmailAddress()));
     }
 
     @CommandHandler
@@ -62,7 +61,7 @@ public class UserAggregate implements Serializable {
             validateDisplayNameIsPresent(command.getDisplayNameChange());
         }
         apply(new UserDetailsUpdatedByAdminEvent(command.getUserId(), userOnOrganizationId,
-                command.getDisplayNameChange(), command.getEmailChange(), command.getRequestingUserId()));
+            command.getDisplayNameChange(), command.getEmailChange(), command.getRequestingUserId()));
     }
 
     @CommandHandler
@@ -88,7 +87,7 @@ public class UserAggregate implements Serializable {
     @CommandHandler
     void handle(DeleteAndForgetUserCommand command) {
         apply(new UserDeletedAndForgottenEvent(command.getUserId(), command.getRequestingUserId(),
-                command.getRequestReason()));
+            command.getRequestReason()));
     }
 
     @EventSourcingHandler
@@ -133,7 +132,7 @@ public class UserAggregate implements Serializable {
 
     private void validateAtLeastOneChangeIsBeingMade(UpdateUserDetailsCommand command) {
         boolean changesMade = command.getDisplayNameChange() != null
-                || command.getEmailChange() != null;
+            || command.getEmailChange() != null;
         if (!changesMade) {
             TranslatableExceptionFactory.throwForKey(USER_UPDATE_NO_FIELDS_CHANGED);
         }
@@ -152,6 +151,8 @@ public class UserAggregate implements Serializable {
     }
 
     private String selectDesiredState(String desiredState, String currentState) {
-        return desiredState == null ? currentState : desiredState;
+        return desiredState == null
+            ? currentState
+            : desiredState;
     }
 }

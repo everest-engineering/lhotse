@@ -14,5 +14,4 @@ import java.lang.annotation.Target;
 @Inherited
 @Documented
 @PreAuthorize("hasRole('ADMIN')")
-public @interface AdminOnly {
-}
+public @interface AdminOnly {}

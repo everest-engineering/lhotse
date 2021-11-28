@@ -49,10 +49,10 @@ class DefaultUsersServiceTest {
     @Test
     void updateUserDetails_WillSendCommand() {
         defaultUsersService.updateUser(ADMIN_ID, USER_ID, "email-change",
-                "display-name-change");
+            "display-name-change");
 
         verify(commandGateway).sendAndWait(new UpdateUserDetailsCommand(USER_ID, "email-change",
-                "display-name-change", ADMIN_ID));
+            "display-name-change", ADMIN_ID));
     }
 
     @Test
@@ -71,11 +71,13 @@ class DefaultUsersServiceTest {
 
     @Test
     void createNewKeycloakUser_WillSendCommandAndWaitForCompletion() {
-        when(keycloakSynchronizationService.createNewKeycloakUserAndSendVerificationEmail(NEW_USER_EMAIL, ORGANIZATION_ID, NEW_USER_DISPLAY_NAME))
+        when(keycloakSynchronizationService.createNewKeycloakUserAndSendVerificationEmail(NEW_USER_EMAIL, ORGANIZATION_ID,
+            NEW_USER_DISPLAY_NAME))
                 .thenReturn(USER_ID);
 
         defaultUsersService.createOrganizationUser(ADMIN_ID, ORGANIZATION_ID, NEW_USER_EMAIL, NEW_USER_DISPLAY_NAME);
-        verify(commandGateway).sendAndWait(new CreateOrganizationUserCommand(USER_ID, ORGANIZATION_ID, ADMIN_ID, NEW_USER_EMAIL, NEW_USER_DISPLAY_NAME));
+        verify(commandGateway)
+            .sendAndWait(new CreateOrganizationUserCommand(USER_ID, ORGANIZATION_ID, ADMIN_ID, NEW_USER_EMAIL, NEW_USER_DISPLAY_NAME));
     }
 
     @Test

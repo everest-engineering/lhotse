@@ -41,13 +41,13 @@ import static engineering.everest.lhotse.users.UserTestHelper.ADMIN_USER;
 public class AdminOrganizationsControllerTest {
     private static final String ROLE_ADMIN = "ROLE_ADMIN";
     private static final Organization ORGANIZATION_1 = new Organization(
-            fromString("53ac29ab-ecc6-431e-bde0-64440cd3dc93"), "organization-1",
-            new OrganizationAddress("street-1", "city-1", "state-1", "country-1", "postal-1"), "website-1",
-            "contactName", "phoneNumber", "email@company.com", false);
+        fromString("53ac29ab-ecc6-431e-bde0-64440cd3dc93"), "organization-1",
+        new OrganizationAddress("street-1", "city-1", "state-1", "country-1", "postal-1"), "website-1",
+        "contactName", "phoneNumber", "email@company.com", false);
     private static final Organization ORGANIZATION_2 = new Organization(
-            fromString("a29797ff-11eb-40e4-9024-30e8cca17096"), "organization-2",
-            new OrganizationAddress("street-2", "city-2", "state-2", "country-2", "postal-2"), "website-2", "", "", "",
-            false);
+        fromString("a29797ff-11eb-40e4-9024-30e8cca17096"), "organization-2",
+        new OrganizationAddress("street-2", "city-2", "state-2", "country-2", "postal-2"), "website-2", "", "", "",
+        false);
 
     private MockMvc mockMvc;
     private Principal principal;
@@ -74,27 +74,27 @@ public class AdminOrganizationsControllerTest {
     @WithMockKeycloakAuth(authorities = ROLE_ADMIN)
     void getOrganizationsWillRetrieveListOfOrganizations_WhenRequestingUserIsAdmin() throws Exception {
         when(dtoConverter.convert(ORGANIZATION_1))
-                .thenReturn(getOrganizationResponse(ORGANIZATION_1));
+            .thenReturn(getOrganizationResponse(ORGANIZATION_1));
         when(dtoConverter.convert(ORGANIZATION_2))
-                .thenReturn(getOrganizationResponse(ORGANIZATION_2));
+            .thenReturn(getOrganizationResponse(ORGANIZATION_2));
         when(organizationsReadService.getOrganizations()).thenReturn(newArrayList(ORGANIZATION_1, ORGANIZATION_2));
 
         mockMvc.perform(get("/admin/organizations")
-                .contentType(APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_JSON))
-                .andExpect(jsonPath("$.[0].id", is(ORGANIZATION_1.getId().toString())))
-                .andExpect(jsonPath("$.[1].id", is(ORGANIZATION_2.getId().toString())))
-                .andExpect(jsonPath("$.[0].organizationName", is(ORGANIZATION_1.getOrganizationName())))
-                .andExpect(jsonPath("$.[1].organizationName", is(ORGANIZATION_2.getOrganizationName())));
+            .contentType(APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(APPLICATION_JSON))
+            .andExpect(jsonPath("$.[0].id", is(ORGANIZATION_1.getId().toString())))
+            .andExpect(jsonPath("$.[1].id", is(ORGANIZATION_2.getId().toString())))
+            .andExpect(jsonPath("$.[0].organizationName", is(ORGANIZATION_1.getOrganizationName())))
+            .andExpect(jsonPath("$.[1].organizationName", is(ORGANIZATION_2.getOrganizationName())));
     }
 
     @Test
     @WithMockKeycloakAuth(authorities = ROLE_ADMIN)
     void disableOrganizationWillDelegate_WhenRequestingUserIsAdmin() throws Exception {
         mockMvc.perform(delete("/admin/organizations/{organizationId}", ORGANIZATION_2.getId())
-                        .principal(principal))
-                .andExpect(status().isOk());
+            .principal(principal))
+            .andExpect(status().isOk());
 
         verify(organizationsService).disableOrganization(ADMIN_USER.getId(), ORGANIZATION_2.getId());
     }
@@ -103,24 +103,24 @@ public class AdminOrganizationsControllerTest {
     @WithMockKeycloakAuth(authorities = ROLE_ADMIN)
     void enableOrganizationWillDelegate_WhenRequestingUserIsAdmin() throws Exception {
         mockMvc.perform(post("/admin/organizations/{organizationId}", ORGANIZATION_2.getId())
-                        .principal(principal))
-                .andExpect(status().isOk());
+            .principal(principal))
+            .andExpect(status().isOk());
 
         verify(organizationsService).enableOrganization(ADMIN_USER.getId(), ORGANIZATION_2.getId());
     }
 
     private static OrganizationResponse getOrganizationResponse(Organization organization) {
         return new OrganizationResponse(organization.getId(),
-                organization.getOrganizationName(),
-                organization.getOrganizationAddress().getStreet(),
-                organization.getOrganizationAddress().getCity(),
-                organization.getOrganizationAddress().getState(),
-                organization.getOrganizationAddress().getCountry(),
-                organization.getOrganizationAddress().getPostalCode(),
-                organization.getWebsiteUrl(),
-                organization.getContactName(),
-                organization.getPhoneNumber(),
-                organization.getEmailAddress(),
-                organization.isDisabled());
+            organization.getOrganizationName(),
+            organization.getOrganizationAddress().getStreet(),
+            organization.getOrganizationAddress().getCity(),
+            organization.getOrganizationAddress().getState(),
+            organization.getOrganizationAddress().getCountry(),
+            organization.getOrganizationAddress().getPostalCode(),
+            organization.getWebsiteUrl(),
+            organization.getContactName(),
+            organization.getPhoneNumber(),
+            organization.getEmailAddress(),
+            organization.isDisabled());
     }
 }

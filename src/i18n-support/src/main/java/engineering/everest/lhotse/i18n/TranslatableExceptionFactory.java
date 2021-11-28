@@ -31,24 +31,23 @@ public class TranslatableExceptionFactory {
     @SuppressWarnings("PMD.UseConcurrentHashMap")
     // TODO: ghetto, this won't scale. See https://github.com/everest-engineering/lhotse/issues/57
     private static final Map<String, Class<?>> KEY_TO_EXCEPTION_MAPPING = Stream.of(
-                    new AbstractMap.SimpleEntry<>(EMAIL_ADDRESS_ALREADY_EXISTS, TranslatableIllegalStateException.class),
-                    new AbstractMap.SimpleEntry<>(EMAIL_ADDRESS_MALFORMED, TranslatableIllegalArgumentException.class),
-                    new AbstractMap.SimpleEntry<>(ORGANIZATION_ALREADY_ENABLED, TranslatableIllegalStateException.class),
-                    new AbstractMap.SimpleEntry<>(ORGANIZATION_DOES_NOT_EXIST, TranslatableIllegalStateException.class),
-                    new AbstractMap.SimpleEntry<>(ORGANIZATION_IS_DEREGISTERED, TranslatableIllegalStateException.class),
-                    new AbstractMap.SimpleEntry<>(ORGANIZATION_IS_DISABLED, TranslatableIllegalStateException.class),
-                    new AbstractMap.SimpleEntry<>(ORGANIZATION_UPDATE_NO_FIELDS_CHANGED, TranslatableIllegalArgumentException.class),
-                    new AbstractMap.SimpleEntry<>(USER_ALREADY_ORGANIZATION_ADMIN, TranslatableIllegalStateException.class),
-                    new AbstractMap.SimpleEntry<>(USER_DISPLAY_NAME_MISSING, TranslatableIllegalArgumentException.class),
-                    new AbstractMap.SimpleEntry<>(USER_IS_DISABLED, TranslatableIllegalStateException.class),
-                    new AbstractMap.SimpleEntry<>(USER_IS_UNKNOWN, TranslatableIllegalStateException.class),
-                    new AbstractMap.SimpleEntry<>(USER_NOT_MEMBER_OF_ORGANIZATION, TranslatableIllegalArgumentException.class),
-                    new AbstractMap.SimpleEntry<>(USER_UPDATE_NO_FIELDS_CHANGED, TranslatableIllegalArgumentException.class),
-                    new AbstractMap.SimpleEntry<>(USER_UPDATE_NO_ROLES_SPECIFIED, TranslatableIllegalArgumentException.class))
-            .collect(toConcurrentMap(Map.Entry::getKey, Map.Entry::getValue));
+        new AbstractMap.SimpleEntry<>(EMAIL_ADDRESS_ALREADY_EXISTS, TranslatableIllegalStateException.class),
+        new AbstractMap.SimpleEntry<>(EMAIL_ADDRESS_MALFORMED, TranslatableIllegalArgumentException.class),
+        new AbstractMap.SimpleEntry<>(ORGANIZATION_ALREADY_ENABLED, TranslatableIllegalStateException.class),
+        new AbstractMap.SimpleEntry<>(ORGANIZATION_DOES_NOT_EXIST, TranslatableIllegalStateException.class),
+        new AbstractMap.SimpleEntry<>(ORGANIZATION_IS_DEREGISTERED, TranslatableIllegalStateException.class),
+        new AbstractMap.SimpleEntry<>(ORGANIZATION_IS_DISABLED, TranslatableIllegalStateException.class),
+        new AbstractMap.SimpleEntry<>(ORGANIZATION_UPDATE_NO_FIELDS_CHANGED, TranslatableIllegalArgumentException.class),
+        new AbstractMap.SimpleEntry<>(USER_ALREADY_ORGANIZATION_ADMIN, TranslatableIllegalStateException.class),
+        new AbstractMap.SimpleEntry<>(USER_DISPLAY_NAME_MISSING, TranslatableIllegalArgumentException.class),
+        new AbstractMap.SimpleEntry<>(USER_IS_DISABLED, TranslatableIllegalStateException.class),
+        new AbstractMap.SimpleEntry<>(USER_IS_UNKNOWN, TranslatableIllegalStateException.class),
+        new AbstractMap.SimpleEntry<>(USER_NOT_MEMBER_OF_ORGANIZATION, TranslatableIllegalArgumentException.class),
+        new AbstractMap.SimpleEntry<>(USER_UPDATE_NO_FIELDS_CHANGED, TranslatableIllegalArgumentException.class),
+        new AbstractMap.SimpleEntry<>(USER_UPDATE_NO_ROLES_SPECIFIED, TranslatableIllegalArgumentException.class))
+        .collect(toConcurrentMap(Map.Entry::getKey, Map.Entry::getValue));
 
-    private TranslatableExceptionFactory() {
-    }
+    private TranslatableExceptionFactory() {}
 
     public static void throwForKey(String i18nMessageKey) {
         Class<?> clazz = KEY_TO_EXCEPTION_MAPPING.get(i18nMessageKey);
@@ -67,7 +66,7 @@ public class TranslatableExceptionFactory {
 
         try {
             throw (TranslatableException) clazz.getConstructor(String.class, Object[].class)
-                    .newInstance(i18nMessageKey, args);
+                .newInstance(i18nMessageKey, args);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
@@ -79,7 +78,7 @@ public class TranslatableExceptionFactory {
 
         try {
             throw (TranslatableException) clazz.getConstructor(String.class, Throwable.class)
-                    .newInstance(i18nMessageKey, cause);
+                .newInstance(i18nMessageKey, cause);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
@@ -91,7 +90,7 @@ public class TranslatableExceptionFactory {
 
         try {
             throw (TranslatableException) clazz.getConstructor(String.class, Throwable.class, Object[].class)
-                    .newInstance(i18nMessageKey, cause, args);
+                .newInstance(i18nMessageKey, cause, args);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             throw new RuntimeException(e);
         }

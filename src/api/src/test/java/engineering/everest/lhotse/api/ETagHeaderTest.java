@@ -33,7 +33,7 @@ class ETagHeaderTest {
         when(buildProperties.getVersion()).thenReturn("version");
 
         mockMvc.perform(get("/api/version").contentType(APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(header().exists("ETag"));
+            .andExpect(status().isOk())
+            .andExpect(header().exists("ETag"));
     }
 }

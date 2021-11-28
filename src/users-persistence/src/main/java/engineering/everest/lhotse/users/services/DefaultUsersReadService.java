@@ -40,15 +40,15 @@ public class DefaultUsersReadService implements UsersReadService {
     @Override
     public List<User> getUsers() {
         return usersRepository.findAll().stream()
-                .map(this::convert)
-                .collect(toList());
+            .map(this::convert)
+            .collect(toList());
     }
 
     @Override
     public List<User> getUsersForOrganization(UUID organizationId) {
         return usersRepository.findByOrganizationId(organizationId).stream()
-                .map(this::convert)
-                .collect(toList());
+            .map(this::convert)
+            .collect(toList());
     }
 
     @Override
@@ -88,7 +88,7 @@ public class DefaultUsersReadService implements UsersReadService {
 
     private User convert(PersistableUser persistableUser) {
         return new User(persistableUser.getId(), persistableUser.getOrganizationId(), persistableUser.getUsername(),
-                persistableUser.getDisplayName(), persistableUser.getEmail(),
-                persistableUser.isDisabled());
+            persistableUser.getDisplayName(), persistableUser.getEmail(),
+            persistableUser.isDisabled());
     }
 }

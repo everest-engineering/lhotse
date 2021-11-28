@@ -70,43 +70,43 @@ class UserControllerTest {
         when(usersReadService.getById(ORG_1_USER_1.getId())).thenReturn(ORG_1_USER_1);
 
         mockMvc.perform(get("/api/user").contentType(APPLICATION_JSON)
-                        .principal(() -> ORG_1_USER_1.getId().toString()))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_JSON))
-                .andExpect(jsonPath("$.id", is(ORG_1_USER_1.getId().toString())));
+            .principal(() -> ORG_1_USER_1.getId().toString()))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(APPLICATION_JSON))
+            .andExpect(jsonPath("$.id", is(ORG_1_USER_1.getId().toString())));
     }
 
     @Test
     void willUpdateUserInfo() throws Exception {
         mockMvc.perform(put("/api/user")
-                        .principal(USER_ID_1::toString)
-                        .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new UpdateUserRequest("display-name-change", "email-change"))))
-                .andExpect(status().isOk());
+            .principal(USER_ID_1::toString)
+            .contentType(APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(new UpdateUserRequest("display-name-change", "email-change"))))
+            .andExpect(status().isOk());
 
         verify(usersService).updateUser(USER_ID_1, USER_ID_1, "email-change",
-                "display-name-change");
+            "display-name-change");
     }
 
     @Test
     void uploadProfilePhoto_WillPersistUploadedFile() throws Exception {
         var persistedFileId = randomUUID();
         when(fileService.transferToPermanentStore(eq(
-                        "profile-photo-file-name"),
-                eq(PROFILE_PHOTO_FILE_CONTENTS.length),
-                any(InputStream.class))).thenReturn(persistedFileId);
+            "profile-photo-file-name"),
+            eq(PROFILE_PHOTO_FILE_CONTENTS.length),
+            any(InputStream.class))).thenReturn(persistedFileId);
 
         mockMvc.perform(multipart("/api/user/profile-photo")
-                        .file(new MockMultipartFile("file", "profile-photo-file-name", IMAGE_JPEG_VALUE, PROFILE_PHOTO_FILE_CONTENTS))
-                        .contentType(MULTIPART_FORM_DATA)
-                        .principal(USER_ID_1::toString))
-                .andDo(org.springframework.test.web.servlet.result.MockMvcResultHandlers.print())
-                .andExpect(status().isOk());
+            .file(new MockMultipartFile("file", "profile-photo-file-name", IMAGE_JPEG_VALUE, PROFILE_PHOTO_FILE_CONTENTS))
+            .contentType(MULTIPART_FORM_DATA)
+            .principal(USER_ID_1::toString))
+            .andDo(org.springframework.test.web.servlet.result.MockMvcResultHandlers.print())
+            .andExpect(status().isOk());
 
         verify(fileService).transferToPermanentStore(
-                eq("profile-photo-file-name"),
-                eq((long)PROFILE_PHOTO_FILE_CONTENTS.length),
-                any(InputStream.class));
+            eq("profile-photo-file-name"),
+            eq((long) PROFILE_PHOTO_FILE_CONTENTS.length),
+            any(InputStream.class));
     }
 
     @Test
@@ -120,14 +120,14 @@ class UserControllerTest {
         when(usersReadService.getProfilePhotoStream(USER_ID_1)).thenReturn(profilePhotoInputStream);
 
         var response = mockMvc.perform(get("/api/user/profile-photo")
-                        .principal(USER_ID_1::toString))
-                .andExpect(request().asyncStarted())
-                .andReturn();
+            .principal(USER_ID_1::toString))
+            .andExpect(request().asyncStarted())
+            .andReturn();
 
         mockMvc.perform(asyncDispatch(response))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_OCTET_STREAM))
-                .andExpect(content().bytes(PROFILE_PHOTO_FILE_CONTENTS));
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(APPLICATION_OCTET_STREAM))
+            .andExpect(content().bytes(PROFILE_PHOTO_FILE_CONTENTS));
     }
 
     @Test
@@ -141,28 +141,28 @@ class UserControllerTest {
         when(usersReadService.getProfilePhotoThumbnailStream(USER_ID_1, 100, 100)).thenReturn(profilePhotoThumbnailInputStream);
 
         var response = mockMvc.perform(get("/api/user/profile-photo/thumbnail?width=100&height=100")
-                        .principal(USER_ID_1::toString))
-                .andExpect(request().asyncStarted())
-                .andReturn();
+            .principal(USER_ID_1::toString))
+            .andExpect(request().asyncStarted())
+            .andReturn();
 
         mockMvc.perform(asyncDispatch(response))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_OCTET_STREAM))
-                .andExpect(content().bytes(PROFILE_PHOTO_THUMBNAIL_FILE_CONTENTS));
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(APPLICATION_OCTET_STREAM))
+            .andExpect(content().bytes(PROFILE_PHOTO_THUMBNAIL_FILE_CONTENTS));
     }
 
     @Test
     void streamProfilePhotoThumbnail_WillFail_WhenQueryParamsMissing() throws Exception {
         mockMvc.perform(get("/api/user/profile-photo/thumbnail"))
-                .andExpect(status().isBadRequest());
+            .andExpect(status().isBadRequest());
     }
 
     private static UserResponse getUserResponse() {
         return new UserResponse(UserControllerTest.ORG_1_USER_1.getId(),
-                UserControllerTest.ORG_1_USER_1.getOrganizationId(),
-                UserControllerTest.ORG_1_USER_1.getUsername(),
-                UserControllerTest.ORG_1_USER_1.getDisplayName(),
-                UserControllerTest.ORG_1_USER_1.getEmail(),
-                UserControllerTest.ORG_1_USER_1.isDisabled());
+            UserControllerTest.ORG_1_USER_1.getOrganizationId(),
+            UserControllerTest.ORG_1_USER_1.getUsername(),
+            UserControllerTest.ORG_1_USER_1.getDisplayName(),
+            UserControllerTest.ORG_1_USER_1.getEmail(),
+            UserControllerTest.ORG_1_USER_1.isDisabled());
     }
 }

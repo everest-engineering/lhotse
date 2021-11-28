@@ -51,7 +51,7 @@ public class OrganizationRegistrationSaga {
         var registeringUserEmail = event.getContactEmail();
 
         commandGateway.send(new CreateUserForNewlyRegisteredOrganizationCommand(organizationId, registeringUserId,
-                registeringUserEmail, registeringUserDisplayName));
+            registeringUserEmail, registeringUserDisplayName));
     }
 
     // Failure here will result in the saga not completing.
@@ -59,10 +59,11 @@ public class OrganizationRegistrationSaga {
     @SagaEventHandler(associationProperty = ORGANIZATION_PROPERTY)
     public void on(UserCreatedForNewlyRegisteredOrganizationEvent event,
                    UsersReadService usersReadService,
-                   OrganizationsReadService organizationsReadService) throws Exception {
+                   OrganizationsReadService organizationsReadService)
+        throws Exception {
         RetryWithExponentialBackoff.oneMinuteWaiter().waitOrThrow(() -> usersReadService.exists(event.getUserId())
-                        && organizationsReadService.exists(event.getOrganizationId()),
-                "user and organization self registration projection update");
+            && organizationsReadService.exists(event.getOrganizationId()),
+            "user and organization self registration projection update");
 
         commandGateway.send(new PromoteUserToOrganizationAdminCommand(event.getOrganizationId(), event.getUserId()));
     }
@@ -74,8 +75,8 @@ public class OrganizationRegistrationSaga {
                    KeycloakSynchronizationService keycloakSynchronizationService) {
 
         keycloakSynchronizationService.updateUserAttributes(event.getPromotedUserId(),
-                Map.ofEntries(entry("attributes", new UserAttribute(event.getOrganizationId(),
-                        usersReadService.getById(event.getPromotedUserId()).getDisplayName()))));
+            Map.ofEntries(entry("attributes", new UserAttribute(event.getOrganizationId(),
+                usersReadService.getById(event.getPromotedUserId()).getDisplayName()))));
 
         keycloakSynchronizationService.addClientLevelUserRoles(event.getPromotedUserId(), Set.of(Role.ORG_ADMIN));
     }

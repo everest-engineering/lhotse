@@ -72,16 +72,22 @@ class OrganizationsReadServiceIntegrationTest {
     private static final String PHONE_NUMBER_2 = "phone-number-2";
     private static final String PHONE_NUMBER_3 = "phone-number-3";
 
-    private static final OrganizationAddress ORGANIZATION_ADDRESS_1 = new OrganizationAddress(ORGANIZATION_ADDRESS_STREET_1, ORGANIZATION_CITY_1,
+    private static final OrganizationAddress ORGANIZATION_ADDRESS_1 =
+        new OrganizationAddress(ORGANIZATION_ADDRESS_STREET_1, ORGANIZATION_CITY_1,
             ORGANIZATION_STATE_1, ORGANIZATION_COUNTRY_1, ORGANIZATION_POSTAL_CODE_1);
-    private static final OrganizationAddress ORGANIZATION_ADDRESS_2 = new OrganizationAddress(ORGANIZATION_ADDRESS_STREET_2, ORGANIZATION_CITY_2,
+    private static final OrganizationAddress ORGANIZATION_ADDRESS_2 =
+        new OrganizationAddress(ORGANIZATION_ADDRESS_STREET_2, ORGANIZATION_CITY_2,
             ORGANIZATION_STATE_2, ORGANIZATION_COUNTRY_2, ORGANIZATION_POSTAL_CODE_2);
-    private static final OrganizationAddress ORGANIZATION_ADDRESS_3 = new OrganizationAddress(ORGANIZATION_ADDRESS_STREET_3, ORGANIZATION_CITY_3,
+    private static final OrganizationAddress ORGANIZATION_ADDRESS_3 =
+        new OrganizationAddress(ORGANIZATION_ADDRESS_STREET_3, ORGANIZATION_CITY_3,
             ORGANIZATION_STATE_3, ORGANIZATION_COUNTRY_3, ORGANIZATION_ADDRESS_POSTAL_CODE_3);
 
-    private static final Organization ORGANIZATION_1 = new Organization(ORGANIZATION_ID_1, ORGANIZATION_NAME_1, ORGANIZATION_ADDRESS_1, ORGANIZATION_WEBSITE_1, CONTACT_NAME_1, PHONE_NUMBER_1, ORGANIZATION_EMAIL_1, false);
-    private static final Organization ORGANIZATION_2 = new Organization(ORGANIZATION_ID_2, ORGANIZATION_NAME_2, ORGANIZATION_ADDRESS_2, ORGANIZATION_WEBSITE_2, CONTACT_NAME_2, PHONE_NUMBER_2, ORGANIZATION_EMAIL_2, false);
-    private static final Organization ORGANIZATION_3 = new Organization(ORGANIZATION_ID_3, ORGANIZATION_NAME_3, ORGANIZATION_ADDRESS_3, ORGANIZATION_WEBSITE_3, CONTACT_NAME_3, PHONE_NUMBER_3, ORGANIZATION_EMAIL_3, false);
+    private static final Organization ORGANIZATION_1 = new Organization(ORGANIZATION_ID_1, ORGANIZATION_NAME_1, ORGANIZATION_ADDRESS_1,
+        ORGANIZATION_WEBSITE_1, CONTACT_NAME_1, PHONE_NUMBER_1, ORGANIZATION_EMAIL_1, false);
+    private static final Organization ORGANIZATION_2 = new Organization(ORGANIZATION_ID_2, ORGANIZATION_NAME_2, ORGANIZATION_ADDRESS_2,
+        ORGANIZATION_WEBSITE_2, CONTACT_NAME_2, PHONE_NUMBER_2, ORGANIZATION_EMAIL_2, false);
+    private static final Organization ORGANIZATION_3 = new Organization(ORGANIZATION_ID_3, ORGANIZATION_NAME_3, ORGANIZATION_ADDRESS_3,
+        ORGANIZATION_WEBSITE_3, CONTACT_NAME_3, PHONE_NUMBER_3, ORGANIZATION_EMAIL_3, false);
 
     @Autowired
     private OrganizationsRepository organizationsRepository;
@@ -92,8 +98,12 @@ class OrganizationsReadServiceIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        organizationsRepository.createOrganization(ORGANIZATION_ID_1, ORGANIZATION_NAME_1, ORGANIZATION_ADDRESS_1, ORGANIZATION_WEBSITE_1, CONTACT_NAME_1, PHONE_NUMBER_1, ORGANIZATION_EMAIL_1, false, ORGANIZATION_CREATED_ON_1);
-        organizationsRepository.createOrganization(ORGANIZATION_ID_2, ORGANIZATION_NAME_2, ORGANIZATION_ADDRESS_2, ORGANIZATION_WEBSITE_2, CONTACT_NAME_2, PHONE_NUMBER_2, ORGANIZATION_EMAIL_2, false, ORGANIZATION_CREATED_ON_2);        organizationsRepository.createOrganization(ORGANIZATION_ID_3, ORGANIZATION_NAME_3, ORGANIZATION_ADDRESS_3, ORGANIZATION_WEBSITE_3, CONTACT_NAME_3, PHONE_NUMBER_3, ORGANIZATION_EMAIL_3, false, ORGANIZATION_CREATED_ON_3);
+        organizationsRepository.createOrganization(ORGANIZATION_ID_1, ORGANIZATION_NAME_1, ORGANIZATION_ADDRESS_1, ORGANIZATION_WEBSITE_1,
+            CONTACT_NAME_1, PHONE_NUMBER_1, ORGANIZATION_EMAIL_1, false, ORGANIZATION_CREATED_ON_1);
+        organizationsRepository.createOrganization(ORGANIZATION_ID_2, ORGANIZATION_NAME_2, ORGANIZATION_ADDRESS_2, ORGANIZATION_WEBSITE_2,
+            CONTACT_NAME_2, PHONE_NUMBER_2, ORGANIZATION_EMAIL_2, false, ORGANIZATION_CREATED_ON_2);
+        organizationsRepository.createOrganization(ORGANIZATION_ID_3, ORGANIZATION_NAME_3, ORGANIZATION_ADDRESS_3, ORGANIZATION_WEBSITE_3,
+            CONTACT_NAME_3, PHONE_NUMBER_3, ORGANIZATION_EMAIL_3, false, ORGANIZATION_CREATED_ON_3);
     }
 
     @Test
@@ -109,7 +119,7 @@ class OrganizationsReadServiceIntegrationTest {
     @Test
     void getOrganizationList_WillReturnAllOrganizations() {
         assertEquals(asList(ORGANIZATION_1, ORGANIZATION_2, ORGANIZATION_3),
-                organizationsReadService.getOrganizations());
+            organizationsReadService.getOrganizations());
     }
 
     @Test

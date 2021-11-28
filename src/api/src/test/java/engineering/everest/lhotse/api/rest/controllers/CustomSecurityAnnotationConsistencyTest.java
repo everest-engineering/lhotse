@@ -37,30 +37,30 @@ class CustomSecurityAnnotationConsistencyTest {
         var classPathScanningCandidateComponentProvider = new ClassPathScanningCandidateComponentProvider(false);
         classPathScanningCandidateComponentProvider.addIncludeFilter(new AnnotationTypeFilter(RestController.class));
         return classPathScanningCandidateComponentProvider.findCandidateComponents(this.getClass().getPackageName()).stream()
-                .map(BeanDefinition::getBeanClassName).map((String className) -> {
-                    try {
-                        return Class.forName(className);
-                    } catch (ClassNotFoundException e) {
-                        throw new RuntimeException(e);
-                    }
-                }).collect(toList());
+            .map(BeanDefinition::getBeanClassName).map((String className) -> {
+                try {
+                    return Class.forName(className);
+                } catch (ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            }).collect(toList());
     }
 
     private void controllerClassHasMatchingAnnotationAndSignature(Class<?> controllerClass) {
         List<Method> methods = Arrays.stream(controllerClass.getMethods())
-                .filter(this::isSecurityAnnotationPresent)
-                .collect(toList());
+            .filter(this::isSecurityAnnotationPresent)
+            .collect(toList());
         for (Method method : methods) {
             if (!isMethodSignatureConsistentWithSecurityAnnotation(method)) {
                 throw new AssertionError(String.format("%s.%s has inconsistent usage of custom security annotation and method signature",
-                        controllerClass, method.getName()));
+                    controllerClass, method.getName()));
             }
         }
     }
 
     private boolean isSecurityAnnotationPresent(Method method) {
         return method.isAnnotationPresent(AdminOrAdminOfTargetOrganization.class)
-                || method.isAnnotationPresent(AdminOrUserOfTargetOrganization.class);
+            || method.isAnnotationPresent(AdminOrUserOfTargetOrganization.class);
     }
 
     private boolean isMethodSignatureConsistentWithSecurityAnnotation(Method method) {
@@ -81,8 +81,8 @@ class CustomSecurityAnnotationConsistencyTest {
     private boolean isOrganizationIdParameterPresent(Parameter[] parameters, String[] parameterNames) {
         for (int i = 0; i < parameters.length; i++) {
             if (parameters[i].isAnnotationPresent(PathVariable.class)
-                    && parameters[i].getType().equals(UUID.class)
-                    && parameterNames[i].equals(ORGANIZATION_ID)) {
+                && parameters[i].getType().equals(UUID.class)
+                && parameterNames[i].equals(ORGANIZATION_ID)) {
                 return true;
             }
         }

@@ -30,11 +30,11 @@ public class OrganizationRepositoryConfig {
                                                                        Snapshotter snapshotter,
                                                                        JCacheAdapter cacheAdapter) {
         return CachingEventSourcingRepository.builder(OrganizationAggregate.class)
-                .aggregateFactory(new GenericAggregateFactory<>(OrganizationAggregate.class))
-                .parameterResolverFactory(parameterResolverFactory)
-                .snapshotTriggerDefinition(new EventCountSnapshotTriggerDefinition(snapshotter, SNAPSHOT_EVENT_COUNT_THRESHOLD))
-                .eventStore(eventStore)
-                .cache(cacheAdapter)
-                .build();
+            .aggregateFactory(new GenericAggregateFactory<>(OrganizationAggregate.class))
+            .parameterResolverFactory(parameterResolverFactory)
+            .snapshotTriggerDefinition(new EventCountSnapshotTriggerDefinition(snapshotter, SNAPSHOT_EVENT_COUNT_THRESHOLD))
+            .eventStore(eventStore)
+            .cache(cacheAdapter)
+            .build();
     }
 }

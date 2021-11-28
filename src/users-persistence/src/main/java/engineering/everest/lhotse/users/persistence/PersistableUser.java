@@ -32,7 +32,11 @@ public class PersistableUser {
     private Instant createdOn;
     private UUID profilePhotoFileId;
 
-    public PersistableUser(UUID id, UUID organizationId, String username, String displayName, boolean disabled,
+    public PersistableUser(UUID id,
+                           UUID organizationId,
+                           String username,
+                           String displayName,
+                           boolean disabled,
                            Instant createdOn) {
         this.id = id;
         this.organizationId = organizationId;

@@ -22,8 +22,10 @@ class OrganizationStatusValidatorTest {
 
     private static final UUID ORGANIZATION_ID_1 = UUID.randomUUID();
     private static final UUID ORGANIZATION_ID_2 = UUID.randomUUID();
-    private static final Organization ORGANIZATION_IN_GOOD_STANDING = new Organization(ORGANIZATION_ID_1, "organization-name", null, null, null, null, null, false);
-    private static final Organization DISABLED_ORGANIZATION = new Organization(ORGANIZATION_ID_2, "organization-name", null, null, null, null, null, true);
+    private static final Organization ORGANIZATION_IN_GOOD_STANDING =
+        new Organization(ORGANIZATION_ID_1, "organization-name", null, null, null, null, null, false);
+    private static final Organization DISABLED_ORGANIZATION =
+        new Organization(ORGANIZATION_ID_2, "organization-name", null, null, null, null, null, true);
 
     private OrganizationStatusValidator organizationStatusValidator;
 
@@ -46,8 +48,8 @@ class OrganizationStatusValidatorTest {
     void validate_WillFail_WhenOrganizationIsDisabled() {
         when(organizationsReadService.getById(ORGANIZATION_ID_2)).thenReturn(DISABLED_ORGANIZATION);
 
-        var thrownException = assertThrows(TranslatableIllegalStateException.class, () ->
-                organizationStatusValidator.validate((OrganizationStatusValidatableCommand) () -> ORGANIZATION_ID_2));
+        var thrownException = assertThrows(TranslatableIllegalStateException.class,
+            () -> organizationStatusValidator.validate((OrganizationStatusValidatableCommand) () -> ORGANIZATION_ID_2));
         assertEquals("ORGANIZATION_IS_DEREGISTERED", thrownException.getMessage());
     }
 
@@ -55,8 +57,8 @@ class OrganizationStatusValidatorTest {
     void validate_WillFail_WhenOrganizationDoesNotExist() {
         when(organizationsReadService.getById(ORGANIZATION_ID_1)).thenThrow(NoSuchElementException.class);
 
-        var thrownException = assertThrows(TranslatableIllegalStateException.class, () ->
-                organizationStatusValidator.validate((OrganizationStatusValidatableCommand) () -> ORGANIZATION_ID_1));
+        var thrownException = assertThrows(TranslatableIllegalStateException.class,
+            () -> organizationStatusValidator.validate((OrganizationStatusValidatableCommand) () -> ORGANIZATION_ID_1));
         assertEquals("ORGANIZATION_DOES_NOT_EXIST", thrownException.getMessage());
     }
 }

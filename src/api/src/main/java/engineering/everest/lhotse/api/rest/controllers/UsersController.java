@@ -53,15 +53,16 @@ public class UsersController {
     @AdminOnly
     public List<UserResponse> getAllUsers() {
         return usersReadService.getUsers()
-                .stream().map(dtoConverter::convert)
-                .collect(toList());
+            .stream().map(dtoConverter::convert)
+            .collect(toList());
     }
 
     @PostMapping("/{userId}/forget")
     @ApiOperation("Handle a GDPR request to delete an account and scrub personal information")
     @AdminOnly
-    public void deleteUser(@ApiIgnore Principal principal, @PathVariable UUID userId,
-            @RequestBody @Valid DeleteAndForgetUserRequest request) {
+    public void deleteUser(@ApiIgnore Principal principal,
+                           @PathVariable UUID userId,
+                           @RequestBody @Valid DeleteAndForgetUserRequest request) {
         usersService.deleteAndForget(UUID.fromString(principal.getName()), userId, request.getRequestReason());
     }
 
@@ -75,18 +76,20 @@ public class UsersController {
     @PutMapping("/{userId}")
     @ApiOperation("Update an organization user's details")
     @AdminOrOrgAdminOrOrgUser
-    public void updateUser(@ApiIgnore Principal principal, @PathVariable UUID userId,
-            @RequestBody @Valid UpdateUserRequest request) {
+    public void updateUser(@ApiIgnore Principal principal,
+                           @PathVariable UUID userId,
+                           @RequestBody @Valid UpdateUserRequest request) {
         usersService.updateUser(UUID.fromString(principal.getName()), userId, request.getEmail(),
-                request.getDisplayName());
+            request.getDisplayName());
     }
 
     @PostMapping("/{userId}/roles")
     @ResponseStatus(OK)
     @ApiOperation("Add user roles")
     @AdminOnly
-    public void addUserRoles(@ApiIgnore Principal principal, @PathVariable UUID userId,
-                                @RequestBody Set<Role> roles) {
+    public void addUserRoles(@ApiIgnore Principal principal,
+                             @PathVariable UUID userId,
+                             @RequestBody Set<Role> roles) {
         usersService.addUserRoles(UUID.fromString(principal.getName()), userId, roles);
     }
 
@@ -94,7 +97,8 @@ public class UsersController {
     @ResponseStatus(OK)
     @ApiOperation("Remove user roles")
     @AdminOnly
-    public void removeUserRoles(@ApiIgnore Principal principal, @PathVariable UUID userId,
+    public void removeUserRoles(@ApiIgnore Principal principal,
+                                @PathVariable UUID userId,
                                 @RequestBody Set<Role> roles) {
         usersService.removeUserRoles(UUID.fromString(principal.getName()), userId, roles);
     }

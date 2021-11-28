@@ -35,17 +35,17 @@ public class DefaultOrganizationsReadService implements OrganizationsReadService
     @Override
     public List<Organization> getOrganizations() {
         return organizationsRepository.findAll().stream()
-                .map(DefaultOrganizationsReadService::convert)
-                .collect(toList());
+            .map(DefaultOrganizationsReadService::convert)
+            .collect(toList());
     }
 
     private static Organization convert(PersistableOrganization persistableOrganization) {
         var address = persistableOrganization.getAddress();
         var organizationAddress = new OrganizationAddress(address.getStreet(),
-                address.getCity(), address.getState(), address.getCountry(), address.getPostalCode());
+            address.getCity(), address.getState(), address.getCountry(), address.getPostalCode());
         return new Organization(persistableOrganization.getId(), persistableOrganization.getOrganizationName(),
-                organizationAddress, persistableOrganization.getWebsiteUrl(), persistableOrganization.getContactName(),
-                persistableOrganization.getPhoneNumber(), persistableOrganization.getEmailAddress(),
-                persistableOrganization.isDisabled());
+            organizationAddress, persistableOrganization.getWebsiteUrl(), persistableOrganization.getContactName(),
+            persistableOrganization.getPhoneNumber(), persistableOrganization.getEmailAddress(),
+            persistableOrganization.isDisabled());
     }
 }

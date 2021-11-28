@@ -55,8 +55,8 @@ public class ExceptionHandlingControllerAdvice extends ResponseEntityExceptionHa
                                                                   HttpStatus status,
                                                                   WebRequest request) {
         var errors = exception.getBindingResult().getFieldErrors().stream()
-                .map(x -> String.format("%s: %s", x.getField(), x.getDefaultMessage()))
-                .collect(joining("; "));
+            .map(x -> String.format("%s: %s", x.getField(), x.getDefaultMessage()))
+            .collect(joining("; "));
         return new ResponseEntity<>(createResponseBody(errors, BAD_REQUEST), new HttpHeaders(), BAD_REQUEST);
     }
 
@@ -93,9 +93,9 @@ public class ExceptionHandlingControllerAdvice extends ResponseEntityExceptionHa
 
     private ApiErrorResponse createResponseBody(String message, HttpStatus httpStatus) {
         return ApiErrorResponse.builder()
-                .status(httpStatus)
-                .message(message)
-                .timestamp(Instant.now(clock))
-                .build();
+            .status(httpStatus)
+            .message(message)
+            .timestamp(Instant.now(clock))
+            .build();
     }
 }

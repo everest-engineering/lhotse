@@ -73,7 +73,7 @@ class UsersControllerTest {
     @BeforeEach
     public void setup() {
         Mockito.<ReadService<? extends Identifiable>>when(readServiceProvider.getService(User.class.getSimpleName()))
-                .thenReturn(usersReadService);
+            .thenReturn(usersReadService);
         this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
     }
 
@@ -85,16 +85,16 @@ class UsersControllerTest {
         when(usersReadService.getUsers()).thenReturn(asList(ORG_1_USER_1, ORG_2_USER_1));
 
         mockMvc.perform(get("/api/users"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_JSON))
-                .andExpect(jsonPath("$.[0].id", is(ORG_1_USER_1.getId().toString())))
-                .andExpect(jsonPath("$.[1].id", is(ORG_2_USER_1.getId().toString())))
-                .andExpect(jsonPath("$.[0].organizationId", is(ORGANIZATION_ID_1.toString())))
-                .andExpect(jsonPath("$.[1].organizationId", is(ORGANIZATION_ID_2.toString())))
-                .andExpect(jsonPath("$.[0].displayName", is(ORG_1_USER_1.getDisplayName())))
-                .andExpect(jsonPath("$.[1].displayName", is(ORG_2_USER_1.getDisplayName())))
-                .andExpect(jsonPath("$.[0].email", is(ORG_1_USER_1.getUsername())))
-                .andExpect(jsonPath("$.[1].email", is(ORG_2_USER_1.getUsername())));
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(APPLICATION_JSON))
+            .andExpect(jsonPath("$.[0].id", is(ORG_1_USER_1.getId().toString())))
+            .andExpect(jsonPath("$.[1].id", is(ORG_2_USER_1.getId().toString())))
+            .andExpect(jsonPath("$.[0].organizationId", is(ORGANIZATION_ID_1.toString())))
+            .andExpect(jsonPath("$.[1].organizationId", is(ORGANIZATION_ID_2.toString())))
+            .andExpect(jsonPath("$.[0].displayName", is(ORG_1_USER_1.getDisplayName())))
+            .andExpect(jsonPath("$.[1].displayName", is(ORG_2_USER_1.getDisplayName())))
+            .andExpect(jsonPath("$.[0].email", is(ORG_1_USER_1.getUsername())))
+            .andExpect(jsonPath("$.[1].email", is(ORG_2_USER_1.getUsername())));
     }
 
     @Test
@@ -104,12 +104,12 @@ class UsersControllerTest {
         when(usersReadService.getById(ORG_2_USER_1.getId())).thenReturn(ORG_2_USER_1);
 
         mockMvc.perform(get("/api/users/{userId}", ORG_2_USER_1.getId()).contentType(APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_JSON))
-                .andExpect(jsonPath("$.id", is(ORG_2_USER_1.getId().toString())))
-                .andExpect(jsonPath("$.organizationId", is(ORGANIZATION_ID_2.toString())))
-                .andExpect(jsonPath("$.displayName", is(ORG_2_USER_1.getDisplayName())))
-                .andExpect(jsonPath("$.email", is(ORG_2_USER_1.getUsername())));
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(APPLICATION_JSON))
+            .andExpect(jsonPath("$.id", is(ORG_2_USER_1.getId().toString())))
+            .andExpect(jsonPath("$.organizationId", is(ORGANIZATION_ID_2.toString())))
+            .andExpect(jsonPath("$.displayName", is(ORG_2_USER_1.getDisplayName())))
+            .andExpect(jsonPath("$.email", is(ORG_2_USER_1.getUsername())));
     }
 
     @Test
@@ -119,13 +119,13 @@ class UsersControllerTest {
         when(usersReadService.getById(ORG_2_USER_1.getId())).thenReturn(ORG_2_USER_1);
 
         mockMvc.perform(put("/api/users/{userId}", ORG_2_USER_1.getId())
-                        .principal(() -> ADMIN_USER.getId().toString())
-                        .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new UpdateUserRequest("display-name-change", "email-change"))))
-                .andExpect(status().isOk());
+            .principal(() -> ADMIN_USER.getId().toString())
+            .contentType(APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(new UpdateUserRequest("display-name-change", "email-change"))))
+            .andExpect(status().isOk());
 
         verify(usersService).updateUser(ADMIN_USER.getId(), ORG_2_USER_1.getId(), "email-change",
-                "display-name-change");
+            "display-name-change");
     }
 
     @Test
@@ -136,10 +136,10 @@ class UsersControllerTest {
         when(usersReadService.getById(ORG_2_USER_1.getId())).thenReturn(ORG_2_USER_1);
 
         mockMvc.perform(post("/api/users/{userId}/roles", ORG_2_USER_1.getId())
-                        .principal(() -> ADMIN_USER.getId().toString())
-                        .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(roles)))
-                .andExpect(status().isOk());
+            .principal(() -> ADMIN_USER.getId().toString())
+            .contentType(APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(roles)))
+            .andExpect(status().isOk());
 
         verify(usersService).addUserRoles(ADMIN_USER.getId(), ORG_2_USER_1.getId(), roles);
     }
@@ -152,10 +152,10 @@ class UsersControllerTest {
         when(usersReadService.getById(ORG_2_USER_1.getId())).thenReturn(ORG_2_USER_1);
 
         mockMvc.perform(delete("/api/users/{userId}/roles", ORG_2_USER_1.getId())
-                        .principal(() -> ADMIN_USER.getId().toString())
-                        .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(roles)))
-                .andExpect(status().isOk());
+            .principal(() -> ADMIN_USER.getId().toString())
+            .contentType(APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(roles)))
+            .andExpect(status().isOk());
 
         verify(usersService).removeUserRoles(ADMIN_USER.getId(), ORG_2_USER_1.getId(), roles);
     }
@@ -167,13 +167,13 @@ class UsersControllerTest {
         var aUser = new User(randomUUID(), authUser.getOrganizationId(), USER_USERNAME, "user");
         when(usersReadService.getById(aUser.getId())).thenReturn(aUser);
         mockMvc.perform(put("/api/users/{userId}", aUser.getId())
-                        .principal(() -> authUser.getId().toString())
-                        .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new UpdateUserRequest("display-name-change", "email-change"))))
-                .andExpect(status().isOk());
+            .principal(() -> authUser.getId().toString())
+            .contentType(APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(new UpdateUserRequest("display-name-change", "email-change"))))
+            .andExpect(status().isOk());
 
         verify(usersService).updateUser(authUser.getId(), aUser.getId(), "email-change",
-                "display-name-change");
+            "display-name-change");
     }
 
     @Test
@@ -183,13 +183,13 @@ class UsersControllerTest {
         when(usersReadService.getById(authUser.getId())).thenReturn(authUser);
 
         mockMvc.perform(put("/api/users/{userId}", authUser.getId())
-                        .principal(() -> authUser.getId().toString())
-                        .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new UpdateUserRequest("display-name-change", "email-change"))))
-                .andExpect(status().isOk());
+            .principal(() -> authUser.getId().toString())
+            .contentType(APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(new UpdateUserRequest("display-name-change", "email-change"))))
+            .andExpect(status().isOk());
 
         verify(usersService).updateUser(authUser.getId(), authUser.getId(), "email-change",
-                "display-name-change");
+            "display-name-change");
     }
 
     @Test
@@ -201,10 +201,10 @@ class UsersControllerTest {
         when(usersReadService.getById(targetUser.getId())).thenReturn(targetUser);
 
         mockMvc.perform(get("/api/users/{userId}", targetUser.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.displayName", is(targetUser.getDisplayName())))
-                .andExpect(jsonPath("$.id", is(targetUser.getId().toString())))
-                .andExpect(jsonPath("$.organizationId", is(targetUser.getOrganizationId().toString())));
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.displayName", is(targetUser.getDisplayName())))
+            .andExpect(jsonPath("$.id", is(targetUser.getId().toString())))
+            .andExpect(jsonPath("$.organizationId", is(targetUser.getOrganizationId().toString())));
     }
 
     @Test
@@ -215,10 +215,10 @@ class UsersControllerTest {
         when(usersReadService.getById(targetUser.getId())).thenReturn(targetUser);
 
         mockMvc.perform(get("/api/users/{userId}", targetUser.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.displayName", is(targetUser.getDisplayName())))
-                .andExpect(jsonPath("$.id", is(targetUser.getId().toString())))
-                .andExpect(jsonPath("$.organizationId", is(targetUser.getOrganizationId().toString())));
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.displayName", is(targetUser.getDisplayName())))
+            .andExpect(jsonPath("$.id", is(targetUser.getId().toString())))
+            .andExpect(jsonPath("$.organizationId", is(targetUser.getOrganizationId().toString())));
     }
 
     @Test
@@ -227,13 +227,13 @@ class UsersControllerTest {
         var authUser = new User(randomUUID(), ORG_1_USER_1.getOrganizationId(), USER_USERNAME, "user");
         UUID targetUserId = randomUUID();
         when(usersReadService.getById(targetUserId)).thenReturn(
-                new User(targetUserId, authUser.getOrganizationId(), "some@umbrella.com", ""));
+            new User(targetUserId, authUser.getOrganizationId(), "some@umbrella.com", ""));
 
         mockMvc.perform(put("/api/users/{userId}", targetUserId)
-                        .principal(() -> authUser.getId().toString())
-                        .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new UpdateUserRequest("new", null))))
-                .andExpect(status().isOk());
+            .principal(() -> authUser.getId().toString())
+            .contentType(APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(new UpdateUserRequest("new", null))))
+            .andExpect(status().isOk());
     }
 
     @Test
@@ -243,20 +243,20 @@ class UsersControllerTest {
         UUID targetUserId = randomUUID();
 
         mockMvc.perform(post("/api/users/{userId}/forget", targetUserId)
-                        .principal(() -> authUser.getId().toString())
-                        .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new DeleteAndForgetUserRequest("Submitted GDPR request"))))
-                .andExpect(status().isOk());
+            .principal(() -> authUser.getId().toString())
+            .contentType(APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(new DeleteAndForgetUserRequest("Submitted GDPR request"))))
+            .andExpect(status().isOk());
 
         verify(usersService).deleteAndForget(authUser.getId(), targetUserId, "Submitted GDPR request");
     }
 
     private static UserResponse getUserResponse(User user) {
         return new UserResponse(user.getId(),
-                user.getOrganizationId(),
-                user.getUsername(),
-                user.getDisplayName(),
-                user.getEmail(),
-                user.isDisabled());
+            user.getOrganizationId(),
+            user.getUsername(),
+            user.getDisplayName(),
+            user.getEmail(),
+            user.isDisabled());
     }
 }

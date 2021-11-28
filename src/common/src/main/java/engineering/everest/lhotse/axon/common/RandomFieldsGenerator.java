@@ -12,7 +12,7 @@ import static org.apache.commons.lang3.RandomStringUtils.random;
 public class RandomFieldsGenerator {
     private static final int GENERATED_PASSWORD_LENGTH = 40;
     private static final char[] PASSWORD_CHARACTER_SET =
-            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~`!@#$%^&*()-_=+[];:,.".toCharArray();
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~`!@#$%^&*()-_=+[];:,.".toCharArray();
 
     private final SecureRandom secureRandom;
 
@@ -26,6 +26,6 @@ public class RandomFieldsGenerator {
 
     public String generatePassword() {
         return random(GENERATED_PASSWORD_LENGTH, 0, PASSWORD_CHARACTER_SET.length - 1,
-                false, false, PASSWORD_CHARACTER_SET, secureRandom);
+            false, false, PASSWORD_CHARACTER_SET, secureRandom);
     }
 }

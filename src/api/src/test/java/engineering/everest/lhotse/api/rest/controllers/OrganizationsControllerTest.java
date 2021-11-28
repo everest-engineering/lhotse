@@ -57,13 +57,17 @@ class OrganizationsControllerTest {
     private static final String ROLE_ORG_USER = "ORG_USER";
     private static final NewUserRequest NEW_USER_REQUEST = new NewUserRequest(NEW_USER_USERNAME, NEW_USER_DISPLAY_NAME);
     private static final Organization ORGANIZATION_1 = new Organization(fromString("53ac29ab-ecc6-431e-bde0-64440cd3dc93"),
-            "organization-1", new OrganizationAddress("street-1", "city-1",
-            "state-1", "country-1", "postal-1"), "website-1", "contactName", "phoneNumber", "email@company.com", false);
+        "organization-1", new OrganizationAddress("street-1", "city-1",
+            "state-1", "country-1", "postal-1"),
+        "website-1", "contactName", "phoneNumber", "email@company.com", false);
     private static final Organization ORGANIZATION_2 = new Organization(fromString("a29797ff-11eb-40e4-9024-30e8cca17096"),
-            "organization-2", new OrganizationAddress("street-2", "city-2",
-            "state-2", "country-2", "postal-2"), "website-2", "", "", "", false);
-    private static final User ORG_1_USER_1 = new User(randomUUID(), ORGANIZATION_1.getId(), "user11@email.com", "new-user-display-name-11", false);
-    private static final User ORG_2_USER_2 = new User(randomUUID(), ORGANIZATION_2.getId(), "user22@email.com", "new-user-display-name-22", false);
+        "organization-2", new OrganizationAddress("street-2", "city-2",
+            "state-2", "country-2", "postal-2"),
+        "website-2", "", "", "", false);
+    private static final User ORG_1_USER_1 =
+        new User(randomUUID(), ORGANIZATION_1.getId(), "user11@email.com", "new-user-display-name-11", false);
+    private static final User ORG_2_USER_2 =
+        new User(randomUUID(), ORGANIZATION_2.getId(), "user22@email.com", "new-user-display-name-22", false);
     private static final UUID organizationId = ORG_1_USER_1.getOrganizationId();
 
     private MockMvc mockMvc;
@@ -93,40 +97,49 @@ class OrganizationsControllerTest {
     @WithMockKeycloakAuth(authorities = ROLE_ADMIN)
     void getOrganizationWillDelegate_WhenRequestingUserBelongsToOrganization() throws Exception {
         when(dtoConverter.convert(ORGANIZATION_1))
-                .thenReturn(getOrganizationResponse());
+            .thenReturn(getOrganizationResponse());
         when(organizationsReadService.getById(organizationId)).thenReturn(ORGANIZATION_1);
 
         mockMvc.perform(get("/api/organizations/{organizationId}", organizationId)
-                        .contentType(APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_JSON))
-                .andExpect(jsonPath("$.id", is(organizationId.toString())));
+            .contentType(APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(APPLICATION_JSON))
+            .andExpect(jsonPath("$.id", is(organizationId.toString())));
     }
 
     @Test
     @WithMockKeycloakAuth(authorities = ROLE_ADMIN)
     void updateOrganizationWillDelegate_WhenRequestingUserIsAdmin() throws Exception {
         mockMvc.perform(put("/api/organizations/{organizationId}", ORGANIZATION_1.getId())
-                        .principal(() -> ADMIN_USER.getId().toString())
-                        .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new UpdateOrganizationRequest(ORGANIZATION_1.getOrganizationName(), ORGANIZATION_1.getOrganizationAddress().getStreet(),
-                                ORGANIZATION_1.getOrganizationAddress().getCity(), ORGANIZATION_1.getOrganizationAddress().getState(), ORGANIZATION_1.getOrganizationAddress().getCountry(), ORGANIZATION_1.getOrganizationAddress().getPostalCode(), ORGANIZATION_1.getWebsiteUrl(),
-                                ORGANIZATION_1.getContactName(), ORGANIZATION_1.getPhoneNumber(), ORGANIZATION_1.getEmailAddress()))))
-                .andExpect(status().isOk());
+            .principal(() -> ADMIN_USER.getId().toString())
+            .contentType(APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(
+                new UpdateOrganizationRequest(ORGANIZATION_1.getOrganizationName(), ORGANIZATION_1.getOrganizationAddress().getStreet(),
+                    ORGANIZATION_1.getOrganizationAddress().getCity(), ORGANIZATION_1.getOrganizationAddress().getState(),
+                    ORGANIZATION_1.getOrganizationAddress().getCountry(), ORGANIZATION_1.getOrganizationAddress().getPostalCode(),
+                    ORGANIZATION_1.getWebsiteUrl(),
+                    ORGANIZATION_1.getContactName(), ORGANIZATION_1.getPhoneNumber(), ORGANIZATION_1.getEmailAddress()))))
+            .andExpect(status().isOk());
 
-        verify(organizationsService).updateOrganization(ADMIN_USER.getId(), ORGANIZATION_1.getId(), ORGANIZATION_1.getOrganizationName(), ORGANIZATION_1.getOrganizationAddress().getStreet(),
-                ORGANIZATION_1.getOrganizationAddress().getCity(), ORGANIZATION_1.getOrganizationAddress().getState(), ORGANIZATION_1.getOrganizationAddress().getCountry(), ORGANIZATION_1.getOrganizationAddress().getPostalCode(), ORGANIZATION_1.getWebsiteUrl(),
-                ORGANIZATION_1.getContactName(), ORGANIZATION_1.getPhoneNumber(), ORGANIZATION_1.getEmailAddress());
+        verify(organizationsService).updateOrganization(ADMIN_USER.getId(), ORGANIZATION_1.getId(), ORGANIZATION_1.getOrganizationName(),
+            ORGANIZATION_1.getOrganizationAddress().getStreet(),
+            ORGANIZATION_1.getOrganizationAddress().getCity(), ORGANIZATION_1.getOrganizationAddress().getState(),
+            ORGANIZATION_1.getOrganizationAddress().getCountry(), ORGANIZATION_1.getOrganizationAddress().getPostalCode(),
+            ORGANIZATION_1.getWebsiteUrl(),
+            ORGANIZATION_1.getContactName(), ORGANIZATION_1.getPhoneNumber(), ORGANIZATION_1.getEmailAddress());
     }
 
     @Test
     void updateOrganization_WillFail_WhenOrganizationIdIsBlank() throws Exception {
         mockMvc.perform(put("/api/organizations/{organizationId}", "")
-                        .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new UpdateOrganizationRequest(ORGANIZATION_1.getOrganizationName(), ORGANIZATION_1.getOrganizationAddress().getStreet(),
-                                ORGANIZATION_1.getOrganizationAddress().getCity(), ORGANIZATION_1.getOrganizationAddress().getState(), ORGANIZATION_1.getOrganizationAddress().getCountry(), ORGANIZATION_1.getOrganizationAddress().getPostalCode(), ORGANIZATION_1.getWebsiteUrl(),
-                                ORGANIZATION_1.getContactName(), ORGANIZATION_1.getPhoneNumber(), ORGANIZATION_1.getEmailAddress()))))
-                .andExpect(status().isNotFound());
+            .contentType(APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(
+                new UpdateOrganizationRequest(ORGANIZATION_1.getOrganizationName(), ORGANIZATION_1.getOrganizationAddress().getStreet(),
+                    ORGANIZATION_1.getOrganizationAddress().getCity(), ORGANIZATION_1.getOrganizationAddress().getState(),
+                    ORGANIZATION_1.getOrganizationAddress().getCountry(), ORGANIZATION_1.getOrganizationAddress().getPostalCode(),
+                    ORGANIZATION_1.getWebsiteUrl(),
+                    ORGANIZATION_1.getContactName(), ORGANIZATION_1.getPhoneNumber(), ORGANIZATION_1.getEmailAddress()))))
+            .andExpect(status().isNotFound());
 
         verifyNoInteractions(organizationsService);
     }
@@ -135,25 +148,25 @@ class OrganizationsControllerTest {
     @WithMockKeycloakAuth(authorities = ROLE_ADMIN)
     void retrievingUserListForOrganization_WillRetrieveSub_WhenRequestingUserIsAdmin() throws Exception {
         when(dtoConverter.convert(ORG_1_USER_1))
-                .thenReturn(getUserResponse());
+            .thenReturn(getUserResponse());
         when(usersReadService.getUsersForOrganization(ORGANIZATION_1.getId())).thenReturn(singletonList(ORG_1_USER_1));
 
         mockMvc.perform(get("/api/organizations/{organizationId}/users", ORGANIZATION_1.getId())
-                        .principal(() -> ORG_1_USER_1.getId().toString()))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_JSON))
-                .andExpect(jsonPath("$.[0].id", is(ORG_1_USER_1.getId().toString())))
-                .andExpect(jsonPath("$.[0].organizationId", is(ORGANIZATION_1.getId().toString())))
-                .andExpect(jsonPath("$.[0].displayName", is(ORG_1_USER_1.getDisplayName())))
-                .andExpect(jsonPath("$.[0].email", is(ORG_1_USER_1.getUsername())));
+            .principal(() -> ORG_1_USER_1.getId().toString()))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(APPLICATION_JSON))
+            .andExpect(jsonPath("$.[0].id", is(ORG_1_USER_1.getId().toString())))
+            .andExpect(jsonPath("$.[0].organizationId", is(ORGANIZATION_1.getId().toString())))
+            .andExpect(jsonPath("$.[0].displayName", is(ORG_1_USER_1.getDisplayName())))
+            .andExpect(jsonPath("$.[0].email", is(ORG_1_USER_1.getUsername())));
     }
 
     @Test
     void creatingOrganizationUser_WillFail_WhenEmailIsBlank() throws Exception {
         mockMvc.perform(post("/api/organizations/{organizationId}/users", ORGANIZATION_2.getId())
-                        .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new NewUserRequest("", ORG_1_USER_1.getDisplayName()))))
-                .andExpect(status().isBadRequest());
+            .contentType(APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(new NewUserRequest("", ORG_1_USER_1.getDisplayName()))))
+            .andExpect(status().isBadRequest());
 
         verifyNoInteractions(usersService);
     }
@@ -161,9 +174,9 @@ class OrganizationsControllerTest {
     @Test
     void creatingOrganizationUser_WillFail_WhenDisplayNameIsBlank() throws Exception {
         mockMvc.perform(post("/api/organizations/{organizationId}/users", ORGANIZATION_2.getId())
-                        .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new NewUserRequest(ORG_1_USER_1.getUsername(), ""))))
-                .andExpect(status().isBadRequest());
+            .contentType(APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(new NewUserRequest(ORG_1_USER_1.getUsername(), ""))))
+            .andExpect(status().isBadRequest());
 
         verifyNoInteractions(usersService);
     }
@@ -172,29 +185,29 @@ class OrganizationsControllerTest {
     @WithMockKeycloakAuth(authorities = ROLE_ADMIN)
     void creatingOrganizationUserWillDelegate_WhenRequestingUserIsAdmin() throws Exception {
         mockMvc.perform(post("/api/organizations/{organizationId}/users", ORGANIZATION_2.getId())
-                        .principal(() -> ORG_2_USER_2.getId().toString())
-                        .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(NEW_USER_REQUEST)))
-                .andExpect(status().isCreated())
-                .andExpect(content().string(Matchers.any(String.class)));
+            .principal(() -> ORG_2_USER_2.getId().toString())
+            .contentType(APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(NEW_USER_REQUEST)))
+            .andExpect(status().isCreated())
+            .andExpect(content().string(Matchers.any(String.class)));
 
         verify(usersService).createOrganizationUser(ORG_2_USER_2.getId(), ORGANIZATION_2.getId(), NEW_USER_USERNAME, NEW_USER_DISPLAY_NAME);
     }
 
     @Test
-    @WithMockKeycloakAuth(otherClaims = @ClaimSet(
+    @WithMockKeycloakAuth(
+        otherClaims = @ClaimSet(
             stringClaims = {
-                    @StringClaim(name = "organizationId", value = "a29797ff-11eb-40e4-9024-30e8cca17096"),
-                    @StringClaim(name = "roles", value = ROLE_ORG_USER)
-            }
-    ))
+                @StringClaim(name = "organizationId", value = "a29797ff-11eb-40e4-9024-30e8cca17096"),
+                @StringClaim(name = "roles", value = ROLE_ORG_USER)
+            }))
     void creatingOrganizationUserWillThrow_WhenRequestingUserIsNotAdmin() {
         try {
             mockMvc.perform(post("/api/organizations/{organizationId}/users", ORGANIZATION_2.getId())
-                            .principal(() -> ORG_2_USER_2.getId().toString())
-                            .contentType(APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(NEW_USER_REQUEST)))
-                    .andReturn();
+                .principal(() -> ORG_2_USER_2.getId().toString())
+                .contentType(APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(NEW_USER_REQUEST)))
+                .andReturn();
         } catch (Exception e) {
             assert e.getCause() instanceof AccessDeniedException;
         }
@@ -202,25 +215,25 @@ class OrganizationsControllerTest {
 
     private static UserResponse getUserResponse() {
         return new UserResponse(OrganizationsControllerTest.ORG_1_USER_1.getId(),
-                OrganizationsControllerTest.ORG_1_USER_1.getOrganizationId(),
-                OrganizationsControllerTest.ORG_1_USER_1.getUsername(),
-                OrganizationsControllerTest.ORG_1_USER_1.getDisplayName(),
-                OrganizationsControllerTest.ORG_1_USER_1.getEmail(),
-                OrganizationsControllerTest.ORG_1_USER_1.isDisabled());
+            OrganizationsControllerTest.ORG_1_USER_1.getOrganizationId(),
+            OrganizationsControllerTest.ORG_1_USER_1.getUsername(),
+            OrganizationsControllerTest.ORG_1_USER_1.getDisplayName(),
+            OrganizationsControllerTest.ORG_1_USER_1.getEmail(),
+            OrganizationsControllerTest.ORG_1_USER_1.isDisabled());
     }
 
     private static OrganizationResponse getOrganizationResponse() {
         return new OrganizationResponse(OrganizationsControllerTest.ORGANIZATION_1.getId(),
-                OrganizationsControllerTest.ORGANIZATION_1.getOrganizationName(),
-                OrganizationsControllerTest.ORGANIZATION_1.getOrganizationAddress().getStreet(),
-                OrganizationsControllerTest.ORGANIZATION_1.getOrganizationAddress().getCity(),
-                OrganizationsControllerTest.ORGANIZATION_1.getOrganizationAddress().getState(),
-                OrganizationsControllerTest.ORGANIZATION_1.getOrganizationAddress().getCountry(),
-                OrganizationsControllerTest.ORGANIZATION_1.getOrganizationAddress().getPostalCode(),
-                OrganizationsControllerTest.ORGANIZATION_1.getWebsiteUrl(),
-                OrganizationsControllerTest.ORGANIZATION_1.getContactName(),
-                OrganizationsControllerTest.ORGANIZATION_1.getPhoneNumber(),
-                OrganizationsControllerTest.ORGANIZATION_1.getEmailAddress(),
-                OrganizationsControllerTest.ORGANIZATION_1.isDisabled());
+            OrganizationsControllerTest.ORGANIZATION_1.getOrganizationName(),
+            OrganizationsControllerTest.ORGANIZATION_1.getOrganizationAddress().getStreet(),
+            OrganizationsControllerTest.ORGANIZATION_1.getOrganizationAddress().getCity(),
+            OrganizationsControllerTest.ORGANIZATION_1.getOrganizationAddress().getState(),
+            OrganizationsControllerTest.ORGANIZATION_1.getOrganizationAddress().getCountry(),
+            OrganizationsControllerTest.ORGANIZATION_1.getOrganizationAddress().getPostalCode(),
+            OrganizationsControllerTest.ORGANIZATION_1.getWebsiteUrl(),
+            OrganizationsControllerTest.ORGANIZATION_1.getContactName(),
+            OrganizationsControllerTest.ORGANIZATION_1.getPhoneNumber(),
+            OrganizationsControllerTest.ORGANIZATION_1.getEmailAddress(),
+            OrganizationsControllerTest.ORGANIZATION_1.isDisabled());
     }
 }

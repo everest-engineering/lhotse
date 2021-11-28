@@ -16,7 +16,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdateUserDetailsCommand implements UsersStatusValidatableCommand, EmailAddressValidatableCommand,
-        UserUniqueEmailValidatableCommand {
+    UserUniqueEmailValidatableCommand {
     @TargetAggregateIdentifier
     private UUID userId;
     private String emailChange;

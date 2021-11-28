@@ -40,10 +40,10 @@ public class OrganizationsEventHandler implements ReplayCompletionAware {
     void on(OrganizationCreatedForNewSelfRegisteredUserEvent event, @Timestamp Instant creationTime) {
         LOGGER.info("Creating new registered organization {}", event.getOrganizationId());
         var organizationAddress = new OrganizationAddress(event.getStreet(), event.getCity(), event.getState(),
-                event.getCountry(), event.getPostalCode());
+            event.getCountry(), event.getPostalCode());
         organizationsRepository.createOrganization(event.getOrganizationId(), event.getOrganizationName(),
-                organizationAddress, event.getWebsiteUrl(), event.getContactName(), event.getContactPhoneNumber(),
-                event.getContactEmail(), false, creationTime);
+            organizationAddress, event.getWebsiteUrl(), event.getContactName(), event.getContactPhoneNumber(),
+            event.getContactEmail(), false, creationTime);
     }
 
     @EventHandler
@@ -97,6 +97,8 @@ public class OrganizationsEventHandler implements ReplayCompletionAware {
     }
 
     private String selectDesiredState(String desiredState, String currentState) {
-        return desiredState == null ? currentState : desiredState;
+        return desiredState == null
+            ? currentState
+            : desiredState;
     }
 }

@@ -42,10 +42,10 @@ public class AxonConfig {
                                          @Value("${application.axon.retry.max-count}") int retryMaxCount,
                                          @Value("${application.axon.retry.pool-size}") int retryPoolSize) {
         return IntervalRetryScheduler.builder()
-                .retryInterval(retryInterval)
-                .maxRetryCount(retryMaxCount)
-                .retryExecutor(new ScheduledThreadPoolExecutor(retryPoolSize))
-                .build();
+            .retryInterval(retryInterval)
+            .maxRetryCount(retryMaxCount)
+            .retryExecutor(new ScheduledThreadPoolExecutor(retryPoolSize))
+            .build();
     }
 
     @Bean
@@ -53,10 +53,10 @@ public class AxonConfig {
                                                        RetryScheduler retryScheduler,
                                                        List<MessageDispatchInterceptor<? super CommandMessage<?>>> dispatchInterceptors) {
         return DefaultCommandGateway.builder()
-                .commandBus(commandBus)
-                .retryScheduler(retryScheduler)
-                .dispatchInterceptors(dispatchInterceptors)
-                .build();
+            .commandBus(commandBus)
+            .retryScheduler(retryScheduler)
+            .dispatchInterceptors(dispatchInterceptors)
+            .build();
     }
 
     @Bean
@@ -65,9 +65,9 @@ public class AxonConfig {
                                        CommandValidatingMessageHandlerInterceptor commandValidatingMessageHandlerInterceptor,
                                        LoggingMessageHandlerInterceptor loggingMessageHandlerInterceptor) {
         var simpleCommandBus = SimpleCommandBus.builder()
-                .transactionManager(txManager)
-                .messageMonitor(axonConfiguration.messageMonitor(CommandBus.class, "commandBus"))
-                .build();
+            .transactionManager(txManager)
+            .messageMonitor(axonConfiguration.messageMonitor(CommandBus.class, "commandBus"))
+            .build();
         simpleCommandBus.registerHandlerInterceptor(new CorrelationDataInterceptor<>(axonConfiguration.correlationDataProviders()));
         simpleCommandBus.registerHandlerInterceptor(commandValidatingMessageHandlerInterceptor);
         simpleCommandBus.registerHandlerInterceptor(loggingMessageHandlerInterceptor);
@@ -76,17 +76,17 @@ public class AxonConfig {
 
     @Autowired
     public void configure(
-            TaskExecutor taskExecutor,
-            EventProcessingModule eventProcessingModule,
-            @Value("${application.axon.event-processor.default-group:true}") boolean defaultGroup,
-            @Value("${application.axon.event-processor.type:tracking}") EventProcessorType eventProcessorType,
-            @Value("${application.axon.event-processor.segments:1}") int numberOfSegments) {
+                          TaskExecutor taskExecutor,
+                          EventProcessingModule eventProcessingModule,
+                          @Value("${application.axon.event-processor.default-group:true}") boolean defaultGroup,
+                          @Value("${application.axon.event-processor.type:tracking}") EventProcessorType eventProcessorType,
+                          @Value("${application.axon.event-processor.segments:1}") int numberOfSegments) {
         if (defaultGroup) {
             eventProcessingModule.byDefaultAssignTo("default");
         }
         eventProcessingModule.registerEventProcessorFactory(
-                new CompositeEventProcessorBuilder(
-                        taskExecutor, eventProcessingModule, eventProcessorType, numberOfSegments));
+            new CompositeEventProcessorBuilder(
+                taskExecutor, eventProcessingModule, eventProcessorType, numberOfSegments));
     }
 
     @Qualifier("eventSerializer")
@@ -94,7 +94,7 @@ public class AxonConfig {
     public CryptoShreddingSerializer eventSerializer(CryptoShreddingKeyService cryptoShreddingKeyService,
                                                      EncrypterDecrypterFactory aesEncrypterDecrypterFactory) {
         return new CryptoShreddingSerializer(JacksonSerializer.defaultSerializer(),
-                cryptoShreddingKeyService, aesEncrypterDecrypterFactory, new ObjectMapper());
+            cryptoShreddingKeyService, aesEncrypterDecrypterFactory, new ObjectMapper());
     }
 
     @Bean

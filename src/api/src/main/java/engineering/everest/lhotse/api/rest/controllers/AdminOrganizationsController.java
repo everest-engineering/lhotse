@@ -36,8 +36,9 @@ public class AdminOrganizationsController {
     private final OrganizationsReadService organizationsReadService;
 
     @Autowired
-    public AdminOrganizationsController(DtoConverter dtoConverter, OrganizationsService organizationsService,
-            OrganizationsReadService organizationsReadService) {
+    public AdminOrganizationsController(DtoConverter dtoConverter,
+                                        OrganizationsService organizationsService,
+                                        OrganizationsReadService organizationsReadService) {
         this.dtoConverter = dtoConverter;
         this.organizationsService = organizationsService;
         this.organizationsReadService = organizationsReadService;
@@ -49,8 +50,8 @@ public class AdminOrganizationsController {
     @AdminOnly
     public List<OrganizationResponse> getAllOrganizations() {
         return organizationsReadService.getOrganizations().stream()
-                .map(dtoConverter::convert)
-                .collect(toList());
+            .map(dtoConverter::convert)
+            .collect(toList());
     }
 
     @DeleteMapping("/{organizationId}")

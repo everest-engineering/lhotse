@@ -68,7 +68,7 @@ public class FirstTimeUserBootstrappingFilterTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
         filterConfig = new FirstTimeUserBootstrappingFilter("default-client",
-                hazelcastCommandGateway, usersReadService, organizationsReadService, randomFieldsGenerator);
+            hazelcastCommandGateway, usersReadService, organizationsReadService, randomFieldsGenerator);
     }
 
     @Test
@@ -90,7 +90,8 @@ public class FirstTimeUserBootstrappingFilterTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {
+    @ValueSource(
+        strings = {
             "/admin/organizations",
             "/admin/organizations/906e3a66-c6ee-418f-a411-4905eed31fde",
             "/api/organizations/906e3a66-c6ee-418f-a411-4905eed31fde",
@@ -102,7 +103,7 @@ public class FirstTimeUserBootstrappingFilterTest {
             "/api/users/9af4cb20-7eb7-486a-a30b-55141714f6af",
             "/api/users/9af4cb20-7eb7-486a-a30b-55141714f6af/forget",
             "/api/users/9af4cb20-7eb7-486a-a30b-55141714f6af/roles",
-    })
+        })
     void shouldNotFilterMethod_WillReturnFalseForProtectedApiPaths(String path) {
         when(httpServletRequest.getServletPath()).thenReturn(path);
         assertFalse(filterConfig.shouldNotFilter(httpServletRequest));
@@ -118,25 +119,25 @@ public class FirstTimeUserBootstrappingFilterTest {
     void organizationRegistrationSaga_WillNotBeTriggeredForAlreadyRegisteredUser() throws ServletException, IOException {
         when(httpServletRequest.getRequestURI()).thenReturn("/api/users");
         when(httpServletRequest.getUserPrincipal())
-                .thenReturn(new KeycloakAuthenticationToken(new OidcKeycloakAccount() {
-                    @Override
-                    public Principal getPrincipal() {
-                        return USER_ID::toString;
-                    }
+            .thenReturn(new KeycloakAuthenticationToken(new OidcKeycloakAccount() {
+                @Override
+                public Principal getPrincipal() {
+                    return USER_ID::toString;
+                }
 
-                    @Override
-                    public Set<String> getRoles() {
-                        return Set.of(Role.ORG_USER.toString(), Role.ORG_ADMIN.toString());
-                    }
+                @Override
+                public Set<String> getRoles() {
+                    return Set.of(Role.ORG_USER.toString(), Role.ORG_ADMIN.toString());
+                }
 
-                    @Override
-                    public KeycloakSecurityContext getKeycloakSecurityContext() {
-                        var accessToken = createDefaultAccessToken();
-                        accessToken.setOtherClaims("organizationId", ORGANIZATION_ID);
-                        accessToken.setOtherClaims("displayName", DISPLAY_NAME);
-                        return new KeycloakSecurityContext("", accessToken, "", new IDToken());
-                    }
-                }, false));
+                @Override
+                public KeycloakSecurityContext getKeycloakSecurityContext() {
+                    var accessToken = createDefaultAccessToken();
+                    accessToken.setOtherClaims("organizationId", ORGANIZATION_ID);
+                    accessToken.setOtherClaims("displayName", DISPLAY_NAME);
+                    return new KeycloakSecurityContext("", accessToken, "", new IDToken());
+                }
+            }, false));
 
         filterConfig.doFilterInternal(httpServletRequest, httpServletResponse, filterChain);
         verify(usersReadService, never()).exists(any());
@@ -150,24 +151,25 @@ public class FirstTimeUserBootstrappingFilterTest {
     void willAugmentAccessTokenForRecentlyRegisteredUsersCallingWithOldAccessToken() throws ServletException, IOException {
         when(httpServletRequest.getRequestURI()).thenReturn("/api/users");
         when(httpServletRequest.getUserPrincipal())
-                .thenReturn(new KeycloakAuthenticationToken(new OidcKeycloakAccount() {
-                    @Override
-                    public Principal getPrincipal() {
-                        return USER_ID::toString;
-                    }
+            .thenReturn(new KeycloakAuthenticationToken(new OidcKeycloakAccount() {
+                @Override
+                public Principal getPrincipal() {
+                    return USER_ID::toString;
+                }
 
-                    @Override
-                    public Set<String> getRoles() {
-                        return Set.of(Role.ORG_USER.toString(), Role.ORG_ADMIN.toString());
-                    }
+                @Override
+                public Set<String> getRoles() {
+                    return Set.of(Role.ORG_USER.toString(), Role.ORG_ADMIN.toString());
+                }
 
-                    @Override
-                    public KeycloakSecurityContext getKeycloakSecurityContext() {
-                        return new KeycloakSecurityContext("", createDefaultAccessToken(), "", new IDToken());
-                    }
-                }, false));
+                @Override
+                public KeycloakSecurityContext getKeycloakSecurityContext() {
+                    return new KeycloakSecurityContext("", createDefaultAccessToken(), "", new IDToken());
+                }
+            }, false));
         when(usersReadService.exists(USER_ID)).thenReturn(true);
-        when(usersReadService.getById(USER_ID)).thenReturn(new User(USER_ID, ORGANIZATION_ID, USERNAME_AND_ORGANISATION_NAME, DISPLAY_NAME));
+        when(usersReadService.getById(USER_ID))
+            .thenReturn(new User(USER_ID, ORGANIZATION_ID, USERNAME_AND_ORGANISATION_NAME, DISPLAY_NAME));
 
         filterConfig.doFilterInternal(httpServletRequest, httpServletResponse, filterChain);
         verify(organizationsReadService, never()).exists(any());
@@ -179,31 +181,32 @@ public class FirstTimeUserBootstrappingFilterTest {
     void willFullyBootstrapNewlyRegisteredUsers() throws ServletException, IOException {
         when(httpServletRequest.getRequestURI()).thenReturn("/api/users");
         when(httpServletRequest.getUserPrincipal())
-                .thenReturn(new KeycloakAuthenticationToken(new OidcKeycloakAccount() {
-                    @Override
-                    public Principal getPrincipal() {
-                        return USER_ID::toString;
-                    }
+            .thenReturn(new KeycloakAuthenticationToken(new OidcKeycloakAccount() {
+                @Override
+                public Principal getPrincipal() {
+                    return USER_ID::toString;
+                }
 
-                    @Override
-                    public Set<String> getRoles() {
-                        return Set.of(Role.ORG_USER.toString(), Role.ORG_ADMIN.toString());
-                    }
+                @Override
+                public Set<String> getRoles() {
+                    return Set.of(Role.ORG_USER.toString(), Role.ORG_ADMIN.toString());
+                }
 
-                    @Override
-                    public KeycloakSecurityContext getKeycloakSecurityContext() {
-                        return new KeycloakSecurityContext("", createDefaultAccessToken(), "", new IDToken());
-                    }
-                }, false));
+                @Override
+                public KeycloakSecurityContext getKeycloakSecurityContext() {
+                    return new KeycloakSecurityContext("", createDefaultAccessToken(), "", new IDToken());
+                }
+            }, false));
         when(randomFieldsGenerator.genRandomUUID()).thenReturn(ORGANIZATION_ID);
         when(usersReadService.exists(USER_ID)).thenReturn(false).thenReturn(true);
         when(organizationsReadService.exists(ORGANIZATION_ID)).thenReturn(true);
-        when(usersReadService.getById(USER_ID)).thenReturn(new User(USER_ID, ORGANIZATION_ID, USERNAME_AND_ORGANISATION_NAME, DISPLAY_NAME));
+        when(usersReadService.getById(USER_ID))
+            .thenReturn(new User(USER_ID, ORGANIZATION_ID, USERNAME_AND_ORGANISATION_NAME, DISPLAY_NAME));
 
         filterConfig.doFilterInternal(httpServletRequest, httpServletResponse, filterChain);
         verify(hazelcastCommandGateway).send(new CreateSelfRegisteredOrganizationCommand(ORGANIZATION_ID, USER_ID,
-                USERNAME_AND_ORGANISATION_NAME, null, null, null, null, null, null,
-                        DISPLAY_NAME, null, USER_EMAIL_ADDRESS));
+            USERNAME_AND_ORGANISATION_NAME, null, null, null, null, null, null,
+            DISPLAY_NAME, null, USER_EMAIL_ADDRESS));
         verifyNoMoreInteractions(hazelcastCommandGateway, createSelfRegisteredOrganizationCommand);
     }
 

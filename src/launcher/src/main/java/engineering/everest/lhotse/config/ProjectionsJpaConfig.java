@@ -60,23 +60,23 @@ public class ProjectionsJpaConfig {
     @Bean
     @Primary
     public LocalContainerEntityManagerFactoryBean entityManagerFactory(
-            EntityManagerFactoryBuilder builder,
-            DataSource dataSource,
-            JpaProperties jpaProperties) {
+                                                                       EntityManagerFactoryBuilder builder,
+                                                                       DataSource dataSource,
+                                                                       JpaProperties jpaProperties) {
         return builder
-                .dataSource(dataSource)
-                .properties(jpaProperties.getProperties())
-                .packages("engineering.everest.lhotse")
-                .persistenceUnit(PROJECTIONS_AUTO_CONFIG_QUALIFIER_NAME)
-                .build();
+            .dataSource(dataSource)
+            .properties(jpaProperties.getProperties())
+            .packages("engineering.everest.lhotse")
+            .persistenceUnit(PROJECTIONS_AUTO_CONFIG_QUALIFIER_NAME)
+            .build();
     }
 
     @Bean(name = "transactionManager")
     @Primary
     public ChainedTransactionManager platformTransactionManager(
-            EntityManagerFactory entityManagerFactory,
-            @Qualifier("file-mappings") PlatformTransactionManager fileMappingsTxManager,
-            @Qualifier("axon") PlatformTransactionManager eventsTxManager) {
+                                                                EntityManagerFactory entityManagerFactory,
+                                                                @Qualifier("file-mappings") PlatformTransactionManager fileMappingsTxManager,
+                                                                @Qualifier("axon") PlatformTransactionManager eventsTxManager) {
 
         var projectionsTxManager = new JpaTransactionManager(entityManagerFactory);
         return new ChainedTransactionManager(eventsTxManager, projectionsTxManager, fileMappingsTxManager);

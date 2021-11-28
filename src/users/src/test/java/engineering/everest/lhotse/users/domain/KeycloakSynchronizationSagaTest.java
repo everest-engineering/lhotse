@@ -37,13 +37,13 @@ public class KeycloakSynchronizationSagaTest {
     private static final Set<Role> roles = Set.of(Role.ORG_USER);
     private static final String EMAIL_ID = "tester@everest.engineering";
     private static final UserRolesAddedByAdminEvent USER_ROLES_ADDED_BY_ADMIN_EVENT =
-            new UserRolesAddedByAdminEvent(REGISTERING_USER_ID, roles, REQUESTING_USER_ID);
+        new UserRolesAddedByAdminEvent(REGISTERING_USER_ID, roles, REQUESTING_USER_ID);
     private static final UserRolesRemovedByAdminEvent USER_ROLES_REMOVED_BY_ADMIN_EVENT =
-            new UserRolesRemovedByAdminEvent(REGISTERING_USER_ID, roles, REQUESTING_USER_ID);
+        new UserRolesRemovedByAdminEvent(REGISTERING_USER_ID, roles, REQUESTING_USER_ID);
     private static final UserDetailsUpdatedByAdminEvent USER_DETAILS_UPDATED_BY_ADMIN_EVENT =
-            new UserDetailsUpdatedByAdminEvent(REGISTERING_USER_ID, ORGANIZATION_ID, DISPLAY_NAME, EMAIL_ID,REQUESTING_USER_ID);
+        new UserDetailsUpdatedByAdminEvent(REGISTERING_USER_ID, ORGANIZATION_ID, DISPLAY_NAME, EMAIL_ID, REQUESTING_USER_ID);
     private static final UserDeletedAndForgottenEvent USER_DELETED_AND_FORGOTTEN_EVENT =
-            new UserDeletedAndForgottenEvent(REGISTERING_USER_ID, REQUESTING_USER_ID, "testing");
+        new UserDeletedAndForgottenEvent(REGISTERING_USER_ID, REQUESTING_USER_ID, "testing");
     private static final User USER = new User(REGISTERING_USER_ID, ORGANIZATION_ID, USERNAME, DISPLAY_NAME);
     private static final User USER_2 = new User(REGISTERING_USER_ID, ORGANIZATION_ID, EMAIL_ID, DISPLAY_NAME, false);
 
@@ -63,9 +63,9 @@ public class KeycloakSynchronizationSagaTest {
     @Test
     void userRolesAddedByAdminEvent_WillFireAnApiCallToAddRolesInKeycloak() {
         testFixture.givenAggregate(REGISTERING_USER_ID.toString()).published()
-                .whenAggregate(REGISTERING_USER_ID.toString()).publishes(USER_ROLES_ADDED_BY_ADMIN_EVENT)
-                .expectNoDispatchedCommands()
-                .expectActiveSagas(0);
+            .whenAggregate(REGISTERING_USER_ID.toString()).publishes(USER_ROLES_ADDED_BY_ADMIN_EVENT)
+            .expectNoDispatchedCommands()
+            .expectActiveSagas(0);
 
         verify(keycloakSynchronizationService).addClientLevelUserRoles(USER.getId(), roles);
     }
@@ -73,9 +73,9 @@ public class KeycloakSynchronizationSagaTest {
     @Test
     void userRolesRemovedByAdminEvent_WillFireAnApiCallToRemoveRolesInKeycloak() {
         testFixture.givenAggregate(REGISTERING_USER_ID.toString()).published()
-                .whenAggregate(REGISTERING_USER_ID.toString()).publishes(USER_ROLES_REMOVED_BY_ADMIN_EVENT)
-                .expectNoDispatchedCommands()
-                .expectActiveSagas(0);
+            .whenAggregate(REGISTERING_USER_ID.toString()).publishes(USER_ROLES_REMOVED_BY_ADMIN_EVENT)
+            .expectNoDispatchedCommands()
+            .expectActiveSagas(0);
 
         verify(keycloakSynchronizationService).removeClientLevelUserRoles(USER.getId(), roles);
     }
@@ -85,21 +85,21 @@ public class KeycloakSynchronizationSagaTest {
         when(usersReadService.getById(USER_2.getId())).thenReturn(USER_2);
 
         testFixture.givenAggregate(REGISTERING_USER_ID.toString()).published()
-                .whenAggregate(REGISTERING_USER_ID.toString()).publishes(USER_DETAILS_UPDATED_BY_ADMIN_EVENT)
-                .expectNoDispatchedCommands()
-                .expectActiveSagas(0);
+            .whenAggregate(REGISTERING_USER_ID.toString()).publishes(USER_DETAILS_UPDATED_BY_ADMIN_EVENT)
+            .expectNoDispatchedCommands()
+            .expectActiveSagas(0);
 
         verify(keycloakSynchronizationService).updateUserAttributes(USER_2.getId(),
-                Map.of("attributes", new UserAttribute(USER_2.getOrganizationId(), USER_2.getDisplayName()),
-                        "email", USER_2.getEmail()));
+            Map.of("attributes", new UserAttribute(USER_2.getOrganizationId(), USER_2.getDisplayName()),
+                "email", USER_2.getEmail()));
     }
 
     @Test
     void userDeletedAndForgottenEvent_WillFireAnApiCallToDeleteUserFromKeycloak() {
         testFixture.givenAggregate(REGISTERING_USER_ID.toString()).published()
-                .whenAggregate(REGISTERING_USER_ID.toString()).publishes(USER_DELETED_AND_FORGOTTEN_EVENT)
-                .expectNoDispatchedCommands()
-                .expectActiveSagas(0);
+            .whenAggregate(REGISTERING_USER_ID.toString()).publishes(USER_DELETED_AND_FORGOTTEN_EVENT)
+            .expectNoDispatchedCommands()
+            .expectActiveSagas(0);
 
         verify(keycloakSynchronizationService).deleteUser(USER.getId());
     }

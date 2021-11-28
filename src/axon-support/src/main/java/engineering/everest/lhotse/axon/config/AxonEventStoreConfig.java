@@ -43,10 +43,9 @@ import java.sql.SQLException;
 @Slf4j
 @Configuration
 @EnableJpaRepositories(
-        entityManagerFactoryRef = "axonEntityManagerFactory",
-        transactionManagerRef = "axonPlatformTransactionManager",
-        basePackages = {"engineering.everest.axon"}
-)
+    entityManagerFactoryRef = "axonEntityManagerFactory",
+    transactionManagerRef = "axonPlatformTransactionManager",
+    basePackages = { "engineering.everest.axon" })
 public class AxonEventStoreConfig {
 
     static final String AXON_AUTO_CONFIG_QUALIFIER = "axon";
@@ -74,39 +73,35 @@ public class AxonEventStoreConfig {
 
     @Bean
     @Qualifier(AXON_AUTO_CONFIG_QUALIFIER)
-    public LocalContainerEntityManagerFactoryBean axonEntityManagerFactory(
-            EntityManagerFactoryBuilder builder,
-            @Qualifier(AXON_AUTO_CONFIG_QUALIFIER) DataSource dataSource,
-            @Qualifier(AXON_AUTO_CONFIG_QUALIFIER) JpaProperties jpaProperties) {
+    public LocalContainerEntityManagerFactoryBean axonEntityManagerFactory(EntityManagerFactoryBuilder builder,
+                                                                           @Qualifier(AXON_AUTO_CONFIG_QUALIFIER) DataSource dataSource,
+                                                                           @Qualifier(AXON_AUTO_CONFIG_QUALIFIER) JpaProperties jpaProperties) {
         return builder
-                .dataSource(dataSource)
-                .properties(jpaProperties.getProperties())
-                .packages("org.axonframework.eventsourcing.eventstore.jpa",
-                        "org.axonframework.eventhandling.tokenstore.jpa",
-                        "org.axonframework.modelling.saga.repository.jpa",
-                        "engineering.everest.axon.cryptoshredding")
-                .persistenceUnit(AXON_AUTO_CONFIG_QUALIFIER)
-                .build();
+            .dataSource(dataSource)
+            .properties(jpaProperties.getProperties())
+            .packages("org.axonframework.eventsourcing.eventstore.jpa",
+                "org.axonframework.eventhandling.tokenstore.jpa",
+                "org.axonframework.modelling.saga.repository.jpa",
+                "engineering.everest.axon.cryptoshredding")
+            .persistenceUnit(AXON_AUTO_CONFIG_QUALIFIER)
+            .build();
     }
 
     @Bean
     @Qualifier(AXON_AUTO_CONFIG_QUALIFIER)
-    public PlatformTransactionManager axonPlatformTransactionManager(
-            @Qualifier(AXON_AUTO_CONFIG_QUALIFIER) EntityManagerFactory entityManagerFactory) {
+    public PlatformTransactionManager axonPlatformTransactionManager(@Qualifier(AXON_AUTO_CONFIG_QUALIFIER) EntityManagerFactory entityManagerFactory) {
         return new JpaTransactionManager(entityManagerFactory);
     }
 
     @Bean
     @Qualifier(AXON_AUTO_CONFIG_QUALIFIER)
-    public EntityManager axonSharedEntityManager(
-            @Qualifier(AXON_AUTO_CONFIG_QUALIFIER) EntityManagerFactory entityManagerFactory) {
+    public EntityManager axonSharedEntityManager(@Qualifier(AXON_AUTO_CONFIG_QUALIFIER) EntityManagerFactory entityManagerFactory) {
         return SharedEntityManagerCreator.createSharedEntityManager(entityManagerFactory);
     }
 
     @Bean
     @Qualifier(AXON_AUTO_CONFIG_QUALIFIER)
-    public EntityManagerProvider axonEntityManagerProvider(
-            @Qualifier(AXON_AUTO_CONFIG_QUALIFIER) EntityManager entityManager) {
+    public EntityManagerProvider axonEntityManagerProvider(@Qualifier(AXON_AUTO_CONFIG_QUALIFIER) EntityManager entityManager) {
         return new SimpleEntityManagerProvider(entityManager);
     }
 
@@ -118,8 +113,8 @@ public class AxonEventStoreConfig {
 
     @Bean
     @Qualifier(AXON_AUTO_CONFIG_QUALIFIER)
-    public PersistenceExceptionResolver axonPersistenceExceptionResolver(
-            @Qualifier(AXON_AUTO_CONFIG_QUALIFIER) DataSource dataSource) throws SQLException {
+    public PersistenceExceptionResolver axonPersistenceExceptionResolver(@Qualifier(AXON_AUTO_CONFIG_QUALIFIER) DataSource dataSource)
+        throws SQLException {
         return new SQLErrorCodesResolver(dataSource);
     }
 
@@ -132,35 +127,34 @@ public class AxonEventStoreConfig {
                                                   @Qualifier(AXON_AUTO_CONFIG_QUALIFIER) EntityManagerProvider entityManagerProvider,
                                                   @Qualifier(AXON_AUTO_CONFIG_QUALIFIER) TransactionManager transactionManager) {
         return JpaEventStorageEngine.builder()
-                .snapshotSerializer(defaultSerializer)
-                .upcasterChain(configuration.upcasterChain())
-                .persistenceExceptionResolver(persistenceExceptionResolver)
-                .eventSerializer(cryptoShreddingEventSerializer)
-                .entityManagerProvider(entityManagerProvider)
-                .transactionManager(transactionManager)
-                .build();
+            .snapshotSerializer(defaultSerializer)
+            .upcasterChain(configuration.upcasterChain())
+            .persistenceExceptionResolver(persistenceExceptionResolver)
+            .eventSerializer(cryptoShreddingEventSerializer)
+            .entityManagerProvider(entityManagerProvider)
+            .transactionManager(transactionManager)
+            .build();
     }
 
     @Bean
     public SagaStore globalSagaStore(@Qualifier(AXON_AUTO_CONFIG_QUALIFIER) EntityManagerProvider entityManagerProvider,
                                      CryptoShreddingSerializer cryptoShreddingEventSerializer) {
         return JpaSagaStore.builder()
-                .serializer(cryptoShreddingEventSerializer)
-                .entityManagerProvider(entityManagerProvider)
-                .build();
+            .serializer(cryptoShreddingEventSerializer)
+            .entityManagerProvider(entityManagerProvider)
+            .build();
     }
 
     @Bean
     @Qualifier(AXON_AUTO_CONFIG_QUALIFIER)
-    public TokenStore tokenStore(
-            @Qualifier(AXON_AUTO_CONFIG_QUALIFIER) EntityManagerProvider entityManagerProvider,
-            Serializer defaultSerializer) {
+    public TokenStore tokenStore(@Qualifier(AXON_AUTO_CONFIG_QUALIFIER) EntityManagerProvider entityManagerProvider,
+                                 Serializer defaultSerializer) {
 
         return JpaTokenStore.builder()
-                .entityManagerProvider(entityManagerProvider)
-                .serializer(defaultSerializer)
-                .nodeId(ManagementFactory.getRuntimeMXBean().getName())
-                .build();
+            .entityManagerProvider(entityManagerProvider)
+            .serializer(defaultSerializer)
+            .nodeId(ManagementFactory.getRuntimeMXBean().getName())
+            .build();
     }
 
     @Bean

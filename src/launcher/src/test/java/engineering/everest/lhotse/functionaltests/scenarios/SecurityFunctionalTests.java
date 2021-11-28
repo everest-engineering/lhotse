@@ -27,9 +27,9 @@ class SecurityFunctionalTests {
     @WithAnonymousUser
     void applicationIsAbleToStart() {
         webClient.get().uri("/api/version")
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(String.class);
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody(String.class);
     }
 
     @Test
@@ -37,21 +37,21 @@ class SecurityFunctionalTests {
     @WithAnonymousUser
     void swaggerApiDocIsAccessible() throws IOException {
         String apiContent = webClient.get().uri("/api/doc")
-                .exchange()
-                .expectStatus().isOk()
-                .returnResult(String.class).getResponseBody().blockFirst();
+            .exchange()
+            .expectStatus().isOk()
+            .returnResult(String.class).getResponseBody().blockFirst();
 
         assertNotNull(apiContent);
 
         Files.writeString(
-                Paths.get(System.getProperty("org.gradle.project.buildDir"), "web-app-api.json"),
-                apiContent);
+            Paths.get(System.getProperty("org.gradle.project.buildDir"), "web-app-api.json"),
+            apiContent);
     }
 
     @Test
     void retrievingOrganizationListWillRedirectToLogin_WhenUserIsNotAuthenticated() {
         webClient.get().uri("/admin/organizations")
-                .exchange()
-                .expectStatus().isFound();
+            .exchange()
+            .expectStatus().isFound();
     }
 }
