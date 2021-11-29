@@ -100,7 +100,7 @@ public class FirstTimeUserBootstrappingFilter extends OncePerRequestFilter {
             LOGGER.info("Bootstrapping newly registered user {}", userId);
             var newOrganizationId = randomFieldsGenerator.genRandomUUID();
             var userEmailAddress = accessToken.getEmail();
-            var organizationName = accessToken.getPreferredUsername();
+            var organizationName = "New Organization";
             var displayName = otherClaims.getOrDefault(DISPLAY_NAME_KEY, "Guest").toString().trim();
 
             // You really want to disconnect the load balancer when doing a replay.... This would fail nicely if the user

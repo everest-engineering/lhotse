@@ -45,7 +45,7 @@ public class FirstTimeUserBootstrappingFilterTest {
 
     private static final UUID USER_ID = randomUUID();
     private static final UUID ORGANIZATION_ID = randomUUID();
-    private static final String USERNAME_AND_ORGANISATION_NAME = "user name";
+    private static final String USERNAME = "user name";
     private static final String DISPLAY_NAME = "New User";
     private static final String USER_EMAIL_ADDRESS = "tester@example.com";
 
@@ -169,7 +169,7 @@ public class FirstTimeUserBootstrappingFilterTest {
             }, false));
         when(usersReadService.exists(USER_ID)).thenReturn(true);
         when(usersReadService.getById(USER_ID))
-            .thenReturn(new User(USER_ID, ORGANIZATION_ID, USERNAME_AND_ORGANISATION_NAME, DISPLAY_NAME));
+            .thenReturn(new User(USER_ID, ORGANIZATION_ID, USERNAME, DISPLAY_NAME));
 
         filterConfig.doFilterInternal(httpServletRequest, httpServletResponse, filterChain);
         verify(organizationsReadService, never()).exists(any());
@@ -201,11 +201,11 @@ public class FirstTimeUserBootstrappingFilterTest {
         when(usersReadService.exists(USER_ID)).thenReturn(false).thenReturn(true);
         when(organizationsReadService.exists(ORGANIZATION_ID)).thenReturn(true);
         when(usersReadService.getById(USER_ID))
-            .thenReturn(new User(USER_ID, ORGANIZATION_ID, USERNAME_AND_ORGANISATION_NAME, DISPLAY_NAME));
+            .thenReturn(new User(USER_ID, ORGANIZATION_ID, USERNAME, DISPLAY_NAME));
 
         filterConfig.doFilterInternal(httpServletRequest, httpServletResponse, filterChain);
         verify(hazelcastCommandGateway).send(new CreateSelfRegisteredOrganizationCommand(ORGANIZATION_ID, USER_ID,
-            USERNAME_AND_ORGANISATION_NAME, null, null, null, null, null, null,
+            "New Organization", null, null, null, null, null, null,
             DISPLAY_NAME, null, USER_EMAIL_ADDRESS));
         verifyNoMoreInteractions(hazelcastCommandGateway, createSelfRegisteredOrganizationCommand);
     }
@@ -214,7 +214,7 @@ public class FirstTimeUserBootstrappingFilterTest {
         AccessToken accessToken = new AccessToken();
         accessToken.setOtherClaims("displayName", DISPLAY_NAME);
         accessToken.setSubject(USER_ID.toString());
-        accessToken.setPreferredUsername(USERNAME_AND_ORGANISATION_NAME);
+        accessToken.setPreferredUsername(USERNAME);
         accessToken.setEmail(USER_EMAIL_ADDRESS);
         var defaultAccess = new AccessToken.Access();
         defaultAccess.addRole(Role.ORG_USER.toString());

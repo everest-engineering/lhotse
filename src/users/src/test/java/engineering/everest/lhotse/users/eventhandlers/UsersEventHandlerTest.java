@@ -73,8 +73,15 @@ class UsersEventHandlerTest {
     }
 
     @Test
+    void onUserCreatedForNewlyRegisteredOrganizationEvent_WillProjectDeletedUser() {
+        usersEventHandler.on(new UserCreatedForNewlyRegisteredOrganizationEvent(ORGANIZATION_ID, USER_ID, null, null), CREATION_TIME);
+
+        verify(usersRepository).createUser(USER_ID, ORGANIZATION_ID, null, String.format("%s@deleted", USER_ID), CREATION_TIME);
+    }
+
+    @Test
     void onUserUpdatedByAdminEvent_WillPersistChanges_WhenFieldsHaveChanged() {
-        PersistableUser persistableUser = createPersistableUser();
+        var persistableUser = createPersistableUser();
 
         when(usersRepository.findById(USER_ID)).thenReturn(Optional.of(persistableUser));
 
@@ -88,7 +95,7 @@ class UsersEventHandlerTest {
 
     @Test
     void onUserDetailsUpdatedByAdminEvent_WillIgnoreFieldsThatAreNotBeingChanged() {
-        PersistableUser persistableUser = createPersistableUser();
+        var persistableUser = createPersistableUser();
 
         when(usersRepository.findById(USER_ID)).thenReturn(Optional.of(persistableUser));
 
@@ -101,7 +108,7 @@ class UsersEventHandlerTest {
 
     @Test
     void onUserDetailsUpdatedByAdminEvent_WillUpdateFieldsBeingBlanked() {
-        PersistableUser persistableUser = createPersistableUser();
+        var persistableUser = createPersistableUser();
 
         when(usersRepository.findById(USER_ID)).thenReturn(Optional.of(persistableUser));
 
@@ -114,7 +121,7 @@ class UsersEventHandlerTest {
 
     @Test
     void onUserProfilePhotoUploadedEvent_WillUpdateProfilePhotoFileId() {
-        PersistableUser persistableUser = createPersistableUser();
+        var persistableUser = createPersistableUser();
 
         when(usersRepository.findById(USER_ID)).thenReturn(Optional.of(persistableUser));
 
@@ -133,7 +140,7 @@ class UsersEventHandlerTest {
     }
 
     private static PersistableUser createPersistableUser() {
-        PersistableUser persistableUser = new PersistableUser();
+        var persistableUser = new PersistableUser();
         persistableUser.setEmail("old-email");
         persistableUser.setDisplayName("old-display-name");
         return persistableUser;
