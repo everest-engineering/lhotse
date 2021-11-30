@@ -35,8 +35,6 @@ subprojects {
     apply plugin: 'pmd'
     apply plugin: 'com.diffplug.spotless'
 
-    sourceCompatibility = 1.11
-    targetCompatibility = 1.11
     version = gitVersion()
 
     repositories {
@@ -45,37 +43,44 @@ subprojects {
     }
 
     ext {
-        axonCryptoShreddingVersion = '0.9.6'
-        axonHazelcastCommandDistributionVersion = '0.9.5'
-        mediaVersion = '0.9.4'
-        storageVersion = '0.9.7'
+        axonCryptoShreddingVersion = '0.9.7'
+        axonHazelcastCommandDistributionVersion = '0.9.6'
+        mediaVersion = '0.9.5'
+        storageVersion = '0.9.8'
 
         awsSdkVersion = '1.11.887'
-        axonVersion = '4.5.1'
+        axonVersion = '4.5.5'
         bouncyCastleVersion = '1.69'
         commonsLangVersion = '3.12.0'
         commonsTextVersion = '1.9'
         commonsValidatorVersion = '1.7'
+        ehCacheVersion = '3.9.7'
         hazelcastKubernetesVersion = '2.2.3'
-        hazelcastVersion = '4.2.1'
+        hazelcastVersion = '4.2.2'
         javaXCacheVersion = '1.1.1'
         javaXPersistenceVersion = '2.2'
         jsonHelperVersion = '20210307'
         keycloakVersion = '15.0.2'
-        liquibaseVersion = '4.4.0'
-        lombokVersion = '1.18.20'
-        microMeterPrometheusVersion = '1.7.1'
-        postgresDriverVersion = '42.2.18'
+        liquibaseVersion = '4.6.1'
+        lombokVersion = '1.18.22'
+        microMeterPrometheusVersion = '1.8.0'
+        postgresDriverVersion = '42.3.1'
         prometheusSimpleClientVersion = '0.11.0'
-        springBootVersion = '2.4.8'
+        springBootVersion = '2.6.0'
         swaggerVersion = '3.0.0'
         webfluxVersion = '2.5.5'
 
         h2Version = '1.4.200'
         hamcrestVersion = '2.2'
-        junitVersion = '5.7.2'
-        mockitoVersion = '3.11.2'
+        junitVersion = '5.8.1'
+        mockitoVersion = '4.0.0'
         undercouchVersion = '4.1.2'
+    }
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(11)
+        }
     }
 
     dependencyManagement {

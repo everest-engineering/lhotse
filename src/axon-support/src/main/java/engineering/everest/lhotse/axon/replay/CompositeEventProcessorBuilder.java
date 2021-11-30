@@ -44,8 +44,7 @@ public class CompositeEventProcessorBuilder implements EventProcessorBuilder {
         }
     }
 
-    private SubscribingEventProcessor buildSubscribingEventProcessor(
-                                                                     String name,
+    private SubscribingEventProcessor buildSubscribingEventProcessor(String name,
                                                                      Configuration configuration,
                                                                      EventHandlerInvoker eventHandlerInvoker) {
         return SubscribingEventProcessor.builder()
@@ -60,8 +59,7 @@ public class CompositeEventProcessorBuilder implements EventProcessorBuilder {
     }
 
     @SuppressWarnings("unchecked")
-    private ReplayMarkerAwareTrackingEventProcessor buildReplayMarkerAwareTrackingEventProcessor(
-                                                                                                 String name,
+    private ReplayMarkerAwareTrackingEventProcessor buildReplayMarkerAwareTrackingEventProcessor(String name,
                                                                                                  Configuration configuration,
                                                                                                  EventHandlerInvoker eventHandlerInvoker) {
         var trackingEventProcessorConfiguration = configuration.getComponent(

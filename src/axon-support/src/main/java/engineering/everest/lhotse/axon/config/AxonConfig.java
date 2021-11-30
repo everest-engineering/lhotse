@@ -21,6 +21,7 @@ import org.axonframework.messaging.interceptors.CorrelationDataInterceptor;
 import org.axonframework.modelling.command.AnnotationCommandTargetResolver;
 import org.axonframework.serialization.json.JacksonSerializer;
 import org.axonframework.spring.config.AxonConfiguration;
+import org.ehcache.jsr107.EhcacheCachingProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,10 +29,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.TaskExecutor;
 
+import javax.cache.CacheManager;
 import java.util.List;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import static engineering.everest.lhotse.axon.config.AxonEventStoreConfig.AXON_AUTO_CONFIG_QUALIFIER;
+import static javax.cache.Caching.getCachingProvider;
 
 @Slf4j
 @Configuration
@@ -75,8 +78,7 @@ public class AxonConfig {
     }
 
     @Autowired
-    public void configure(
-                          TaskExecutor taskExecutor,
+    public void configure(TaskExecutor taskExecutor,
                           EventProcessingModule eventProcessingModule,
                           @Value("${application.axon.event-processor.default-group:true}") boolean defaultGroup,
                           @Value("${application.axon.event-processor.type:tracking}") EventProcessorType eventProcessorType,
@@ -95,6 +97,12 @@ public class AxonConfig {
                                                      EncrypterDecrypterFactory aesEncrypterDecrypterFactory) {
         return new CryptoShreddingSerializer(JacksonSerializer.defaultSerializer(),
             cryptoShreddingKeyService, aesEncrypterDecrypterFactory, new ObjectMapper());
+    }
+
+    @Qualifier("axon-cache-manager")
+    @Bean
+    public CacheManager cacheManager() {
+        return getCachingProvider(EhcacheCachingProvider.class.getCanonicalName()).getCacheManager();
     }
 
     @Bean

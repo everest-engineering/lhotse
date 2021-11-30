@@ -53,7 +53,7 @@ sample code demonstrates end-to-end command handling and event processing flows 
 
 This project uses [Java 11](https://openjdk.java.net/projects/jdk/11/).
 
-The container system is [Docker](https://www.docker.com/).
+The container convenience tooling is [Docker](https://www.docker.com/).
 
 [Project Lombok](https://projectlombok.org/) greatly reduces the need for hand cranking tedious boilerplate code.
 

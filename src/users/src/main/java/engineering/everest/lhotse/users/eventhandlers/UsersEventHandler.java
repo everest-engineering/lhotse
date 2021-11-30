@@ -56,8 +56,8 @@ public class UsersEventHandler implements ReplayCompletionAware {
             ? String.format("%s@deleted", event.getUserId())
             : event.getUserEmail();
 
-            usersRepository.createUser(event.getUserId(), event.getOrganizationId(), event.getUserDisplayName(),
-                userEmail, creationTime);
+        usersRepository.createUser(event.getUserId(), event.getOrganizationId(), event.getUserDisplayName(),
+            userEmail, creationTime);
     }
 
     @EventHandler
