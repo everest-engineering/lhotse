@@ -2,15 +2,15 @@ package engineering.everest.lhotse.organizations.eventhandlers;
 
 import engineering.everest.lhotse.axon.replay.ReplayCompletionAware;
 import engineering.everest.lhotse.organizations.OrganizationAddress;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationAddressUpdatedEvent;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationContactDetailsUpdatedEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationCreatedForNewSelfRegisteredUserEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationDisabledByAdminEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationEnabledByAdminEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationNameChangedEvent;
-import engineering.everest.lhotse.organizations.domain.events.OrganizationContactDetailsUpdatedEvent;
-import engineering.everest.lhotse.organizations.domain.events.OrganizationAddressUpdatedEvent;
 import engineering.everest.lhotse.organizations.persistence.Address;
 import engineering.everest.lhotse.organizations.persistence.OrganizationsRepository;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventhandling.ResetHandler;
 import org.axonframework.eventhandling.Timestamp;
@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 
 @Service
-@Log4j2
+@Slf4j
 public class OrganizationsEventHandler implements ReplayCompletionAware {
 
     private final OrganizationsRepository organizationsRepository;

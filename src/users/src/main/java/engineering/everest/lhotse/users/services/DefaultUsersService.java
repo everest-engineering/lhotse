@@ -9,14 +9,14 @@ import engineering.everest.lhotse.users.domain.commands.DeleteAndForgetUserComma
 import engineering.everest.lhotse.users.domain.commands.RegisterUploadedUserProfilePhotoCommand;
 import engineering.everest.lhotse.users.domain.commands.RemoveUserRolesCommand;
 import engineering.everest.lhotse.users.domain.commands.UpdateUserDetailsCommand;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;
 import java.util.UUID;
 
 @Service
-@Log4j2
+@Slf4j
 public class DefaultUsersService implements UsersService {
 
     private final HazelcastCommandGateway commandGateway;

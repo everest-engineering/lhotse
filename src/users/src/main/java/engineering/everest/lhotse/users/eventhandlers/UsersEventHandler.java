@@ -9,7 +9,7 @@ import engineering.everest.lhotse.users.domain.events.UserDeletedAndForgottenEve
 import engineering.everest.lhotse.users.domain.events.UserDetailsUpdatedByAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserProfilePhotoUploadedEvent;
 import engineering.everest.lhotse.users.persistence.UsersRepository;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventhandling.ResetHandler;
 import org.axonframework.eventhandling.Timestamp;
@@ -21,7 +21,7 @@ import java.time.Instant;
 import static engineering.everest.lhotse.axon.common.domain.User.ADMIN_ID;
 
 @Service
-@Log4j2
+@Slf4j
 public class UsersEventHandler implements ReplayCompletionAware {
 
     private final UsersRepository usersRepository;

@@ -7,17 +7,17 @@ import engineering.everest.lhotse.organizations.persistence.OrganizationsReposit
 import engineering.everest.lhotse.organizations.persistence.PersistableOrganization;
 import engineering.everest.lhotse.users.persistence.PersistableUser;
 import engineering.everest.lhotse.users.persistence.UsersRepository;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import javax.annotation.PostConstruct;
 
 import static engineering.everest.lhotse.axon.common.domain.Role.ADMIN;
 import static engineering.everest.lhotse.axon.common.domain.Role.ORG_ADMIN;
@@ -26,7 +26,7 @@ import static engineering.everest.lhotse.axon.common.domain.User.ADMIN_ID;
 import static java.util.UUID.fromString;
 
 @Component
-@Log4j2
+@Slf4j
 public class AdminProvisionTask implements ReplayCompletionAware {
     public static final UUID ORGANIZATION_ID = fromString("00000000-0000-0000-0000-000000000000");
     private static final String ADMIN_DISPLAY_NAME = "Admin";

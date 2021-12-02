@@ -1,7 +1,7 @@
 package engineering.everest.lhotse.axon.common.services;
 
 import engineering.everest.lhotse.axon.common.domain.Identifiable;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -11,7 +11,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
-@Log4j2
+@Slf4j
 public class DefaultReadServiceProvider implements ReadServiceProvider {
 
     private static final String GET_BY_ID_METHOD = "getById";

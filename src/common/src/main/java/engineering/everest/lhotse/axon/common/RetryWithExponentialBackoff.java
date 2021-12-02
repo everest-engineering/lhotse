@@ -1,7 +1,7 @@
 package engineering.everest.lhotse.axon.common;
 
 import engineering.everest.lhotse.axon.common.exceptions.RetryTimedOutException;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
 import java.util.concurrent.Callable;
@@ -10,7 +10,7 @@ import java.util.function.Predicate;
 import static java.time.Duration.ZERO;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
-@Log4j2
+@Slf4j
 public class RetryWithExponentialBackoff {
     private final Duration initialSleep;
     private final long backoffMultiplier;
