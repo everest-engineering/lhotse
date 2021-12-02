@@ -74,6 +74,7 @@ subprojects {
         hamcrestVersion = '2.2'
         junitVersion = '5.8.1'
         mockitoVersion = '4.0.0'
+        slf4jTestVersion = '2.4.0'
         undercouchVersion = '4.1.2'
     }
 

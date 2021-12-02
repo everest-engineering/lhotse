@@ -2,7 +2,7 @@ package engineering.everest.lhotse.axon.command.validators;
 
 import engineering.everest.lhotse.axon.command.validation.UsersStatusValidatableCommand;
 import engineering.everest.lhotse.axon.command.validation.Validates;
-import engineering.everest.lhotse.i18n.TranslatableExceptionFactory;
+import engineering.everest.lhotse.i18n.exceptions.TranslatableIllegalStateException;
 import engineering.everest.lhotse.users.services.UsersReadService;
 import org.springframework.stereotype.Component;
 
@@ -24,10 +24,10 @@ public class UserStatusValidator implements Validates<UsersStatusValidatableComm
     public void validate(UsersStatusValidatableCommand validatable) {
         for (UUID userId : validatable.getUserIds()) {
             if (!usersReadService.exists(userId)) {
-                TranslatableExceptionFactory.throwForKey(USER_IS_UNKNOWN, userId);
+                throw new TranslatableIllegalStateException(USER_IS_UNKNOWN, userId);
             }
             if (usersReadService.getById(userId).isDisabled()) {
-                TranslatableExceptionFactory.throwForKey(USER_IS_DISABLED, userId);
+                throw new TranslatableIllegalStateException(USER_IS_DISABLED, userId);
             }
         }
     }

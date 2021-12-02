@@ -1,6 +1,6 @@
 package engineering.everest.lhotse.users.domain;
 
-import engineering.everest.lhotse.i18n.TranslatableExceptionFactory;
+import engineering.everest.lhotse.i18n.exceptions.TranslatableIllegalArgumentException;
 import engineering.everest.lhotse.users.domain.commands.AddUserRolesCommand;
 import engineering.everest.lhotse.users.domain.commands.CreateOrganizationUserCommand;
 import engineering.everest.lhotse.users.domain.commands.CreateUserForNewlyRegisteredOrganizationCommand;
@@ -126,7 +126,7 @@ public class UserAggregate implements Serializable {
 
     private void validateDisplayNameIsPresent(String displayName) {
         if (isBlank(displayName)) {
-            TranslatableExceptionFactory.throwForKey(USER_DISPLAY_NAME_MISSING);
+            throw new TranslatableIllegalArgumentException(USER_DISPLAY_NAME_MISSING);
         }
     }
 
@@ -134,19 +134,19 @@ public class UserAggregate implements Serializable {
         boolean changesMade = command.getDisplayNameChange() != null
             || command.getEmailChange() != null;
         if (!changesMade) {
-            TranslatableExceptionFactory.throwForKey(USER_UPDATE_NO_FIELDS_CHANGED);
+            throw new TranslatableIllegalArgumentException(USER_UPDATE_NO_FIELDS_CHANGED);
         }
     }
 
     private void validateAtLeastOneRoleIsPresent(AddUserRolesCommand command) {
         if (command.getRoles().isEmpty()) {
-            TranslatableExceptionFactory.throwForKey(USER_UPDATE_NO_ROLES_SPECIFIED);
+            throw new TranslatableIllegalArgumentException(USER_UPDATE_NO_ROLES_SPECIFIED);
         }
     }
 
     private void validateAtLeastOneRoleIsPresent(RemoveUserRolesCommand command) {
         if (command.getRoles().isEmpty()) {
-            TranslatableExceptionFactory.throwForKey(USER_UPDATE_NO_ROLES_SPECIFIED);
+            throw new TranslatableIllegalArgumentException(USER_UPDATE_NO_ROLES_SPECIFIED);
         }
     }
 

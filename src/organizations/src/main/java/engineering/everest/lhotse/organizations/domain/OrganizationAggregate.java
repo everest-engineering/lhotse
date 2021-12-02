@@ -1,6 +1,7 @@
 package engineering.everest.lhotse.organizations.domain;
 
-import engineering.everest.lhotse.i18n.TranslatableExceptionFactory;
+import engineering.everest.lhotse.i18n.exceptions.TranslatableIllegalArgumentException;
+import engineering.everest.lhotse.i18n.exceptions.TranslatableIllegalStateException;
 import engineering.everest.lhotse.organizations.domain.commands.CreateSelfRegisteredOrganizationCommand;
 import engineering.everest.lhotse.organizations.domain.commands.DisableOrganizationCommand;
 import engineering.everest.lhotse.organizations.domain.commands.EnableOrganizationCommand;
@@ -54,7 +55,7 @@ public class OrganizationAggregate implements Serializable {
     void handle(PromoteUserToOrganizationAdminCommand command) {
         validateOrganizationIsEnabled();
         if (organizationAdminIds.contains(command.getPromotedUserId())) {
-            TranslatableExceptionFactory.throwForKey(USER_ALREADY_ORGANIZATION_ADMIN, command.getPromotedUserId(), id);
+            throw new TranslatableIllegalStateException(USER_ALREADY_ORGANIZATION_ADMIN, command.getPromotedUserId(), id);
         }
 
         apply(new UserPromotedToOrganizationAdminEvent(command.getOrganizationId(), command.getPromotedUserId()));
@@ -69,7 +70,7 @@ public class OrganizationAggregate implements Serializable {
     @CommandHandler
     void handle(EnableOrganizationCommand command) {
         if (!disabled) {
-            TranslatableExceptionFactory.throwForKey(ORGANIZATION_ALREADY_ENABLED, id);
+            throw new TranslatableIllegalStateException(ORGANIZATION_ALREADY_ENABLED, id);
         }
         apply(new OrganizationEnabledByAdminEvent(command.getOrganizationId(), command.getRequestingUserId()));
     }
@@ -117,14 +118,14 @@ public class OrganizationAggregate implements Serializable {
 
     private void validateOrganizationIsEnabled() {
         if (disabled) {
-            TranslatableExceptionFactory.throwForKey(ORGANIZATION_IS_DISABLED, id);
+            throw new TranslatableIllegalStateException(ORGANIZATION_IS_DISABLED, id);
         }
     }
 
     private void validateAtLeastOneUpdateIsMade(UpdateOrganizationCommand command) {
         var isChangeMade = isNameUpdated(command) || areContactDetailsUpdated(command) || isAddressUpdated(command);
         if (!isChangeMade) {
-            TranslatableExceptionFactory.throwForKey(ORGANIZATION_UPDATE_NO_FIELDS_CHANGED);
+            throw new TranslatableIllegalArgumentException(ORGANIZATION_UPDATE_NO_FIELDS_CHANGED);
         }
     }
 

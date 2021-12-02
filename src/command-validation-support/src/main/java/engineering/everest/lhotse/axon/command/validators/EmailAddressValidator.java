@@ -2,7 +2,7 @@ package engineering.everest.lhotse.axon.command.validators;
 
 import engineering.everest.lhotse.axon.command.validation.EmailAddressValidatableCommand;
 import engineering.everest.lhotse.axon.command.validation.Validates;
-import engineering.everest.lhotse.i18n.TranslatableExceptionFactory;
+import engineering.everest.lhotse.i18n.exceptions.TranslatableIllegalArgumentException;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +17,7 @@ public class EmailAddressValidator implements Validates<EmailAddressValidatableC
             return;
         }
         if (!EmailValidator.getInstance(false).isValid(validatable.getEmailAddress())) {
-            TranslatableExceptionFactory.throwForKey(EMAIL_ADDRESS_MALFORMED);
+            throw new TranslatableIllegalArgumentException(EMAIL_ADDRESS_MALFORMED);
         }
     }
 }
