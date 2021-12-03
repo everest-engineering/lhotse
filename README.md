@@ -40,6 +40,7 @@ sample code demonstrates end-to-end command handling and event processing flows 
     - [User and Keycloak authentication token](#user-and-authentication-token)
     - [Endpoint access control](#endpoint-access-control)
   - [File support](#file-support)
+    - [Configuring the In-Memory Filestore](#configuring-the-in-memory-filestore) 
     - [Configuring Mongo GridFS](#configuring-mongo-gridfs)
     - [Configuring AWS S3](#configuring-aws-s3)
   - [Media support](#media-support)
@@ -84,7 +85,7 @@ KEYCLOAK_PASSWORD=******
 (Note: the above env variable values should match with the keycloak server details specified in the `application.properties` file and the 
 `build.gradle` file present in the launcher module. Keycloak test server also uses the same credentials for authentication.)
 
-Start up containers for Postgres, MongoDB and Keycloak:
+Start up containers for Postgres and Keycloak:
 
 `docker-compose up`
 
@@ -384,8 +385,18 @@ Our file store implementation automatically deduplicates files. Storing a file w
 a previous file will return a (new) file identifier mapping to the original. The most recently stored file will then be
 silently removed.
 
-File stores need backing service such as a blob store or filesystem. This starter kit supports
-[Mongo GridFS](https://docs.mongodb.com/manual/core/gridfs/) and AWS S3 at time of writing.
+File stores need backing service such as a blob store or filesystem. This starter kit supports an in-memory filestore, 
+[Mongo GridFS](https://docs.mongodb.com/manual/core/gridfs/) and [AWS S3](https://aws.amazon.com/s3/).
+
+### Configuring the In-Memory Filestore
+
+The in-memory filestore backend is intended only for development and testing. This filestore is not distributed so will not work well when 
+running multiple instances of the application in HA mode. A locally hosted or AWS hosted S3 compatible filestore is a better bet in this
+instance.
+
+```
+application.filestore.backend=inMemory
+```
 
 ### Configuring Mongo GridFS
 

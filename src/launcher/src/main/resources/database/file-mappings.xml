@@ -11,8 +11,8 @@
             </column>
             <column name="filesizebytes" type="bigint"/>
             <column name="filestoretype" type="int"/>
-            <column name="nativestoragefileid" type="varchar(255)"/>
-            <column name="nativestoragetype" type="integer"/>
+            <column name="backingstoragefileid" type="varchar(255)"/>
+            <column name="backingstoragetype" type="integer"/>
             <column name="sha256" type="char(64)"/>
             <column name="sha512" type="char(128)"/>
             <column name="markedfordeletion" type="boolean" defaultValueBoolean="false"/>

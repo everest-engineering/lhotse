@@ -5,7 +5,7 @@ services:
     container_name: postgres-db
     restart: always
     ports:
-      - 5432:5432
+      - "5432:5432"
     volumes:
       - ./src/launcher/db-scripts:/docker-entrypoint-initdb.d
     environment:
@@ -13,28 +13,10 @@ services:
       POSTGRES_DB: default
       POSTGRES_PASSWORD: postgres
 
-  mongo-db:
-    image: mongo:4
-    container_name: mongo-db
-    restart: always
-    ports:
-      - 27017:27017
-    environment:
-      MONGO_INITDB_DATABASE: test
-
-  mongo-express:
-    image: mongo-express
-    container_name: mongo-express
-    restart: always
-    links:
-      - 'mongo-db:mongo'
-    ports:
-      - 8081:8081
-
   keycloak:
     image: jboss/keycloak
     container_name: keycloak
-    command: 
+    command:
       -Djboss.http.port=${KEYCLOAK_SERVER_PORT}
     volumes:
       - ./keycloak/imports:/opt/jboss/keycloak/imports

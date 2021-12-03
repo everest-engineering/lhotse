@@ -68,8 +68,8 @@ public class DefaultUsersReadService implements UsersReadService {
 
     @Override
     public InputStream getProfilePhotoThumbnailStream(UUID userId, int width, int height) throws IOException {
-        PersistableUser persistableUser = usersRepository.findById(userId).orElseThrow();
-        UUID profilePhotoFileId = persistableUser.getProfilePhotoFileId();
+        var persistableUser = usersRepository.findById(userId).orElseThrow();
+        var profilePhotoFileId = persistableUser.getProfilePhotoFileId();
         if (profilePhotoFileId == null) {
             throw new NoSuchElementException("Profile photo not present");
         }
@@ -78,8 +78,8 @@ public class DefaultUsersReadService implements UsersReadService {
 
     @Override
     public InputStream getProfilePhotoStream(UUID id) throws IOException {
-        PersistableUser persistableUser = usersRepository.findById(id).orElseThrow();
-        UUID profilePhotoFileId = persistableUser.getProfilePhotoFileId();
+        var persistableUser = usersRepository.findById(id).orElseThrow();
+        var profilePhotoFileId = persistableUser.getProfilePhotoFileId();
         if (profilePhotoFileId == null) {
             throw new NoSuchElementException("Profile photo not present");
         }
