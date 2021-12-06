@@ -6,6 +6,7 @@ buildscript {
 
 plugins {
     id 'org.springframework.boot'
+    id "com.dorongold.task-tree" version "2.1.0"
     id "de.undercouch.download" version "${undercouchVersion}"
 }
 
@@ -86,36 +87,53 @@ dependencyManagement {
     }
 }
 
-task downloadKeycloakZipFile(type: Download) {
-    outputs.cacheIf {true}
+task downloadKeycloak(type: Download) {
+    outputs.cacheIf { true }
     src "https://github.com/keycloak/keycloak/releases/download/${keycloakVersion}/keycloak-${keycloakVersion}.zip"
-    dest new File(buildDir, "keycloak-${keycloakVersion}.zip")
+    dest new File('/tmp', "keycloak-${keycloakVersion}.zip") // Cache between clean builds
     onlyIfModified true
 }
 
-task downloadAndUnzipKeycloakFile(dependsOn: downloadKeycloakZipFile, type: Copy) {
-    from zipTree(downloadKeycloakZipFile.dest)
-    into buildDir
+task downloadAndUnzipKeycloak(dependsOn: downloadKeycloak, type: Copy) {
+    from zipTree(downloadKeycloak.dest)
+    into '/tmp'
 }
 
-task startServer(dependsOn: 'downloadAndUnzipKeycloakFile') {
+task killKeycloak() {
     doLast {
-        def keycloakDir = "$buildDir/keycloak-${keycloakVersion}"
-        def port = 8180
+        'pkill -f keycloak'.execute().waitFor()
+    }
+}
+
+task keycloakTestServer(dependsOn: downloadAndUnzipKeycloak) {
+    doFirst {
+        Properties properties = new Properties()
+        def file = project.rootProject.file('.env')
+        def port, testUser, testPass
+        if (file.exists()) {
+            properties.load(file.newDataInputStream())
+            port = properties.getProperty('KEYCLOAK_SERVER_PORT')
+            testUser = properties.getProperty('KEYCLOAK_USER')
+            testPass = properties.getProperty('KEYCLOAK_PASSWORD')
+        }
+
+        def keycloakDir = "/tmp/keycloak-${keycloakVersion}"
         def waitTime = 10000
-        def testUser = "admin@everest.engineering"
-        def testPass = "ac0n3x72"
 
         def createUser = "$keycloakDir/bin/add-user-keycloak.sh -r master -u $testUser -p $testPass".execute()
         createUser.consumeProcessOutput(System.out, System.err)
         createUser.waitForOrKill(waitTime)
 
-        def startServer = "$keycloakDir/bin/standalone.sh -Djboss.http.port=$port".execute()
-        startServer.consumeProcessOutput(System.out, System.err)
-        startServer.waitForOrKill(3 * waitTime)
+        def keycloakProcess = "$keycloakDir/bin/standalone.sh -Djboss.http.port=$port".execute()
+        // There is too much noise as it is
+        keycloakProcess.consumeProcessOutput(new FileOutputStream('/dev/null'), new FileOutputStream('/dev/null'))
+        keycloakProcess.waitForOrKill(2 * waitTime)
 
         def createRealm = "$keycloakDir/bin/kcadm.sh create realms -f $rootDir/keycloak/imports/realm-export.json --no-config --server http://localhost:$port/auth --realm master --user $testUser --password $testPass".execute()
         createRealm.consumeProcessOutput(System.out, System.err)
         createRealm.waitForOrKill(waitTime)
     }
 }
+
+test.dependsOn(keycloakTestServer)
+test.finalizedBy(killKeycloak)

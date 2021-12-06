@@ -69,7 +69,7 @@ by the Lombok annotations will not be visible (and the project will be littered 
 
 To build the entire application, including running unit and functional tests:
 
-`./gradlew startServer && ./gradlew build`
+`./gradlew build`
 
 (Note that functional tests share the same port number for embedded database as for the containerised database, if
 tests fail try running `docker-compose down` first. Free-up port for the keycloak test server as well).

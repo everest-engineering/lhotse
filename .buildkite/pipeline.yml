@@ -1,6 +1,3 @@
-if-release: &if-release
-    if: build.tag =~ /^[0-9]+\.[0-9]+\.[0-9]+\$/
-
 if-our-repo: &if-our-repo
     if: pipeline.repository =~ /^https:\/\/github.com\/everest-engineering\//
 
@@ -12,8 +9,7 @@ steps:
     agents:
       java: 11
     commands:
-      - pkill java || echo 'No Java processes to kill.'
-      - ./gradlew startServer && ./gradlew build --console plain
+      - ./gradlew clean build --console plain
 
   - label: ':sonarqube: Quality reporting'
     <<: *if-our-repo
@@ -21,17 +17,4 @@ steps:
     agents:
       java: 11
     commands:
-      - pkill java || echo 'No Java processes to kill.'
-      - ./gradlew clean startServer && ./gradlew codeCoverageReport sonarqube --console plain
-
-  - wait:
-    <<: *if-release
-
-  - label: ':rocket: publish'
-    <<: *if-release
-    key: bintray-publish
-    agents:
-      java: 11
-    commands:
-      - git fetch --tags
-      - ./gradlew bintrayPublish bintrayUpload --console plain
+      - ./gradlew clean codeCoverageReport sonarqube --console plain
