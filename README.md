@@ -321,20 +321,24 @@ explains how it works, its limitations and an important caveat.
 
 ## Security and access control
 
-We are using [Keycloak](https://www.keycloak.org/) to manage users' authentication, authorization, and session management.
+We are using [Keycloak](https://www.keycloak.org/) to manage user authentication and session management. Authorisation is handled by the
+application itself.
 
 Keycloak has the following three main concepts.
 
-- _Realm_: A realm secures and manages security metadata for a set of users, applications, and registered auth clients. By default Keycloak will provide us with a `master` realm but using the `master` realm for the admin users is the best practice so we have created a new realm called `default` and all the app users will be managed from it.
-- _Client_: Clients are entities that can request authentication of a user within a realm. By default, Keycloak will provide us with a few clients but using a separate client is the best practice. So we have created `default client` for the `default` realm. Using it we can access the Keycloak APIs from outside of its admin console.
-- _Role_: Roles identify a type or category of user. Keycloak often assigns access and permissions to specific roles rather than individual users for fine-grained access control. Currently, we using the `ADMIN` role for admin users.
+- _Realms_ which secure and manages security metadata for a set of users, applications and clients. By default, Keycloak provides a `master`
+  realm which is best used only for superuser administration. We create a separate realm, `default` for managing our application.
+- _Clients_ are the applications on whose behalf Keycloak is authenticating users. By default, Keycloak will provide us with a few clients
+  but using a separate client is the best practice. We have set up a `default client` for the `default` realm. 
+- _Roles_ identify a type or category of user. Roles can be specific to a client or apply to an entire realm. 
 
-_Note: Our app has some internal roles for managing the user's access levels but those roles don't have any relation with Keycloak roles._
+[The official documentation goes into more detail](https://www.keycloak.org/docs/latest/server_admin/index.html#core-concepts-and-terms).
 
 ### User and Token
 
-A user object in the business domain often requires more attributes than a user object from the Keycloak authentication token.
-For an example, the starter kit's user object has an extra `organizationId` attribute, to authorize the user, we added this info in the Keycloak authentication token as other claims, and we can access these claims like remaining claims of a user object.
+A user object in the business domain often requires more attributes than a user object from the Keycloak authentication token. For an
+example, the starter kit's user object has an extra `organizationId` attribute, to authorize the user, we added this info in the Keycloak
+authentication token as other claims, and we can access these claims like remaining claims of a user object.
 
 ### Endpoint access control
 
@@ -346,12 +350,13 @@ permission check comes in. An entity in this case is a representation of domain 
 corresponds to at least one persistable object. For an example, one `Organization` entity corresponds to one
 `PersistableOrganization`. To put it simply in the event sourcing context, it can be just considered as the projection.
 
-The entity permission check is specified within the security annotation and takes the form of `hasPermission(#entityId, 'EntityClassName', 'permissionType')`. This expression is evaluated by `EntityPermissionEvaluator`, which in turn
-delegates to corresponding permission check methods of an entity, where customized permission requirements can be
-implemented. This workflow is made possible by: a) having all entity classes implementing the `Identifiable` interface
-and b) having a `ReadService` for each `Identifable` entity. The `Identifiable` interface provides default _reject all_
-permission checks which can be overridden by implementing entities. The `ReadService` provides a way to load an entity
-by its simple class name. To help managing increasing number of `ReadService`, the starter kit provides a
+The entity permission check is specified within the security annotation and takes the form
+of `hasPermission(#entityId, 'EntityClassName', 'permissionType')`. This expression is evaluated by `EntityPermissionEvaluator`, which in
+turn delegates to corresponding permission check methods of an entity, where customized permission requirements can be implemented. This
+workflow is made possible by: a) having all entity classes implementing the `Identifiable` interface and b) having a `ReadService` for
+each `Identifable` entity. The `Identifiable` interface provides default _reject all_
+permission checks which can be overridden by implementing entities. The `ReadService` provides a way to load an entity by its simple class
+name. To help managing increasing number of `ReadService`, the starter kit provides a
 `ReadServiceProvider` bean which collects all `ReadService` beans during start of the application context.
 
 When adding new controllers and security configurations, it is important to refer to existing patterns and ensure
