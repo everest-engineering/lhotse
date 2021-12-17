@@ -12,8 +12,8 @@ limitations in our CI/CD pipeline. We hope to be able to standardise on the cont
 
 # Command line administration
 
-Keycloak ships with a `kcadm.sh` script which launchers the administrative CLI jar. The CLI is _stateful_
-in that it requires a configuration file containing configuration and credential information to execute tasks.
+Keycloak ships with a `kcadm.sh` script which launchers the administrative CLI jar. The CLI can be used in both a stateless and stateful 
+way. The latter stores configuration and credential information required to execute tasks in a configuration file.
 
 See the [official CLI documentation](https://www.keycloak.org/docs/latest/server_admin/#the-admin-cli) for full details.
 
@@ -25,7 +25,7 @@ If you have not installed Keycloak locally, you can run `kcadm.sh` directly with
 docker exec keycloak /opt/jboss/keycloak/bin/kcadm.sh
 ```
 
-Or via a locally cached copy created when running `./gradlew keycloakServer`:
+Or via a locally cached copy created when running `./gradlew keycloakTestServer`:
 
 ```
 /tmp/keycloak-$version/bin/kcadm.sh
