@@ -1,6 +1,6 @@
 package engineering.everest.lhotse;
 
-import engineering.everest.lhotse.axon.common.domain.Role;
+import engineering.everest.lhotse.common.domain.Role;
 import engineering.everest.lhotse.api.services.KeycloakSynchronizationService;
 import engineering.everest.lhotse.organizations.persistence.OrganizationsRepository;
 import engineering.everest.lhotse.users.persistence.PersistableUser;
@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import static engineering.everest.lhotse.axon.common.domain.User.ADMIN_ID;
+import static engineering.everest.lhotse.common.domain.User.ADMIN_ID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;

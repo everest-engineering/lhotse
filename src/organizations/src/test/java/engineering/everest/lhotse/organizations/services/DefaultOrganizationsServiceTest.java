@@ -10,7 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.UUID;
 
-import static engineering.everest.lhotse.axon.common.domain.User.ADMIN_ID;
+import static engineering.everest.lhotse.common.domain.User.ADMIN_ID;
 import static java.util.UUID.randomUUID;
 import static org.mockito.Mockito.verify;
 

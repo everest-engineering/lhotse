@@ -1,4 +1,4 @@
-package engineering.everest.lhotse.axon.common;
+package engineering.everest.lhotse.common;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;

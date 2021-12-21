@@ -1,4 +1,4 @@
-package engineering.everest.lhotse.axon.common.domain;
+package engineering.everest.lhotse.common.domain;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

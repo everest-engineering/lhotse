@@ -29,7 +29,7 @@ import javax.validation.ConstraintViolationException;
 import java.util.UUID;
 
 import static engineering.everest.lhotse.axon.AxonTestUtils.mockCommandValidatingMessageHandlerInterceptor;
-import static engineering.everest.lhotse.axon.common.domain.User.ADMIN_ID;
+import static engineering.everest.lhotse.common.domain.User.ADMIN_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)

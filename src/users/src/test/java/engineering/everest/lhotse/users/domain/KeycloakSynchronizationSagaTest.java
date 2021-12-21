@@ -1,9 +1,9 @@
 package engineering.everest.lhotse.users.domain;
 
 import engineering.everest.lhotse.api.services.KeycloakSynchronizationService;
-import engineering.everest.lhotse.axon.common.domain.Role;
-import engineering.everest.lhotse.axon.common.domain.User;
-import engineering.everest.lhotse.axon.common.domain.UserAttribute;
+import engineering.everest.lhotse.common.domain.Role;
+import engineering.everest.lhotse.common.domain.User;
+import engineering.everest.lhotse.common.domain.UserAttribute;
 import engineering.everest.lhotse.users.domain.events.UserDeletedAndForgottenEvent;
 import engineering.everest.lhotse.users.domain.events.UserDetailsUpdatedByAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserRolesAddedByAdminEvent;
@@ -16,14 +16,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
 import static java.util.UUID.randomUUID;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class KeycloakSynchronizationSagaTest {

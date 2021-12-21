@@ -1,7 +1,7 @@
 package engineering.everest.lhotse.registrations.domain;
 
 import engineering.everest.lhotse.api.services.KeycloakSynchronizationService;
-import engineering.everest.lhotse.axon.common.domain.User;
+import engineering.everest.lhotse.common.domain.User;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationCreatedForNewSelfRegisteredUserEvent;
 import engineering.everest.lhotse.organizations.domain.events.UserPromotedToOrganizationAdminEvent;
 import engineering.everest.lhotse.organizations.services.OrganizationsReadService;

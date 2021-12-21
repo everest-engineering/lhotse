@@ -1,7 +1,7 @@
 package engineering.everest.lhotse.users.domain.commands;
 
 import engineering.everest.lhotse.axon.command.validation.UsersStatusValidatableCommand;
-import engineering.everest.lhotse.axon.common.domain.Role;
+import engineering.everest.lhotse.common.domain.Role;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

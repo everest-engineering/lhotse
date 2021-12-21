@@ -1,8 +1,8 @@
 package engineering.everest.lhotse.users;
 
-import engineering.everest.lhotse.axon.common.domain.User;
+import engineering.everest.lhotse.common.domain.User;
 
-import static engineering.everest.lhotse.axon.common.domain.User.ADMIN_ID;
+import static engineering.everest.lhotse.common.domain.User.ADMIN_ID;
 
 public class UserTestHelper {
 

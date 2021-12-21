@@ -1,6 +1,6 @@
 package engineering.everest.lhotse.users.services;
 
-import engineering.everest.lhotse.axon.common.domain.User;
+import engineering.everest.lhotse.common.domain.User;
 import engineering.everest.lhotse.users.persistence.PersistableUser;
 import engineering.everest.lhotse.users.persistence.UsersRepository;
 import engineering.everest.starterkit.filestorage.FileService;

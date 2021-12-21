@@ -19,10 +19,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import static engineering.everest.lhotse.axon.common.domain.Role.ADMIN;
-import static engineering.everest.lhotse.axon.common.domain.Role.ORG_ADMIN;
-import static engineering.everest.lhotse.axon.common.domain.Role.ORG_USER;
-import static engineering.everest.lhotse.axon.common.domain.User.ADMIN_ID;
+import static engineering.everest.lhotse.common.domain.Role.ADMIN;
+import static engineering.everest.lhotse.common.domain.Role.ORG_ADMIN;
+import static engineering.everest.lhotse.common.domain.Role.ORG_USER;
+import static engineering.everest.lhotse.common.domain.User.ADMIN_ID;
 import static java.util.UUID.fromString;
 
 @Component

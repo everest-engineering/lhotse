@@ -1,6 +1,6 @@
 package engineering.everest.lhotse.users.services;
 
-import engineering.everest.lhotse.axon.common.domain.Role;
+import engineering.everest.lhotse.common.domain.Role;
 
 import java.util.UUID;
 import java.util.Set;

@@ -1,4 +1,4 @@
-package engineering.everest.lhotse.axon.common.services;
+package engineering.everest.lhotse.common.services;
 
 import org.junit.jupiter.api.Test;
 

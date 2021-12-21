@@ -1,6 +1,6 @@
-package engineering.everest.lhotse.axon.common;
+package engineering.everest.lhotse.common;
 
-import engineering.everest.lhotse.axon.common.exceptions.RetryTimedOutException;
+import engineering.everest.lhotse.common.exceptions.RetryTimedOutException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

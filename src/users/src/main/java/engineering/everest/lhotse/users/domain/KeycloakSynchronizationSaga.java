@@ -2,8 +2,8 @@ package engineering.everest.lhotse.users.domain;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import engineering.everest.lhotse.api.services.KeycloakSynchronizationService;
-import engineering.everest.lhotse.axon.common.RetryWithExponentialBackoff;
-import engineering.everest.lhotse.axon.common.domain.UserAttribute;
+import engineering.everest.lhotse.common.RetryWithExponentialBackoff;
+import engineering.everest.lhotse.common.domain.UserAttribute;
 import engineering.everest.lhotse.users.domain.events.UserDeletedAndForgottenEvent;
 import engineering.everest.lhotse.users.domain.events.UserDetailsUpdatedByAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserRolesAddedByAdminEvent;

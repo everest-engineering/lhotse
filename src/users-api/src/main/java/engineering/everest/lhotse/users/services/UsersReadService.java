@@ -1,7 +1,7 @@
 package engineering.everest.lhotse.users.services;
 
-import engineering.everest.lhotse.axon.common.services.ReadService;
-import engineering.everest.lhotse.axon.common.domain.User;
+import engineering.everest.lhotse.common.services.ReadService;
+import engineering.everest.lhotse.common.domain.User;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -1,4 +1,4 @@
-package engineering.everest.lhotse.axon.common.exceptions;
+package engineering.everest.lhotse.common.exceptions;
 
 import java.time.Duration;
 

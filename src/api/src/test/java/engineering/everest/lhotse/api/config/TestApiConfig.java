@@ -1,7 +1,7 @@
 package engineering.everest.lhotse.api.config;
 
 import engineering.everest.lhotse.api.rest.converters.DtoConverter;
-import engineering.everest.lhotse.axon.common.services.ReadServiceProvider;
+import engineering.everest.lhotse.common.services.ReadServiceProvider;
 import engineering.everest.lhotse.users.services.UsersReadService;
 import org.aopalliance.intercept.MethodInvocation;
 import org.keycloak.KeycloakPrincipal;

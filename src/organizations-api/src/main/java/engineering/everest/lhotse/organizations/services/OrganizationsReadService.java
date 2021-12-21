@@ -1,6 +1,6 @@
 package engineering.everest.lhotse.organizations.services;
 
-import engineering.everest.lhotse.axon.common.services.ReadService;
+import engineering.everest.lhotse.common.services.ReadService;
 import engineering.everest.lhotse.organizations.Organization;
 
 import java.util.List;

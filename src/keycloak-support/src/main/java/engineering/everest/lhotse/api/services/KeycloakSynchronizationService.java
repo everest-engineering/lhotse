@@ -1,7 +1,7 @@
 package engineering.everest.lhotse.api.services;
 
-import engineering.everest.lhotse.axon.common.domain.Role;
-import engineering.everest.lhotse.axon.common.domain.UserAttribute;
+import engineering.everest.lhotse.common.domain.Role;
+import engineering.everest.lhotse.common.domain.UserAttribute;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.json.JSONArray;

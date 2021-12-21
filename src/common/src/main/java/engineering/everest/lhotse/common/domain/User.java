@@ -1,4 +1,4 @@
-package engineering.everest.lhotse.axon.common.domain;
+package engineering.everest.lhotse.common.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

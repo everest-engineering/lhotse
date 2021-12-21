@@ -1,6 +1,6 @@
-package engineering.everest.lhotse.axon.common.services;
+package engineering.everest.lhotse.common.services;
 
-import engineering.everest.lhotse.axon.common.domain.Identifiable;
+import engineering.everest.lhotse.common.domain.Identifiable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

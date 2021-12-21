@@ -5,7 +5,7 @@ import engineering.everest.lhotse.api.config.TestApiConfig;
 import engineering.everest.lhotse.api.rest.converters.DtoConverter;
 import engineering.everest.lhotse.api.rest.requests.UpdateUserRequest;
 import engineering.everest.lhotse.api.rest.responses.UserResponse;
-import engineering.everest.lhotse.axon.common.domain.User;
+import engineering.everest.lhotse.common.domain.User;
 import engineering.everest.lhotse.users.services.UsersReadService;
 import engineering.everest.lhotse.users.services.UsersService;
 import engineering.everest.starterkit.filestorage.FileService;

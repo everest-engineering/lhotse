@@ -1,7 +1,7 @@
 package engineering.everest.lhotse.axon.command.validators;
 
 import engineering.everest.lhotse.axon.command.validation.UsersStatusValidatableCommand;
-import engineering.everest.lhotse.axon.common.domain.User;
+import engineering.everest.lhotse.common.domain.User;
 import engineering.everest.lhotse.i18n.exceptions.TranslatableIllegalStateException;
 import engineering.everest.lhotse.users.services.UsersReadService;
 import org.junit.jupiter.api.BeforeEach;

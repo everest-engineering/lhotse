@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 
-import static engineering.everest.lhotse.axon.common.domain.User.ADMIN_ID;
+import static engineering.everest.lhotse.common.domain.User.ADMIN_ID;
 
 @Service
 @Slf4j

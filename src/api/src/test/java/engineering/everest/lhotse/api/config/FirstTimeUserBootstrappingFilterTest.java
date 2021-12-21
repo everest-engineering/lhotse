@@ -1,9 +1,9 @@
 package engineering.everest.lhotse.api.config;
 
 import engineering.everest.axon.HazelcastCommandGateway;
-import engineering.everest.lhotse.axon.common.RandomFieldsGenerator;
-import engineering.everest.lhotse.axon.common.domain.Role;
-import engineering.everest.lhotse.axon.common.domain.User;
+import engineering.everest.lhotse.common.RandomFieldsGenerator;
+import engineering.everest.lhotse.common.domain.Role;
+import engineering.everest.lhotse.common.domain.User;
 import engineering.everest.lhotse.organizations.domain.commands.CreateSelfRegisteredOrganizationCommand;
 import engineering.everest.lhotse.organizations.services.OrganizationsReadService;
 import engineering.everest.lhotse.users.services.UsersReadService;

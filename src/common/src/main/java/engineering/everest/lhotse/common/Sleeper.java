@@ -1,4 +1,4 @@
-package engineering.everest.lhotse.axon.common;
+package engineering.everest.lhotse.common;
 
 import java.time.Duration;
 

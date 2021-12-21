@@ -1,6 +1,6 @@
 package engineering.everest.lhotse.users.persistence;
 
-import engineering.everest.lhotse.axon.common.domain.User;
+import engineering.everest.lhotse.common.domain.User;
 import engineering.everest.lhotse.users.config.TestUserSessionsJpaConfig;
 import engineering.everest.lhotse.users.services.UsersReadService;
 import engineering.everest.starterkit.filestorage.FileService;

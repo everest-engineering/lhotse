@@ -1,7 +1,7 @@
 package engineering.everest.lhotse.users.domain.events;
 
 import engineering.everest.axon.cryptoshredding.annotations.EncryptionKeyIdentifier;
-import engineering.everest.lhotse.axon.common.domain.Role;
+import engineering.everest.lhotse.common.domain.Role;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -1,6 +1,6 @@
 package engineering.everest.lhotse.organizations;
 
-import engineering.everest.lhotse.axon.common.domain.Identifiable;
+import engineering.everest.lhotse.common.domain.Identifiable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

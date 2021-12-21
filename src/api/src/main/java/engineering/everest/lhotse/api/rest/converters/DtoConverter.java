@@ -2,7 +2,7 @@ package engineering.everest.lhotse.api.rest.converters;
 
 import engineering.everest.lhotse.api.rest.responses.OrganizationResponse;
 import engineering.everest.lhotse.api.rest.responses.UserResponse;
-import engineering.everest.lhotse.axon.common.domain.User;
+import engineering.everest.lhotse.common.domain.User;
 import engineering.everest.lhotse.organizations.Organization;
 import org.springframework.stereotype.Service;
 
