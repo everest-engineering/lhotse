@@ -5,7 +5,6 @@ import engineering.everest.lhotse.organizations.domain.events.OrganizationContac
 import engineering.everest.lhotse.organizations.domain.events.OrganizationCreatedForNewSelfRegisteredUserEvent;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.modelling.command.EntityId;
 
@@ -13,7 +12,6 @@ import java.io.Serializable;
 import java.util.UUID;
 
 @EqualsAndHashCode
-@ToString
 @NoArgsConstructor
 class OrganizationContactDetails implements Serializable {
 

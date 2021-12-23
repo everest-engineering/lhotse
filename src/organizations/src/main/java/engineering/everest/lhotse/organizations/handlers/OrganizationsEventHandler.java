@@ -1,4 +1,4 @@
-package engineering.everest.lhotse.organizations.eventhandlers;
+package engineering.everest.lhotse.organizations.handlers;
 
 import engineering.everest.lhotse.axon.replay.ReplayCompletionAware;
 import engineering.everest.lhotse.organizations.OrganizationAddress;
@@ -8,25 +8,31 @@ import engineering.everest.lhotse.organizations.domain.events.OrganizationCreate
 import engineering.everest.lhotse.organizations.domain.events.OrganizationDisabledByAdminEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationEnabledByAdminEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationNameChangedEvent;
+import engineering.everest.lhotse.organizations.domain.queries.OrganizationQuery;
 import engineering.everest.lhotse.organizations.persistence.Address;
 import engineering.everest.lhotse.organizations.persistence.OrganizationsRepository;
+import engineering.everest.lhotse.organizations.persistence.PersistableOrganization;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventhandling.ResetHandler;
 import org.axonframework.eventhandling.Timestamp;
+import org.axonframework.queryhandling.QueryUpdateEmitter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.time.Instant;
+import java.util.UUID;
 
-@Service
 @Slf4j
+@Component
 public class OrganizationsEventHandler implements ReplayCompletionAware {
 
+    private final QueryUpdateEmitter queryUpdateEmitter;
     private final OrganizationsRepository organizationsRepository;
 
     @Autowired
-    public OrganizationsEventHandler(OrganizationsRepository organizationsRepository) {
+    public OrganizationsEventHandler(QueryUpdateEmitter queryUpdateEmitter, OrganizationsRepository organizationsRepository) {
+        this.queryUpdateEmitter = queryUpdateEmitter;
         this.organizationsRepository = organizationsRepository;
     }
 
@@ -52,6 +58,8 @@ public class OrganizationsEventHandler implements ReplayCompletionAware {
         var persistableOrganization = organizationsRepository.findById(event.getOrganizationId()).orElseThrow();
         persistableOrganization.setDisabled(true);
         organizationsRepository.save(persistableOrganization);
+
+        emitOrganizationQueryUpdate(event.getOrganizationId(), persistableOrganization);
     }
 
     @EventHandler
@@ -60,40 +68,54 @@ public class OrganizationsEventHandler implements ReplayCompletionAware {
         var persistableOrganization = organizationsRepository.findById(event.getOrganizationId()).orElseThrow();
         persistableOrganization.setDisabled(false);
         organizationsRepository.save(persistableOrganization);
+
+        emitOrganizationQueryUpdate(event.getOrganizationId(), persistableOrganization);
     }
 
     @EventHandler
     void on(OrganizationNameChangedEvent event) {
         LOGGER.info("Organization {} name updated by {}", event.getOrganizationId(), event.getUpdatingUserId());
-        var organization = organizationsRepository.findById(event.getOrganizationId()).orElseThrow();
-        organization.setOrganizationName(selectDesiredState(event.getOrganizationName(), organization.getOrganizationName()));
-        organizationsRepository.save(organization);
+        var persistableOrganization = organizationsRepository.findById(event.getOrganizationId()).orElseThrow();
+        persistableOrganization
+            .setOrganizationName(selectDesiredState(event.getOrganizationName(), persistableOrganization.getOrganizationName()));
+        organizationsRepository.save(persistableOrganization);
+
+        emitOrganizationQueryUpdate(event.getOrganizationId(), persistableOrganization);
     }
 
     @EventHandler
     void on(OrganizationContactDetailsUpdatedEvent event) {
         LOGGER.info("Organization {} contact details updated by {}", event.getOrganizationId(), event.getUpdatingUserId());
-        var organization = organizationsRepository.findById(event.getOrganizationId()).orElseThrow();
-        organization.setContactName(selectDesiredState(event.getContactName(), organization.getContactName()));
-        organization.setPhoneNumber(selectDesiredState(event.getPhoneNumber(), organization.getPhoneNumber()));
-        organization.setEmailAddress(selectDesiredState(event.getEmailAddress(), organization.getEmailAddress()));
-        organization.setWebsiteUrl(selectDesiredState(event.getWebsiteUrl(), organization.getWebsiteUrl()));
-        organizationsRepository.save(organization);
+        var persistableOrganization = organizationsRepository.findById(event.getOrganizationId()).orElseThrow();
+        persistableOrganization.setContactName(selectDesiredState(event.getContactName(), persistableOrganization.getContactName()));
+        persistableOrganization.setPhoneNumber(selectDesiredState(event.getPhoneNumber(), persistableOrganization.getPhoneNumber()));
+        persistableOrganization.setEmailAddress(selectDesiredState(event.getEmailAddress(), persistableOrganization.getEmailAddress()));
+        persistableOrganization.setWebsiteUrl(selectDesiredState(event.getWebsiteUrl(), persistableOrganization.getWebsiteUrl()));
+        organizationsRepository.save(persistableOrganization);
+
+        emitOrganizationQueryUpdate(event.getOrganizationId(), persistableOrganization);
     }
 
     @EventHandler
     void on(OrganizationAddressUpdatedEvent event) {
         LOGGER.info("Organization {} address updated by {}", event.getOrganizationId(), event.getUpdatingUserId());
-        var organization = organizationsRepository.findById(event.getOrganizationId()).orElseThrow();
-        var organizationAddress = organization.getAddress();
+        var persistableOrganization = organizationsRepository.findById(event.getOrganizationId()).orElseThrow();
+        var organizationAddress = persistableOrganization.getAddress();
         var city = selectDesiredState(event.getCity(), organizationAddress.getCity());
         var street = selectDesiredState(event.getStreet(), organizationAddress.getStreet());
         var state = selectDesiredState(event.getState(), organizationAddress.getState());
         var country = selectDesiredState(event.getCountry(), organizationAddress.getCountry());
         var postalCode = selectDesiredState(event.getPostalCode(), organizationAddress.getPostalCode());
         var address = new Address(street, city, state, country, postalCode);
-        organization.setAddress(address);
-        organizationsRepository.save(organization);
+        persistableOrganization.setAddress(address);
+        organizationsRepository.save(persistableOrganization);
+
+        emitOrganizationQueryUpdate(event.getOrganizationId(), persistableOrganization);
+    }
+
+    private void emitOrganizationQueryUpdate(UUID eventOrganisationId, PersistableOrganization persistableOrganization) {
+        queryUpdateEmitter.emit(OrganizationQuery.class, query -> eventOrganisationId.equals(query.getOrganizationId()),
+            persistableOrganization.toDomain());
     }
 
     private String selectDesiredState(String desiredState, String currentState) {

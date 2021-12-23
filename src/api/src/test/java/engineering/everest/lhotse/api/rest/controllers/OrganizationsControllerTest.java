@@ -13,10 +13,13 @@ import engineering.everest.lhotse.api.rest.responses.UserResponse;
 import engineering.everest.lhotse.common.domain.User;
 import engineering.everest.lhotse.organizations.Organization;
 import engineering.everest.lhotse.organizations.OrganizationAddress;
+import engineering.everest.lhotse.organizations.domain.queries.OrganizationQuery;
 import engineering.everest.lhotse.organizations.services.OrganizationsReadService;
 import engineering.everest.lhotse.organizations.services.OrganizationsService;
 import engineering.everest.lhotse.users.services.UsersReadService;
 import engineering.everest.lhotse.users.services.UsersService;
+import org.axonframework.queryhandling.QueryGateway;
+import org.axonframework.queryhandling.SubscriptionQueryResult;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,27 +28,36 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-import java.util.*;
+import java.util.List;
+import java.util.UUID;
 
 import static engineering.everest.lhotse.users.UserTestHelper.ADMIN_USER;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.http.MediaType.APPLICATION_NDJSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = { OrganizationsController.class })
 @ContextConfiguration(classes = { TestApiConfig.class, OrganizationsController.class })
@@ -71,6 +83,7 @@ class OrganizationsControllerTest {
     private static final UUID organizationId = ORG_1_USER_1.getOrganizationId();
 
     private MockMvc mockMvc;
+    private WebTestClient webTestClient;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -87,24 +100,50 @@ class OrganizationsControllerTest {
     private UsersService usersService;
     @MockBean
     private UsersReadService usersReadService;
+    @MockBean
+    private QueryGateway queryGateway;
 
     @BeforeEach
     public void setup() {
-        this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+        webTestClient = MockMvcWebTestClient.bindToApplicationContext(webApplicationContext).build();
     }
 
     @Test
     @WithMockKeycloakAuth(authorities = ROLE_ADMIN)
-    void getOrganizationWillDelegate_WhenRequestingUserBelongsToOrganization() throws Exception {
-        when(dtoConverter.convert(ORGANIZATION_1))
-            .thenReturn(getOrganizationResponse());
+    void getOrganizationWillReturnInitialQueryResult_WhenRequestingJsonContent() throws Exception {
+        when(dtoConverter.convert(ORGANIZATION_1)).thenReturn(organizationResponse());
         when(organizationsReadService.getById(organizationId)).thenReturn(ORGANIZATION_1);
 
         mockMvc.perform(get("/api/organizations/{organizationId}", organizationId)
-            .contentType(APPLICATION_JSON))
+            .accept(APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().contentType(APPLICATION_JSON))
             .andExpect(jsonPath("$.id", is(organizationId.toString())));
+    }
+
+    @Test
+    @WithMockKeycloakAuth(authorities = ROLE_ADMIN)
+    void getOrganizationUpdates_WillSubscribeCallerToFlux_WhenRequestingNewlineDelineatedJsonContent() throws Exception {
+        var subscriptionQueryResult = mock(SubscriptionQueryResult.class);
+        when(queryGateway.subscriptionQuery(eq(new OrganizationQuery(organizationId)), eq(Organization.class), eq(Organization.class)))
+            .thenReturn(subscriptionQueryResult);
+        when(subscriptionQueryResult.initialResult()).thenReturn(Mono.just(ORGANIZATION_1));
+        when(subscriptionQueryResult.updates()).thenReturn(Flux.just(ORGANIZATION_1));
+
+        when(dtoConverter.convert(ORGANIZATION_1)).thenReturn(organizationResponse());
+        when(organizationsReadService.getById(organizationId)).thenReturn(ORGANIZATION_1);
+
+        var response = webTestClient.get().uri("/api/organizations/{organizationId}", organizationId)
+            .accept(APPLICATION_NDJSON)
+            .exchange()
+            .expectStatus().is2xxSuccessful()
+            .expectHeader().contentType(APPLICATION_NDJSON)
+            .expectBodyList(OrganizationResponse.class)
+            .returnResult()
+            .getResponseBody();
+
+        assertEquals(List.of(organizationResponse(), organizationResponse()), response);
     }
 
     @Test
@@ -222,7 +261,7 @@ class OrganizationsControllerTest {
             OrganizationsControllerTest.ORG_1_USER_1.isDisabled());
     }
 
-    private static OrganizationResponse getOrganizationResponse() {
+    private static OrganizationResponse organizationResponse() {
         return new OrganizationResponse(OrganizationsControllerTest.ORGANIZATION_1.getId(),
             OrganizationsControllerTest.ORGANIZATION_1.getOrganizationName(),
             OrganizationsControllerTest.ORGANIZATION_1.getOrganizationAddress().getStreet(),

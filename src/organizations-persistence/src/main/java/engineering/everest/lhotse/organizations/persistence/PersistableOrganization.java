@@ -1,8 +1,11 @@
 package engineering.everest.lhotse.organizations.persistence;
 
+import engineering.everest.lhotse.organizations.Organization;
+import engineering.everest.lhotse.organizations.OrganizationAddress;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import java.time.Instant;
@@ -17,6 +20,7 @@ public class PersistableOrganization {
     private UUID id;
     private String organizationName;
     private Instant registeredOn;
+    @Embedded
     private Address address;
     private String websiteUrl;
     private String contactName;
@@ -42,5 +46,12 @@ public class PersistableOrganization {
         this.phoneNumber = phoneNumber;
         this.emailAddress = emailAddress;
         this.disabled = isDisabled;
+    }
+
+    public Organization toDomain() {
+        return new Organization(id, organizationName,
+            new OrganizationAddress(address.getStreet(), address.getCity(), address.getState(), address.getCountry(),
+                address.getPostalCode()),
+            websiteUrl, contactName, phoneNumber, emailAddress, isDisabled());
     }
 }

@@ -11,7 +11,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Organization implements Identifiable {
-
     private UUID id;
     private String organizationName;
     private OrganizationAddress organizationAddress;

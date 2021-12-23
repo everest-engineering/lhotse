@@ -7,14 +7,16 @@ import engineering.everest.lhotse.api.rest.requests.NewUserRequest;
 import engineering.everest.lhotse.api.rest.requests.UpdateOrganizationRequest;
 import engineering.everest.lhotse.api.rest.responses.OrganizationResponse;
 import engineering.everest.lhotse.api.rest.responses.UserResponse;
+import engineering.everest.lhotse.organizations.Organization;
+import engineering.everest.lhotse.organizations.domain.queries.OrganizationQuery;
 import engineering.everest.lhotse.organizations.services.OrganizationsReadService;
 import engineering.everest.lhotse.organizations.services.OrganizationsService;
 import engineering.everest.lhotse.users.services.UsersReadService;
 import engineering.everest.lhotse.users.services.UsersService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import springfox.documentation.annotations.ApiIgnore;
-
+import lombok.extern.slf4j.Slf4j;
+import org.axonframework.queryhandling.QueryGateway;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,9 +26,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Flux;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
-
 import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
@@ -35,10 +38,12 @@ import static java.util.stream.Collectors.toList;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.APPLICATION_NDJSON_VALUE;
 
 @RestController
 @RequestMapping("/api/organizations")
 @Api(consumes = APPLICATION_JSON_VALUE, tags = "Organizations")
+@Slf4j
 public class OrganizationsController {
 
     private final DtoConverter dtoConverter;
@@ -46,18 +51,21 @@ public class OrganizationsController {
     private final OrganizationsReadService organizationsReadService;
     private final UsersService usersService;
     private final UsersReadService usersReadService;
+    private final QueryGateway queryGateway;
 
     @Autowired
     public OrganizationsController(DtoConverter dtoConverter,
                                    OrganizationsService organizationsService,
                                    OrganizationsReadService organizationsReadService,
                                    UsersService usersService,
-                                   UsersReadService usersReadService) {
+                                   UsersReadService usersReadService,
+                                   QueryGateway queryGateway) {
         this.dtoConverter = dtoConverter;
         this.organizationsService = organizationsService;
         this.organizationsReadService = organizationsReadService;
         this.usersService = usersService;
         this.usersReadService = usersReadService;
+        this.queryGateway = queryGateway;
     }
 
     @GetMapping("/{organizationId}")
@@ -66,6 +74,20 @@ public class OrganizationsController {
     @AdminOrUserOfTargetOrganization
     public OrganizationResponse getOrganization(@ApiIgnore Principal principal, @PathVariable UUID organizationId) {
         return dtoConverter.convert(organizationsReadService.getById(organizationId));
+    }
+
+    @GetMapping(value = "/{organizationId}", produces = APPLICATION_NDJSON_VALUE)
+    @ResponseStatus(OK)
+    @ApiOperation("Stream the state of an organization")
+    @AdminOrUserOfTargetOrganization
+    public Flux<OrganizationResponse> getOrganizationUpdates(@ApiIgnore Principal principal, @PathVariable UUID organizationId) {
+        var subscriptionQueryResult =
+            queryGateway.subscriptionQuery(new OrganizationQuery(organizationId), Organization.class, Organization.class);
+        var initialResult = subscriptionQueryResult.initialResult();
+        return subscriptionQueryResult
+            .updates()
+            .mergeWith(initialResult)
+            .map(dtoConverter::convert);
     }
 
     @PutMapping("/{organizationId}")
