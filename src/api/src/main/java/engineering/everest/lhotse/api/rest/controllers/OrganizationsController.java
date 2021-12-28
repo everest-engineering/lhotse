@@ -83,10 +83,8 @@ public class OrganizationsController {
     public Flux<OrganizationResponse> getOrganizationUpdates(@ApiIgnore Principal principal, @PathVariable UUID organizationId) {
         var subscriptionQueryResult =
             queryGateway.subscriptionQuery(new OrganizationQuery(organizationId), Organization.class, Organization.class);
-        var initialResult = subscriptionQueryResult.initialResult();
-        return subscriptionQueryResult
-            .updates()
-            .mergeWith(initialResult)
+        return subscriptionQueryResult.updates()
+            .mergeWith(subscriptionQueryResult.initialResult())
             .map(dtoConverter::convert);
     }
 
@@ -107,8 +105,8 @@ public class OrganizationsController {
     @ApiOperation("Retrieve a list of users for an organization")
     @AdminOrUserOfTargetOrganization
     public List<UserResponse> listOrganizationUsers(@ApiIgnore Principal principal, @PathVariable UUID organizationId) {
-        return usersReadService.getUsersForOrganization(organizationId)
-            .stream().map(dtoConverter::convert)
+        return usersReadService.getUsersForOrganization(organizationId).stream()
+            .map(dtoConverter::convert)
             .collect(toList());
     }
 

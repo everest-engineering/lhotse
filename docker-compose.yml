@@ -2,7 +2,6 @@ version: '3'
 services:
   postgres-db:
     image: postgres:12-alpine
-    container_name: postgres-db
     restart: always
     ports:
       - "5432:5432"
@@ -15,7 +14,6 @@ services:
 
   keycloak:
     image: jboss/keycloak
-    container_name: keycloak
     command:
       -Djboss.http.port=${KEYCLOAK_SERVER_PORT}
     volumes:
@@ -35,3 +33,4 @@ services:
       - "${KEYCLOAK_SERVER_PORT}:${KEYCLOAK_SERVER_PORT}"
     depends_on:
       - postgres-db
+
