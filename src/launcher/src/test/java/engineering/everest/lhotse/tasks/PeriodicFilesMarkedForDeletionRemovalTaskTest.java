@@ -4,6 +4,7 @@ import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.cp.CPSubsystem;
 import com.hazelcast.cp.lock.FencedLock;
 import engineering.everest.starterkit.filestorage.FileService;
+import engineering.everest.starterkit.media.thumbnails.ThumbnailService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,6 +45,8 @@ public class PeriodicFilesMarkedForDeletionRemovalTaskTest {
     private CPSubsystem cpSubsystem;
     @Mock
     private FencedLock singleAppNodeExecutionLock;
+    @Mock
+    private ThumbnailService thumbnailService;
 
     @BeforeEach
     void setUp() {
@@ -52,7 +55,7 @@ public class PeriodicFilesMarkedForDeletionRemovalTaskTest {
         lenient().when(singleAppNodeExecutionLock.isLockedByCurrentThread()).thenReturn(true);
 
         periodicFilesMarkedForDeletionRemovalTask =
-            new PeriodicFilesMarkedForDeletionRemovalTask(hazelcastInstance, fileService, BATCH_SIZE);
+            new PeriodicFilesMarkedForDeletionRemovalTask(hazelcastInstance, fileService, thumbnailService, BATCH_SIZE);
     }
 
     @Test
@@ -81,7 +84,7 @@ public class PeriodicFilesMarkedForDeletionRemovalTaskTest {
     void checkForFilesMarkedForDeletionToCleanUp_WillDelegateToFileServiceForDeletion() {
         periodicFilesMarkedForDeletionRemovalTask.checkForFilesMarkedForDeletionToCleanUp();
 
-        verify(fileService).deleteFileBatch(BATCH_SIZE);
+        verify(fileService).deleteEphemeralFileBatch(BATCH_SIZE);
     }
 
     @Test
@@ -118,7 +121,14 @@ public class PeriodicFilesMarkedForDeletionRemovalTaskTest {
     void replayCompleted_WillDelegateToFileServiceToMarkAllFilesForDeletion() {
         periodicFilesMarkedForDeletionRemovalTask.replayCompleted();
 
-        verify(fileService).markAllFilesForDeletion();
+        verify(fileService).markAllEphemeralFilesForDeletion();
+    }
+
+    @Test
+    void replayCompleted_WillClearAllThumbnails() {
+        periodicFilesMarkedForDeletionRemovalTask.replayCompleted();
+
+        verify(thumbnailService).deleteAllThumbnailMappings();
     }
 
     private static Stream<Arguments> exampleTimeStrings() {

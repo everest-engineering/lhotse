@@ -6,8 +6,11 @@ import engineering.everest.lhotse.tasks.PeriodicFilesMarkedForDeletionRemovalTas
 import engineering.everest.starterkit.filestorage.FileService;
 import engineering.everest.starterkit.filestorage.persistence.FileMappingRepository;
 import engineering.everest.starterkit.filestorage.persistence.PersistableFileMapping;
+import engineering.everest.starterkit.media.thumbnails.ThumbnailService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
@@ -24,6 +27,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @SpringBootTest(webEnvironment = DEFINED_PORT, classes = Launcher.class)
 @ActiveProfiles("standalone")
 @Transactional
+@ExtendWith(MockitoExtension.class)
 class FileStoreFunctionalTests {
     private static final byte[] TEMPORARY_FILE_CONTENTS = "A temporary file for unit testing".getBytes();
 
@@ -31,6 +35,8 @@ class FileStoreFunctionalTests {
     private FileService fileService;
     @Autowired
     private HazelcastInstance hazelcastInstance;
+    @Autowired
+    private ThumbnailService thumbnailService;
     @Autowired
     private FileMappingRepository fileMappingRepository;
 
@@ -40,12 +46,13 @@ class FileStoreFunctionalTests {
     void setUp() throws IOException {
         fileService.transferToEphemeralStore(new ByteArrayInputStream(TEMPORARY_FILE_CONTENTS));
 
-        periodicFilesMarkedForDeletionRemovalTask = new PeriodicFilesMarkedForDeletionRemovalTask(hazelcastInstance, fileService, 10);
+        periodicFilesMarkedForDeletionRemovalTask =
+            new PeriodicFilesMarkedForDeletionRemovalTask(hazelcastInstance, fileService, thumbnailService, 10);
     }
 
     @Test
     void ephemeralFilesMarkedForDeletionAreDeletedWhenDeleteTaskRuns() {
-        fileService.markAllFilesForDeletion();
+        fileService.markAllEphemeralFilesForDeletion();
 
         periodicFilesMarkedForDeletionRemovalTask.deleteFilesInBatches();
 
