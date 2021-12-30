@@ -35,14 +35,12 @@ sample code demonstrates end-to-end command handling and event processing flows 
     - [Event replays](#event-replays)
     - [Crypto shredding](#crypto-shredding)
     - [Security and access control](#security-and-access-control)
-        - [User and Keycloak authentication token](#user-and-keycloak-authentication-token)
         - [Endpoint access control](#endpoint-access-control)
-    - [File support](#file-support)
+    - [Filestore support](#file-support)
         - [Configuring the In-Memory Filestore](#configuring-the-in-memory-filestore)
         - [Configuring Mongo GridFS](#configuring-mongo-gridfs)
         - [Configuring AWS S3](#configuring-aws-s3)
     - [Media support](#media-support)
-    - [ETag HTTP headers](#etag-http-headers)
 - [Project Info](#project-info)
     - [Maintainers](#maintainers)
     - [Contributing](#contributing)
@@ -265,7 +263,7 @@ The starter kit comes with programmatic support for triggering replays. To perfo
 
 Behind the scenes, replays are being executed by:
 
-* shutting down [tracking event processors](https://axoniq.io/blog-overview/tracking-event-processors) (TEP) processing;
+* shutting down [tracking event processors](https://axoniq.io/blog-overview/tracking-event-processors) (TEPs);
 * clearing the tracking tokens in the Axon database;
 * placing a marker event into the event log that will end replays; 
 * notifying interested listeners that replays have completed; and
@@ -322,7 +320,7 @@ during start of the application context.
 When adding new controllers and security configurations, it is important to refer to existing patterns and ensure
 consistency. This also applies to tests where fixtures are provided to support the necessary _automagic_ behaviours.
 
-## File support
+## Filestore support
 
 The [storage](https://github.com/everest-engineering/lhotse-storage) module implements two file stores: one is referred
 to as _permanent_, the other as the _ephemeral_ store. The permanent file store is for storing critical files that, such
@@ -374,13 +372,6 @@ for fetching AWS credentials and the AWS region.
 The [media](https://github.com/everest-engineering/lhotse-media) module adds additional support for managing of image
 and video updates. It generates thumbnail images on the fly, caching them in the ephemeral file store for subsequent
 requests. Thumbnail sizes are limited to prevent the system from being overwhelmed by malicious requests.
-
-## ETag HTTP headers
-
-[ETag HTTP headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag) are enabled by default for all API
-endpoints via a shallow filter. The filter is unaware of any changes made to underlying data so while clients may use
-the ETag to avoid unnecessary transfers and client side processing, there is no benefit to application server
-performance.
 
 # Project Info
 
