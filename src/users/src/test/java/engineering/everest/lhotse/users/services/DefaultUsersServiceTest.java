@@ -1,6 +1,5 @@
 package engineering.everest.lhotse.users.services;
 
-import engineering.everest.axon.HazelcastCommandGateway;
 import engineering.everest.lhotse.api.services.KeycloakSynchronizationService;
 import engineering.everest.lhotse.users.domain.commands.AddUserRolesCommand;
 import engineering.everest.lhotse.users.domain.commands.CreateOrganizationUserCommand;
@@ -8,6 +7,7 @@ import engineering.everest.lhotse.users.domain.commands.DeleteAndForgetUserComma
 import engineering.everest.lhotse.users.domain.commands.RegisterUploadedUserProfilePhotoCommand;
 import engineering.everest.lhotse.users.domain.commands.RemoveUserRolesCommand;
 import engineering.everest.lhotse.users.domain.commands.UpdateUserDetailsCommand;
+import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,7 +35,7 @@ class DefaultUsersServiceTest {
     private static final String NEW_USER_DISPLAY_NAME = "new-user-display-name";
 
     @Mock
-    private HazelcastCommandGateway commandGateway;
+    private CommandGateway commandGateway;
     @Mock
     private KeycloakSynchronizationService keycloakSynchronizationService;
 

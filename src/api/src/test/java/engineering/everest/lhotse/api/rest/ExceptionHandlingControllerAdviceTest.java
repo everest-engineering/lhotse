@@ -1,6 +1,5 @@
 package engineering.everest.lhotse.api.rest;
 
-import engineering.everest.axon.exceptions.RemoteCommandExecutionException;
 import engineering.everest.lhotse.api.rest.responses.ApiErrorResponse;
 import engineering.everest.lhotse.i18n.exceptions.TranslatableException;
 import org.axonframework.modelling.command.AggregateNotFoundException;
@@ -100,56 +99,6 @@ class ExceptionHandlingControllerAdviceTest {
         var expectedResponse = ApiErrorResponse.builder()
             .status(BAD_REQUEST)
             .message("bad argument")
-            .timestamp(Instant.now(clock))
-            .build();
-
-        assertEquals(new ResponseEntity<>(expectedResponse, new HttpHeaders(), BAD_REQUEST), controllerAdvice.handleExceptions(exception));
-    }
-
-    @Test
-    void willMapRemoteCommandExecutionExceptionWithNestedExecutionException() {
-        var exception =
-            new RemoteCommandExecutionException(new ExecutionException("inner exception", new IllegalArgumentException("bad argument")));
-        var expectedResponse = ApiErrorResponse.builder()
-            .status(BAD_REQUEST)
-            .message("bad argument")
-            .timestamp(Instant.now(clock))
-            .build();
-
-        assertEquals(new ResponseEntity<>(expectedResponse, new HttpHeaders(), BAD_REQUEST), controllerAdvice.handleExceptions(exception));
-    }
-
-    @Test
-    void willMapRemoteCommandExecutionExceptionWithNestedInterruptedException() {
-        var exception = new RemoteCommandExecutionException(new InterruptedException("inner exception"));
-        var expectedResponse = ApiErrorResponse.builder()
-            .status(BAD_REQUEST)
-            .message("inner exception")
-            .timestamp(Instant.now(clock))
-            .build();
-
-        assertEquals(new ResponseEntity<>(expectedResponse, new HttpHeaders(), BAD_REQUEST), controllerAdvice.handleExceptions(exception));
-    }
-
-    @Test
-    void willMapRemoteCommandExecutionExceptionWithNestedTranslatableException() {
-        var exception = new RemoteCommandExecutionException(
-            new ExecutionException(new ExecutionException(new TranslatableException("USER_DISPLAY_NAME_MISSING"))));
-        var expectedResponse = ApiErrorResponse.builder()
-            .status(BAD_REQUEST)
-            .message("User display name is required")
-            .timestamp(Instant.now(clock))
-            .build();
-
-        assertEquals(new ResponseEntity<>(expectedResponse, new HttpHeaders(), BAD_REQUEST), controllerAdvice.handleExceptions(exception));
-    }
-
-    @Test
-    void willMapRemoteCommandExecutionExceptionWithNestedException() {
-        var exception = new RemoteCommandExecutionException(new Exception("inner exception"));
-        var expectedResponse = ApiErrorResponse.builder()
-            .status(BAD_REQUEST)
-            .message("inner exception")
             .timestamp(Instant.now(clock))
             .build();
 

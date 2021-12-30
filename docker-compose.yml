@@ -1,10 +1,10 @@
 version: '3'
 services:
   postgres-db:
-    image: postgres:12-alpine
-    restart: always
+    image: postgres:14-alpine
+    restart: unless-stopped
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT}:5432"
     volumes:
       - ./src/launcher/db-scripts:/docker-entrypoint-initdb.d
     environment:
@@ -12,10 +12,18 @@ services:
       POSTGRES_DB: default
       POSTGRES_PASSWORD: postgres
 
+  axonserver:
+    image: axoniq/axonserver:latest
+    restart: unless-stopped
+    ports:
+     - "${AXON_SERVER_DASHBOARD_PORT}:8024"
+     - "${AXON_SERVER_GRPC_PORT}:8124"
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xmx1g"
+
   keycloak:
-    image: jboss/keycloak
-    command:
-      -Djboss.http.port=${KEYCLOAK_SERVER_PORT}
+    image: jboss/keycloak:latest
+    restart: unless-stopped
     volumes:
       - ./keycloak/imports:/opt/jboss/keycloak/imports
       - ./keycloak/themes/custom:/opt/jboss/keycloak/themes/custom
@@ -30,7 +38,7 @@ services:
       KEYCLOAK_PASSWORD: ${KEYCLOAK_PASSWORD}
       KEYCLOAK_IMPORT: /opt/jboss/keycloak/imports/realm-export.json -Dkeycloak.profile.feature.upload_scripts=enabled
     ports:
-      - "${KEYCLOAK_SERVER_PORT}:${KEYCLOAK_SERVER_PORT}"
+      - "${KEYCLOAK_SERVER_PORT}:8080"
     depends_on:
       - postgres-db
 

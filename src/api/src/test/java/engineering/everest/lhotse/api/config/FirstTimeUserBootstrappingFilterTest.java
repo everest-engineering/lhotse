@@ -1,12 +1,12 @@
 package engineering.everest.lhotse.api.config;
 
-import engineering.everest.axon.HazelcastCommandGateway;
 import engineering.everest.lhotse.common.RandomFieldsGenerator;
 import engineering.everest.lhotse.common.domain.Role;
 import engineering.everest.lhotse.common.domain.User;
 import engineering.everest.lhotse.organizations.domain.commands.CreateSelfRegisteredOrganizationCommand;
 import engineering.everest.lhotse.organizations.services.OrganizationsReadService;
 import engineering.everest.lhotse.users.services.UsersReadService;
+import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -58,7 +58,7 @@ public class FirstTimeUserBootstrappingFilterTest {
     @Mock
     private FilterChain filterChain;
     @Mock
-    private HazelcastCommandGateway hazelcastCommandGateway;
+    private CommandGateway commandGateway;
     @Mock
     private CreateSelfRegisteredOrganizationCommand createSelfRegisteredOrganizationCommand;
     @Mock
@@ -68,7 +68,7 @@ public class FirstTimeUserBootstrappingFilterTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
         filterConfig = new FirstTimeUserBootstrappingFilter("default-client",
-            hazelcastCommandGateway, usersReadService, organizationsReadService, randomFieldsGenerator);
+            commandGateway, usersReadService, organizationsReadService, randomFieldsGenerator);
     }
 
     @Test
@@ -143,8 +143,8 @@ public class FirstTimeUserBootstrappingFilterTest {
         verify(usersReadService, never()).exists(any());
         verify(organizationsReadService, never()).exists(any());
         verify(usersReadService, never()).getById(any());
-        verify(hazelcastCommandGateway, never()).send(any());
-        verifyNoMoreInteractions(hazelcastCommandGateway, createSelfRegisteredOrganizationCommand);
+        verify(commandGateway, never()).send(any());
+        verifyNoMoreInteractions(commandGateway, createSelfRegisteredOrganizationCommand);
     }
 
     @Test
@@ -173,8 +173,8 @@ public class FirstTimeUserBootstrappingFilterTest {
 
         filterConfig.doFilterInternal(httpServletRequest, httpServletResponse, filterChain);
         verify(organizationsReadService, never()).exists(any());
-        verify(hazelcastCommandGateway, never()).send(any());
-        verifyNoMoreInteractions(hazelcastCommandGateway, createSelfRegisteredOrganizationCommand);
+        verify(commandGateway, never()).send(any());
+        verifyNoMoreInteractions(commandGateway, createSelfRegisteredOrganizationCommand);
     }
 
     @Test
@@ -204,10 +204,10 @@ public class FirstTimeUserBootstrappingFilterTest {
             .thenReturn(new User(USER_ID, ORGANIZATION_ID, USERNAME, DISPLAY_NAME));
 
         filterConfig.doFilterInternal(httpServletRequest, httpServletResponse, filterChain);
-        verify(hazelcastCommandGateway).send(new CreateSelfRegisteredOrganizationCommand(ORGANIZATION_ID, USER_ID,
+        verify(commandGateway).send(new CreateSelfRegisteredOrganizationCommand(ORGANIZATION_ID, USER_ID,
             "New Organization", null, null, null, null, null, null,
             DISPLAY_NAME, null, USER_EMAIL_ADDRESS));
-        verifyNoMoreInteractions(hazelcastCommandGateway, createSelfRegisteredOrganizationCommand);
+        verifyNoMoreInteractions(commandGateway, createSelfRegisteredOrganizationCommand);
     }
 
     private AccessToken createDefaultAccessToken() {

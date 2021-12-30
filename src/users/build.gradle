@@ -13,7 +13,6 @@ dependencies {
     implementation project(':users-persistence')
 
     implementation "engineering.everest.axon:crypto-shredding-extension:${axonCryptoShreddingVersion}"
-    implementation "engineering.everest.axon:command-distribution-extension:${axonHazelcastCommandDistributionVersion}"
     implementation "org.apache.commons:commons-lang3:${commonsLangVersion}"
     implementation "org.json:json:${jsonHelperVersion}"
     implementation "org.keycloak:keycloak-admin-client:${keycloakVersion}"

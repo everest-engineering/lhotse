@@ -31,6 +31,7 @@ public class CommandValidatingMessageHandlerInterceptor implements MessageHandle
     private final Validator javaBeanValidator;
 
     @Autowired
+    @SuppressWarnings("rawtypes")
     public CommandValidatingMessageHandlerInterceptor(List<Validates> validators, Validator javaBeanValidator) {
         this.javaBeanValidator = javaBeanValidator;
         Map<Class<?>, Validates<?>> m = new ConcurrentHashMap<>();
@@ -88,5 +89,4 @@ public class CommandValidatingMessageHandlerInterceptor implements MessageHandle
         }
         return interfaces;
     }
-
 }

@@ -1,17 +1,17 @@
 package engineering.everest.lhotse.users.domain;
 
+import engineering.everest.lhotse.axon.command.AxonCommandExecutionExceptionFactory;
 import engineering.everest.lhotse.axon.command.validators.EmailAddressValidator;
 import engineering.everest.lhotse.axon.command.validators.OrganizationStatusValidator;
 import engineering.everest.lhotse.axon.command.validators.UserStatusValidator;
 import engineering.everest.lhotse.axon.command.validators.UsersUniqueEmailValidator;
 import engineering.everest.lhotse.common.domain.Role;
-import engineering.everest.lhotse.i18n.exceptions.TranslatableIllegalArgumentException;
+import engineering.everest.lhotse.users.domain.commands.AddUserRolesCommand;
 import engineering.everest.lhotse.users.domain.commands.CreateOrganizationUserCommand;
 import engineering.everest.lhotse.users.domain.commands.CreateUserForNewlyRegisteredOrganizationCommand;
 import engineering.everest.lhotse.users.domain.commands.DeleteAndForgetUserCommand;
 import engineering.everest.lhotse.users.domain.commands.RegisterUploadedUserProfilePhotoCommand;
 import engineering.everest.lhotse.users.domain.commands.UpdateUserDetailsCommand;
-import engineering.everest.lhotse.users.domain.commands.AddUserRolesCommand;
 import engineering.everest.lhotse.users.domain.events.UserCreatedByAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserCreatedForNewlyRegisteredOrganizationEvent;
 import engineering.everest.lhotse.users.domain.events.UserDeletedAndForgottenEvent;
@@ -19,6 +19,7 @@ import engineering.everest.lhotse.users.domain.events.UserDetailsUpdatedByAdminE
 import engineering.everest.lhotse.users.domain.events.UserProfilePhotoUploadedEvent;
 import engineering.everest.lhotse.users.domain.events.UserRolesAddedByAdminEvent;
 import engineering.everest.lhotse.users.services.UsersReadService;
+import org.axonframework.commandhandling.CommandExecutionException;
 import org.axonframework.eventsourcing.AggregateDeletedException;
 import org.axonframework.spring.stereotype.Aggregate;
 import org.axonframework.test.aggregate.AggregateTestFixture;
@@ -58,6 +59,7 @@ class UserAggregateTest {
         new UserCreatedForNewlyRegisteredOrganizationEvent(ORGANIZATION_ID, USER_ID, USER_DISPLAY_NAME, USERNAME);
 
     private FixtureConfiguration<UserAggregate> testFixture;
+    private AxonCommandExecutionExceptionFactory axonCommandExecutionExceptionFactory;
 
     @Mock
     private UsersReadService usersReadService;
@@ -72,20 +74,23 @@ class UserAggregateTest {
 
     @BeforeEach
     void setUp() {
+        axonCommandExecutionExceptionFactory = new AxonCommandExecutionExceptionFactory();
+
         testFixture = new AggregateTestFixture<>(UserAggregate.class)
             .registerCommandHandlerInterceptor(mockCommandValidatingMessageHandlerInterceptor(
                 emailAddressValidator,
                 usersUniqueEmailValidator,
                 organizationStatusValidator,
                 userStatusValidator))
-            .registerInjectableResource(usersReadService);
+            .registerInjectableResource(usersReadService)
+            .registerInjectableResource(axonCommandExecutionExceptionFactory);
     }
 
     @Test
     void aggregateHasExplicitlyDefinedRepository() {
         var organizationClass = UserAggregate.class;
         var aggregateAnnotation = organizationClass.getAnnotation(Aggregate.class);
-        assertEquals(aggregateAnnotation.repository(), "repositoryForUser");
+        assertEquals("userAggregateSnapshotTriggerDefinition", aggregateAnnotation.snapshotTriggerDefinition());
     }
 
     @Test
@@ -269,7 +274,7 @@ class UserAggregateTest {
         testFixture.given(USER_CREATED_FOR_NEWLY_REGISTERED_ORGANIZATION_EVENT)
             .when(new UpdateUserDetailsCommand(USER_ID, NO_CHANGE, NO_CHANGE, ADMIN_ID))
             .expectNoEvents()
-            .expectException(TranslatableIllegalArgumentException.class)
+            .expectException(CommandExecutionException.class)
             .expectExceptionMessage("USER_UPDATE_NO_FIELDS_CHANGED");
     }
 
@@ -278,7 +283,7 @@ class UserAggregateTest {
         testFixture.given(USER_CREATED_FOR_NEWLY_REGISTERED_ORGANIZATION_EVENT)
             .when(new UpdateUserDetailsCommand(USER_ID, NO_CHANGE, BLANK_FIELD, ADMIN_ID))
             .expectNoEvents()
-            .expectException(TranslatableIllegalArgumentException.class)
+            .expectException(CommandExecutionException.class)
             .expectExceptionMessage("USER_DISPLAY_NAME_MISSING");
     }
 

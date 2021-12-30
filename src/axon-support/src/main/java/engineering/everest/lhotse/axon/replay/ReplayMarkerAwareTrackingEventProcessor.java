@@ -159,8 +159,7 @@ public class ReplayMarkerAwareTrackingEventProcessor extends TrackingEventProces
         }
 
         @Override
-        public Builder trackingEventProcessorConfiguration(
-                                                           TrackingEventProcessorConfiguration trackingEventProcessorConfiguration) {
+        public Builder trackingEventProcessorConfiguration(TrackingEventProcessorConfiguration trackingEventProcessorConfiguration) {
             super.trackingEventProcessorConfiguration(trackingEventProcessorConfiguration);
             this.initialSegmentsCount = trackingEventProcessorConfiguration.getInitialSegmentsCount();
             return this;

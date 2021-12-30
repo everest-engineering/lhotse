@@ -1,9 +1,11 @@
 package engineering.everest.lhotse.axon.command.validators;
 
+import engineering.everest.lhotse.axon.command.AxonCommandExecutionExceptionFactory;
 import engineering.everest.lhotse.axon.command.validation.UsersBelongToOrganizationValidatableCommand;
 import engineering.everest.lhotse.common.domain.User;
 import engineering.everest.lhotse.i18n.exceptions.TranslatableIllegalArgumentException;
 import engineering.everest.lhotse.users.services.UsersReadService;
+import org.axonframework.commandhandling.CommandExecutionException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,13 +32,15 @@ class UsersBelongToOrganizationValidatorTest {
     private static final User ORG_2_USER_1 = new User(USER_ID_3, ORGANIZATION_ID_2, "username-3", "user-display-3");
 
     private UsersBelongToOrganizationValidator usersBelongToOrganizationValidator;
+    private AxonCommandExecutionExceptionFactory axonCommandExecutionExceptionFactory;
 
     @Mock
     private UsersReadService usersReadService;
 
     @BeforeEach
     void setUp() {
-        usersBelongToOrganizationValidator = new UsersBelongToOrganizationValidator(usersReadService);
+        axonCommandExecutionExceptionFactory = new AxonCommandExecutionExceptionFactory();
+        usersBelongToOrganizationValidator = new UsersBelongToOrganizationValidator(usersReadService, axonCommandExecutionExceptionFactory);
 
         lenient().when(usersReadService.getById(USER_ID_1)).thenReturn(ORG_1_USER_1);
         lenient().when(usersReadService.getById(USER_ID_2)).thenReturn(ORG_1_USER_2);
@@ -50,9 +54,12 @@ class UsersBelongToOrganizationValidatorTest {
 
     @Test
     void validate_WillFail_WhenAnyEveryUserBelongsToDifferentOrganization() {
-        var thrownException = assertThrows(TranslatableIllegalArgumentException.class,
+        var exception = assertThrows(CommandExecutionException.class,
             () -> usersBelongToOrganizationValidator.validate(createValidatableCommand(Set.of(USER_ID_1, USER_ID_2, USER_ID_3))));
-        assertEquals("USER_NOT_MEMBER_OF_ORGANIZATION", thrownException.getMessage());
+        assertEquals("USER_NOT_MEMBER_OF_ORGANIZATION", exception.getMessage());
+
+        var translatableIllegalArgumentException = (TranslatableIllegalArgumentException) exception.getDetails().orElseThrow();
+        assertEquals("USER_NOT_MEMBER_OF_ORGANIZATION", translatableIllegalArgumentException.getMessage());
     }
 
     private UsersBelongToOrganizationValidatableCommand createValidatableCommand(Set<UUID> userIds) {

@@ -1,6 +1,5 @@
 package engineering.everest.lhotse.api.config;
 
-import engineering.everest.axon.HazelcastCommandGateway;
 import engineering.everest.lhotse.common.RandomFieldsGenerator;
 import engineering.everest.lhotse.common.RetryWithExponentialBackoff;
 import engineering.everest.lhotse.common.domain.Role;
@@ -8,6 +7,7 @@ import engineering.everest.lhotse.organizations.domain.commands.CreateSelfRegist
 import engineering.everest.lhotse.organizations.services.OrganizationsReadService;
 import engineering.everest.lhotse.users.services.UsersReadService;
 import lombok.extern.slf4j.Slf4j;
+import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
 import org.keycloak.representations.AccessToken;
 import org.springframework.beans.factory.annotation.Value;
@@ -45,14 +45,14 @@ public class FirstTimeUserBootstrappingFilter extends OncePerRequestFilter {
         "/api/users/**/forget",
         "/api/users/**/roles");
 
-    private final HazelcastCommandGateway commandGateway;
+    private final CommandGateway commandGateway;
     private final UsersReadService usersReadService;
     private final OrganizationsReadService organizationsReadService;
     private final String defaultKeycloakClientId;
     private final RandomFieldsGenerator randomFieldsGenerator;
 
     public FirstTimeUserBootstrappingFilter(@Value("${keycloak.resource}") String defaultKeycloakClientId,
-                                            HazelcastCommandGateway commandGateway,
+                                            CommandGateway commandGateway,
                                             UsersReadService usersReadService,
                                             OrganizationsReadService organizationsReadService,
                                             RandomFieldsGenerator randomFieldsGenerator) {

@@ -1,9 +1,11 @@
 package engineering.everest.lhotse.axon.command.validators;
 
+import engineering.everest.lhotse.axon.command.AxonCommandExecutionExceptionFactory;
 import engineering.everest.lhotse.axon.command.validation.UsersStatusValidatableCommand;
 import engineering.everest.lhotse.common.domain.User;
 import engineering.everest.lhotse.i18n.exceptions.TranslatableIllegalStateException;
 import engineering.everest.lhotse.users.services.UsersReadService;
+import org.axonframework.commandhandling.CommandExecutionException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,6 +26,7 @@ class UserStatusValidatorTest {
     private final static UUID USER_ID = UUID.randomUUID();
 
     private UserStatusValidator userStatusValidator;
+    private AxonCommandExecutionExceptionFactory axonCommandExecutionExceptionFactory;
 
     @Mock
     private UsersReadService usersReadService;
@@ -32,7 +35,8 @@ class UserStatusValidatorTest {
 
     @BeforeEach
     void setUp() {
-        userStatusValidator = new UserStatusValidator(usersReadService);
+        axonCommandExecutionExceptionFactory = new AxonCommandExecutionExceptionFactory();
+        userStatusValidator = new UserStatusValidator(usersReadService, axonCommandExecutionExceptionFactory);
 
         lenient().when(usersReadService.exists(USER_ID)).thenReturn(true);
         lenient().when(usersReadService.getById(USER_ID)).thenReturn(user);
@@ -43,18 +47,24 @@ class UserStatusValidatorTest {
     void validate_WillFail_WhenUserDoesNotExist() {
         when(usersReadService.exists(USER_ID)).thenReturn(false);
 
-        var thrownException = assertThrows(TranslatableIllegalStateException.class,
+        var exception = assertThrows(CommandExecutionException.class,
             () -> userStatusValidator.validate((UsersStatusValidatableCommand) () -> Set.of(USER_ID)));
-        assertEquals("USER_IS_UNKNOWN", thrownException.getMessage());
+        assertEquals("USER_IS_UNKNOWN", exception.getMessage());
+
+        var translatableIllegalArgumentException = (TranslatableIllegalStateException) exception.getDetails().orElseThrow();
+        assertEquals("USER_IS_UNKNOWN", translatableIllegalArgumentException.getMessage());
     }
 
     @Test
     void validate_WillFail_WhenUserIsDisabled() {
         when(user.isDisabled()).thenReturn(true);
 
-        var thrownException = assertThrows(TranslatableIllegalStateException.class,
+        var exception = assertThrows(CommandExecutionException.class,
             () -> userStatusValidator.validate((UsersStatusValidatableCommand) () -> Set.of(USER_ID)));
-        assertEquals("USER_IS_DISABLED", thrownException.getMessage());
+        assertEquals("USER_IS_DISABLED", exception.getMessage());
+
+        var translatableIllegalArgumentException = (TranslatableIllegalStateException) exception.getDetails().orElseThrow();
+        assertEquals("USER_IS_DISABLED", translatableIllegalArgumentException.getMessage());
     }
 
     @Test

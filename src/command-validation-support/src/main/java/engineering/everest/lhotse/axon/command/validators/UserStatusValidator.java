@@ -1,5 +1,6 @@
 package engineering.everest.lhotse.axon.command.validators;
 
+import engineering.everest.lhotse.axon.command.AxonCommandExecutionExceptionFactory;
 import engineering.everest.lhotse.axon.command.validation.UsersStatusValidatableCommand;
 import engineering.everest.lhotse.axon.command.validation.Validates;
 import engineering.everest.lhotse.i18n.exceptions.TranslatableIllegalStateException;
@@ -15,19 +16,25 @@ import static engineering.everest.lhotse.i18n.MessageKeys.USER_IS_UNKNOWN;
 public class UserStatusValidator implements Validates<UsersStatusValidatableCommand> {
 
     private final UsersReadService usersReadService;
+    private final AxonCommandExecutionExceptionFactory axonCommandExecutionExceptionFactory;
 
-    public UserStatusValidator(UsersReadService usersReadService) {
+    public UserStatusValidator(UsersReadService usersReadService,
+                               AxonCommandExecutionExceptionFactory axonCommandExecutionExceptionFactory) {
         this.usersReadService = usersReadService;
+        this.axonCommandExecutionExceptionFactory = axonCommandExecutionExceptionFactory;
     }
 
     @Override
+    @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
     public void validate(UsersStatusValidatableCommand validatable) {
         for (UUID userId : validatable.getUserIds()) {
             if (!usersReadService.exists(userId)) {
-                throw new TranslatableIllegalStateException(USER_IS_UNKNOWN, userId);
+                axonCommandExecutionExceptionFactory.throwWrappedInCommandExecutionException(
+                    new TranslatableIllegalStateException(USER_IS_UNKNOWN, userId));
             }
             if (usersReadService.getById(userId).isDisabled()) {
-                throw new TranslatableIllegalStateException(USER_IS_DISABLED, userId);
+                axonCommandExecutionExceptionFactory.throwWrappedInCommandExecutionException(
+                    new TranslatableIllegalStateException(USER_IS_DISABLED, userId));
             }
         }
     }

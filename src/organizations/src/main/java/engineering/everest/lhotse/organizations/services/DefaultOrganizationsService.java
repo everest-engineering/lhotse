@@ -1,9 +1,9 @@
 package engineering.everest.lhotse.organizations.services;
 
-import engineering.everest.axon.HazelcastCommandGateway;
-import engineering.everest.lhotse.organizations.domain.commands.UpdateOrganizationCommand;
 import engineering.everest.lhotse.organizations.domain.commands.DisableOrganizationCommand;
 import engineering.everest.lhotse.organizations.domain.commands.EnableOrganizationCommand;
+import engineering.everest.lhotse.organizations.domain.commands.UpdateOrganizationCommand;
+import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -11,9 +11,9 @@ import java.util.UUID;
 @Service
 public class DefaultOrganizationsService implements OrganizationsService {
 
-    private final HazelcastCommandGateway commandGateway;
+    private final CommandGateway commandGateway;
 
-    public DefaultOrganizationsService(HazelcastCommandGateway commandGateway) {
+    public DefaultOrganizationsService(CommandGateway commandGateway) {
         this.commandGateway = commandGateway;
     }
 

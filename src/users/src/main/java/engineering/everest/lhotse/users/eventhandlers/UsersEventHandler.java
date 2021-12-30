@@ -50,8 +50,7 @@ public class UsersEventHandler implements ReplayCompletionAware {
 
     @EventHandler
     void on(UserCreatedForNewlyRegisteredOrganizationEvent event, @Timestamp Instant creationTime) {
-        LOGGER.info("User {} created for self registered organization {}", event.getUserId(),
-            event.getOrganizationId());
+        LOGGER.info("User {} created for self registered organization {}", event.getUserId(), event.getOrganizationId());
         var userEmail = event.getUserEmail() == null
             ? String.format("%s@deleted", event.getUserId())
             : event.getUserEmail();
@@ -82,8 +81,8 @@ public class UsersEventHandler implements ReplayCompletionAware {
     void on(UserDeletedAndForgottenEvent event) {
         LOGGER.info("Deleting user {}", event.getDeletedUserId());
         usersRepository.deleteById(event.getDeletedUserId());
-        cryptoShreddingKeyService.deleteSecretKey(new TypeDifferentiatedSecretKeyId(event.getDeletedUserId()
-            .toString(), ""));
+        cryptoShreddingKeyService.deleteSecretKey(
+            new TypeDifferentiatedSecretKeyId(event.getDeletedUserId().toString(), ""));
     }
 
     private String selectDesiredState(String desiredState, String currentState) {

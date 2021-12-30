@@ -41,7 +41,6 @@ dependencies {
 
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     implementation "engineering.everest.axon:crypto-shredding-extension:${axonCryptoShreddingVersion}"
-    implementation "engineering.everest.axon:command-distribution-extension:${axonHazelcastCommandDistributionVersion}"
     implementation "engineering.everest.starterkit:storage:${storageVersion}"
     implementation "engineering.everest.starterkit:media:${mediaVersion}"
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
@@ -119,22 +118,57 @@ task keycloakTestServer(dependsOn: downloadAndUnzipKeycloak) {
         }
 
         def keycloakDir = "/tmp/keycloak-${keycloakVersion}"
-        def waitTime = 10000
+        def waitTime = 5000L
 
         def createUser = "$keycloakDir/bin/add-user-keycloak.sh -r master -u $testUser -p $testPass".execute()
         createUser.consumeProcessOutput(System.out, System.err)
         createUser.waitForOrKill(waitTime)
 
         def keycloakProcess = "$keycloakDir/bin/standalone.sh -Djboss.http.port=$port".execute()
-        // There is too much noise as it is
         keycloakProcess.consumeProcessOutput(new FileOutputStream('/dev/null'), new FileOutputStream('/dev/null'))
-        keycloakProcess.waitForOrKill(2 * waitTime)
 
         def createRealm = "$keycloakDir/bin/kcadm.sh create realms -f $rootDir/keycloak/imports/realm-export.json --no-config --server http://localhost:$port/auth --realm master --user $testUser --password $testPass".execute()
-        createRealm.consumeProcessOutput(System.out, System.err)
-        createRealm.waitForOrKill(waitTime)
+        keycloakProcess.consumeProcessOutput(new FileOutputStream('/dev/null'), new FileOutputStream('/dev/null'))
     }
 }
 
-test.dependsOn(keycloakTestServer)
-test.finalizedBy(killKeycloak)
+
+task downloadAxonServer(type: Download) {
+    outputs.cacheIf { true }
+    src "https://download.axoniq.io/axonserver/AxonServer.zip"
+    dest new File('/tmp', "axonserver.zip") // Cache between clean builds
+    onlyIfModified true
+}
+
+task downloadAndUnzipAxonServer(dependsOn: downloadAxonServer, type: Copy) {
+    eachFile {
+        path -= ~/^.+?\//
+    }
+    from zipTree(downloadAxonServer.dest)
+    into '/tmp/axonserver'
+}
+
+task killAxonServer() {
+    doLast {
+        'pkill -f axonserver'.execute().waitFor()
+    }
+}
+
+
+task axonTestServer(dependsOn: downloadAndUnzipAxonServer) {
+    doFirst {
+        def axonServerDir = "/tmp/axonserver"
+        def waitTime = 5000L
+
+        def cleanupProcess = "rm -rf data".execute([] as String[], axonServerDir as File)
+        cleanupProcess.consumeProcessOutput(System.out, System.err)
+        cleanupProcess.waitForOrKill(waitTime)
+
+        def axonServerProcess = "java -jar axonserver.jar".execute([] as String[], axonServerDir as File)
+        axonServerProcess.consumeProcessOutput(new FileOutputStream('/dev/null'), new FileOutputStream('/dev/null'))
+    }
+}
+
+
+test.dependsOn([keycloakTestServer, axonTestServer])
+test.finalizedBy([killKeycloak, killAxonServer])

@@ -1,8 +1,10 @@
 package engineering.everest.lhotse.axon.command.validators;
 
+import engineering.everest.lhotse.axon.command.AxonCommandExecutionExceptionFactory;
 import engineering.everest.lhotse.axon.command.validation.UserUniqueEmailValidatableCommand;
 import engineering.everest.lhotse.i18n.exceptions.TranslatableIllegalStateException;
 import engineering.everest.lhotse.users.services.UsersReadService;
+import org.axonframework.commandhandling.CommandExecutionException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,19 +25,24 @@ public class UserUniqueEmailValidatorTest {
     public UsersReadService usersReadService;
 
     private UsersUniqueEmailValidator usersUniqueEmailValidator;
+    private AxonCommandExecutionExceptionFactory axonCommandExecutionExceptionFactory;
 
     @BeforeEach
     void setUp() {
-        usersUniqueEmailValidator = new UsersUniqueEmailValidator(usersReadService);
+        axonCommandExecutionExceptionFactory = new AxonCommandExecutionExceptionFactory();
+        usersUniqueEmailValidator = new UsersUniqueEmailValidator(usersReadService, axonCommandExecutionExceptionFactory);
     }
 
     @Test
     void validate_WillFail_WhenUserWithEmailAlreadyExists() {
         when(usersReadService.hasUserWithEmail(EXISTING_USER_EMAIL_1)).thenReturn(true);
 
-        var thrownException = assertThrows(TranslatableIllegalStateException.class,
+        var exception = assertThrows(CommandExecutionException.class,
             () -> usersUniqueEmailValidator.validate((UserUniqueEmailValidatableCommand) () -> EXISTING_USER_EMAIL_1));
-        assertEquals("EMAIL_ADDRESS_ALREADY_EXISTS", thrownException.getMessage());
+        assertEquals("EMAIL_ADDRESS_ALREADY_EXISTS", exception.getMessage());
+
+        var translatableIllegalArgumentException = (TranslatableIllegalStateException) exception.getDetails().orElseThrow();
+        assertEquals("EMAIL_ADDRESS_ALREADY_EXISTS", translatableIllegalArgumentException.getMessage());
     }
 
     @Test

@@ -1,8 +1,5 @@
 package engineering.everest.lhotse.tasks;
 
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.cp.CPSubsystem;
-import com.hazelcast.cp.lock.FencedLock;
 import engineering.everest.starterkit.filestorage.FileService;
 import engineering.everest.starterkit.media.thumbnails.ThumbnailService;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,17 +12,18 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.stream.Stream;
 
 import static java.time.Duration.parse;
 import static java.util.Arrays.stream;
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -38,24 +36,22 @@ public class PeriodicFilesMarkedForDeletionRemovalTaskTest {
     private PeriodicFilesMarkedForDeletionRemovalTask periodicFilesMarkedForDeletionRemovalTask;
 
     @Mock
+    private EntityManager entityManager;
+    @Mock
     private FileService fileService;
     @Mock
-    private HazelcastInstance hazelcastInstance;
-    @Mock
-    private CPSubsystem cpSubsystem;
-    @Mock
-    private FencedLock singleAppNodeExecutionLock;
-    @Mock
     private ThumbnailService thumbnailService;
+    @Mock
+    private Query lockQuery;
 
     @BeforeEach
     void setUp() {
-        when(hazelcastInstance.getCPSubsystem()).thenReturn(cpSubsystem);
-        when(cpSubsystem.getLock(PeriodicFilesMarkedForDeletionRemovalTask.class.getSimpleName())).thenReturn(singleAppNodeExecutionLock);
-        lenient().when(singleAppNodeExecutionLock.isLockedByCurrentThread()).thenReturn(true);
+        lenient().when(entityManager.createNativeQuery("SELECT pg_try_advisory_lock(42)")).thenReturn(lockQuery);
+        lenient().when(entityManager.createNativeQuery("SELECT pg_advisory_unlock(42)")).thenReturn(mock(Query.class));
+        lenient().when(lockQuery.getSingleResult()).thenReturn(Boolean.TRUE);
 
         periodicFilesMarkedForDeletionRemovalTask =
-            new PeriodicFilesMarkedForDeletionRemovalTask(hazelcastInstance, fileService, thumbnailService, BATCH_SIZE);
+            new PeriodicFilesMarkedForDeletionRemovalTask(entityManager, fileService, thumbnailService, BATCH_SIZE);
     }
 
     @Test
@@ -64,7 +60,7 @@ public class PeriodicFilesMarkedForDeletionRemovalTaskTest {
             .filter(method -> method.getName().equals("checkForFilesMarkedForDeletionToCleanUp"))
             .findFirst().orElseThrow();
 
-        Scheduled schedule = checkForFilesToDeleteMethod.getAnnotation(Scheduled.class);
+        var schedule = checkForFilesToDeleteMethod.getAnnotation(Scheduled.class);
         assertTrue(schedule.fixedRate() > 0 || !schedule.fixedRateString().equals(""));
     }
 
@@ -74,7 +70,7 @@ public class PeriodicFilesMarkedForDeletionRemovalTaskTest {
         Method checkForTimedOutHelpSessionsMethod = stream(PeriodicFilesMarkedForDeletionRemovalTask.class.getDeclaredMethods())
             .filter(method -> method.getName().equals("checkForFilesMarkedForDeletionToCleanUp"))
             .findFirst().orElseThrow();
-        Scheduled schedule = checkForTimedOutHelpSessionsMethod.getAnnotation(Scheduled.class);
+        var schedule = checkForTimedOutHelpSessionsMethod.getAnnotation(Scheduled.class);
 
         String expression = schedule.fixedRateString().replace("${storage.files.deletion.fixedRate:5m}", input);
         assertEquals(expectedDuration, parse(expression));
@@ -88,33 +84,12 @@ public class PeriodicFilesMarkedForDeletionRemovalTaskTest {
     }
 
     @Test
-    void checkForFilesMarkedForDeletionToCleanUp_WillObtainDistributedExecutionLockWhenLockIsNotAcquired() {
-        when(singleAppNodeExecutionLock.isLockedByCurrentThread()).thenReturn(false);
-        when(singleAppNodeExecutionLock.isLocked()).thenReturn(false);
-
-        periodicFilesMarkedForDeletionRemovalTask.checkForFilesMarkedForDeletionToCleanUp();
-
-        verify(singleAppNodeExecutionLock).tryLock(5, SECONDS);
-    }
-
-    @Test
-    void checkForFilesMarkedForDeletionToCleanUp_WillNotTryAndObtainLockWhenThisInstanceAlreadyOwnsTheLock() {
-        when(singleAppNodeExecutionLock.isLockedByCurrentThread()).thenReturn(true);
-
-        periodicFilesMarkedForDeletionRemovalTask.checkForFilesMarkedForDeletionToCleanUp();
-
-        verify(singleAppNodeExecutionLock, never()).tryLock(5, SECONDS);
-    }
-
-    @Test
     void checkForFilesMarkedForDeletionToCleanUp_WillDoNothingWhenAnotherInstanceHasAcquiredLock() {
-        when(singleAppNodeExecutionLock.isLockedByCurrentThread()).thenReturn(false);
-        when(singleAppNodeExecutionLock.isLocked()).thenReturn(true);
+        when(lockQuery.getSingleResult()).thenReturn(Boolean.FALSE);
 
         periodicFilesMarkedForDeletionRemovalTask.checkForFilesMarkedForDeletionToCleanUp();
 
-        verify(singleAppNodeExecutionLock, never()).tryLock(5, SECONDS);
-        verifyNoInteractions(fileService);
+        verifyNoInteractions(thumbnailService, fileService);
     }
 
     @Test

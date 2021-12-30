@@ -1,8 +1,8 @@
 package engineering.everest.lhotse.api.rest;
 
-import engineering.everest.axon.exceptions.RemoteCommandExecutionException;
 import engineering.everest.lhotse.api.rest.responses.ApiErrorResponse;
 import engineering.everest.lhotse.i18n.exceptions.TranslatableException;
+import org.axonframework.commandhandling.CommandExecutionException;
 import org.axonframework.modelling.command.AggregateNotFoundException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -42,10 +42,9 @@ public class ExceptionHandlingControllerAdvice extends ResponseEntityExceptionHa
         if (exception instanceof ExecutionException) {
             return handleExecutionException((ExecutionException) exception);
         }
-        if (exception instanceof RemoteCommandExecutionException) {
-            return handleRemoteCommandExecutionException((RemoteCommandExecutionException) exception);
+        if (exception instanceof CommandExecutionException) {
+            return handleCommandExecutionException((CommandExecutionException) exception);
         }
-
         return handleGenericException(exception);
     }
 
@@ -79,12 +78,15 @@ public class ExceptionHandlingControllerAdvice extends ResponseEntityExceptionHa
         return new ResponseEntity<>(createResponseBody(message, BAD_REQUEST), new HttpHeaders(), BAD_REQUEST);
     }
 
-    private ResponseEntity<Object> handleRemoteCommandExecutionException(RemoteCommandExecutionException exception) {
-        var cause = exception.getCause();
-        if (cause instanceof ExecutionException) {
-            return handleExecutionException((ExecutionException) cause);
+    private ResponseEntity<Object> handleCommandExecutionException(CommandExecutionException exception) {
+        String message = exception.getMessage();
+        if (exception.getDetails().isPresent()) {
+            var details = exception.getDetails().orElseThrow();
+            if (details instanceof TranslatableException) {
+                message = ((TranslatableException) details).getLocalizedMessage();
+            }
         }
-        return new ResponseEntity<>(createResponseBody(cause.getMessage(), BAD_REQUEST), new HttpHeaders(), BAD_REQUEST);
+        return new ResponseEntity<>(createResponseBody(message, BAD_REQUEST), new HttpHeaders(), BAD_REQUEST);
     }
 
     private ResponseEntity<Object> handleGenericException(Exception exception) {

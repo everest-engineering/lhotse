@@ -20,7 +20,6 @@ import org.axonframework.modelling.saga.StartSaga;
 import org.axonframework.serialization.Revision;
 import org.axonframework.spring.stereotype.Saga;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.Map;
 import java.util.Set;
@@ -37,7 +36,6 @@ public class OrganizationRegistrationSaga {
     private transient CommandGateway commandGateway;
 
     @Autowired
-    @Qualifier("hazelcastCommandGateway")
     public void setCommandGateway(CommandGateway commandGateway) {
         this.commandGateway = commandGateway;
     }

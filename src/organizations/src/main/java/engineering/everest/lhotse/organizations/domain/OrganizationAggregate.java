@@ -1,18 +1,19 @@
 package engineering.everest.lhotse.organizations.domain;
 
+import engineering.everest.lhotse.axon.command.AxonCommandExecutionExceptionFactory;
 import engineering.everest.lhotse.i18n.exceptions.TranslatableIllegalArgumentException;
 import engineering.everest.lhotse.i18n.exceptions.TranslatableIllegalStateException;
 import engineering.everest.lhotse.organizations.domain.commands.CreateSelfRegisteredOrganizationCommand;
 import engineering.everest.lhotse.organizations.domain.commands.DisableOrganizationCommand;
 import engineering.everest.lhotse.organizations.domain.commands.EnableOrganizationCommand;
 import engineering.everest.lhotse.organizations.domain.commands.UpdateOrganizationCommand;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationAddressUpdatedEvent;
+import engineering.everest.lhotse.organizations.domain.events.OrganizationContactDetailsUpdatedEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationCreatedForNewSelfRegisteredUserEvent;
-import engineering.everest.lhotse.organizations.domain.events.UserPromotedToOrganizationAdminEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationDisabledByAdminEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationEnabledByAdminEvent;
 import engineering.everest.lhotse.organizations.domain.events.OrganizationNameChangedEvent;
-import engineering.everest.lhotse.organizations.domain.events.OrganizationContactDetailsUpdatedEvent;
-import engineering.everest.lhotse.organizations.domain.events.OrganizationAddressUpdatedEvent;
+import engineering.everest.lhotse.organizations.domain.events.UserPromotedToOrganizationAdminEvent;
 import engineering.everest.lhotse.users.domain.commands.PromoteUserToOrganizationAdminCommand;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
@@ -31,7 +32,7 @@ import static engineering.everest.lhotse.i18n.MessageKeys.ORGANIZATION_UPDATE_NO
 import static engineering.everest.lhotse.i18n.MessageKeys.USER_ALREADY_ORGANIZATION_ADMIN;
 import static org.axonframework.modelling.command.AggregateLifecycle.apply;
 
-@Aggregate(repository = "repositoryForOrganization")
+@Aggregate(snapshotTriggerDefinition = "organizationAggregateSnapshotTriggerDefinition")
 public class OrganizationAggregate implements Serializable {
 
     @AggregateIdentifier
@@ -52,33 +53,35 @@ public class OrganizationAggregate implements Serializable {
     }
 
     @CommandHandler
-    void handle(PromoteUserToOrganizationAdminCommand command) {
-        validateOrganizationIsEnabled();
+    void handle(PromoteUserToOrganizationAdminCommand command, AxonCommandExecutionExceptionFactory axonCommandExecutionExceptionFactory) {
+        validateOrganizationIsEnabled(axonCommandExecutionExceptionFactory);
         if (organizationAdminIds.contains(command.getPromotedUserId())) {
-            throw new TranslatableIllegalStateException(USER_ALREADY_ORGANIZATION_ADMIN, command.getPromotedUserId(), id);
+            axonCommandExecutionExceptionFactory.throwWrappedInCommandExecutionException(
+                new TranslatableIllegalStateException(USER_ALREADY_ORGANIZATION_ADMIN, command.getPromotedUserId(), id));
         }
 
         apply(new UserPromotedToOrganizationAdminEvent(command.getOrganizationId(), command.getPromotedUserId()));
     }
 
     @CommandHandler
-    void handle(DisableOrganizationCommand command) {
-        validateOrganizationIsEnabled();
+    void handle(DisableOrganizationCommand command, AxonCommandExecutionExceptionFactory axonCommandExecutionExceptionFactory) {
+        validateOrganizationIsEnabled(axonCommandExecutionExceptionFactory);
         apply(new OrganizationDisabledByAdminEvent(command.getOrganizationId(), command.getRequestingUserId()));
     }
 
     @CommandHandler
-    void handle(EnableOrganizationCommand command) {
+    void handle(EnableOrganizationCommand command, AxonCommandExecutionExceptionFactory axonCommandExecutionExceptionFactory) {
         if (!disabled) {
-            throw new TranslatableIllegalStateException(ORGANIZATION_ALREADY_ENABLED, id);
+            axonCommandExecutionExceptionFactory.throwWrappedInCommandExecutionException(
+                new TranslatableIllegalStateException(ORGANIZATION_ALREADY_ENABLED, id));
         }
         apply(new OrganizationEnabledByAdminEvent(command.getOrganizationId(), command.getRequestingUserId()));
     }
 
     @CommandHandler
-    public void handle(UpdateOrganizationCommand command) {
-        validateOrganizationIsEnabled();
-        validateAtLeastOneUpdateIsMade(command);
+    public void handle(UpdateOrganizationCommand command, AxonCommandExecutionExceptionFactory axonCommandExecutionExceptionFactory) {
+        validateOrganizationIsEnabled(axonCommandExecutionExceptionFactory);
+        validateAtLeastOneUpdateIsMade(command, axonCommandExecutionExceptionFactory);
 
         if (isNameUpdated(command)) {
             apply(new OrganizationNameChangedEvent(command.getOrganizationId(), command.getOrganizationName(),
@@ -116,16 +119,19 @@ public class OrganizationAggregate implements Serializable {
         organizationAdminIds.add(event.getPromotedUserId());
     }
 
-    private void validateOrganizationIsEnabled() {
+    private void validateOrganizationIsEnabled(AxonCommandExecutionExceptionFactory axonCommandExecutionExceptionFactory) {
         if (disabled) {
-            throw new TranslatableIllegalStateException(ORGANIZATION_IS_DISABLED, id);
+            axonCommandExecutionExceptionFactory.throwWrappedInCommandExecutionException(
+                new TranslatableIllegalStateException(ORGANIZATION_IS_DISABLED, id));
         }
     }
 
-    private void validateAtLeastOneUpdateIsMade(UpdateOrganizationCommand command) {
+    private void validateAtLeastOneUpdateIsMade(UpdateOrganizationCommand command,
+                                                AxonCommandExecutionExceptionFactory axonCommandExecutionExceptionFactory) {
         var isChangeMade = isNameUpdated(command) || areContactDetailsUpdated(command) || isAddressUpdated(command);
         if (!isChangeMade) {
-            throw new TranslatableIllegalArgumentException(ORGANIZATION_UPDATE_NO_FIELDS_CHANGED);
+            axonCommandExecutionExceptionFactory.throwWrappedInCommandExecutionException(
+                new TranslatableIllegalArgumentException(ORGANIZATION_UPDATE_NO_FIELDS_CHANGED));
         }
     }
 

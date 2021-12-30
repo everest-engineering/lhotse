@@ -1,9 +1,11 @@
 package engineering.everest.lhotse.axon.command.validators;
 
+import engineering.everest.lhotse.axon.command.AxonCommandExecutionExceptionFactory;
 import engineering.everest.lhotse.axon.command.validation.OrganizationStatusValidatableCommand;
 import engineering.everest.lhotse.i18n.exceptions.TranslatableIllegalStateException;
 import engineering.everest.lhotse.organizations.Organization;
 import engineering.everest.lhotse.organizations.services.OrganizationsReadService;
+import org.axonframework.commandhandling.CommandExecutionException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,13 +30,15 @@ class OrganizationStatusValidatorTest {
         new Organization(ORGANIZATION_ID_2, "organization-name", null, null, null, null, null, true);
 
     private OrganizationStatusValidator organizationStatusValidator;
+    private AxonCommandExecutionExceptionFactory axonCommandExecutionExceptionFactory;
 
     @Mock
     private OrganizationsReadService organizationsReadService;
 
     @BeforeEach
     void setUp() {
-        organizationStatusValidator = new OrganizationStatusValidator(organizationsReadService);
+        axonCommandExecutionExceptionFactory = new AxonCommandExecutionExceptionFactory();
+        organizationStatusValidator = new OrganizationStatusValidator(organizationsReadService, axonCommandExecutionExceptionFactory);
     }
 
     @Test
@@ -48,17 +52,23 @@ class OrganizationStatusValidatorTest {
     void validate_WillFail_WhenOrganizationIsDisabled() {
         when(organizationsReadService.getById(ORGANIZATION_ID_2)).thenReturn(DISABLED_ORGANIZATION);
 
-        var thrownException = assertThrows(TranslatableIllegalStateException.class,
+        var exception = assertThrows(CommandExecutionException.class,
             () -> organizationStatusValidator.validate((OrganizationStatusValidatableCommand) () -> ORGANIZATION_ID_2));
-        assertEquals("ORGANIZATION_IS_DEREGISTERED", thrownException.getMessage());
+        assertEquals("ORGANIZATION_IS_DEREGISTERED", exception.getMessage());
+
+        var translatableIllegalArgumentException = (TranslatableIllegalStateException) exception.getDetails().orElseThrow();
+        assertEquals("ORGANIZATION_IS_DEREGISTERED", translatableIllegalArgumentException.getMessage());
     }
 
     @Test
     void validate_WillFail_WhenOrganizationDoesNotExist() {
         when(organizationsReadService.getById(ORGANIZATION_ID_1)).thenThrow(NoSuchElementException.class);
 
-        var thrownException = assertThrows(TranslatableIllegalStateException.class,
+        var exception = assertThrows(CommandExecutionException.class,
             () -> organizationStatusValidator.validate((OrganizationStatusValidatableCommand) () -> ORGANIZATION_ID_1));
-        assertEquals("ORGANIZATION_DOES_NOT_EXIST", thrownException.getMessage());
+        assertEquals("ORGANIZATION_DOES_NOT_EXIST", exception.getMessage());
+
+        var translatableIllegalArgumentException = (TranslatableIllegalStateException) exception.getDetails().orElseThrow();
+        assertEquals("ORGANIZATION_DOES_NOT_EXIST", translatableIllegalArgumentException.getMessage());
     }
 }

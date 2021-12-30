@@ -96,8 +96,7 @@ class ApplicationFunctionalTests {
 
         var newUserRequest = new NewUserRequest("user123@example.com", "Captain Fancypants");
         var userId = apiRestTestClient.createUser(AdminProvisionTask.ORGANIZATION_ID, newUserRequest, CREATED);
-        RetryWithExponentialBackoff
-            .oneMinuteWaiter()
+        RetryWithExponentialBackoff.oneMinuteWaiter()
             .waitOrThrow(() -> usersReadService.exists(userId), "user registration projection update");
 
         var response = webTestClient.post().uri("/api/organizations/{organizationId}/users", AdminProvisionTask.ORGANIZATION_ID)

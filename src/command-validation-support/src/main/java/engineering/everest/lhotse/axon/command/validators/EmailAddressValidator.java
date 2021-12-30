@@ -1,5 +1,6 @@
 package engineering.everest.lhotse.axon.command.validators;
 
+import engineering.everest.lhotse.axon.command.AxonCommandExecutionExceptionFactory;
 import engineering.everest.lhotse.axon.command.validation.EmailAddressValidatableCommand;
 import engineering.everest.lhotse.axon.command.validation.Validates;
 import engineering.everest.lhotse.i18n.exceptions.TranslatableIllegalArgumentException;
@@ -11,13 +12,20 @@ import static engineering.everest.lhotse.i18n.MessageKeys.EMAIL_ADDRESS_MALFORME
 @Component
 public class EmailAddressValidator implements Validates<EmailAddressValidatableCommand> {
 
+    private final AxonCommandExecutionExceptionFactory axonCommandExecutionExceptionFactory;
+
+    public EmailAddressValidator(AxonCommandExecutionExceptionFactory axonCommandExecutionExceptionFactory) {
+        this.axonCommandExecutionExceptionFactory = axonCommandExecutionExceptionFactory;
+    }
+
     @Override
     public void validate(EmailAddressValidatableCommand validatable) {
         if (validatable.getEmailAddress() == null) {
             return;
         }
         if (!EmailValidator.getInstance(false).isValid(validatable.getEmailAddress())) {
-            throw new TranslatableIllegalArgumentException(EMAIL_ADDRESS_MALFORMED);
+            axonCommandExecutionExceptionFactory.throwWrappedInCommandExecutionException(
+                new TranslatableIllegalArgumentException(EMAIL_ADDRESS_MALFORMED));
         }
     }
 }

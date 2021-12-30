@@ -11,7 +11,6 @@ dependencies {
     implementation project(':users-api')
     implementation project(':keycloak-support')
 
-    implementation "engineering.everest.axon:command-distribution-extension:${axonHazelcastCommandDistributionVersion}"
     implementation "engineering.everest.starterkit:media:${mediaVersion}"
     implementation "engineering.everest.starterkit:storage:${storageVersion}"
     implementation 'org.keycloak:keycloak-spring-boot-starter'

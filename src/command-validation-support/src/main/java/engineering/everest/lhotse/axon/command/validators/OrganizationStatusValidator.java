@@ -1,5 +1,6 @@
 package engineering.everest.lhotse.axon.command.validators;
 
+import engineering.everest.lhotse.axon.command.AxonCommandExecutionExceptionFactory;
 import engineering.everest.lhotse.axon.command.validation.OrganizationStatusValidatableCommand;
 import engineering.everest.lhotse.axon.command.validation.Validates;
 import engineering.everest.lhotse.i18n.exceptions.TranslatableIllegalStateException;
@@ -15,9 +16,12 @@ import static engineering.everest.lhotse.i18n.MessageKeys.ORGANIZATION_IS_DEREGI
 public class OrganizationStatusValidator implements Validates<OrganizationStatusValidatableCommand> {
 
     private final OrganizationsReadService organizationsReadService;
+    private final AxonCommandExecutionExceptionFactory axonCommandExecutionExceptionFactory;
 
-    public OrganizationStatusValidator(OrganizationsReadService organizationsReadService) {
+    public OrganizationStatusValidator(OrganizationsReadService organizationsReadService,
+                                       AxonCommandExecutionExceptionFactory axonCommandExecutionExceptionFactory) {
         this.organizationsReadService = organizationsReadService;
+        this.axonCommandExecutionExceptionFactory = axonCommandExecutionExceptionFactory;
     }
 
     @Override
@@ -25,10 +29,12 @@ public class OrganizationStatusValidator implements Validates<OrganizationStatus
         try {
             var organization = organizationsReadService.getById(command.getOrganizationId());
             if (organization.isDisabled()) {
-                throw new TranslatableIllegalStateException(ORGANIZATION_IS_DEREGISTERED, command.getOrganizationId());
+                axonCommandExecutionExceptionFactory.throwWrappedInCommandExecutionException(
+                    new TranslatableIllegalStateException(ORGANIZATION_IS_DEREGISTERED, command.getOrganizationId()));
             }
         } catch (NoSuchElementException e) {
-            throw new TranslatableIllegalStateException(ORGANIZATION_DOES_NOT_EXIST, e, command.getOrganizationId());
+            axonCommandExecutionExceptionFactory.throwWrappedInCommandExecutionException(
+                new TranslatableIllegalStateException(ORGANIZATION_DOES_NOT_EXIST, e, command.getOrganizationId()));
         }
     }
 }

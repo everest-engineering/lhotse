@@ -6,89 +6,36 @@ import engineering.everest.axon.cryptoshredding.CryptoShreddingSerializer;
 import engineering.everest.axon.cryptoshredding.encryption.EncrypterDecrypterFactory;
 import engineering.everest.lhotse.axon.CommandValidatingMessageHandlerInterceptor;
 import engineering.everest.lhotse.axon.LoggingMessageHandlerInterceptor;
-import engineering.everest.lhotse.axon.replay.CompositeEventProcessorBuilder;
+import engineering.everest.lhotse.axon.replay.ReplayMarkerAwareTrackingEventProcessorBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.commandhandling.CommandBus;
-import org.axonframework.commandhandling.CommandMessage;
-import org.axonframework.commandhandling.SimpleCommandBus;
-import org.axonframework.commandhandling.gateway.DefaultCommandGateway;
-import org.axonframework.commandhandling.gateway.IntervalRetryScheduler;
-import org.axonframework.commandhandling.gateway.RetryScheduler;
-import org.axonframework.common.transaction.TransactionManager;
+import org.axonframework.common.jpa.EntityManagerProvider;
 import org.axonframework.config.EventProcessingModule;
-import org.axonframework.messaging.MessageDispatchInterceptor;
+import org.axonframework.eventhandling.tokenstore.TokenStore;
+import org.axonframework.eventhandling.tokenstore.jpa.JpaTokenStore;
 import org.axonframework.messaging.interceptors.CorrelationDataInterceptor;
-import org.axonframework.modelling.command.AnnotationCommandTargetResolver;
+import org.axonframework.modelling.saga.repository.SagaStore;
+import org.axonframework.modelling.saga.repository.jpa.JpaSagaStore;
+import org.axonframework.serialization.Serializer;
 import org.axonframework.serialization.json.JacksonSerializer;
 import org.axonframework.spring.config.AxonConfiguration;
-import org.ehcache.jsr107.EhcacheCachingProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.TaskExecutor;
 
-import javax.cache.CacheManager;
-import java.util.List;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-
-import static engineering.everest.lhotse.axon.config.AxonEventStoreConfig.AXON_AUTO_CONFIG_QUALIFIER;
-import static javax.cache.Caching.getCachingProvider;
+import java.lang.management.ManagementFactory;
 
 @Slf4j
 @Configuration
 public class AxonConfig {
-    @Bean
-    @SuppressWarnings("PMD.DoNotUseThreads")
-    public RetryScheduler retryScheduler(@Value("${application.axon.retry.interval-milli-seconds}") int retryInterval,
-                                         @Value("${application.axon.retry.max-count}") int retryMaxCount,
-                                         @Value("${application.axon.retry.pool-size}") int retryPoolSize) {
-        return IntervalRetryScheduler.builder()
-            .retryInterval(retryInterval)
-            .maxRetryCount(retryMaxCount)
-            .retryExecutor(new ScheduledThreadPoolExecutor(retryPoolSize))
-            .build();
-    }
-
-    @Bean
-    public DefaultCommandGateway defaultCommandGateway(CommandBus commandBus,
-                                                       RetryScheduler retryScheduler,
-                                                       List<MessageDispatchInterceptor<? super CommandMessage<?>>> dispatchInterceptors) {
-        return DefaultCommandGateway.builder()
-            .commandBus(commandBus)
-            .retryScheduler(retryScheduler)
-            .dispatchInterceptors(dispatchInterceptors)
-            .build();
-    }
-
-    @Bean
-    public SimpleCommandBus commandBus(@Qualifier(AXON_AUTO_CONFIG_QUALIFIER) TransactionManager txManager,
-                                       AxonConfiguration axonConfiguration,
-                                       CommandValidatingMessageHandlerInterceptor commandValidatingMessageHandlerInterceptor,
-                                       LoggingMessageHandlerInterceptor loggingMessageHandlerInterceptor) {
-        var simpleCommandBus = SimpleCommandBus.builder()
-            .transactionManager(txManager)
-            .messageMonitor(axonConfiguration.messageMonitor(CommandBus.class, "commandBus"))
-            .build();
-        simpleCommandBus.registerHandlerInterceptor(new CorrelationDataInterceptor<>(axonConfiguration.correlationDataProviders()));
-        simpleCommandBus.registerHandlerInterceptor(commandValidatingMessageHandlerInterceptor);
-        simpleCommandBus.registerHandlerInterceptor(loggingMessageHandlerInterceptor);
-        return simpleCommandBus;
-    }
 
     @Autowired
     public void configure(TaskExecutor taskExecutor,
-                          EventProcessingModule eventProcessingModule,
-                          @Value("${application.axon.event-processor.default-group:true}") boolean defaultGroup,
-                          @Value("${application.axon.event-processor.type:tracking}") EventProcessorType eventProcessorType,
-                          @Value("${application.axon.event-processor.segments:1}") int numberOfSegments) {
-        if (defaultGroup) {
-            eventProcessingModule.byDefaultAssignTo("default");
-        }
+                          EventProcessingModule eventProcessingModule) {
         eventProcessingModule.registerEventProcessorFactory(
-            new CompositeEventProcessorBuilder(
-                taskExecutor, eventProcessingModule, eventProcessorType, numberOfSegments));
+            new ReplayMarkerAwareTrackingEventProcessorBuilder(taskExecutor, eventProcessingModule));
     }
 
     @Qualifier("eventSerializer")
@@ -99,19 +46,32 @@ public class AxonConfig {
             cryptoShreddingKeyService, aesEncrypterDecrypterFactory, new ObjectMapper());
     }
 
-    @Qualifier("axon-cache-manager")
     @Bean
-    public CacheManager cacheManager() {
-        return getCachingProvider(EhcacheCachingProvider.class.getCanonicalName()).getCacheManager();
+    @SuppressWarnings("rawtypes")
+    public SagaStore globalSagaStore(EntityManagerProvider entityManagerProvider,
+                                     CryptoShreddingSerializer cryptoShreddingEventSerializer) {
+        return JpaSagaStore.builder()
+            .serializer(cryptoShreddingEventSerializer)
+            .entityManagerProvider(entityManagerProvider)
+            .build();
     }
 
     @Bean
-    public AnnotationCommandTargetResolver annotationCommandTargetResolver() {
-        return AnnotationCommandTargetResolver.builder().build();
+    public TokenStore tokenStore(EntityManagerProvider entityManagerProvider, Serializer defaultSerializer) {
+        return JpaTokenStore.builder()
+            .entityManagerProvider(entityManagerProvider)
+            .serializer(defaultSerializer)
+            .nodeId(ManagementFactory.getRuntimeMXBean().getName())
+            .build();
     }
 
-    public enum EventProcessorType {
-        SUBSCRIBING,
-        TRACKING
+    @Autowired
+    public void registerInterceptors(@Autowired CommandBus commandBus,
+                                     @Autowired AxonConfiguration axonConfiguration,
+                                     @Autowired CommandValidatingMessageHandlerInterceptor commandValidatingMessageHandlerInterceptor,
+                                     @Autowired LoggingMessageHandlerInterceptor loggingMessageHandlerInterceptor) {
+        commandBus.registerHandlerInterceptor(new CorrelationDataInterceptor<>(axonConfiguration.correlationDataProviders()));
+        commandBus.registerHandlerInterceptor(commandValidatingMessageHandlerInterceptor);
+        commandBus.registerHandlerInterceptor(loggingMessageHandlerInterceptor);
     }
 }

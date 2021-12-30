@@ -1,13 +1,16 @@
 package engineering.everest.lhotse.axon;
 
+import engineering.everest.lhotse.axon.command.AxonCommandExecutionExceptionFactory;
 import engineering.everest.lhotse.axon.command.validators.EmailAddressValidator;
 import engineering.everest.lhotse.axon.command.validators.OrganizationStatusValidator;
 import engineering.everest.lhotse.axon.command.validators.UsersUniqueEmailValidator;
+import engineering.everest.lhotse.i18n.exceptions.TranslatableException;
 import engineering.everest.lhotse.i18n.exceptions.TranslatableIllegalStateException;
 import engineering.everest.lhotse.organizations.Organization;
 import engineering.everest.lhotse.organizations.services.OrganizationsReadService;
 import engineering.everest.lhotse.users.domain.commands.CreateOrganizationUserCommand;
 import engineering.everest.lhotse.users.services.UsersReadService;
+import org.axonframework.commandhandling.CommandExecutionException;
 import org.axonframework.commandhandling.CommandMessage;
 import org.axonframework.messaging.InterceptorChain;
 import org.axonframework.messaging.unitofwork.UnitOfWork;
@@ -60,14 +63,16 @@ class CommandValidatingMessageHandlerInterceptorTest {
     private UsersUniqueEmailValidator usersUniqueEmailValidator;
     private OrganizationStatusValidator organizationStatusValidator;
     private CommandValidatingMessageHandlerInterceptor commandValidatingMessageHandlerInterceptor;
+    private AxonCommandExecutionExceptionFactory axonCommandExecutionExceptionFactory;
 
     @BeforeEach
     void setUp() {
         Mockito.<CommandMessage<?>>when(unitOfWork.getMessage()).thenReturn(commandMessage);
         lenient().when(javaBeanValidator.validate(any())).thenReturn(emptySet());
-        emailAddressValidator = new EmailAddressValidator();
-        usersUniqueEmailValidator = new UsersUniqueEmailValidator(usersReadService);
-        organizationStatusValidator = new OrganizationStatusValidator(organizationsReadService);
+        axonCommandExecutionExceptionFactory = new AxonCommandExecutionExceptionFactory();
+        emailAddressValidator = new EmailAddressValidator(axonCommandExecutionExceptionFactory);
+        usersUniqueEmailValidator = new UsersUniqueEmailValidator(usersReadService, axonCommandExecutionExceptionFactory);
+        organizationStatusValidator = new OrganizationStatusValidator(organizationsReadService, axonCommandExecutionExceptionFactory);
         commandValidatingMessageHandlerInterceptor = new CommandValidatingMessageHandlerInterceptor(
             List.of(emailAddressValidator,
                 usersUniqueEmailValidator,
@@ -84,10 +89,13 @@ class CommandValidatingMessageHandlerInterceptorTest {
         when(createUserSubClassCommand.getOrganizationId()).thenReturn(ORGANIZATION_ID);
         when(organizationsReadService.getById(ORGANIZATION_ID)).thenThrow(NoSuchElementException.class);
 
-        var exception = assertThrows(TranslatableIllegalStateException.class,
+        var exception = assertThrows(CommandExecutionException.class,
             () -> commandValidatingMessageHandlerInterceptor.handle(unitOfWork, interceptorChain));
 
         assertEquals("ORGANIZATION_DOES_NOT_EXIST", exception.getMessage());
+        var details = exception.getDetails().orElseThrow();
+        assertEquals(TranslatableIllegalStateException.class, details.getClass());
+        assertEquals("ORGANIZATION_DOES_NOT_EXIST", ((TranslatableException) details).getMessage());
     }
 
     @Test

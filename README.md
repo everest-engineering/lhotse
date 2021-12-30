@@ -2,18 +2,17 @@
 
 [![Build status](https://badge.buildkite.com/b44f55806fca0e349ecc8d470fe0fdcea8f49c1375f33e86d5.svg?branch=main)](https://buildkite.com/everest-engineering/lhotse) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=everest-engineering_lhotse&metric=alert_status)](https://sonarcloud.io/dashboard?id=everest-engineering_lhotse)
 
-This is Lhotse, a starter kit for writing event sourced web applications following domain driven design principles.
-It is based on [Spring Boot](https://spring.io/projects/spring-boot), [Axon](https://axoniq.io/) and
-[Hazelcast](https://hazelcast.com/).
+This is Lhotse, a starter kit for writing event sourced application backends following domain driven design principles.
+It is based on [Spring Boot](https://spring.io/projects/spring-boot), [Axon](https://axoniq.io/)
+and [Keycloak](https://www.keycloak.org/).
 
-Whether you're starting a new project or refactoring an existing one, you should consider this project if you're seeking:
+Whether you're starting a new project or refactoring an existing one, you should consider this project if you're
+seeking:
 
-- horizontal scalability via self forming clusters with distributed command processing
+- horizontal scalability with distributed command and event processing
 - crypto-shredding support for your event log to address privacy regulations such as the GDPR
-- Axon's awesome event sourcing and [CQRS](https://martinfowler.com/bliki/CQRS.html) features
 - deduplicating filestore abstractions for a variety of backing stores such as S3 buckets and Mongo GridFS
-- role based authorisation
-- Spring Boot features such as OAuth ready authorisation and Prometheus integration
+- SSO, role based authorisation and federated identity management
 
 ... without the time and effort involved in starting a new project from scratch.
 
@@ -23,42 +22,42 @@ sample code demonstrates end-to-end command handling and event processing flows 
 # Table of Contents
 
 - [Tooling](#tooling)
-  - [IntelliJ configuration](#intellij-configuration)
-  - [Building](#building)
-  - [Semantic versioning](#semantic-versioning)
-  - [Jupyter notebook](#jupyter-notebook)
-  - [Swagger documentation](#swagger-documentation)
-  - [Code style](#code-style)
+    - [IntelliJ configuration](#intellij-configuration)
+    - [Building](#building)
+    - [Semantic versioning](#semantic-versioning)
+    - [Jupyter notebook](#jupyter-notebook)
+    - [Swagger documentation](#swagger-documentation)
+    - [Code style](#code-style)
 - [Features](#features)
-  - [Axon: DDD and event sourcing](#axon-ddd-and-event-sourcing)
-  - [Distributed command handling](#distributed-command-handling)
-  - [Command validation](#command-validation)
-  - [Event processing](#event-processing)
-  - [Event replays](#event-replays)
-  - [Crypto shredding](#crypto-shredding)
-  - [Security and access control](#security-and-access-control)
-    - [User and Keycloak authentication token](#user-and-authentication-token)
-    - [Endpoint access control](#endpoint-access-control)
-  - [File support](#file-support)
-    - [Configuring the In-Memory Filestore](#configuring-the-in-memory-filestore) 
-    - [Configuring Mongo GridFS](#configuring-mongo-gridfs)
-    - [Configuring AWS S3](#configuring-aws-s3)
-  - [Media support](#media-support)
-  - [ETag HTTP headers](#etag-http-headers)
+    - [Axon: DDD and event sourcing](#axon-ddd-and-event-sourcing)
+    - [Command validation](#command-validation)
+    - [Event processing](#event-processing)
+    - [Event replays](#event-replays)
+    - [Crypto shredding](#crypto-shredding)
+    - [Security and access control](#security-and-access-control)
+        - [User and Keycloak authentication token](#user-and-keycloak-authentication-token)
+        - [Endpoint access control](#endpoint-access-control)
+    - [File support](#file-support)
+        - [Configuring the In-Memory Filestore](#configuring-the-in-memory-filestore)
+        - [Configuring Mongo GridFS](#configuring-mongo-gridfs)
+        - [Configuring AWS S3](#configuring-aws-s3)
+    - [Media support](#media-support)
+    - [ETag HTTP headers](#etag-http-headers)
 - [Project Info](#project-info)
-  - [Maintainers](#maintainers)
-  - [Contributing](#contributing)
-  - [License](#license)
+    - [Maintainers](#maintainers)
+    - [Contributing](#contributing)
+    - [License](#license)
 
 # Tooling
 
-This project uses [Java 11](https://openjdk.java.net/projects/jdk/11/).
+This project uses [Java 11](https://openjdk.java.net/projects/jdk/11/). We will update to Java 17 as soon as all third
+party dependencies are ready.
 
-The container convenience tooling is [Docker](https://www.docker.com/).
+Container convenience tooling is [Docker](https://www.docker.com/).
 
 [Project Lombok](https://projectlombok.org/) greatly reduces the need for hand cranking tedious boilerplate code.
 
-The build system is [Gradle](https://gradle.org/) and it supports all the above.
+The build system is [Gradle](https://gradle.org/).
 
 ## IntelliJ configuration
 
@@ -71,40 +70,26 @@ To build the entire application, including running unit and functional tests:
 
 `./gradlew build`
 
-(Note that functional tests share the same port number for embedded database as for the containerised database, if
-tests fail try running `docker-compose down` first. Free-up port for the keycloak test server as well).
-
-Update the `.env` file present in the project root directory and do the env variables setup for keycloak:
-
-```
-KEYCLOAK_SERVER_PORT=8180
-KEYCLOAK_USER=admin@everest.engineering
-KEYCLOAK_PASSWORD=******
-```
-
-(Note: the above env variable values should match with the keycloak server details specified in the `application.properties` file and the 
-`build.gradle` file present in the launcher module. Keycloak test server also uses the same credentials for authentication.)
+(Note that functional tests share the same port number for embedded database as for the containerised database, if tests
+fail try running `docker-compose down` first. Free-up port for the keycloak test server as well).
 
 Start up containers for Postgres and Keycloak:
 
 `docker-compose up`
 
-This project uses keycloak for authentication and authorization. `docker-compose up` will run the keycloak container on the 
-`KEYCLOAK_SERVER_PORT` which is specified in the `.env` file.
+This project uses keycloak for authentication and authorization. `docker-compose up` will run the keycloak container and
+expose it on the `KEYCLOAK_SERVER_PORT` specified in the `.env` file.
 
 #### Client secret
 
-We need to get the client secret from the keycloak server and configure it in the `application.properties` for `keycloak.credentials.secret`
-prop.
+A client secret defined by Keycloak ois required to be configured in the the `application.properties` file. The secret
+must be generated within Keycloak and copied to the application properties. To do this:
 
-Open the http://localhost:8180/auth url and login to app using `KEYCLOAK_USER` and `KEYCLOAK_PASSWORD`.
-
-Select the `default` realm and go to the `Clients` tab.
-
-Select the `default-client` under Clients tab.
-
-Go to the `Credentials` tab and regenerate the client secret if required.
-Get the `secret` value and add it in the `application.properties` as mentioned above.
+* Open http://localhost:8180/auth and login using the `KEYCLOAK_USER` and `KEYCLOAK_PASSWORD` defined in the `.env` file
+* Select the `default` realm and go to the clients tab
+* Select the `default-client` under the clients tab
+* Go to the credentials tab and regenerate the client secret. Paste this value as the `keycloak.credentials.secret`
+  property in the `application.properties` file.
 
 To run the application server using Gradle:
 
@@ -114,7 +99,8 @@ To create a docker image:
 
 `./gradlew bootBuildImage`
 
-To run the application server container with a TTY attached, allocating 2GiB memory and applying the `prod` Spring profile:
+To run the application server container with a TTY attached, allocating 2GiB memory and applying the `prod` Spring
+profile:
 
 `docker run -t -m 2G --network host -e "SPRING_PROFILES_ACTIVE=prod" your.organisation.here/lhotse:$BUILD_VERSION`
 
@@ -139,38 +125,38 @@ number of commits since the `1.2.0` tag was applied. Each subsequent commit will
 
 ## Jupyter notebook
 
-An initial [Jupyter notebook](https://jupyter.org/) can be found in 'doc/notebook'. It acts as an interactive
-reference for the API endpoints and should be in your development workflow. Note that this requires
-[IRuby](https://github.com/sciruby/iruby).
+An [Jupyter notebook](https://jupyter.org/) can be found in 'doc/notebook'. It acts as an interactive reference
+for the API endpoints and should be in your development workflow.
 
 Jupyter notebook can be run as a Docker container:
 
-`docker-compose -f doc/notebook/docker-compose.yml up`.
+`docker-compose -f doc/notebook/docker-compose.yml up`
 
 ## Swagger documentation
 
 Swagger API documentation is automatically generated by [Springfox](https://springfox.github.io/springfox/docs/current/).
 
 API documentation is accessible when running the application locally by visiting
-[Swagger UI](http://localhost:8080/swagger-ui/index.html). Default credentials for logging in as an administrator can
-be found in `application.properties` along with the client ID and client secret.
+[Swagger UI](http://localhost:8080/swagger-ui/index.html). Default credentials for logging in as an administrator can be
+found in `application.properties` along with the client ID and client secret.
 
 Functional tests generate a Swagger JSON API definition at `./launcher/build/web-app-api.json`
 
 ## Code style
 
-[Spotless](https://github.com/diffplug/spotless) is run as part of the Gradle build to ensure consistency. Spotless has been configured
-to use the Eclipse formatter using the rules in 'build-config/eclipse-formatter-config.xml'. This file can be imported into IntelliJ
-(and, of course, Eclipse).
+[Spotless](https://github.com/diffplug/spotless) is run as part of the Gradle build to ensure consistency. Spotless has
+been configured to use the Eclipse formatter using the rules in 'build-config/eclipse-formatter-config.xml'. This file
+can be imported into IntelliJ.
 
 Build checks will fail if the code is inconsistent with the standard. Automatic formatting can be applied by running:
 
 `./gradlew spotlessApply`
 
-Note that Spotless will not enforce joining of manually wrapped lines in order to keep builder pattern function chaining clean.
+Note that Spotless will not enforce joining of manually wrapped lines in order to keep builder pattern function chaining
+clean.
 
 [PMD](https://pmd.github.io/) and [Checkstyle](https://checkstyle.org/) quality checks are automatically applied to all
-sub-projects.
+subprojects.
 
 # Features
 
@@ -191,45 +177,19 @@ due to a slow migration of complex domain logic from within the domain model to 
 system evolves.
 
 Event sourcing captures the activities of a business in an event log, an append-only history of every important
-_business action_ that has ever been taken by users or by the system itself. Events are mapped to an arbitrary number
-of projections for use by the query side of the system. Being able to replay events offers several significant benefits:
+_business action_ that has ever been taken by users or by the system itself. Events are mapped to an arbitrary number of
+projections for use by the query side of the system. Being able to replay events offers several significant benefits:
 
-- Projections can be optimised for reading by denormalising data
-- Events can be _upcasted_. That is, events are marked with a revision that allows them to be transformed to an updated
-  version of the same event. This protects developers from creating significant errors in users' data due to, for example,
-  accidentally transposing two fields within a command or event;
-- Projections can be updated with new information that was either captured by or derived from events. New business
+* Projections can be optimised for reading by denormalising data
+* Events can be _upcasted_. That is, events are marked with a revision that allows them to be transformed to an updated
+  version of the same event. This protects developers from creating significant errors in users' data due to, for
+  example, accidentally transposing two fields within a command or event;
+* Projections can be updated with new information that was either captured by or derived from events. New business
   requirements can be met and projections generated such that historical user actions can be incorporated as new
   features are rolled out;
 
-Axon provides the event sourcing framework. User actions of interest to a business (typically anything that modifies data)
-are dispatched to command handlers that, after validation, emit events.
-
-## Distributed command handling
-
-Part of Axon's appeal is the ability to horizontally scale an application using Axon Server for command and event
-dispatching, and event log persistence. While well suited to applications that require massive scale, deploying Axon
-Server introduces additional maintenance and configuration overhead.
-
-We have taken a different approach that provides a good starting point for small to medium applications while still
-allowing migration to Axon Server in the future. Horizontal scalability is achieved via a
-[command distribution extension](https://github.com/everest-engineering/axon-command-distribution-extension) that wraps
-the standard Axon command gateway with a [Hazelcast](https://hazelcast.com/) based distributed command gateway.
-An arbitrary number of application instances started together, either on the same network or within a Kubernetes cluster,
-will be automatically discovered to form a cluster.
-
-Commands dispatched through the Hazelcast command gateway are deterministically routed to a single application instance
-which, based on the aggregate identifier, has ownership of an aggregate for as long as that instance remains a member of
-the cluster. This clear aggregate ownership is vital to avoid a split brain scenario as aggregates are cached in memory
-and are responsible for command validation. A split brain situation could arise if multiple unsynchronised copies were
-to be distributed among cluster members.
-
-Hazelcast will automatically reassign aggregate ownership if an application instance leaves the cluster due to a restart,
-network disconnection or other failure.
-
-Events emitted by an aggregate are passed to the application instance's local event bus. Events are persisted to the
-event log by the instance handling the command. Subscribing event processing (the default in our configuration) guarantees
-that the same instance will be performing the event handling.
+Axon provides the event sourcing framework. User actions of interest to a business (typically anything that modifies
+data) are dispatched to command handlers that, after validation, emit events.
 
 ## Command validation
 
@@ -243,16 +203,16 @@ overhead.
 
 There is a philosophical argument for defining aggregates such that all information required to validate commands is
 held by an aggregate in memory. In practice, however, more natural aggregates can be formed by allowing some validation
-to be based on _projections_. We also know from experience that some validation will be shared among multiple aggregates.
-The amount of testing required to verify all possible command failure situations tends to grow non-linearly as the number
-of checks that are performed inside an aggregate grows.
+to be based on _projections_. We also know from experience that some validation will be shared among multiple
+aggregates. The amount of testing required to verify all possible command failure situations tends to grow non-linearly
+as the number of checks that are performed inside an aggregate grows.
 
 We have addressed this in the `axon-support` and `command-validation-suport` modules through the introduction of marker
 interfaces that map commands to dedicated command validators. Validators extract common checks or checks based on
-projections and allow them to be tested independently. Aggregate tests just need to ensure that a failure in the validator
-fails command validation. Since this design opens up the possibility of a validator to be missed, reflection is used to
-detect validators at application start up and register them with a command interceptor that is triggered prior to the
-command handler method being called. This significantly reduces testing effort and human error.
+projections and allow them to be tested independently. Aggregate tests just need to ensure that a failure in the
+validator fails command validation. Since this design opens up the possibility of a validator to be missed, reflection
+is used to detect validators at application start up and register them with a command interceptor that is triggered
+prior to the command handler method being called. This significantly reduces testing effort and human error.
 
 ## Event processing
 
@@ -261,84 +221,83 @@ Axon provides two types of event processors,
 
 Subscribing processors execute on the same thread that is publishing the event. This allows command dispatching to wait
 until the event has been both appended to the event store and all event handling is completed. Commands are queued for
-processing on a FIFO basis. It is important, therefore, to not use them for long running tasks.
+processing on a FIFO basis. It is important, therefore, to not use them for long-running tasks.
 
 Tracking event processors (TEPs), in contrast, execute in their own thread, monitoring the event store for new events.
 TEPs track their progress consuming events using tracking tokens persisted in the database. TEPs hold ownership of the
 tokens, preventing multiple application instances from concurrently performing the same processing. Token ownership
 passes to another application instance in the event that a token owner is shutdown or restarted.
 
-TEPs introduce additional complexity by not guaranteeing that projections will be up to date when an API call has ended.
+TEPs introduce additional complexity by not guaranteeing that projections will be up-to-date when an API call has ended.
 TEPs should, in our opinion, be only used for longer running processing, during replays and when preparing projections
 for new feature releases.
 
-Axon also introduces the concept of processing groups as a way of segmenting and orchestrating event processing, ensuring
-that events are handled sequentially within a group. By default, Axon assigns each tracking event processor (TEP) to its
-own processing group, aiming to parallelise event processing as much as possible. We take a more conservative approach to
-make the system easier to reason about by defaulting to subscribing event processors and assigning them to a default
-processing group unless explicitly assigned elsewhere.
+Axon also introduces the concept of processing groups as a way of segmenting and orchestrating event processing,
+ensuring that events are handled sequentially within a group. By default, Axon assigns each tracking event processor
+(TEP) to its own processing group, aiming to parallelise event processing as much as possible. We take a more
+conservative approach to make the system easier to reason about by defaulting to subscribing event processors and
+assigning them to a default processing group unless explicitly assigned elsewhere.
 
 ## Event replays
 
 Event replaying takes the system back to a previous point in time in order to apply a different interpretation of what
 it means to process an event.
 
-The simplest way of executing a replay is to wipe all projections and then reapply every event ever emitted to
-rebuild using the latest logic. This is a valid approach for fledgling applications but may not be acceptable once the
-system has scaled up. More advanced approaches are made possible by assigning event processors to different processing
-groups and running a mixture of subscribing and tracking event processors. Advanced configuration opens up the
-possibility of:
+The simplest way of executing a replay is to wipe all projections and then reapply every event ever emitted to rebuild
+using the latest logic. This is a valid approach for fledgling applications but may not be acceptable once the system
+has scaled up. More advanced approaches are made possible by assigning event processors to different processing groups
+and running a mixture of subscribing and tracking event processors. Advanced configuration opens up the possibility of:
 
-- Replaying events into a new projection database while continuing to project to an existing one, making the replay
+* Replaying events into a new projection database while continuing to project to an existing one, making the replay
   transparent to end users. The system can then be switched over to use the new projection while optionally continuing
   to maintain the old one.
-- Tracking event processors can be used to generate projections for new features that are not yet released to users
+* Tracking event processors can be used to generate projections for new features that are not yet released to users
   until the projections are ready for use.
-- Processing groups allow replays to be limited to bounded contexts that are naturally isolated.
+* Processing groups allow replays to be limited to bounded contexts that are naturally isolated.
 
 The starter kit comes with programmatic support for triggering replays. To perform a replay:
 
-- disconnect the application from load balancers
-- trigger a replay via a [Spring Boot Actuator](https://spring.io/guides/gs/actuator-service/) call to `/actuator/replay`
-- monitor the state of replay via a Spring actuator endpoint
-- reconnect the application to load balancers
+* disconnect the application from load balancers
+* (if running more than a single node) shut down event processing using the `axonserver-cli` or the Axon dashboard
+* trigger a replay via a [Spring Boot Actuator](https://spring.io/guides/gs/actuator-service/) call to `/actuator/replay`
+* monitor the state of replay via a Spring actuator endpoint
+* reconnect the application to load balancers
 
 Behind the scenes, replays are being executed by:
 
-- shutting down [tracking event processors](https://axoniq.io/blog-overview/tracking-event-processors) (TEP) processing;
-- clearing the tracking tokens in the Axon database;
-- placing a marker event into the event log that will end replays; and
-- resstarting TEP processing.
+* shutting down [tracking event processors](https://axoniq.io/blog-overview/tracking-event-processors) (TEP) processing;
+* clearing the tracking tokens in the Axon database;
+* placing a marker event into the event log that will end replays; 
+* notifying interested listeners that replays have completed; and
+* restarting TEP processing.
 
 ## Crypto shredding
 
-Crypto shredding is a technique for disabling access to sensitive information by discarding encryption keys. You might use
-this on the behest of a user or when retention is no longer justified in order to comply with the European Union's General
-Data Protection Regulation (GDPR) without compromising the append-only nature of your event log.
+Crypto shredding is a technique for disabling access to sensitive information by discarding encryption keys. You might
+use this on the behest of a user or when retention is no longer justified in order to comply with the European Union's
+General Data Protection Regulation (GDPR) without compromising the append-only nature of your event log.
 
-Documentation in the [crypto shredding](https://github.com/everest-engineering/axon-crypto-shredding-extension) repository
-explains how it works, its limitations and an important caveat.
+Documentation in the [crypto shredding](https://github.com/everest-engineering/axon-crypto-shredding-extension)
+repository explains how it works, its limitations and an important caveat.
 
 ## Security and access control
 
-We are using [Keycloak](https://www.keycloak.org/) to manage user authentication and session management. Authorisation is handled by the
-application itself.
+We are using [Keycloak](https://www.keycloak.org/) to manage user authentication and session management. Authorisation
+is handled by the application itself.
 
 Keycloak has the following three main concepts.
 
-- _Realms_ which secure and manages security metadata for a set of users, applications and clients. By default, Keycloak provides a `master`
-  realm which is best used only for superuser administration. We create a separate realm, `default` for managing our application.
-- _Clients_ are the applications on whose behalf Keycloak is authenticating users. By default, Keycloak will provide us with a few clients
-  but using a separate client is the best practice. We have set up a `default client` for the `default` realm. 
-- _Roles_ identify a type or category of user. Roles can be specific to a client or apply to an entire realm. 
+* _Realms_ which secure and manages security metadata for a set of users, applications and clients. By default, Keycloak
+  provides a `master`
+  realm which is best used only for superuser administration. We create a separate realm, `default` for managing our
+  application.
+* _Clients_ are the applications on whose behalf Keycloak is authenticating users. By default, Keycloak will provide us
+  with a few clients but using a separate client is the best practice. We have set up a `default client` for
+  the `default` realm.
+* _Roles_ identify a type or category of user. Roles can be specific to a client or apply to an entire realm.
 
 [The official documentation goes into more detail](https://www.keycloak.org/docs/latest/server_admin/index.html#core-concepts-and-terms).
 
-### User and Token
-
-A user object in the business domain often requires more attributes than a user object from the Keycloak authentication token. For an
-example, the starter kit's user object has an extra `organizationId` attribute, to authorize the user, we added this info in the Keycloak
-authentication token as other claims, and we can access these claims like remaining claims of a user object.
 
 ### Endpoint access control
 
@@ -351,53 +310,37 @@ corresponds to at least one persistable object. For an example, one `Organizatio
 `PersistableOrganization`. To put it simply in the event sourcing context, it can be just considered as the projection.
 
 The entity permission check is specified within the security annotation and takes the form
-of `hasPermission(#entityId, 'EntityClassName', 'permissionType')`. This expression is evaluated by `EntityPermissionEvaluator`, which in
-turn delegates to corresponding permission check methods of an entity, where customized permission requirements can be implemented. This
-workflow is made possible by: a) having all entity classes implementing the `Identifiable` interface and b) having a `ReadService` for
-each `Identifable` entity. The `Identifiable` interface provides default _reject all_
-permission checks which can be overridden by implementing entities. The `ReadService` provides a way to load an entity by its simple class
-name. To help managing increasing number of `ReadService`, the starter kit provides a
-`ReadServiceProvider` bean which collects all `ReadService` beans during start of the application context.
+of `hasPermission(#entityId, 'EntityClassName', 'permissionType')`. This expression is evaluated
+by `EntityPermissionEvaluator`, which in turn delegates to corresponding permission check methods of an entity, where
+customized permission requirements can be implemented. This workflow is made possible by: a) having all entity classes
+implementing the `Identifiable` interface and b) having a `ReadService` for each `Identifable` entity.
+The `Identifiable` interface provides default _reject all_ permission checks which can be overridden by implementing 
+entities. The `ReadService` provides a way to load an entity by its simple class name. To help manage increasing 
+number of `ReadService`, the starter kit provides a `ReadServiceProvider` bean which collects all `ReadService` beans 
+during start of the application context.
 
 When adding new controllers and security configurations, it is important to refer to existing patterns and ensure
 consistency. This also applies to tests where fixtures are provided to support the necessary _automagic_ behaviours.
-
-#### Custom method security expression handlers
-
-We have introduced the `hasCustomRole` and `memberOfOrg` custom expression handlers to evaluate app related roles.
-Roles like `ORG_USER` and `ORG_ADMIN` which are configured in app side can't be evaluated using obvious and default 
-expression handlers like `hasRole` and `hasAnyRole`, `hasAuthority` and `hasAnyAuthority` etc,.
-The reason for this is, an app related roles are stored as attributes in the keycloak user object.
-User attributes are simply an extra claims stored in a keycloak authentication token for later authorization purpose.
-These were injected by intercepting requests at runtime.
-
-We can make any user as a superuser by assigning the `ADMIN` role from keycloak console.
-Since it is a keycloak specific role, it can only be evaluated by the default expression handlers.
-This is the reason we have both `hasRole` and `hasCustomRole` expression handlers.
-
-`hasRole` to evaluate roles configured in keycloak.
-
-`hasCustomRole` to evaluate roles configured in app.
 
 ## File support
 
 The [storage](https://github.com/everest-engineering/lhotse-storage) module implements two file stores: one is referred
 to as _permanent_, the other as the _ephemeral_ store. The permanent file store is for storing critical files that, such
-as user uploads, cannot be recovered. The ephemeral store is for non-critical files that can be regenerated by the system
-either dynamically or via an event replay.
+as user uploads, cannot be recovered. The ephemeral store is for non-critical files that can be regenerated by the
+system either dynamically or via an event replay.
 
-Our file store implementation automatically deduplicates files. Storing a file whose contents matches
-a previous file will return a (new) file identifier mapping to the original. The most recently stored file will then be
-silently removed.
+Our file store implementation automatically deduplicates files. Storing a file whose contents matches a previous file
+will return a (new) file identifier mapping to the original. The most recently stored file will then be silently
+removed.
 
-File stores need backing service such as a blob store or filesystem. This starter kit supports an in-memory filestore, 
+File stores need backing service such as a blob store or filesystem. This starter kit supports an in-memory filestore,
 [Mongo GridFS](https://docs.mongodb.com/manual/core/gridfs/) and [AWS S3](https://aws.amazon.com/s3/).
 
 ### Configuring the In-Memory Filestore
 
-The in-memory filestore backend is intended only for development and testing. This filestore is not distributed so will not work well when 
-running multiple instances of the application in HA mode. A locally hosted or AWS hosted S3 compatible filestore is a better bet in this
-instance.
+The in-memory filestore backend is intended only for development and testing. This filestore is not distributed so will
+not work well when running multiple instances of the application in HA mode. A locally hosted or AWS hosted S3
+compatible filestore is a better bet in this instance.
 
 ```
 application.filestore.backend=inMemory
@@ -421,21 +364,23 @@ application.filestore.awsS3.buckets.permanent=sample-bucket-permanent
 application.filestore.awsS3.buckets.ephemeral=sample-bucket-ephemeral
 ```
 
-We rely on [DefaultAWSCredentialsProviderChain](https://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/auth/DefaultAWSCredentialsProviderChain.html)
+We rely
+on [DefaultAWSCredentialsProviderChain](https://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/auth/DefaultAWSCredentialsProviderChain.html)
 and [DefaultAwsRegionProviderChain](https://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/regions/DefaultAwsRegionProviderChain.html)
 for fetching AWS credentials and the AWS region.
 
 ## Media support
 
-The [media](https://github.com/everest-engineering/lhotse-media) module adds additional support for managing of image and
-video updates. It generates thumbnail images on the fly, caching them in the ephemeral file store for subsequent requests.
-Thumbnail sizes are limited to prevent the system from being overwhelmed by malicious requests.
+The [media](https://github.com/everest-engineering/lhotse-media) module adds additional support for managing of image
+and video updates. It generates thumbnail images on the fly, caching them in the ephemeral file store for subsequent
+requests. Thumbnail sizes are limited to prevent the system from being overwhelmed by malicious requests.
 
 ## ETag HTTP headers
 
 [ETag HTTP headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag) are enabled by default for all API
-endpoints via a shallow filter. The filter is unaware of any changes made to underlying data so while clients may use the
-ETag to avoid unnecessary transfers and client side processing, there is no benefit to application server performance.
+endpoints via a shallow filter. The filter is unaware of any changes made to underlying data so while clients may use
+the ETag to avoid unnecessary transfers and client side processing, there is no benefit to application server
+performance.
 
 # Project Info
 
@@ -447,9 +392,9 @@ ETag to avoid unnecessary transfers and client side processing, there is no bene
 
 We appreciate your help!
 
-[Open an issue](https://github.com/everest-engineering/lhotse/issues/new/choose) or submit a pull request for an enhancement.
-You may want to view the [project board](https://github.com/orgs/everest-engineering/projects/1) or browse through the
-[current open issues](https://github.com/everest-engineering/lhotse/issues).
+[Open an issue](https://github.com/everest-engineering/lhotse/issues/new/choose) or submit a pull request for an
+enhancement. You may want to view the [project board](https://github.com/orgs/everest-engineering/projects/1) or browse
+through the [current open issues](https://github.com/everest-engineering/lhotse/issues).
 
 ## License
 

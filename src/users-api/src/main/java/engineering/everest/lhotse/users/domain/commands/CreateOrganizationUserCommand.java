@@ -17,6 +17,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CreateOrganizationUserCommand implements EmailAddressValidatableCommand, UserUniqueEmailValidatableCommand,
     OrganizationStatusValidatableCommand {
+
     @TargetAggregateIdentifier
     private UUID userId;
     @NotNull

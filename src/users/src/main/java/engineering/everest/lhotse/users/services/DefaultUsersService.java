@@ -1,6 +1,5 @@
 package engineering.everest.lhotse.users.services;
 
-import engineering.everest.axon.HazelcastCommandGateway;
 import engineering.everest.lhotse.api.services.KeycloakSynchronizationService;
 import engineering.everest.lhotse.common.domain.Role;
 import engineering.everest.lhotse.users.domain.commands.AddUserRolesCommand;
@@ -10,6 +9,7 @@ import engineering.everest.lhotse.users.domain.commands.RegisterUploadedUserProf
 import engineering.everest.lhotse.users.domain.commands.RemoveUserRolesCommand;
 import engineering.everest.lhotse.users.domain.commands.UpdateUserDetailsCommand;
 import lombok.extern.slf4j.Slf4j;
+import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;
@@ -19,10 +19,10 @@ import java.util.UUID;
 @Slf4j
 public class DefaultUsersService implements UsersService {
 
-    private final HazelcastCommandGateway commandGateway;
+    private final CommandGateway commandGateway;
     private final KeycloakSynchronizationService keycloakSynchronizationService;
 
-    public DefaultUsersService(HazelcastCommandGateway commandGateway, KeycloakSynchronizationService keycloakSynchronizationService) {
+    public DefaultUsersService(CommandGateway commandGateway, KeycloakSynchronizationService keycloakSynchronizationService) {
         this.commandGateway = commandGateway;
         this.keycloakSynchronizationService = keycloakSynchronizationService;
     }

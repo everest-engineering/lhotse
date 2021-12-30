@@ -1,18 +1,23 @@
 package engineering.everest.lhotse.axon.command.validators;
 
+import engineering.everest.lhotse.axon.command.AxonCommandExecutionExceptionFactory;
 import engineering.everest.lhotse.i18n.exceptions.TranslatableIllegalArgumentException;
+import org.axonframework.commandhandling.CommandExecutionException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class EmailAddressValidatorTest {
 
     private EmailAddressValidator emailAddressValidator;
+    private AxonCommandExecutionExceptionFactory axonCommandExecutionExceptionFactory;
 
     @BeforeEach
     void setUp() {
-        emailAddressValidator = new EmailAddressValidator();
+        axonCommandExecutionExceptionFactory = new AxonCommandExecutionExceptionFactory();
+        emailAddressValidator = new EmailAddressValidator(axonCommandExecutionExceptionFactory);
     }
 
     @Test
@@ -27,26 +32,46 @@ class EmailAddressValidatorTest {
 
     @Test
     void validator_WillFail_WhenEmailIsBlank() {
-        assertThrows(TranslatableIllegalArgumentException.class, () -> emailAddressValidator.validate(() -> ""));
+        var exception = assertThrows(CommandExecutionException.class, () -> emailAddressValidator.validate(() -> ""));
+        assertEquals("EMAIL_ADDRESS_MALFORMED", exception.getMessage());
+
+        var translatableIllegalArgumentException = (TranslatableIllegalArgumentException) exception.getDetails().orElseThrow();
+        assertEquals("EMAIL_ADDRESS_MALFORMED", translatableIllegalArgumentException.getMessage());
     }
 
     @Test
     void validator_WillFail_WhenEmailIsAddressedLocally() {
-        assertThrows(TranslatableIllegalArgumentException.class, () -> emailAddressValidator.validate(() -> "bob@localhost"));
+        var exception = assertThrows(CommandExecutionException.class, () -> emailAddressValidator.validate(() -> "bob@localhost"));
+        assertEquals("EMAIL_ADDRESS_MALFORMED", exception.getMessage());
+
+        var translatableIllegalArgumentException = (TranslatableIllegalArgumentException) exception.getDetails().orElseThrow();
+        assertEquals("EMAIL_ADDRESS_MALFORMED", translatableIllegalArgumentException.getMessage());
     }
 
     @Test
     void validator_WillFail_WhenEmailContainsSpaces() {
-        assertThrows(TranslatableIllegalArgumentException.class, () -> emailAddressValidator.validate(() -> "bob @ my.com"));
+        var exception = assertThrows(CommandExecutionException.class, () -> emailAddressValidator.validate(() -> "bob @ my.com"));
+        assertEquals("EMAIL_ADDRESS_MALFORMED", exception.getMessage());
+
+        var translatableIllegalArgumentException = (TranslatableIllegalArgumentException) exception.getDetails().orElseThrow();
+        assertEquals("EMAIL_ADDRESS_MALFORMED", translatableIllegalArgumentException.getMessage());
     }
 
     @Test
     void validator_WillFail_WhenEmailIsMissingHostname() {
-        assertThrows(TranslatableIllegalArgumentException.class, () -> emailAddressValidator.validate(() -> "bob@"));
+        var exception = assertThrows(CommandExecutionException.class, () -> emailAddressValidator.validate(() -> "bob@"));
+        assertEquals("EMAIL_ADDRESS_MALFORMED", exception.getMessage());
+
+        var translatableIllegalArgumentException = (TranslatableIllegalArgumentException) exception.getDetails().orElseThrow();
+        assertEquals("EMAIL_ADDRESS_MALFORMED", translatableIllegalArgumentException.getMessage());
     }
 
     @Test
     void validator_WillFail_WhenHostnameIsAToplevelDomain() {
-        assertThrows(TranslatableIllegalArgumentException.class, () -> emailAddressValidator.validate(() -> "bob@engineering"));
+        var exception = assertThrows(CommandExecutionException.class, () -> emailAddressValidator.validate(() -> "bob@engineering"));
+        assertEquals("EMAIL_ADDRESS_MALFORMED", exception.getMessage());
+
+        var translatableIllegalArgumentException = (TranslatableIllegalArgumentException) exception.getDetails().orElseThrow();
+        assertEquals("EMAIL_ADDRESS_MALFORMED", translatableIllegalArgumentException.getMessage());
     }
 }

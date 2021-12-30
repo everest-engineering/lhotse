@@ -1,5 +1,6 @@
 package engineering.everest.lhotse.users.domain;
 
+import engineering.everest.lhotse.axon.command.AxonCommandExecutionExceptionFactory;
 import engineering.everest.lhotse.i18n.exceptions.TranslatableIllegalArgumentException;
 import engineering.everest.lhotse.users.domain.commands.AddUserRolesCommand;
 import engineering.everest.lhotse.users.domain.commands.CreateOrganizationUserCommand;
@@ -30,7 +31,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.axonframework.modelling.command.AggregateLifecycle.apply;
 import static org.axonframework.modelling.command.AggregateLifecycle.markDeleted;
 
-@Aggregate(repository = "repositoryForUser")
+@Aggregate(snapshotTriggerDefinition = "userAggregateSnapshotTriggerDefinition")
 public class UserAggregate implements Serializable {
 
     @AggregateIdentifier
@@ -54,26 +55,26 @@ public class UserAggregate implements Serializable {
     }
 
     @CommandHandler
-    void handle(UpdateUserDetailsCommand command) {
-        validateAtLeastOneChangeIsBeingMade(command);
+    void handle(UpdateUserDetailsCommand command, AxonCommandExecutionExceptionFactory axonCommandExecutionExceptionFactory) {
+        validateAtLeastOneChangeIsBeingMade(command, axonCommandExecutionExceptionFactory);
 
         if (command.getDisplayNameChange() != null) {
-            validateDisplayNameIsPresent(command.getDisplayNameChange());
+            validateDisplayNameIsPresent(command.getDisplayNameChange(), axonCommandExecutionExceptionFactory);
         }
         apply(new UserDetailsUpdatedByAdminEvent(command.getUserId(), userOnOrganizationId,
             command.getDisplayNameChange(), command.getEmailChange(), command.getRequestingUserId()));
     }
 
     @CommandHandler
-    void handle(AddUserRolesCommand command) {
-        validateAtLeastOneRoleIsPresent(command);
+    void handle(AddUserRolesCommand command, AxonCommandExecutionExceptionFactory axonCommandExecutionExceptionFactory) {
+        validateAtLeastOneRoleIsPresent(command, axonCommandExecutionExceptionFactory);
 
         apply(new UserRolesAddedByAdminEvent(command.getUserId(), command.getRoles(), command.getRequestingUserId()));
     }
 
     @CommandHandler
-    void handle(RemoveUserRolesCommand command) {
-        validateAtLeastOneRoleIsPresent(command);
+    void handle(RemoveUserRolesCommand command, AxonCommandExecutionExceptionFactory axonCommandExecutionExceptionFactory) {
+        validateAtLeastOneRoleIsPresent(command, axonCommandExecutionExceptionFactory);
 
         apply(new UserRolesRemovedByAdminEvent(command.getUserId(), command.getRoles(), command.getRequestingUserId()));
     }
@@ -124,29 +125,37 @@ public class UserAggregate implements Serializable {
         markDeleted();
     }
 
-    private void validateDisplayNameIsPresent(String displayName) {
+    private void validateDisplayNameIsPresent(String displayName,
+                                              AxonCommandExecutionExceptionFactory axonCommandExecutionExceptionFactory) {
         if (isBlank(displayName)) {
-            throw new TranslatableIllegalArgumentException(USER_DISPLAY_NAME_MISSING);
+            axonCommandExecutionExceptionFactory.throwWrappedInCommandExecutionException(
+                new TranslatableIllegalArgumentException(USER_DISPLAY_NAME_MISSING));
         }
     }
 
-    private void validateAtLeastOneChangeIsBeingMade(UpdateUserDetailsCommand command) {
+    private void validateAtLeastOneChangeIsBeingMade(UpdateUserDetailsCommand command,
+                                                     AxonCommandExecutionExceptionFactory axonCommandExecutionExceptionFactory) {
         boolean changesMade = command.getDisplayNameChange() != null
             || command.getEmailChange() != null;
         if (!changesMade) {
-            throw new TranslatableIllegalArgumentException(USER_UPDATE_NO_FIELDS_CHANGED);
+            axonCommandExecutionExceptionFactory.throwWrappedInCommandExecutionException(
+                new TranslatableIllegalArgumentException(USER_UPDATE_NO_FIELDS_CHANGED));
         }
     }
 
-    private void validateAtLeastOneRoleIsPresent(AddUserRolesCommand command) {
+    private void validateAtLeastOneRoleIsPresent(AddUserRolesCommand command,
+                                                 AxonCommandExecutionExceptionFactory axonCommandExecutionExceptionFactory) {
         if (command.getRoles().isEmpty()) {
-            throw new TranslatableIllegalArgumentException(USER_UPDATE_NO_ROLES_SPECIFIED);
+            axonCommandExecutionExceptionFactory.throwWrappedInCommandExecutionException(
+                new TranslatableIllegalArgumentException(USER_UPDATE_NO_ROLES_SPECIFIED));
         }
     }
 
-    private void validateAtLeastOneRoleIsPresent(RemoveUserRolesCommand command) {
+    private void validateAtLeastOneRoleIsPresent(RemoveUserRolesCommand command,
+                                                 AxonCommandExecutionExceptionFactory axonCommandExecutionExceptionFactory) {
         if (command.getRoles().isEmpty()) {
-            throw new TranslatableIllegalArgumentException(USER_UPDATE_NO_ROLES_SPECIFIED);
+            axonCommandExecutionExceptionFactory.throwWrappedInCommandExecutionException(
+                new TranslatableIllegalArgumentException(USER_UPDATE_NO_ROLES_SPECIFIED));
         }
     }
 

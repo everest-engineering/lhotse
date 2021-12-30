@@ -9,6 +9,7 @@ dependencies {
     implementation project(':organizations-api')
 
     implementation 'org.springframework:spring-context'
+    implementation "org.axonframework:axon-modelling:${axonVersion}"
     implementation "org.apache.commons:commons-lang3:${commonsLangVersion}"
     implementation "commons-validator:commons-validator:${commonsValidatorVersion}"
 

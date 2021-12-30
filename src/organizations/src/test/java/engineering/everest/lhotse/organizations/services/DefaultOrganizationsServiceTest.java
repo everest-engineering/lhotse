@@ -1,7 +1,9 @@
 package engineering.everest.lhotse.organizations.services;
 
-import engineering.everest.axon.HazelcastCommandGateway;
-import engineering.everest.lhotse.organizations.domain.commands.*;
+import engineering.everest.lhotse.organizations.domain.commands.DisableOrganizationCommand;
+import engineering.everest.lhotse.organizations.domain.commands.EnableOrganizationCommand;
+import engineering.everest.lhotse.organizations.domain.commands.UpdateOrganizationCommand;
+import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,7 +32,7 @@ class DefaultOrganizationsServiceTest {
     private static final String ORGANIZATION_PHONE_NUMBER_1 = "phoneNumber";
 
     @Mock
-    private HazelcastCommandGateway commandGateway;
+    private CommandGateway commandGateway;
 
     private DefaultOrganizationsService defaultOrganizationService;
 
