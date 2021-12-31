@@ -43,13 +43,13 @@ subprojects {
     }
 
     ext {
-        axonCryptoShreddingVersion = '0.9.7'
-        mediaVersion = '0.9.6'
-        storageVersion = '0.9.10'
+        axonCryptoShreddingVersion = '0.9.8'
+        mediaVersion = '0.9.7'
+        storageVersion = '0.9.11'
 
-        awsSdkVersion = '1.11.887'
-        axonVersion = '4.5.5'
-        bouncyCastleVersion = '1.69'
+        awsSdkVersion = '1.12.131'
+        axonVersion = '4.5.6'
+        bouncyCastleVersion = '1.70'
         commonsLangVersion = '3.12.0'
         commonsTextVersion = '1.9'
         commonsValidatorVersion = '1.7'
@@ -58,19 +58,19 @@ subprojects {
         javaXPersistenceVersion = '2.2'
         jsonHelperVersion = '20210307'
         keycloakVersion = '15.0.2'
-        liquibaseVersion = '4.6.1'
+        liquibaseVersion = '4.6.2'
         lombokVersion = '1.18.22'
-        microMeterPrometheusVersion = '1.8.0'
+        microMeterPrometheusVersion = '1.8.1'
         postgresDriverVersion = '42.3.1'
-        prometheusSimpleClientVersion = '0.11.0'
+        prometheusSimpleClientVersion = '0.14.1'
         springBootVersion = '2.6.0'
         swaggerVersion = '3.0.0'
         webfluxVersion = '2.5.5'
 
         h2Version = '1.4.200'
         hamcrestVersion = '2.2'
-        junitVersion = '5.8.1'
-        mockitoVersion = '4.0.0'
+        junitVersion = '5.8.2'
+        mockitoVersion = '4.2.0'
         slf4jTestVersion = '2.4.0'
         undercouchVersion = '4.1.2'
     }
@@ -96,14 +96,14 @@ subprojects {
     }
 
     checkstyle {
-        toolVersion = '8.44'
+        toolVersion = '9.2.1'
         maxWarnings = 0
         configFile = file("${project.rootDir}/build-config/checkstyle/checkstyle.xml")
         sourceSets = [sourceSets.main]
     }
 
     pmd {
-        toolVersion = '6.36.0'
+        toolVersion = '6.41.0'
         incrementalAnalysis = true
         ruleSets = []
         ruleSetFiles = files("${project.rootDir}/build-config/pmd/pmd-ruleset.xml")
