@@ -97,9 +97,6 @@ public class ReplayMarkerAwareTrackingEventProcessor extends TrackingEventProces
     @SuppressWarnings("PMD.AvoidFieldNameMatchingMethodName")
     public static class Builder extends TrackingEventProcessor.Builder {
 
-        private TransactionManager transactionManager;
-        private TokenStore tokenStore;
-        private int initialSegmentsCount;
         private TaskExecutor taskExecutor;
 
         @Override
@@ -141,21 +138,18 @@ public class ReplayMarkerAwareTrackingEventProcessor extends TrackingEventProces
         @Override
         public Builder tokenStore(TokenStore tokenStore) {
             super.tokenStore(tokenStore);
-            this.tokenStore = tokenStore;
             return this;
         }
 
         @Override
         public Builder transactionManager(TransactionManager transactionManager) {
             super.transactionManager(transactionManager);
-            this.transactionManager = transactionManager;
             return this;
         }
 
         @Override
         public Builder trackingEventProcessorConfiguration(TrackingEventProcessorConfiguration trackingEventProcessorConfiguration) {
             super.trackingEventProcessorConfiguration(trackingEventProcessorConfiguration);
-            this.initialSegmentsCount = trackingEventProcessorConfiguration.getInitialSegmentsCount();
             return this;
         }
 
