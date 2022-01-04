@@ -26,7 +26,6 @@ class UserStatusValidatorTest {
     private final static UUID USER_ID = UUID.randomUUID();
 
     private UserStatusValidator userStatusValidator;
-    private AxonCommandExecutionExceptionFactory axonCommandExecutionExceptionFactory;
 
     @Mock
     private UsersReadService usersReadService;
@@ -35,8 +34,7 @@ class UserStatusValidatorTest {
 
     @BeforeEach
     void setUp() {
-        axonCommandExecutionExceptionFactory = new AxonCommandExecutionExceptionFactory();
-        userStatusValidator = new UserStatusValidator(usersReadService, axonCommandExecutionExceptionFactory);
+        userStatusValidator = new UserStatusValidator(usersReadService, new AxonCommandExecutionExceptionFactory());
 
         lenient().when(usersReadService.exists(USER_ID)).thenReturn(true);
         lenient().when(usersReadService.getById(USER_ID)).thenReturn(user);
@@ -51,8 +49,8 @@ class UserStatusValidatorTest {
             () -> userStatusValidator.validate((UsersStatusValidatableCommand) () -> Set.of(USER_ID)));
         assertEquals("USER_IS_UNKNOWN", exception.getMessage());
 
-        var translatableIllegalArgumentException = (TranslatableIllegalStateException) exception.getDetails().orElseThrow();
-        assertEquals("USER_IS_UNKNOWN", translatableIllegalArgumentException.getMessage());
+        var translatableException = (TranslatableIllegalStateException) exception.getDetails().orElseThrow();
+        assertEquals("USER_IS_UNKNOWN", translatableException.getMessage());
     }
 
     @Test
@@ -63,8 +61,8 @@ class UserStatusValidatorTest {
             () -> userStatusValidator.validate((UsersStatusValidatableCommand) () -> Set.of(USER_ID)));
         assertEquals("USER_IS_DISABLED", exception.getMessage());
 
-        var translatableIllegalArgumentException = (TranslatableIllegalStateException) exception.getDetails().orElseThrow();
-        assertEquals("USER_IS_DISABLED", translatableIllegalArgumentException.getMessage());
+        var translatableException = (TranslatableIllegalStateException) exception.getDetails().orElseThrow();
+        assertEquals("USER_IS_DISABLED", translatableException.getMessage());
     }
 
     @Test

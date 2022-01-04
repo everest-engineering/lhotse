@@ -128,10 +128,9 @@ task keycloakTestServer(dependsOn: downloadAndUnzipKeycloak) {
         keycloakProcess.consumeProcessOutput(new FileOutputStream('/dev/null'), new FileOutputStream('/dev/null'))
 
         def createRealm = "$keycloakDir/bin/kcadm.sh create realms -f $rootDir/keycloak/imports/realm-export.json --no-config --server http://localhost:$port/auth --realm master --user $testUser --password $testPass".execute()
-        keycloakProcess.consumeProcessOutput(new FileOutputStream('/dev/null'), new FileOutputStream('/dev/null'))
+        createRealm.consumeProcessOutput(new FileOutputStream('/dev/null'), new FileOutputStream('/dev/null'))
     }
 }
-
 
 task downloadAxonServer(type: Download) {
     outputs.cacheIf { true }
@@ -154,7 +153,6 @@ task killAxonServer() {
     }
 }
 
-
 task axonTestServer(dependsOn: downloadAndUnzipAxonServer) {
     doFirst {
         def axonServerDir = "/tmp/axonserver"
@@ -168,7 +166,6 @@ task axonTestServer(dependsOn: downloadAndUnzipAxonServer) {
         axonServerProcess.consumeProcessOutput(new FileOutputStream('/dev/null'), new FileOutputStream('/dev/null'))
     }
 }
-
 
 test.dependsOn([keycloakTestServer, axonTestServer])
 test.finalizedBy([killKeycloak, killAxonServer])

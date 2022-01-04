@@ -26,9 +26,6 @@ import java.util.function.Consumer;
 @Slf4j
 public class ReplayMarkerAwareTrackingEventProcessor extends TrackingEventProcessor implements ReplayableEventProcessor {
 
-    private final TransactionManager transactionManager;
-    private final TokenStore tokenStore;
-    private final int initialSegmentsCount;
     private final AtomicReference<ReplayMarkerEvent> targetMarkerEventHolder = new AtomicReference<>();
     private final AtomicInteger workerReplayCompletionCounter = new AtomicInteger();
     private final List<Consumer<ReplayableEventProcessor>> replayCompletionListener = new ArrayList<>();
@@ -36,9 +33,6 @@ public class ReplayMarkerAwareTrackingEventProcessor extends TrackingEventProces
 
     protected ReplayMarkerAwareTrackingEventProcessor(Builder builder) {
         super(builder);
-        transactionManager = builder.transactionManager;
-        tokenStore = builder.tokenStore;
-        initialSegmentsCount = builder.initialSegmentsCount;
         taskExecutor = builder.taskExecutor;
     }
 

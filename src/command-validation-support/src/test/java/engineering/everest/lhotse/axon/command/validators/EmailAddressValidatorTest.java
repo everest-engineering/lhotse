@@ -12,12 +12,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class EmailAddressValidatorTest {
 
     private EmailAddressValidator emailAddressValidator;
-    private AxonCommandExecutionExceptionFactory axonCommandExecutionExceptionFactory;
 
     @BeforeEach
     void setUp() {
-        axonCommandExecutionExceptionFactory = new AxonCommandExecutionExceptionFactory();
-        emailAddressValidator = new EmailAddressValidator(axonCommandExecutionExceptionFactory);
+        emailAddressValidator = new EmailAddressValidator(new AxonCommandExecutionExceptionFactory());
     }
 
     @Test
@@ -35,8 +33,8 @@ class EmailAddressValidatorTest {
         var exception = assertThrows(CommandExecutionException.class, () -> emailAddressValidator.validate(() -> ""));
         assertEquals("EMAIL_ADDRESS_MALFORMED", exception.getMessage());
 
-        var translatableIllegalArgumentException = (TranslatableIllegalArgumentException) exception.getDetails().orElseThrow();
-        assertEquals("EMAIL_ADDRESS_MALFORMED", translatableIllegalArgumentException.getMessage());
+        var translatableException = (TranslatableIllegalArgumentException) exception.getDetails().orElseThrow();
+        assertEquals("EMAIL_ADDRESS_MALFORMED", translatableException.getMessage());
     }
 
     @Test
@@ -44,8 +42,8 @@ class EmailAddressValidatorTest {
         var exception = assertThrows(CommandExecutionException.class, () -> emailAddressValidator.validate(() -> "bob@localhost"));
         assertEquals("EMAIL_ADDRESS_MALFORMED", exception.getMessage());
 
-        var translatableIllegalArgumentException = (TranslatableIllegalArgumentException) exception.getDetails().orElseThrow();
-        assertEquals("EMAIL_ADDRESS_MALFORMED", translatableIllegalArgumentException.getMessage());
+        var translatableException = (TranslatableIllegalArgumentException) exception.getDetails().orElseThrow();
+        assertEquals("EMAIL_ADDRESS_MALFORMED", translatableException.getMessage());
     }
 
     @Test
@@ -53,8 +51,8 @@ class EmailAddressValidatorTest {
         var exception = assertThrows(CommandExecutionException.class, () -> emailAddressValidator.validate(() -> "bob @ my.com"));
         assertEquals("EMAIL_ADDRESS_MALFORMED", exception.getMessage());
 
-        var translatableIllegalArgumentException = (TranslatableIllegalArgumentException) exception.getDetails().orElseThrow();
-        assertEquals("EMAIL_ADDRESS_MALFORMED", translatableIllegalArgumentException.getMessage());
+        var translatableException = (TranslatableIllegalArgumentException) exception.getDetails().orElseThrow();
+        assertEquals("EMAIL_ADDRESS_MALFORMED", translatableException.getMessage());
     }
 
     @Test
@@ -62,8 +60,8 @@ class EmailAddressValidatorTest {
         var exception = assertThrows(CommandExecutionException.class, () -> emailAddressValidator.validate(() -> "bob@"));
         assertEquals("EMAIL_ADDRESS_MALFORMED", exception.getMessage());
 
-        var translatableIllegalArgumentException = (TranslatableIllegalArgumentException) exception.getDetails().orElseThrow();
-        assertEquals("EMAIL_ADDRESS_MALFORMED", translatableIllegalArgumentException.getMessage());
+        var translatableException = (TranslatableIllegalArgumentException) exception.getDetails().orElseThrow();
+        assertEquals("EMAIL_ADDRESS_MALFORMED", translatableException.getMessage());
     }
 
     @Test
@@ -71,7 +69,7 @@ class EmailAddressValidatorTest {
         var exception = assertThrows(CommandExecutionException.class, () -> emailAddressValidator.validate(() -> "bob@engineering"));
         assertEquals("EMAIL_ADDRESS_MALFORMED", exception.getMessage());
 
-        var translatableIllegalArgumentException = (TranslatableIllegalArgumentException) exception.getDetails().orElseThrow();
-        assertEquals("EMAIL_ADDRESS_MALFORMED", translatableIllegalArgumentException.getMessage());
+        var translatableException = (TranslatableIllegalArgumentException) exception.getDetails().orElseThrow();
+        assertEquals("EMAIL_ADDRESS_MALFORMED", translatableException.getMessage());
     }
 }

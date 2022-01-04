@@ -32,15 +32,14 @@ class UsersBelongToOrganizationValidatorTest {
     private static final User ORG_2_USER_1 = new User(USER_ID_3, ORGANIZATION_ID_2, "username-3", "user-display-3");
 
     private UsersBelongToOrganizationValidator usersBelongToOrganizationValidator;
-    private AxonCommandExecutionExceptionFactory axonCommandExecutionExceptionFactory;
 
     @Mock
     private UsersReadService usersReadService;
 
     @BeforeEach
     void setUp() {
-        axonCommandExecutionExceptionFactory = new AxonCommandExecutionExceptionFactory();
-        usersBelongToOrganizationValidator = new UsersBelongToOrganizationValidator(usersReadService, axonCommandExecutionExceptionFactory);
+        usersBelongToOrganizationValidator =
+            new UsersBelongToOrganizationValidator(usersReadService, new AxonCommandExecutionExceptionFactory());
 
         lenient().when(usersReadService.getById(USER_ID_1)).thenReturn(ORG_1_USER_1);
         lenient().when(usersReadService.getById(USER_ID_2)).thenReturn(ORG_1_USER_2);
@@ -58,8 +57,8 @@ class UsersBelongToOrganizationValidatorTest {
             () -> usersBelongToOrganizationValidator.validate(createValidatableCommand(Set.of(USER_ID_1, USER_ID_2, USER_ID_3))));
         assertEquals("USER_NOT_MEMBER_OF_ORGANIZATION", exception.getMessage());
 
-        var translatableIllegalArgumentException = (TranslatableIllegalArgumentException) exception.getDetails().orElseThrow();
-        assertEquals("USER_NOT_MEMBER_OF_ORGANIZATION", translatableIllegalArgumentException.getMessage());
+        var translatableException = (TranslatableIllegalArgumentException) exception.getDetails().orElseThrow();
+        assertEquals("USER_NOT_MEMBER_OF_ORGANIZATION", translatableException.getMessage());
     }
 
     private UsersBelongToOrganizationValidatableCommand createValidatableCommand(Set<UUID> userIds) {

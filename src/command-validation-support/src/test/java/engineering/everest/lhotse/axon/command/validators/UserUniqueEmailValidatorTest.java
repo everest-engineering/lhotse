@@ -25,12 +25,10 @@ public class UserUniqueEmailValidatorTest {
     public UsersReadService usersReadService;
 
     private UsersUniqueEmailValidator usersUniqueEmailValidator;
-    private AxonCommandExecutionExceptionFactory axonCommandExecutionExceptionFactory;
 
     @BeforeEach
     void setUp() {
-        axonCommandExecutionExceptionFactory = new AxonCommandExecutionExceptionFactory();
-        usersUniqueEmailValidator = new UsersUniqueEmailValidator(usersReadService, axonCommandExecutionExceptionFactory);
+        usersUniqueEmailValidator = new UsersUniqueEmailValidator(usersReadService, new AxonCommandExecutionExceptionFactory());
     }
 
     @Test
@@ -41,8 +39,8 @@ public class UserUniqueEmailValidatorTest {
             () -> usersUniqueEmailValidator.validate((UserUniqueEmailValidatableCommand) () -> EXISTING_USER_EMAIL_1));
         assertEquals("EMAIL_ADDRESS_ALREADY_EXISTS", exception.getMessage());
 
-        var translatableIllegalArgumentException = (TranslatableIllegalStateException) exception.getDetails().orElseThrow();
-        assertEquals("EMAIL_ADDRESS_ALREADY_EXISTS", translatableIllegalArgumentException.getMessage());
+        var translatableException = (TranslatableIllegalStateException) exception.getDetails().orElseThrow();
+        assertEquals("EMAIL_ADDRESS_ALREADY_EXISTS", translatableException.getMessage());
     }
 
     @Test

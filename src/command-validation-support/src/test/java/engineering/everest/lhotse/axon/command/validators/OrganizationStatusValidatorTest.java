@@ -30,15 +30,13 @@ class OrganizationStatusValidatorTest {
         new Organization(ORGANIZATION_ID_2, "organization-name", null, null, null, null, null, true);
 
     private OrganizationStatusValidator organizationStatusValidator;
-    private AxonCommandExecutionExceptionFactory axonCommandExecutionExceptionFactory;
 
     @Mock
     private OrganizationsReadService organizationsReadService;
 
     @BeforeEach
     void setUp() {
-        axonCommandExecutionExceptionFactory = new AxonCommandExecutionExceptionFactory();
-        organizationStatusValidator = new OrganizationStatusValidator(organizationsReadService, axonCommandExecutionExceptionFactory);
+        organizationStatusValidator = new OrganizationStatusValidator(organizationsReadService, new AxonCommandExecutionExceptionFactory());
     }
 
     @Test
@@ -56,8 +54,8 @@ class OrganizationStatusValidatorTest {
             () -> organizationStatusValidator.validate((OrganizationStatusValidatableCommand) () -> ORGANIZATION_ID_2));
         assertEquals("ORGANIZATION_IS_DEREGISTERED", exception.getMessage());
 
-        var translatableIllegalArgumentException = (TranslatableIllegalStateException) exception.getDetails().orElseThrow();
-        assertEquals("ORGANIZATION_IS_DEREGISTERED", translatableIllegalArgumentException.getMessage());
+        var translatableException = (TranslatableIllegalStateException) exception.getDetails().orElseThrow();
+        assertEquals("ORGANIZATION_IS_DEREGISTERED", translatableException.getMessage());
     }
 
     @Test
@@ -68,7 +66,7 @@ class OrganizationStatusValidatorTest {
             () -> organizationStatusValidator.validate((OrganizationStatusValidatableCommand) () -> ORGANIZATION_ID_1));
         assertEquals("ORGANIZATION_DOES_NOT_EXIST", exception.getMessage());
 
-        var translatableIllegalArgumentException = (TranslatableIllegalStateException) exception.getDetails().orElseThrow();
-        assertEquals("ORGANIZATION_DOES_NOT_EXIST", translatableIllegalArgumentException.getMessage());
+        var translatableException = (TranslatableIllegalStateException) exception.getDetails().orElseThrow();
+        assertEquals("ORGANIZATION_DOES_NOT_EXIST", translatableException.getMessage());
     }
 }
