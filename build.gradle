@@ -3,7 +3,7 @@ import com.github.jk1.license.render.*
 plugins {
     id 'com.palantir.git-version' version '0.12.3'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
-    id 'org.springframework.boot' version '2.4.8' apply false
+    id 'org.springframework.boot' version '2.6.3' apply false
     id 'org.owasp.dependencycheck' version '6.5.1'
     id 'com.github.jk1.dependency-license-report' version '1.16'
     id 'org.sonarqube' version '3.3'
@@ -63,7 +63,7 @@ subprojects {
         microMeterPrometheusVersion = '1.8.1'
         postgresDriverVersion = '42.3.1'
         prometheusSimpleClientVersion = '0.14.1'
-        springBootVersion = '2.6.0'
+        springBootVersion = '2.6.3'
         swaggerVersion = '3.0.0'
         webfluxVersion = '2.5.5'
 
