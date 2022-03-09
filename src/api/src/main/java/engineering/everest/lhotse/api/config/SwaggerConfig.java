@@ -13,7 +13,6 @@ import springfox.documentation.builders.OAuthBuilder;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.SecurityScheme;
-import springfox.documentation.service.GrantType;
 import springfox.documentation.service.ResourceOwnerPasswordCredentialsGrant;
 import springfox.documentation.service.SecurityReference;
 import springfox.documentation.service.AuthorizationScope;
@@ -45,17 +44,14 @@ import static springfox.documentation.builders.PathSelectors.regex;
 public class SwaggerConfig {
 
     private final String authServer;
-    private final String clientSecret;
     private final String clientId;
     private final String realm;
 
     public SwaggerConfig(@Value("${keycloak.auth-server-url}") String authServer,
-                         @Value("${keycloak.credentials.secret}") String clientSecret,
                          @Value("${keycloak.resource}") String clientId,
                          @Value("${keycloak.realm}") String realm) {
         this.authServer = authServer;
         this.clientId = clientId;
-        this.clientSecret = clientSecret;
         this.realm = realm;
     }
 
@@ -78,7 +74,6 @@ public class SwaggerConfig {
         return SecurityConfigurationBuilder.builder()
             .realm(realm)
             .clientId(clientId)
-            .clientSecret(clientSecret)
             .scopeSeparator(" ")
             .useBasicAuthenticationWithAccessCodeGrant(true)
             .build();
@@ -101,8 +96,7 @@ public class SwaggerConfig {
     }
 
     private SecurityScheme securityScheme() {
-        GrantType grantType =
-            new ResourceOwnerPasswordCredentialsGrant(authServer + "/realms/" + realm + "/protocol/openid-connect/token");
+        var grantType = new ResourceOwnerPasswordCredentialsGrant(authServer + "/realms/" + realm + "/protocol/openid-connect/token");
 
         return new OAuthBuilder().name("Spring OAuth2")
             .grantTypes(List.of(grantType))

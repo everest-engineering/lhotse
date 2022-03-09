@@ -78,16 +78,7 @@ Start up containers for Postgres and Keycloak:
 This project uses keycloak for authentication and authorization. `docker-compose up` will run the keycloak container and
 expose it on the `KEYCLOAK_SERVER_PORT` specified in the `.env` file.
 
-#### Client secret
-
-A client secret defined by Keycloak ois required to be configured in the the `application.properties` file. The secret
-must be generated within Keycloak and copied to the application properties. To do this:
-
-* Open http://localhost:8180/auth and login using the `KEYCLOAK_USER` and `KEYCLOAK_PASSWORD` defined in the `.env` file
-* Select the `default` realm and go to the clients tab
-* Select the `default-client` under the clients tab
-* Go to the credentials tab and regenerate the client secret. Paste this value as the `keycloak.credentials.secret`
-  property in the `application.properties` file.
+## Running
 
 To run the application server using Gradle:
 
