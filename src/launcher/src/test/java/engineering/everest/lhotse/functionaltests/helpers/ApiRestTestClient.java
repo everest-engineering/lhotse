@@ -49,7 +49,7 @@ public class ApiRestTestClient {
     private final WebTestClient webTestClient;
     private final AdminProvisionTask adminProvisionTask;
     private String accessToken;
-    private String clientSecret;
+    private String adminPassword;
 
     public ApiRestTestClient(WebTestClient webTestClient, AdminProvisionTask adminProvisionTask) {
         this.webTestClient = webTestClient;
@@ -60,8 +60,8 @@ public class ApiRestTestClient {
         var userDetails = adminProvisionTask.run();
         assertNotNull(userDetails);
 
-        clientSecret = userDetails.getOrDefault("clientSecret", null).toString();
-        assertNotNull(clientSecret);
+        adminPassword = userDetails.getOrDefault("clientSecret", null).toString();
+        assertNotNull(adminPassword);
 
         login(keycloakAdminUser, keycloakAdminPassword);
     }
@@ -76,7 +76,7 @@ public class ApiRestTestClient {
             .grantType(OAuth2Constants.PASSWORD)
             .realm(keycloakAdminRealm)
             .clientId(keycloakAdminClientId)
-            .clientSecret(clientSecret)
+            .clientSecret(adminPassword)
             .username(username)
             .password(password)
             .resteasyClient(new ResteasyClientBuilder()
