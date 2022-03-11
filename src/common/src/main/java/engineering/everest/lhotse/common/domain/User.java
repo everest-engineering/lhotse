@@ -15,6 +15,7 @@ import static java.util.UUID.fromString;
 public class User implements Identifiable {
 
     public static final UUID ADMIN_ID = fromString("00000000-0000-0000-0000-000000000000");
+    public static final UUID MONITORING_ID = fromString("11111111-1111-1111-1111-111111111111");
 
     private UUID id;
     private UUID organizationId;

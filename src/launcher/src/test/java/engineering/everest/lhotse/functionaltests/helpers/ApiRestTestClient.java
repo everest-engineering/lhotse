@@ -1,11 +1,11 @@
 package engineering.everest.lhotse.functionaltests.helpers;
 
-import engineering.everest.lhotse.AdminProvisionTask;
 import engineering.everest.lhotse.api.rest.requests.NewUserRequest;
 import engineering.everest.lhotse.api.rest.requests.UpdateUserRequest;
 import engineering.everest.lhotse.api.rest.responses.OrganizationResponse;
 import engineering.everest.lhotse.api.rest.responses.UserResponse;
 import engineering.everest.lhotse.api.services.KeycloakSynchronizationService;
+import engineering.everest.lhotse.tasks.AdminUserProvisioningTask;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.keycloak.OAuth2Constants;
@@ -47,11 +47,11 @@ public class ApiRestTestClient {
     private KeycloakSynchronizationService keycloakSynchronizationService;
 
     private final WebTestClient webTestClient;
-    private final AdminProvisionTask adminProvisionTask;
+    private final AdminUserProvisioningTask adminProvisionTask;
     private String accessToken;
     private String adminPassword;
 
-    public ApiRestTestClient(WebTestClient webTestClient, AdminProvisionTask adminProvisionTask) {
+    public ApiRestTestClient(WebTestClient webTestClient, AdminUserProvisioningTask adminProvisionTask) {
         this.webTestClient = webTestClient;
         this.adminProvisionTask = adminProvisionTask;
     }

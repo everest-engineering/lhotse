@@ -1,10 +1,9 @@
 package engineering.everest.lhotse.functionaltests.scenarios;
 
-import engineering.everest.lhotse.AdminProvisionTask;
 import engineering.everest.lhotse.Launcher;
 import engineering.everest.lhotse.api.rest.requests.NewUserRequest;
-import engineering.everest.lhotse.axon.CommandValidatingMessageHandlerInterceptor;
 import engineering.everest.lhotse.api.services.KeycloakSynchronizationService;
+import engineering.everest.lhotse.axon.CommandValidatingMessageHandlerInterceptor;
 import engineering.everest.lhotse.common.RetryWithExponentialBackoff;
 import engineering.everest.lhotse.functionaltests.helpers.ApiRestTestClient;
 import engineering.everest.lhotse.organizations.services.OrganizationsReadService;
@@ -22,6 +21,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.util.Map;
 
+import static engineering.everest.lhotse.tasks.AdminUserProvisioningTask.ORGANIZATION_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.DEFINED_PORT;
@@ -77,7 +77,7 @@ class ApplicationFunctionalTests {
 
         var newUserRequest = new NewUserRequest("a-user", "");
         var response = webTestClient.post().uri("/api/organizations/{organizationId}/users",
-            AdminProvisionTask.ORGANIZATION_ID)
+            ORGANIZATION_ID)
             .header("Authorization", "Bearer " + apiRestTestClient.getAccessToken())
             .header("Accept-Language", "de-DE")
             .contentType(APPLICATION_JSON)
@@ -95,11 +95,11 @@ class ApplicationFunctionalTests {
         apiRestTestClient.createAdminUserAndLogin();
 
         var newUserRequest = new NewUserRequest("user123@example.com", "Captain Fancypants");
-        var userId = apiRestTestClient.createUser(AdminProvisionTask.ORGANIZATION_ID, newUserRequest, CREATED);
+        var userId = apiRestTestClient.createUser(ORGANIZATION_ID, newUserRequest, CREATED);
         RetryWithExponentialBackoff.oneMinuteWaiter()
             .waitOrThrow(() -> usersReadService.exists(userId), "user registration projection update");
 
-        var response = webTestClient.post().uri("/api/organizations/{organizationId}/users", AdminProvisionTask.ORGANIZATION_ID)
+        var response = webTestClient.post().uri("/api/organizations/{organizationId}/users", ORGANIZATION_ID)
             .header("Authorization", "Bearer " + apiRestTestClient.getAccessToken())
             .header("Accept-Language", "de-DE")
             .contentType(APPLICATION_JSON)

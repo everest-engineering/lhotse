@@ -20,6 +20,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @Import(KeycloakSpringBootConfigResolver.class)
 @EnableGlobalMethodSecurity(jsr250Enabled = true, prePostEnabled = true)
 public class WebSecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
+
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) {
         KeycloakAuthenticationProvider keycloakAuthenticationProvider = keycloakAuthenticationProvider();
@@ -38,17 +39,24 @@ public class WebSecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         super.configure(http);
 
-        http.cors()
-            .and()
-            .csrf()
-            .disable()
+        http.cors().and().csrf().disable()
             .authorizeRequests()
-            .antMatchers("/api/organizations/**", "/api/version",
-                "/actuator/health/**", "/api/doc/**", "/swagger-ui/**", "/swagger-resources/**", "/sso/login*")
+            .antMatchers(
+                "/api/organizations/**",
+                "/api/version",
+                "/actuator/health",
+                "/api/doc/**",
+                "/swagger-ui/**",
+                "/swagger-resources/**",
+                "/sso/login*")
             .permitAll()
-            .antMatchers("/api/**", "/actuator/prometheus/**").authenticated()
-            .antMatchers("/admin/**", "/actuator/**").hasRole("ADMIN").anyRequest().permitAll()
-            .and()
-            .logout().logoutRequestMatcher(new AntPathRequestMatcher("/logout", "GET")).logoutSuccessUrl("/");
+            .antMatchers(
+                "/api/**",
+                "/actuator/prometheus/**")
+            .authenticated()
+            .antMatchers("/actuator/health/**", "/actuator/metrics/**", "/actuator/prometheus").hasAnyRole("ADMIN", "MONITORING")
+            .antMatchers("/actuator/**", "/admin/**").hasRole("ADMIN")
+            .anyRequest().permitAll()
+            .and().logout().logoutRequestMatcher(new AntPathRequestMatcher("/logout", "GET")).logoutSuccessUrl("/");
     }
 }

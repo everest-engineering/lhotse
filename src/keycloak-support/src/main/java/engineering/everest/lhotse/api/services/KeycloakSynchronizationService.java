@@ -217,9 +217,8 @@ public class KeycloakSynchronizationService {
             "credentials",
             List.of(Map.of("type", "password", VALUE_KEY, password, "temporary", passwordTemporary))));
 
-        var userId1 = getUserId(username);
-        sendUserVerificationEmail(userId1);
-        var userId = userId1;
+        var userId = getUserId(username);
+        sendUserVerificationEmail(userId);
         addClientLevelUserRoles(userId, roles);
 
         var secret = getClientSecret(getClientIdFromClientDetails());
