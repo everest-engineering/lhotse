@@ -27,9 +27,9 @@ class UsersBelongToOrganizationValidatorTest {
     private static final UUID USER_ID_3 = UUID.randomUUID();
     private static final UUID ORGANIZATION_ID_1 = UUID.randomUUID();
     private static final UUID ORGANIZATION_ID_2 = UUID.randomUUID();
-    private static final User ORG_1_USER_1 = new User(USER_ID_1, ORGANIZATION_ID_1, "username-1", "user-display-1");
-    private static final User ORG_1_USER_2 = new User(USER_ID_2, ORGANIZATION_ID_1, "username-2", "user-display-2");
-    private static final User ORG_2_USER_1 = new User(USER_ID_3, ORGANIZATION_ID_2, "username-3", "user-display-3");
+    private static final User ORG_1_USER_1 = new User(USER_ID_1, ORGANIZATION_ID_1, "user-display-1", "email-address-1");
+    private static final User ORG_1_USER_2 = new User(USER_ID_2, ORGANIZATION_ID_1, "user-display-2", "email-address-2");
+    private static final User ORG_2_USER_1 = new User(USER_ID_3, ORGANIZATION_ID_2, "user-display-3", "email-address-3");
 
     private UsersBelongToOrganizationValidator usersBelongToOrganizationValidator;
 

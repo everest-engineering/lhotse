@@ -63,11 +63,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ContextConfiguration(classes = { TestApiConfig.class, OrganizationsController.class })
 class OrganizationsControllerTest {
 
-    private static final String NEW_USER_USERNAME = "new@umbrella.com";
+    private static final String NEW_USER_EMAIL = "new@umbrella.com";
     private static final String NEW_USER_DISPLAY_NAME = "new user";
     private static final String ROLE_ADMIN = "ROLE_ADMIN";
     private static final String ROLE_ORG_USER = "ORG_USER";
-    private static final NewUserRequest NEW_USER_REQUEST = new NewUserRequest(NEW_USER_USERNAME, NEW_USER_DISPLAY_NAME);
+    private static final NewUserRequest NEW_USER_REQUEST = new NewUserRequest(NEW_USER_EMAIL, NEW_USER_DISPLAY_NAME);
     private static final Organization ORGANIZATION_1 = new Organization(fromString("53ac29ab-ecc6-431e-bde0-64440cd3dc93"),
         "organization-1", new OrganizationAddress("street-1", "city-1",
             "state-1", "country-1", "postal-1"),
@@ -197,7 +197,7 @@ class OrganizationsControllerTest {
             .andExpect(jsonPath("$.[0].id", is(ORG_1_USER_1.getId().toString())))
             .andExpect(jsonPath("$.[0].organizationId", is(ORGANIZATION_1.getId().toString())))
             .andExpect(jsonPath("$.[0].displayName", is(ORG_1_USER_1.getDisplayName())))
-            .andExpect(jsonPath("$.[0].email", is(ORG_1_USER_1.getUsername())));
+            .andExpect(jsonPath("$.[0].emailAddress", is(ORG_1_USER_1.getEmailAddress())));
     }
 
     @Test
@@ -214,7 +214,7 @@ class OrganizationsControllerTest {
     void creatingOrganizationUser_WillFail_WhenDisplayNameIsBlank() throws Exception {
         mockMvc.perform(post("/api/organizations/{organizationId}/users", ORGANIZATION_2.getId())
             .contentType(APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(new NewUserRequest(ORG_1_USER_1.getUsername(), ""))))
+            .content(objectMapper.writeValueAsString(new NewUserRequest(ORG_1_USER_1.getEmailAddress(), ""))))
             .andExpect(status().isBadRequest());
 
         verifyNoInteractions(usersService);
@@ -230,7 +230,7 @@ class OrganizationsControllerTest {
             .andExpect(status().isCreated())
             .andExpect(content().string(Matchers.any(String.class)));
 
-        verify(usersService).createOrganizationUser(ORG_2_USER_2.getId(), ORGANIZATION_2.getId(), NEW_USER_USERNAME, NEW_USER_DISPLAY_NAME);
+        verify(usersService).createOrganizationUser(ORG_2_USER_2.getId(), ORGANIZATION_2.getId(), NEW_USER_EMAIL, NEW_USER_DISPLAY_NAME);
     }
 
     @Test
@@ -255,9 +255,8 @@ class OrganizationsControllerTest {
     private static UserResponse getUserResponse() {
         return new UserResponse(OrganizationsControllerTest.ORG_1_USER_1.getId(),
             OrganizationsControllerTest.ORG_1_USER_1.getOrganizationId(),
-            OrganizationsControllerTest.ORG_1_USER_1.getUsername(),
             OrganizationsControllerTest.ORG_1_USER_1.getDisplayName(),
-            OrganizationsControllerTest.ORG_1_USER_1.getEmail(),
+            OrganizationsControllerTest.ORG_1_USER_1.getEmailAddress(),
             OrganizationsControllerTest.ORG_1_USER_1.isDisabled());
     }
 

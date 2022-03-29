@@ -19,14 +19,9 @@ public class PersistableUser {
     @Id
     private UUID id;
     private UUID organizationId;
-
-    @Column(name = "username", unique = true)
-    private String username;
-
     private String displayName;
-
-    @Column(name = "email", unique = true)
-    private String email;
+    @Column(name = "emailaddress", unique = true)
+    private String emailAddress;
 
     private boolean disabled;
     private Instant createdOn;
@@ -34,21 +29,19 @@ public class PersistableUser {
 
     public PersistableUser(UUID id,
                            UUID organizationId,
-                           String username,
                            String displayName,
+                           String emailAddress,
                            boolean disabled,
                            Instant createdOn) {
         this.id = id;
         this.organizationId = organizationId;
-        this.username = username;
         this.displayName = displayName;
+        this.emailAddress = emailAddress;
         this.disabled = disabled;
         this.createdOn = createdOn;
-
-        this.email = this.username;
     }
 
     PersistableUser(UUID id, UUID organizationId, String displayName, String email, Instant createdOn) {
-        this(id, organizationId, email, displayName, false, createdOn);
+        this(id, organizationId, displayName, email, false, createdOn);
     }
 }

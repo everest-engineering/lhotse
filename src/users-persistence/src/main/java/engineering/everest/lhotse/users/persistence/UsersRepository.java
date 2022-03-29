@@ -17,9 +17,7 @@ public interface UsersRepository extends JpaRepository<PersistableUser, UUID> {
 
     List<PersistableUser> findByOrganizationId(UUID organizationId);
 
-    Optional<PersistableUser> findByUsernameIgnoreCase(String username);
-
-    Optional<PersistableUser> findByEmailIgnoreCase(String email);
+    Optional<PersistableUser> findByEmailAddressIgnoreCase(String email);
 
     void deleteByIdNot(UUID organizationId);
 }

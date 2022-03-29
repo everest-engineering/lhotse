@@ -13,8 +13,7 @@ public class UserResponse {
 
     private UUID id;
     private UUID organizationId;
-    private String username;
     private String displayName;
-    private String email;
+    private String emailAddress;
     private boolean disabled;
 }

@@ -41,7 +41,7 @@ class UserControllerTest {
     private static final byte[] PROFILE_PHOTO_THUMBNAIL_FILE_CONTENTS = "profile-photo-thumbnail-file-contents".getBytes();
     private static final UUID USER_ID_1 = randomUUID();
     private static final UUID ORGANIZATION_ID_1 = randomUUID();
-    private static final User ORG_1_USER_1 = new User(USER_ID_1, ORGANIZATION_ID_1, "org-1-user-1", "org-1-user-1-display");
+    private static final User ORG_1_USER_1 = new User(USER_ID_1, ORGANIZATION_ID_1, "org-1-user-1-display", "org-1-user-1");
 
     private MockMvc mockMvc;
 
@@ -160,9 +160,8 @@ class UserControllerTest {
     private static UserResponse getUserResponse() {
         return new UserResponse(UserControllerTest.ORG_1_USER_1.getId(),
             UserControllerTest.ORG_1_USER_1.getOrganizationId(),
-            UserControllerTest.ORG_1_USER_1.getUsername(),
             UserControllerTest.ORG_1_USER_1.getDisplayName(),
-            UserControllerTest.ORG_1_USER_1.getEmail(),
+            UserControllerTest.ORG_1_USER_1.getEmailAddress(),
             UserControllerTest.ORG_1_USER_1.isDisabled());
     }
 }

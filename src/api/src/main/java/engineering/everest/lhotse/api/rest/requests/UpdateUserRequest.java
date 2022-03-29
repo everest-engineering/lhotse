@@ -12,5 +12,5 @@ import lombok.NoArgsConstructor;
 public class UpdateUserRequest {
 
     private String displayName;
-    private String email;
+    private String emailAddress;
 }

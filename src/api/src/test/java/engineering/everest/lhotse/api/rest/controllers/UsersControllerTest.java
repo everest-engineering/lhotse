@@ -47,9 +47,9 @@ class UsersControllerTest {
     private static final UUID USER_ID_2 = randomUUID();
     private static final UUID ORGANIZATION_ID_1 = randomUUID();
     private static final UUID ORGANIZATION_ID_2 = randomUUID();
-    private static final User ORG_1_USER_1 = new User(USER_ID_1, ORGANIZATION_ID_1, "org-1-user-1", "org-1-user-1-display");
-    private static final User ORG_2_USER_1 = new User(USER_ID_2, ORGANIZATION_ID_2, "org-2-user-1", "org-2-user-1-display");
-    private static final String USER_USERNAME = "user@umbrella.com";
+    private static final User ORG_1_USER_1 = new User(USER_ID_1, ORGANIZATION_ID_1, "org-1-user-1-display", "org-1-user-1");
+    private static final User ORG_2_USER_1 = new User(USER_ID_2, ORGANIZATION_ID_2, "org-2-user-1-display", "org-2-user-1");
+    private static final String USER_EMAIL_ADDRESS = "user@umbrella.com";
     private static final String ROLE_ADMIN = "ROLE_ADMIN";
     private static final String ROLE_ORGANIZATION_ADMIN = "ROLE_ORG_ADMIN";
     private static final String ROLE_ORGANIZATION_USER = "ROLE_ORG_USER";
@@ -93,8 +93,8 @@ class UsersControllerTest {
             .andExpect(jsonPath("$.[1].organizationId", is(ORGANIZATION_ID_2.toString())))
             .andExpect(jsonPath("$.[0].displayName", is(ORG_1_USER_1.getDisplayName())))
             .andExpect(jsonPath("$.[1].displayName", is(ORG_2_USER_1.getDisplayName())))
-            .andExpect(jsonPath("$.[0].email", is(ORG_1_USER_1.getUsername())))
-            .andExpect(jsonPath("$.[1].email", is(ORG_2_USER_1.getUsername())));
+            .andExpect(jsonPath("$.[0].emailAddress", is(ORG_1_USER_1.getEmailAddress())))
+            .andExpect(jsonPath("$.[1].emailAddress", is(ORG_2_USER_1.getEmailAddress())));
     }
 
     @Test
@@ -109,7 +109,7 @@ class UsersControllerTest {
             .andExpect(jsonPath("$.id", is(ORG_2_USER_1.getId().toString())))
             .andExpect(jsonPath("$.organizationId", is(ORGANIZATION_ID_2.toString())))
             .andExpect(jsonPath("$.displayName", is(ORG_2_USER_1.getDisplayName())))
-            .andExpect(jsonPath("$.email", is(ORG_2_USER_1.getUsername())));
+            .andExpect(jsonPath("$.emailAddress", is(ORG_2_USER_1.getEmailAddress())));
     }
 
     @Test
@@ -163,8 +163,8 @@ class UsersControllerTest {
     @Test
     @WithMockKeycloakAuth(authorities = { ROLE_ORGANIZATION_ADMIN })
     void updateUserDetailsWillDelegate_WhenRequestingUserIsAdminOfOrganization() throws Exception {
-        var authUser = new User(randomUUID(), ORG_1_USER_1.getOrganizationId(), USER_USERNAME, "user");
-        var aUser = new User(randomUUID(), authUser.getOrganizationId(), USER_USERNAME, "user");
+        var authUser = new User(randomUUID(), ORG_1_USER_1.getOrganizationId(), "user", USER_EMAIL_ADDRESS);
+        var aUser = new User(randomUUID(), authUser.getOrganizationId(), "user", USER_EMAIL_ADDRESS);
         when(usersReadService.getById(aUser.getId())).thenReturn(aUser);
         mockMvc.perform(put("/api/users/{userId}", aUser.getId())
             .principal(() -> authUser.getId().toString())
@@ -179,7 +179,7 @@ class UsersControllerTest {
     @Test
     @WithMockKeycloakAuth(authorities = { ROLE_ORGANIZATION_USER })
     void updateUserDetailsWillDelegate_WhenRequestingUserIsTargetUser() throws Exception {
-        var authUser = new User(randomUUID(), ORG_1_USER_1.getOrganizationId(), USER_USERNAME, "user");
+        var authUser = new User(randomUUID(), ORG_1_USER_1.getOrganizationId(), "user", USER_EMAIL_ADDRESS);
         when(usersReadService.getById(authUser.getId())).thenReturn(authUser);
 
         mockMvc.perform(put("/api/users/{userId}", authUser.getId())
@@ -195,8 +195,8 @@ class UsersControllerTest {
     @Test
     @WithMockKeycloakAuth(authorities = { ROLE_ORGANIZATION_USER })
     void getUserById_WillDelegate() throws Exception {
-        var authUser = new User(randomUUID(), ORG_1_USER_1.getOrganizationId(), USER_USERNAME, "user");
-        var targetUser = new User(randomUUID(), authUser.getOrganizationId(), "other@umbrella.com", "other");
+        var authUser = new User(randomUUID(), ORG_1_USER_1.getOrganizationId(), "user", USER_EMAIL_ADDRESS);
+        var targetUser = new User(randomUUID(), authUser.getOrganizationId(), "other", "other@umbrella.com");
         when(dtoConverter.convert(targetUser)).thenReturn(getUserResponse(targetUser));
         when(usersReadService.getById(targetUser.getId())).thenReturn(targetUser);
 
@@ -210,7 +210,7 @@ class UsersControllerTest {
     @Test
     @WithMockKeycloakAuth(authorities = ROLE_ADMIN)
     void getUserOfAnyOrganization_WillDelegateForAdmin() throws Exception {
-        var targetUser = new User(randomUUID(), randomUUID(), "other@umbrella.com", "other");
+        var targetUser = new User(randomUUID(), randomUUID(), "other", "other@umbrella.com");
         when(dtoConverter.convert(targetUser)).thenReturn(getUserResponse(targetUser));
         when(usersReadService.getById(targetUser.getId())).thenReturn(targetUser);
 
@@ -224,10 +224,10 @@ class UsersControllerTest {
     @Test
     @WithMockKeycloakAuth(authorities = { ROLE_ORGANIZATION_ADMIN })
     void updateUser_WillDelegate() throws Exception {
-        var authUser = new User(randomUUID(), ORG_1_USER_1.getOrganizationId(), USER_USERNAME, "user");
+        var authUser = new User(randomUUID(), ORG_1_USER_1.getOrganizationId(), "user", USER_EMAIL_ADDRESS);
         UUID targetUserId = randomUUID();
         when(usersReadService.getById(targetUserId)).thenReturn(
-            new User(targetUserId, authUser.getOrganizationId(), "some@umbrella.com", ""));
+            new User(targetUserId, authUser.getOrganizationId(), "", "some@umbrella.com"));
 
         mockMvc.perform(put("/api/users/{userId}", targetUserId)
             .principal(() -> authUser.getId().toString())
@@ -239,7 +239,7 @@ class UsersControllerTest {
     @Test
     @WithMockKeycloakAuth(authorities = ROLE_ADMIN)
     void deleteAndForgetUser_WillDelegate() throws Exception {
-        var authUser = new User(randomUUID(), ORG_1_USER_1.getOrganizationId(), USER_USERNAME, "user");
+        var authUser = new User(randomUUID(), ORG_1_USER_1.getOrganizationId(), "user", USER_EMAIL_ADDRESS);
         UUID targetUserId = randomUUID();
 
         mockMvc.perform(post("/api/users/{userId}/forget", targetUserId)
@@ -254,9 +254,8 @@ class UsersControllerTest {
     private static UserResponse getUserResponse(User user) {
         return new UserResponse(user.getId(),
             user.getOrganizationId(),
-            user.getUsername(),
             user.getDisplayName(),
-            user.getEmail(),
+            user.getEmailAddress(),
             user.isDisabled());
     }
 }

@@ -57,13 +57,13 @@ public class DefaultUsersReadService implements UsersReadService {
     }
 
     @Override
-    public User getUserByUsername(String username) {
-        return convert(usersRepository.findByEmailIgnoreCase(username).orElseThrow());
+    public User getUserByEmailAddress(String emailAddress) {
+        return convert(usersRepository.findByEmailAddressIgnoreCase(emailAddress).orElseThrow());
     }
 
     @Override
     public boolean hasUserWithEmail(String email) {
-        return usersRepository.findByEmailIgnoreCase(email).isPresent();
+        return usersRepository.findByEmailAddressIgnoreCase(email).isPresent();
     }
 
     @Override
@@ -87,8 +87,7 @@ public class DefaultUsersReadService implements UsersReadService {
     }
 
     private User convert(PersistableUser persistableUser) {
-        return new User(persistableUser.getId(), persistableUser.getOrganizationId(), persistableUser.getUsername(),
-            persistableUser.getDisplayName(), persistableUser.getEmail(),
-            persistableUser.isDisabled());
+        return new User(persistableUser.getId(), persistableUser.getOrganizationId(), persistableUser.getDisplayName(),
+            persistableUser.getEmailAddress(), persistableUser.isDisabled());
     }
 }

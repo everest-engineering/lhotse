@@ -36,20 +36,20 @@ public class KeycloakSynchronizationService {
     private static final String VALUE_KEY = "value";
 
     private final String keycloakServerAuthUrl;
-    private final String keycloakAdminUser;
+    private final String keycloakAdminEmailAddress;
     private final String keycloakAdminPassword;
     private final String keycloakMasterRealmAdminClientId;
     private final String keycloakDefaultRealmDefaultClientId;
     private final int keycloakServerConnectionPoolSize;
 
     public KeycloakSynchronizationService(@Value("${keycloak.auth-server-url}") String keycloakServerAuthUrl,
-                                          @Value("${kc.server.admin-user}") String keycloakAdminUser,
+                                          @Value("${kc.server.admin-email}") String keycloakAdminEmailAddress,
                                           @Value("${kc.server.admin-password}") String keycloakAdminPassword,
                                           @Value("${kc.server.master-realm.default.client-id}") String keycloakMasterRealmAdminClientId,
                                           @Value("${keycloak.resource}") String keycloakDefaultRealmDefaultClientId,
                                           @Value("${kc.server.connection.pool-size}") int keycloakServerConnectionPoolSize) {
         this.keycloakServerAuthUrl = keycloakServerAuthUrl;
-        this.keycloakAdminUser = keycloakAdminUser;
+        this.keycloakAdminEmailAddress = keycloakAdminEmailAddress;
         this.keycloakAdminPassword = keycloakAdminPassword;
         this.keycloakMasterRealmAdminClientId = keycloakMasterRealmAdminClientId;
         this.keycloakDefaultRealmDefaultClientId = keycloakDefaultRealmDefaultClientId;
@@ -62,7 +62,7 @@ public class KeycloakSynchronizationService {
             .grantType(OAuth2Constants.PASSWORD)
             .realm("master")
             .clientId(keycloakMasterRealmAdminClientId)
-            .username(keycloakAdminUser)
+            .username(keycloakAdminEmailAddress)
             .password(keycloakAdminPassword)
             .resteasyClient(new ResteasyClientBuilder()
                 .connectionPoolSize(keycloakServerConnectionPoolSize).build())
@@ -84,21 +84,20 @@ public class KeycloakSynchronizationService {
             .block();
     }
 
-    public UUID createNewKeycloakUserAndSendVerificationEmail(String username, UUID organizationId, String displayName) {
-        createNewKeycloakUser(Map.of("username", username,
-            "email", username,
+    public UUID createNewKeycloakUserAndSendVerificationEmail(String emailAddress, UUID organizationId, String displayName) {
+        createNewKeycloakUser(Map.of("email", emailAddress,
             "enabled", true,
             "attributes", new UserAttribute(organizationId, displayName),
             "credentials",
             List.of(Map.of("type", "password", VALUE_KEY, "changeme", "temporary", true))));
 
-        var userId = getUserId(username);
+        var userId = getUserId(emailAddress);
         sendUserVerificationEmail(userId);
         return userId;
     }
 
-    public UUID getUserId(String username) {
-        return fromString(new JSONArray(getUsers(Map.of("username", username)))
+    public UUID getUserId(String emailAddress) {
+        return fromString(new JSONArray(getUsers(Map.of("username", emailAddress)))
             .getJSONObject(0)
             .getString("id"));
     }
@@ -202,22 +201,20 @@ public class KeycloakSynchronizationService {
         return filters;
     }
 
-    public Map<String, Object> setupKeycloakUser(String username,
-                                                 String email,
+    public Map<String, Object> setupKeycloakUser(String emailAddress,
                                                  boolean enabled,
                                                  UUID organizationId,
                                                  Set<Role> roles,
                                                  String displayName,
                                                  String password,
                                                  boolean passwordTemporary) {
-        createNewKeycloakUser(Map.of("username", username,
-            "email", email,
+        createNewKeycloakUser(Map.of("email", emailAddress,
             "enabled", enabled,
             "attributes", new UserAttribute(organizationId, displayName),
             "credentials",
             List.of(Map.of("type", "password", VALUE_KEY, password, "temporary", passwordTemporary))));
 
-        var userId = getUserId(username);
+        var userId = getUserId(emailAddress);
         sendUserVerificationEmail(userId);
         addClientLevelUserRoles(userId, roles);
 

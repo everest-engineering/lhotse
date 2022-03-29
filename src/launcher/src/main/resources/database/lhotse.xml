@@ -146,18 +146,14 @@
                 <constraints nullable="false"/>
             </column>
             <column name="displayname" type="varchar(255)"/>
-            <column name="email" type="varchar(255)"/>
             <column name="organizationid" type="uuid"/>
             <column name="profilephotofileid" type="uuid"/>
-            <column name="username" type="varchar(255)">
+            <column name="emailaddress" type="varchar(255)">
                 <constraints unique="true" uniqueConstraintName="UNIQUE_users_email" nullable="false"/>
             </column>
         </createTable>
-        <createIndex tableName="users" indexName="INDEX_users_email">
-            <column name="email"/>
-        </createIndex>
-        <createIndex tableName="users" indexName="INDEX_users_username">
-            <column name="username"/>
+        <createIndex tableName="users" indexName="INDEX_users_email_address">
+            <column name="emailaddress"/>
         </createIndex>
         <createIndex tableName="users" indexName="INDEX_users_organization_id">
             <column name="organizationid"/>

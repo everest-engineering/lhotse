@@ -45,7 +45,6 @@ public class FirstTimeUserBootstrappingFilterTest {
 
     private static final UUID USER_ID = randomUUID();
     private static final UUID ORGANIZATION_ID = randomUUID();
-    private static final String USERNAME = "user name";
     private static final String DISPLAY_NAME = "New User";
     private static final String USER_EMAIL_ADDRESS = "tester@example.com";
 
@@ -169,7 +168,7 @@ public class FirstTimeUserBootstrappingFilterTest {
             }, false));
         when(usersReadService.exists(USER_ID)).thenReturn(true);
         when(usersReadService.getById(USER_ID))
-            .thenReturn(new User(USER_ID, ORGANIZATION_ID, USERNAME, DISPLAY_NAME));
+            .thenReturn(new User(USER_ID, ORGANIZATION_ID, DISPLAY_NAME, USER_EMAIL_ADDRESS));
 
         filterConfig.doFilterInternal(httpServletRequest, httpServletResponse, filterChain);
         verify(organizationsReadService, never()).exists(any());
@@ -201,7 +200,7 @@ public class FirstTimeUserBootstrappingFilterTest {
         when(usersReadService.exists(USER_ID)).thenReturn(false).thenReturn(true);
         when(organizationsReadService.exists(ORGANIZATION_ID)).thenReturn(true);
         when(usersReadService.getById(USER_ID))
-            .thenReturn(new User(USER_ID, ORGANIZATION_ID, USERNAME, DISPLAY_NAME));
+            .thenReturn(new User(USER_ID, ORGANIZATION_ID, DISPLAY_NAME, USER_EMAIL_ADDRESS));
 
         filterConfig.doFilterInternal(httpServletRequest, httpServletResponse, filterChain);
         verify(commandGateway).send(new CreateSelfRegisteredOrganizationCommand(ORGANIZATION_ID, USER_ID,
@@ -214,7 +213,6 @@ public class FirstTimeUserBootstrappingFilterTest {
         AccessToken accessToken = new AccessToken();
         accessToken.setOtherClaims("displayName", DISPLAY_NAME);
         accessToken.setSubject(USER_ID.toString());
-        accessToken.setPreferredUsername(USERNAME);
         accessToken.setEmail(USER_EMAIL_ADDRESS);
         var defaultAccess = new AccessToken.Access();
         defaultAccess.addRole(Role.ORG_USER.toString());

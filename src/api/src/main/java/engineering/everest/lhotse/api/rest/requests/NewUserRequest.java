@@ -16,7 +16,7 @@ public class NewUserRequest {
     @NotBlank
     @Size(max = 100)
     @ApiModelProperty(required = true)
-    private String username;
+    private String emailAddress;
 
     @NotBlank
     @Size(max = 100)

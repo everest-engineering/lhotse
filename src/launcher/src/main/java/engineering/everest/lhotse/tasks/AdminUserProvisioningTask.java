@@ -25,16 +25,16 @@ public class AdminUserProvisioningTask implements ReplayCompletionAware {
     private final String adminPassword;
 
     public AdminUserProvisioningTask(SpecialUserProvisioner specialUserProvisioner,
-                                     @Value("${kc.server.admin-user}") String adminUsername,
+                                     @Value("${kc.server.admin-email}") String adminEmailAddress,
                                      @Value("${kc.server.admin-password}") String adminPassword) {
         this.specialUserProvisioner = specialUserProvisioner;
-        this.adminEmail = adminUsername;
+        this.adminEmail = adminEmailAddress;
         this.adminPassword = adminPassword;
     }
 
     @PostConstruct
     public Map<String, Object> run() {
-        return specialUserProvisioner.provision(new User(ADMIN_ID, ORGANIZATION_ID, adminEmail, "Admin"), adminPassword,
+        return specialUserProvisioner.provision(new User(ADMIN_ID, ORGANIZATION_ID, "Admin", adminEmail), adminPassword,
             Set.of(Role.ADMIN));
     }
 

@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
 import javax.persistence.EntityManager;
@@ -28,6 +29,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @SpringBootTest(webEnvironment = RANDOM_PORT, classes = Launcher.class)
 @ActiveProfiles("standalone")
 @Transactional
+@DirtiesContext
 @ExtendWith(MockitoExtension.class)
 class FileStoreFunctionalTests {
     private static final byte[] TEMPORARY_FILE_CONTENTS = "A temporary file for testing".getBytes();

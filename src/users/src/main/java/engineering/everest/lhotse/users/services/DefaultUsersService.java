@@ -28,8 +28,8 @@ public class DefaultUsersService implements UsersService {
     }
 
     @Override
-    public void updateUser(UUID requestingUserId, UUID userId, String emailChange, String displayNameChange) {
-        commandGateway.sendAndWait(new UpdateUserDetailsCommand(userId, emailChange, displayNameChange, requestingUserId));
+    public void updateUser(UUID requestingUserId, UUID userId, String emailAddressChange, String displayNameChange) {
+        commandGateway.sendAndWait(new UpdateUserDetailsCommand(userId, emailAddressChange, displayNameChange, requestingUserId));
     }
 
     @Override
@@ -43,10 +43,10 @@ public class DefaultUsersService implements UsersService {
     }
 
     @Override
-    public UUID createOrganizationUser(UUID requestingUserId, UUID organizationId, String username, String displayName) {
-        var keycloakUserId = createUserAndRetrieveKeycloakUserId(username, organizationId, displayName);
+    public UUID createOrganizationUser(UUID requestingUserId, UUID organizationId, String emailAddress, String displayName) {
+        var keycloakUserId = createUserAndRetrieveKeycloakUserId(emailAddress, organizationId, displayName);
         return commandGateway.sendAndWait(
-            new CreateOrganizationUserCommand(keycloakUserId, organizationId, requestingUserId, username, displayName));
+            new CreateOrganizationUserCommand(keycloakUserId, organizationId, requestingUserId, emailAddress, displayName));
     }
 
     @Override
@@ -59,7 +59,7 @@ public class DefaultUsersService implements UsersService {
         commandGateway.sendAndWait(new DeleteAndForgetUserCommand(userId, requestingUserId, requestReason));
     }
 
-    private UUID createUserAndRetrieveKeycloakUserId(String username, UUID organizationId, String displayName) {
-        return keycloakSynchronizationService.createNewKeycloakUserAndSendVerificationEmail(username, organizationId, displayName);
+    private UUID createUserAndRetrieveKeycloakUserId(String emailAddress, UUID organizationId, String displayName) {
+        return keycloakSynchronizationService.createNewKeycloakUserAndSendVerificationEmail(emailAddress, organizationId, displayName);
     }
 }

@@ -25,12 +25,8 @@ public class CreateOrganizationUserCommand implements EmailAddressValidatableCom
     @NotNull
     private UUID requestingUserId;
     @NotNull
-    private String username;
+    private String emailAddress;
     @NotBlank
     private String userDisplayName;
 
-    @Override
-    public String getEmailAddress() {
-        return username;
-    }
 }

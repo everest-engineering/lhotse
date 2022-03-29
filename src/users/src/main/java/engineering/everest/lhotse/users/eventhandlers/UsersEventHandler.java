@@ -65,7 +65,7 @@ public class UsersEventHandler implements ReplayCompletionAware {
         var persistableUser = usersRepository.findById(event.getUserId()).orElseThrow();
         persistableUser.setDisplayName(selectDesiredState(event.getDisplayNameChange(),
             persistableUser.getDisplayName()));
-        persistableUser.setEmail(selectDesiredState(event.getEmailChange(), persistableUser.getEmail()));
+        persistableUser.setEmailAddress(selectDesiredState(event.getEmailChange(), persistableUser.getEmailAddress()));
         usersRepository.save(persistableUser);
     }
 

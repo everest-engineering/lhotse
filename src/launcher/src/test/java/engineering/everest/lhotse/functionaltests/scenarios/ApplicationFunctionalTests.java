@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
@@ -33,6 +34,7 @@ import static org.springframework.web.reactive.function.BodyInserters.fromValue;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT, classes = Launcher.class)
 @ActiveProfiles("standalone")
+@DirtiesContext
 class ApplicationFunctionalTests {
 
     @Autowired

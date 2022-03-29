@@ -10,8 +10,8 @@ import org.springframework.stereotype.Service;
 public class DtoConverter {
 
     public UserResponse convert(User user) {
-        return new UserResponse(user.getId(), user.getOrganizationId(), user.getUsername(), user.getDisplayName(),
-            user.getEmail(), user.isDisabled());
+        return new UserResponse(user.getId(), user.getOrganizationId(), user.getDisplayName(),
+            user.getEmailAddress(), user.isDisabled());
     }
 
     public OrganizationResponse convert(Organization organization) {

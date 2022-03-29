@@ -51,11 +51,11 @@ class UsersReadServiceIntegrationTest {
     private static final String USER_DISPLAY_NAME_2 = "user-display-name-2";
     private static final String USER_DISPLAY_NAME_4 = "user-display-name-3";
     private static final String USER_DISPLAY_NAME_3 = "user-display-name-4";
-    private static final String USERNAME_1 = "user1@email.com";
-    private static final String USERNAME_1_DIFFERENT_CASE = "USER1@email.com";
-    private static final String USERNAME_2 = "user2@email.com";
-    private static final String USERNAME_3 = "user3@email.com";
-    private static final String USERNAME_4 = "user4@email.com";
+    private static final String USER_EMAIL_ADDRESS_1 = "user1@email.com";
+    private static final String USER_EMAIL_1_DIFFERENT_CASE = "USER1@email.com";
+    private static final String USER_EMAIL_ADDRESS_2 = "user2@email.com";
+    private static final String USER_EMAIL_ADDRESS_3 = "user3@email.com";
+    private static final String USER_EMAIL_ADDRESS_4 = "user4@email.com";
     private static final String USER_EMAIL_DOES_NOT_EXIST = "unknown@email.com";
     private static final Instant CREATED_ON_1 = ofEpochSecond(800000L);
     private static final Instant CREATED_ON_2 = ofEpochSecond(800000L);
@@ -63,17 +63,17 @@ class UsersReadServiceIntegrationTest {
     private static final Instant CREATED_ON_3 = ofEpochSecond(800000L);
 
     private static final User ORG_1_USER_1 =
-        new User(ORG_1_USER_ID_1, ORGANIZATION_ID_1, USERNAME_1, USER_DISPLAY_NAME_1, USERNAME_1, false);
-    private static final User ORG_1_USER_2 = new User(ORG_1_USER_ID_2, ORGANIZATION_ID_1, USERNAME_2, USER_DISPLAY_NAME_2, false);
-    private static final User ORG_1_USER_3_DISABLED = new User(ORG_1_USER_ID_3, ORGANIZATION_ID_1, USERNAME_3, USER_DISPLAY_NAME_3, true);
-    private static final User ORG_2_USER_1 = new User(ORG_2_USER_ID_1, ORGANIZATION_ID_2, USERNAME_4, USER_DISPLAY_NAME_4, false);
+        new User(ORG_1_USER_ID_1, ORGANIZATION_ID_1, USER_DISPLAY_NAME_1, USER_EMAIL_ADDRESS_1, false);
+    private static final User ORG_1_USER_2 = new User(ORG_1_USER_ID_2, ORGANIZATION_ID_1, USER_DISPLAY_NAME_2, USER_EMAIL_ADDRESS_2, false);
+    private static final User ORG_1_USER_3_DISABLED =
+        new User(ORG_1_USER_ID_3, ORGANIZATION_ID_1, USER_DISPLAY_NAME_3, USER_EMAIL_ADDRESS_3, true);
+    private static final User ORG_2_USER_1 = new User(ORG_2_USER_ID_1, ORGANIZATION_ID_2, USER_DISPLAY_NAME_4, USER_EMAIL_ADDRESS_4, false);
 
     private static final PersistableUser PERSISTABLE_ORG_1_USER_1 =
-        new PersistableUser(ORG_1_USER_ID_1, ORGANIZATION_ID_1, USERNAME_1, USER_DISPLAY_NAME_1,
-            USERNAME_1, false, CREATED_ON_1, PROFILE_PHOTO_ID);
+        new PersistableUser(ORG_1_USER_ID_1, ORGANIZATION_ID_1, USER_DISPLAY_NAME_1, USER_EMAIL_ADDRESS_1, false, CREATED_ON_1,
+            PROFILE_PHOTO_ID);
     private static final PersistableUser PERSISTABLE_ORG_1_USER_3 =
-        new PersistableUser(ORG_1_USER_ID_3, ORGANIZATION_ID_1, USERNAME_3, USER_DISPLAY_NAME_3,
-            true, CREATED_ON_3);
+        new PersistableUser(ORG_1_USER_ID_3, ORGANIZATION_ID_1, USER_DISPLAY_NAME_3, USER_EMAIL_ADDRESS_3, true, CREATED_ON_3);
     public static final String PROFILE_PHOTO_FILE_CONTENTS = "my profile photo";
 
     @Autowired
@@ -88,9 +88,9 @@ class UsersReadServiceIntegrationTest {
     @BeforeEach
     void setUp() {
         usersRepository.save(PERSISTABLE_ORG_1_USER_1);
-        usersRepository.createUser(ORG_1_USER_ID_2, ORGANIZATION_ID_1, USER_DISPLAY_NAME_2, USERNAME_2, CREATED_ON_2);
+        usersRepository.createUser(ORG_1_USER_ID_2, ORGANIZATION_ID_1, USER_DISPLAY_NAME_2, USER_EMAIL_ADDRESS_2, CREATED_ON_2);
         usersRepository.save(PERSISTABLE_ORG_1_USER_3);
-        usersRepository.createUser(ORG_2_USER_ID_1, ORGANIZATION_ID_2, USER_DISPLAY_NAME_4, USERNAME_4, CREATED_ON_4);
+        usersRepository.createUser(ORG_2_USER_ID_1, ORGANIZATION_ID_2, USER_DISPLAY_NAME_4, USER_EMAIL_ADDRESS_4, CREATED_ON_4);
     }
 
     @Test
@@ -99,8 +99,8 @@ class UsersReadServiceIntegrationTest {
     }
 
     @Test
-    void getUserByUsername_WillRetrieveByUsername() {
-        assertEquals(ORG_2_USER_1, usersReadService.getUserByUsername(USERNAME_4));
+    void getUserByEmailAddress_WillRetrieveByEmailAddress() {
+        assertEquals(ORG_2_USER_1, usersReadService.getUserByEmailAddress(USER_EMAIL_ADDRESS_4));
     }
 
     @Test
@@ -131,12 +131,12 @@ class UsersReadServiceIntegrationTest {
 
     @Test
     void hasUserWithEmail_WillReturnTrue_WhenUserWithEmailExists() {
-        assertTrue(usersReadService.hasUserWithEmail(USERNAME_1));
+        assertTrue(usersReadService.hasUserWithEmail(USER_EMAIL_ADDRESS_1));
     }
 
     @Test
     void hasUserWithEmail_WillReturnTrue_WhenEmailIsDifferentlyCased() {
-        assertTrue(usersReadService.hasUserWithEmail(USERNAME_1_DIFFERENT_CASE));
+        assertTrue(usersReadService.hasUserWithEmail(USER_EMAIL_1_DIFFERENT_CASE));
     }
 
     @Test

@@ -46,17 +46,17 @@ class UserAggregateTest {
     private static final UUID ORGANIZATION_ID = randomUUID();
     private static final UUID USER_ID = randomUUID();
     private static final UUID PROFILE_PHOTO_FILE_ID = randomUUID();
-    private static final String USERNAME = "user@email.com";
+    private static final String EMAIL_ADDRESS = "user@email.com";
     private static final String USER_DISPLAY_NAME = "user-display-name";
     private static final String DISPLAY_NAME_CHANGE = "display-name-change";
-    private static final String EMAIL_CHANGE = "email@change.com";
+    private static final String EMAIL_ADDRESS_CHANGE = "email@change.com";
     private static final String NO_CHANGE = null;
     private static final String BLANK_FIELD = "";
 
     private static final UserDeletedAndForgottenEvent USER_DELETED_AND_FORGOTTEN_EVENT =
         new UserDeletedAndForgottenEvent(USER_ID, ADMIN_ID, "It's the right thing to do");
     private static final UserCreatedForNewlyRegisteredOrganizationEvent USER_CREATED_FOR_NEWLY_REGISTERED_ORGANIZATION_EVENT =
-        new UserCreatedForNewlyRegisteredOrganizationEvent(ORGANIZATION_ID, USER_ID, USER_DISPLAY_NAME, USERNAME);
+        new UserCreatedForNewlyRegisteredOrganizationEvent(ORGANIZATION_ID, USER_ID, USER_DISPLAY_NAME, EMAIL_ADDRESS);
 
     private FixtureConfiguration<UserAggregate> testFixture;
     private AxonCommandExecutionExceptionFactory axonCommandExecutionExceptionFactory;
@@ -96,15 +96,15 @@ class UserAggregateTest {
     @Test
     void createOrganizationUserCommandEmits_WhenAllMandatoryFieldsArePresentInCreationCommand() {
         testFixture.givenNoPriorActivity()
-            .when(new CreateOrganizationUserCommand(USER_ID, ORGANIZATION_ID, ADMIN_ID, USERNAME, USER_DISPLAY_NAME))
-            .expectEvents(new UserCreatedByAdminEvent(USER_ID, ORGANIZATION_ID, ADMIN_ID, USER_DISPLAY_NAME, USERNAME));
+            .when(new CreateOrganizationUserCommand(USER_ID, ORGANIZATION_ID, ADMIN_ID, EMAIL_ADDRESS, USER_DISPLAY_NAME))
+            .expectEvents(new UserCreatedByAdminEvent(USER_ID, ORGANIZATION_ID, ADMIN_ID, USER_DISPLAY_NAME, EMAIL_ADDRESS));
     }
 
     @Test
     void createUserForNewlyRegisteredOrganizationCommandEmits_WhenAllMandatoryFieldsArePresentInCreationCommand() {
         testFixture.givenNoPriorActivity()
-            .when(new CreateUserForNewlyRegisteredOrganizationCommand(ORGANIZATION_ID, USER_ID, USERNAME, USER_DISPLAY_NAME))
-            .expectEvents(new UserCreatedForNewlyRegisteredOrganizationEvent(ORGANIZATION_ID, USER_ID, USER_DISPLAY_NAME, USERNAME));
+            .when(new CreateUserForNewlyRegisteredOrganizationCommand(ORGANIZATION_ID, USER_ID, EMAIL_ADDRESS, USER_DISPLAY_NAME))
+            .expectEvents(new UserCreatedForNewlyRegisteredOrganizationEvent(ORGANIZATION_ID, USER_ID, USER_DISPLAY_NAME, EMAIL_ADDRESS));
     }
 
     @Test
@@ -128,7 +128,7 @@ class UserAggregateTest {
     @Test
     void rejectsCreateOrganizationUserCommand_WhenDisplayNameIsBlank() {
         testFixture.givenNoPriorActivity()
-            .when(new CreateOrganizationUserCommand(USER_ID, ORGANIZATION_ID, ADMIN_ID, USERNAME, ""))
+            .when(new CreateOrganizationUserCommand(USER_ID, ORGANIZATION_ID, ADMIN_ID, EMAIL_ADDRESS, ""))
             .expectNoEvents()
             .expectException(ConstraintViolationException.class);
     }
@@ -136,7 +136,7 @@ class UserAggregateTest {
     @Test
     void rejectsCreateUserForNewlyRegisteredOrganizationCommand_WhenDisplayNameIsBlank() {
         testFixture.givenNoPriorActivity()
-            .when(new CreateUserForNewlyRegisteredOrganizationCommand(ORGANIZATION_ID, USER_ID, USERNAME, ""))
+            .when(new CreateUserForNewlyRegisteredOrganizationCommand(ORGANIZATION_ID, USER_ID, EMAIL_ADDRESS, ""))
             .expectNoEvents()
             .expectException(ConstraintViolationException.class);
     }
@@ -144,7 +144,7 @@ class UserAggregateTest {
     @Test
     void rejectsCreateOrganizationUserCommand_WhenDisplayNameIsNull() {
         testFixture.givenNoPriorActivity()
-            .when(new CreateOrganizationUserCommand(USER_ID, ORGANIZATION_ID, ADMIN_ID, USERNAME, null))
+            .when(new CreateOrganizationUserCommand(USER_ID, ORGANIZATION_ID, ADMIN_ID, EMAIL_ADDRESS, null))
             .expectNoEvents()
             .expectException(ConstraintViolationException.class);
     }
@@ -152,14 +152,14 @@ class UserAggregateTest {
     @Test
     void rejectsCreateUserForNewlyRegisteredOrganizationCommand_WhenDisplayNameIsNull() {
         testFixture.givenNoPriorActivity()
-            .when(new CreateUserForNewlyRegisteredOrganizationCommand(ORGANIZATION_ID, USER_ID, USERNAME, null))
+            .when(new CreateUserForNewlyRegisteredOrganizationCommand(ORGANIZATION_ID, USER_ID, EMAIL_ADDRESS, null))
             .expectNoEvents()
             .expectException(ConstraintViolationException.class);
     }
 
     @Test
     void rejectsCreateOrganizationUserCommand_WhenRequestingUserIsNull() {
-        var command = new CreateOrganizationUserCommand(USER_ID, ORGANIZATION_ID, null, USERNAME, USER_DISPLAY_NAME);
+        var command = new CreateOrganizationUserCommand(USER_ID, ORGANIZATION_ID, null, EMAIL_ADDRESS, USER_DISPLAY_NAME);
 
         testFixture.givenNoPriorActivity()
             .when(command)
@@ -170,14 +170,14 @@ class UserAggregateTest {
     @Test
     void rejectsCreateUserForNewlyRegisteredOrganizationCommand_WhenRequestingUserIsNull() {
         testFixture.givenNoPriorActivity()
-            .when(new CreateUserForNewlyRegisteredOrganizationCommand(ORGANIZATION_ID, null, USERNAME, USER_DISPLAY_NAME))
+            .when(new CreateUserForNewlyRegisteredOrganizationCommand(ORGANIZATION_ID, null, EMAIL_ADDRESS, USER_DISPLAY_NAME))
             .expectNoEvents()
             .expectException(ConstraintViolationException.class);
     }
 
     @Test
     void rejectsCreateOrganizationUserCommand_WhenOrganizationIdIsInvalid() {
-        var command = new CreateOrganizationUserCommand(USER_ID, ORGANIZATION_ID, ADMIN_ID, USERNAME, USER_DISPLAY_NAME);
+        var command = new CreateOrganizationUserCommand(USER_ID, ORGANIZATION_ID, ADMIN_ID, EMAIL_ADDRESS, USER_DISPLAY_NAME);
         doThrow(IllegalStateException.class).when(organizationStatusValidator).validate(command);
 
         testFixture.givenNoPriorActivity()
@@ -188,7 +188,7 @@ class UserAggregateTest {
 
     @Test
     void rejectsCreateOrganizationUserCommand_WhenUniqueUserEmailValidatorFails() {
-        var command = new CreateOrganizationUserCommand(USER_ID, ORGANIZATION_ID, ADMIN_ID, USERNAME, USER_DISPLAY_NAME);
+        var command = new CreateOrganizationUserCommand(USER_ID, ORGANIZATION_ID, ADMIN_ID, EMAIL_ADDRESS, USER_DISPLAY_NAME);
         doThrow(IllegalArgumentException.class).when(usersUniqueEmailValidator).validate(command);
 
         testFixture.givenNoPriorActivity()
@@ -200,24 +200,24 @@ class UserAggregateTest {
     @Test
     void createUserForNewlyRegisteredOrganizationCommandEmits() {
         testFixture.givenNoPriorActivity()
-            .when(new CreateUserForNewlyRegisteredOrganizationCommand(USER_ID, ORGANIZATION_ID, USERNAME, USER_DISPLAY_NAME))
-            .expectEvents(new UserCreatedForNewlyRegisteredOrganizationEvent(USER_ID, ORGANIZATION_ID, USER_DISPLAY_NAME, USERNAME));
+            .when(new CreateUserForNewlyRegisteredOrganizationCommand(USER_ID, ORGANIZATION_ID, EMAIL_ADDRESS, USER_DISPLAY_NAME))
+            .expectEvents(new UserCreatedForNewlyRegisteredOrganizationEvent(USER_ID, ORGANIZATION_ID, USER_DISPLAY_NAME, EMAIL_ADDRESS));
     }
 
     @Test
     void createOrganizationUserCommandEmits() {
         testFixture.givenNoPriorActivity()
-            .when(new CreateOrganizationUserCommand(USER_ID, ORGANIZATION_ID, ADMIN_ID, USERNAME, USER_DISPLAY_NAME))
-            .expectEvents(new UserCreatedByAdminEvent(USER_ID, ORGANIZATION_ID, ADMIN_ID, USER_DISPLAY_NAME, USERNAME));
+            .when(new CreateOrganizationUserCommand(USER_ID, ORGANIZATION_ID, ADMIN_ID, EMAIL_ADDRESS, USER_DISPLAY_NAME))
+            .expectEvents(new UserCreatedByAdminEvent(USER_ID, ORGANIZATION_ID, ADMIN_ID, USER_DISPLAY_NAME, EMAIL_ADDRESS));
     }
 
     @Test
     void updateUserDetailsCommandEmits_WhenCommandAccepted() {
         testFixture.given(USER_CREATED_FOR_NEWLY_REGISTERED_ORGANIZATION_EVENT)
-            .when(new UpdateUserDetailsCommand(USER_ID, EMAIL_CHANGE,
+            .when(new UpdateUserDetailsCommand(USER_ID, EMAIL_ADDRESS_CHANGE,
                 DISPLAY_NAME_CHANGE, ADMIN_ID))
             .expectEvents(new UserDetailsUpdatedByAdminEvent(USER_ID, ORGANIZATION_ID, DISPLAY_NAME_CHANGE,
-                EMAIL_CHANGE, ADMIN_ID));
+                EMAIL_ADDRESS_CHANGE, ADMIN_ID));
     }
 
     @Test
@@ -260,7 +260,7 @@ class UserAggregateTest {
 
     @Test
     void rejectsUpdateUserDetailsCommand_WhenRequestingUserIdIsNull() {
-        var command = new UpdateUserDetailsCommand(USER_ID, EMAIL_CHANGE, DISPLAY_NAME_CHANGE, null);
+        var command = new UpdateUserDetailsCommand(USER_ID, EMAIL_ADDRESS_CHANGE, DISPLAY_NAME_CHANGE, null);
 
         testFixture.given(USER_CREATED_FOR_NEWLY_REGISTERED_ORGANIZATION_EVENT)
             .when(command)
@@ -289,7 +289,7 @@ class UserAggregateTest {
 
     @Test
     void rejectsUpdateUserDetailsCommand_WhenUniqueEmailValidatorFails() {
-        var command = new UpdateUserDetailsCommand(USER_ID, EMAIL_CHANGE, DISPLAY_NAME_CHANGE, ADMIN_ID);
+        var command = new UpdateUserDetailsCommand(USER_ID, EMAIL_ADDRESS_CHANGE, DISPLAY_NAME_CHANGE, ADMIN_ID);
         doThrow(IllegalStateException.class).when(usersUniqueEmailValidator).validate(command);
 
         testFixture.given(USER_CREATED_FOR_NEWLY_REGISTERED_ORGANIZATION_EVENT)
@@ -300,7 +300,7 @@ class UserAggregateTest {
 
     @Test
     void rejectsUpdateUserDetailsCommand_WhenUserStatusValidatorFails() {
-        var command = new UpdateUserDetailsCommand(USER_ID, EMAIL_CHANGE, DISPLAY_NAME_CHANGE, ADMIN_ID);
+        var command = new UpdateUserDetailsCommand(USER_ID, EMAIL_ADDRESS_CHANGE, DISPLAY_NAME_CHANGE, ADMIN_ID);
         doThrow(IllegalStateException.class).when(userStatusValidator).validate(command);
 
         testFixture.given(USER_CREATED_FOR_NEWLY_REGISTERED_ORGANIZATION_EVENT)

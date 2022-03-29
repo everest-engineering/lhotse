@@ -16,7 +16,7 @@ public interface UsersReadService extends ReadService<User> {
 
     boolean exists(UUID userId);
 
-    User getUserByUsername(String username);
+    User getUserByEmailAddress(String emailAddress);
 
     boolean hasUserWithEmail(String email);
 

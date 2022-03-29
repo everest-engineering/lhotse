@@ -20,7 +20,7 @@ import static org.mockito.Mockito.when;
 class AdminUserProvisioningTaskTest {
 
     private static final String PASSWORD = "admin-raw-password";
-    private static final User USER = new User(ADMIN_ID, ORGANIZATION_ID, "admin@example.com", "Admin", false);
+    private static final User USER = new User(ADMIN_ID, ORGANIZATION_ID, "Admin", "admin@example.com", false);
 
     private AdminUserProvisioningTask adminProvisionTask;
 
@@ -29,7 +29,7 @@ class AdminUserProvisioningTaskTest {
 
     @BeforeEach
     void setUp() {
-        adminProvisionTask = new AdminUserProvisioningTask(specialUserProvisioner, USER.getEmail(), PASSWORD);
+        adminProvisionTask = new AdminUserProvisioningTask(specialUserProvisioner, USER.getEmailAddress(), PASSWORD);
 
         when(specialUserProvisioner.provision(USER, PASSWORD, Set.of(ADMIN))).thenReturn(Map.of("userId", ADMIN_ID));
     }

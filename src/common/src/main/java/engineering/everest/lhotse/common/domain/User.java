@@ -15,20 +15,14 @@ import static java.util.UUID.fromString;
 public class User implements Identifiable {
 
     public static final UUID ADMIN_ID = fromString("00000000-0000-0000-0000-000000000000");
-    public static final UUID MONITORING_ID = fromString("11111111-1111-1111-1111-111111111111");
 
     private UUID id;
     private UUID organizationId;
-    private String username;
     private String displayName;
-    private String email;
+    private String emailAddress;
     private boolean disabled;
 
-    public User(UUID id, UUID organizationId, String username, String displayName) {
-        this(id, organizationId, username, displayName, false);
-    }
-
-    public User(UUID id, UUID organizationId, String username, String displayName, boolean disabled) {
-        this(id, organizationId, username, displayName, username, disabled);
+    public User(UUID id, UUID organizationId, String displayName, String emailAddress) {
+        this(id, organizationId, displayName, emailAddress, false);
     }
 }

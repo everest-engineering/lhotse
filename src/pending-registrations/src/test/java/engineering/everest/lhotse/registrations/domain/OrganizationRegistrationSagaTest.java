@@ -87,7 +87,7 @@ class OrganizationRegistrationSagaTest {
 
     @Test
     void userPromotedToOrganizationAdminEvent_WillEndSaga() {
-        var user = new User(REGISTERING_USER_ID, ORGANIZATION_ID, "test", "tester");
+        var user = new User(REGISTERING_USER_ID, ORGANIZATION_ID, "tester", "test");
         when(usersReadService.exists(REGISTERING_USER_ID)).thenReturn(true);
         when(organizationsReadService.exists(ORGANIZATION_ID)).thenReturn(true);
         when(usersReadService.getById(user.getId())).thenReturn(user);

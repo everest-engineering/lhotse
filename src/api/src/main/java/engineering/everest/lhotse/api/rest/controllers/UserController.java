@@ -60,7 +60,7 @@ public class UserController {
     @ApiOperation("Update currently authenticated user information")
     public void updateUser(@ApiIgnore Principal principal, @RequestBody UpdateUserRequest updateUserRequest) {
         var userId = UUID.fromString(principal.getName());
-        usersService.updateUser(userId, userId, updateUserRequest.getEmail(),
+        usersService.updateUser(userId, userId, updateUserRequest.getEmailAddress(),
             updateUserRequest.getDisplayName());
     }
 

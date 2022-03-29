@@ -44,7 +44,7 @@ public class UserUniqueEmailValidatorTest {
     }
 
     @Test
-    void validate_WillPass_WhenUserNameWithEmailDoesNotExist() {
+    void validate_WillPass_WhenUserWithEmailDoesNotExist() {
         when(usersReadService.hasUserWithEmail(NEW_USER_EMAIL)).thenReturn(false);
 
         usersUniqueEmailValidator.validate((UserUniqueEmailValidatableCommand) () -> NEW_USER_EMAIL);

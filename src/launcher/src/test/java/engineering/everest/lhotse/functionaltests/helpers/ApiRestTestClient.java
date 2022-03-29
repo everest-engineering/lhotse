@@ -32,8 +32,8 @@ import static org.springframework.web.reactive.function.BodyInserters.fromValue;
 public class ApiRestTestClient {
     @Value("${keycloak.auth-server-url}")
     private String keycloakServerAuthUrl;
-    @Value("${kc.server.admin-user}")
-    private String keycloakAdminUser;
+    @Value("${kc.server.admin-email}")
+    private String keycloakAdminEmailAddress;
     @Value("${kc.server.admin-password}")
     private String keycloakAdminPassword;
     @Value("${keycloak.realm}")
@@ -66,21 +66,21 @@ public class ApiRestTestClient {
         adminPassword = userDetails.getOrDefault("clientSecret", null).toString();
         assertNotNull(adminPassword);
 
-        login(keycloakAdminUser, keycloakAdminPassword);
+        login(keycloakAdminEmailAddress, keycloakAdminPassword);
     }
 
     public String getAccessToken() {
         return accessToken;
     }
 
-    public void login(String username, String password) {
+    public void login(String emailAddress, String password) {
         Keycloak keycloak = KeycloakBuilder.builder()
             .serverUrl(keycloakServerAuthUrl)
             .grantType(OAuth2Constants.PASSWORD)
             .realm(keycloakAdminRealm)
             .clientId(keycloakAdminClientId)
             .clientSecret(adminPassword)
-            .username(username)
+            .username(emailAddress)
             .password(password)
             .resteasyClient(new ResteasyClientBuilder()
                 .connectionPoolSize(keycloakServerConnectionPoolSize).build())

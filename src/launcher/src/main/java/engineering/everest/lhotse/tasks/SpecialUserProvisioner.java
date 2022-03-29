@@ -15,10 +15,10 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import static engineering.everest.lhotse.common.domain.User.ADMIN_ID;
 import static engineering.everest.lhotse.tasks.AdminUserProvisioningTask.ORGANIZATION_ID;
-import static java.util.UUID.fromString;
 
 @Component
 @Slf4j
@@ -40,10 +40,11 @@ public class SpecialUserProvisioner {
     }
 
     public Map<String, Object> provision(User user, String clearTextPassword, Set<Role> roles) {
-        var userDetails = keycloakSynchronizationService.setupKeycloakUser(user.getEmail(), user.getEmail(), !user.isDisabled(),
-            user.getOrganizationId(), roles, user.getDisplayName(), clearTextPassword, false);
+        var userDetails =
+            keycloakSynchronizationService.setupKeycloakUser(user.getEmailAddress(), !user.isDisabled(),
+                user.getOrganizationId(), roles, user.getDisplayName(), clearTextPassword, false);
 
-        var existingUser = usersRepository.findByEmailIgnoreCase(user.getEmail());
+        var existingUser = usersRepository.findByEmailAddressIgnoreCase(user.getEmailAddress());
         if (existingUser.isPresent()) {
             LOGGER.info("Skipping provisioning of '{}' account since it already exists", user.getDisplayName());
         } else {
@@ -51,12 +52,13 @@ public class SpecialUserProvisioner {
                 LOGGER.info("Provisioning admin organization");
                 organizationsRepository.save(new PersistableOrganization(ORGANIZATION_ID, "Admin Org",
                     new Address(null, null, null, null, null), null,
-                    user.getDisplayName(), null, user.getEmail(), false, Instant.now(clock)));
+                    user.getDisplayName(), null, user.getEmailAddress(), false, Instant.now(clock)));
             }
 
             LOGGER.info("Provisioning user '{}'", user.getDisplayName());
-            usersRepository.save(new PersistableUser(fromString(userDetails.getOrDefault("userId", ADMIN_ID).toString()),
-                user.getOrganizationId(), user.getEmail(), user.getDisplayName(), user.isDisabled(), Instant.now(clock)));
+            var userId = UUID.fromString(userDetails.getOrDefault("userId", ADMIN_ID).toString());
+            usersRepository.save(new PersistableUser(userId, user.getOrganizationId(), user.getDisplayName(),
+                user.getEmailAddress(), user.isDisabled(), Instant.now(clock)));
         }
         return userDetails;
     }
