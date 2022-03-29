@@ -11,6 +11,7 @@ import engineering.everest.lhotse.users.services.UsersReadService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,18 +20,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
-import java.util.Map;
+import java.time.Instant;
 
 import static engineering.everest.lhotse.tasks.AdminUserProvisioningTask.ORGANIZATION_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.DEFINED_PORT;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.web.reactive.function.BodyInserters.fromValue;
 
-@SpringBootTest(webEnvironment = DEFINED_PORT, classes = Launcher.class)
+@SpringBootTest(webEnvironment = RANDOM_PORT, classes = Launcher.class)
 @ActiveProfiles("standalone")
 class ApplicationFunctionalTests {
 
@@ -46,6 +47,11 @@ class ApplicationFunctionalTests {
     private UsersReadService usersReadService;
     @Autowired
     private KeycloakSynchronizationService keycloakSynchronizationService;
+
+    @BeforeEach
+    void setUp() {
+        apiRestTestClient.setWebTestClient(webTestClient);
+    }
 
     @Test
     void commandValidatingMessageHandlerInterceptorWillBeRegistered() {
@@ -68,7 +74,7 @@ class ApplicationFunctionalTests {
     static class ErrorResponse {
         private HttpStatus status;
         private String message;
-        private Map<String, String> timestamp;
+        private Instant timestamp;
     }
 
     @Test

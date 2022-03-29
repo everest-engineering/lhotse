@@ -46,14 +46,17 @@ public class ApiRestTestClient {
     @Autowired
     private KeycloakSynchronizationService keycloakSynchronizationService;
 
-    private final WebTestClient webTestClient;
     private final AdminUserProvisioningTask adminProvisionTask;
+    private WebTestClient webTestClient;
     private String accessToken;
     private String adminPassword;
 
-    public ApiRestTestClient(WebTestClient webTestClient, AdminUserProvisioningTask adminProvisionTask) {
-        this.webTestClient = webTestClient;
+    public ApiRestTestClient(AdminUserProvisioningTask adminProvisionTask) {
         this.adminProvisionTask = adminProvisionTask;
+    }
+
+    public void setWebTestClient(WebTestClient webTestClient) {
+        this.webTestClient = webTestClient;
     }
 
     public void createAdminUserAndLogin() {

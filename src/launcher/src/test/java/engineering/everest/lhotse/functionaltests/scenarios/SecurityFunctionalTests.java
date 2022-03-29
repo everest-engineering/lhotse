@@ -14,19 +14,19 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.DEFINED_PORT;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-@SpringBootTest(webEnvironment = DEFINED_PORT, classes = Launcher.class)
+@SpringBootTest(webEnvironment = RANDOM_PORT, classes = Launcher.class)
 @ActiveProfiles("standalone")
 class SecurityFunctionalTests {
 
     @Autowired
-    private WebTestClient webClient;
+    private WebTestClient webTestClient;
 
     @Test
     @WithAnonymousUser
     void applicationIsAbleToStart() {
-        webClient.get().uri("/api/version")
+        webTestClient.get().uri("/api/version")
             .exchange()
             .expectStatus().isOk()
             .expectBody(String.class);
@@ -36,7 +36,7 @@ class SecurityFunctionalTests {
     @EnabledIfSystemProperty(named = "org.gradle.project.buildDir", matches = ".+")
     @WithAnonymousUser
     void swaggerApiDocIsAccessible() throws IOException {
-        String apiContent = webClient.get().uri("/api/doc")
+        String apiContent = webTestClient.get().uri("/api/doc")
             .exchange()
             .expectStatus().isOk()
             .returnResult(String.class).getResponseBody().blockFirst();
@@ -50,7 +50,7 @@ class SecurityFunctionalTests {
 
     @Test
     void retrievingOrganizationListWillRedirectToLogin_WhenUserIsNotAuthenticated() {
-        webClient.get().uri("/admin/organizations")
+        webTestClient.get().uri("/admin/organizations")
             .exchange()
             .expectStatus().isFound();
     }

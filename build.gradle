@@ -45,7 +45,7 @@ subprojects {
     ext {
         axonCryptoShreddingVersion = '0.9.8'
         mediaVersion = '0.9.7'
-        storageVersion = '0.9.13'
+        storageVersion = '0.9.14'
 
         awsSdkVersion = '1.12.159'
         axonVersion = '4.5.6'

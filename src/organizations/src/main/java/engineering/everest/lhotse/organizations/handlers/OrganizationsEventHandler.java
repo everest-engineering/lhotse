@@ -21,7 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
-import java.util.UUID;
 
 @Slf4j
 @Component
@@ -59,7 +58,7 @@ public class OrganizationsEventHandler implements ReplayCompletionAware {
         persistableOrganization.setDisabled(true);
         organizationsRepository.save(persistableOrganization);
 
-        emitOrganizationQueryUpdate(event.getOrganizationId(), persistableOrganization);
+        emitOrganizationQueryUpdate(persistableOrganization);
     }
 
     @EventHandler
@@ -69,7 +68,7 @@ public class OrganizationsEventHandler implements ReplayCompletionAware {
         persistableOrganization.setDisabled(false);
         organizationsRepository.save(persistableOrganization);
 
-        emitOrganizationQueryUpdate(event.getOrganizationId(), persistableOrganization);
+        emitOrganizationQueryUpdate(persistableOrganization);
     }
 
     @EventHandler
@@ -80,7 +79,7 @@ public class OrganizationsEventHandler implements ReplayCompletionAware {
             .setOrganizationName(selectDesiredState(event.getOrganizationName(), persistableOrganization.getOrganizationName()));
         organizationsRepository.save(persistableOrganization);
 
-        emitOrganizationQueryUpdate(event.getOrganizationId(), persistableOrganization);
+        emitOrganizationQueryUpdate(persistableOrganization);
     }
 
     @EventHandler
@@ -93,7 +92,7 @@ public class OrganizationsEventHandler implements ReplayCompletionAware {
         persistableOrganization.setWebsiteUrl(selectDesiredState(event.getWebsiteUrl(), persistableOrganization.getWebsiteUrl()));
         organizationsRepository.save(persistableOrganization);
 
-        emitOrganizationQueryUpdate(event.getOrganizationId(), persistableOrganization);
+        emitOrganizationQueryUpdate(persistableOrganization);
     }
 
     @EventHandler
@@ -110,11 +109,11 @@ public class OrganizationsEventHandler implements ReplayCompletionAware {
         persistableOrganization.setAddress(address);
         organizationsRepository.save(persistableOrganization);
 
-        emitOrganizationQueryUpdate(event.getOrganizationId(), persistableOrganization);
+        emitOrganizationQueryUpdate(persistableOrganization);
     }
 
-    private void emitOrganizationQueryUpdate(UUID eventOrganisationId, PersistableOrganization persistableOrganization) {
-        queryUpdateEmitter.emit(OrganizationQuery.class, query -> eventOrganisationId.equals(query.getOrganizationId()),
+    private void emitOrganizationQueryUpdate(PersistableOrganization persistableOrganization) {
+        queryUpdateEmitter.emit(OrganizationQuery.class, query -> persistableOrganization.getId().equals(query.getOrganizationId()),
             persistableOrganization.toDomain());
     }
 

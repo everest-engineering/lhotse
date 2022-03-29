@@ -124,7 +124,7 @@ class OrganizationsControllerTest {
 
     @Test
     @WithMockKeycloakAuth(authorities = ROLE_ADMIN)
-    void getOrganizationUpdates_WillSubscribeCallerToFlux_WhenRequestingNewlineDelineatedJsonContent() throws Exception {
+    void getOrganizationUpdates_WillSubscribeCallerToFlux_WhenRequestingNewlineDelineatedJsonContent() {
         var subscriptionQueryResult = mock(SubscriptionQueryResult.class);
         when(queryGateway.subscriptionQuery(eq(new OrganizationQuery(organizationId)), eq(Organization.class), eq(Organization.class)))
             .thenReturn(subscriptionQueryResult);
