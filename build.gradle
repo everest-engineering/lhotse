@@ -1,14 +1,13 @@
 import com.github.jk1.license.render.*
 
 plugins {
-    id 'com.palantir.git-version' version '0.12.3'
+    id 'com.palantir.git-version' version '0.14.0'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
-    id 'org.springframework.boot' version '2.4.8' apply false
+    id 'org.springframework.boot' version '2.6.5' apply false
     id 'org.owasp.dependencycheck' version '6.5.1'
     id 'com.github.jk1.dependency-license-report' version '1.16'
     id 'org.sonarqube' version '3.3'
     id 'com.diffplug.spotless' version '6.0.0'
-    id 'jacoco'
 }
 
 version = gitVersion()
@@ -43,36 +42,36 @@ subprojects {
     }
 
     ext {
-        axonCryptoShreddingVersion = '0.9.8'
-        mediaVersion = '0.9.7'
-        storageVersion = '0.9.14'
+        axonCryptoShreddingVersion = '0.9.9'
+        mediaVersion = '0.9.8'
+        storageVersion = '0.9.15'
 
-        awsSdkVersion = '1.12.159'
-        axonVersion = '4.5.6'
+        awsSdkVersion = '1.12.186'
+        axonVersion = '4.5.8'
         bouncyCastleVersion = '1.70'
         commonsLangVersion = '3.12.0'
         commonsTextVersion = '1.9'
         commonsValidatorVersion = '1.7'
-        ehCacheVersion = '3.9.7'
+        ehCacheVersion = '3.10.0'
         javaXCacheVersion = '1.1.1'
         javaXPersistenceVersion = '2.2'
-        jsonHelperVersion = '20210307'
+        jsonHelperVersion = '20220320'
         keycloakVersion = '16.1.1'
         liquibaseVersion = '4.6.2'
         lombokVersion = '1.18.22'
-        microMeterPrometheusVersion = '1.8.1'
+        microMeterPrometheusVersion = '1.8.4'
         postgresDriverVersion = '42.3.1'
-        prometheusSimpleClientVersion = '0.14.1'
-        springBootVersion = '2.6.0'
+        prometheusSimpleClientVersion = '0.15.0'
+        springBootVersion = '2.6.5'
         swaggerVersion = '3.0.0'
         webfluxVersion = '2.5.5'
 
         h2Version = '1.4.200'
         hamcrestVersion = '2.2'
         junitVersion = '5.8.2'
-        mockitoVersion = '4.2.0'
-        slf4jTestVersion = '2.4.0'
-        undercouchVersion = '4.1.2'
+        mockitoVersion = '4.4.0'
+        slf4jTestVersion = '2.6.0'
+        undercouchVersion = '5.0.2'
     }
 
     java {

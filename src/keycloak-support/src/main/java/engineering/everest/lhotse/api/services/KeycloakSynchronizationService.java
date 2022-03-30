@@ -34,6 +34,7 @@ public class KeycloakSynchronizationService {
     private static final String AUTHORIZATION = "Authorization";
     private static final String NAME_KEY = "name";
     private static final String VALUE_KEY = "value";
+    private static final String USERNAME_KEY = "username";
 
     private final String keycloakServerAuthUrl;
     private final String keycloakAdminEmailAddress;
@@ -97,7 +98,7 @@ public class KeycloakSynchronizationService {
     }
 
     public UUID getUserId(String emailAddress) {
-        return fromString(new JSONArray(getUsers(Map.of("username", emailAddress)))
+        return fromString(new JSONArray(getUsers(Map.of(USERNAME_KEY, emailAddress)))
             .getJSONObject(0)
             .getString("id"));
     }
