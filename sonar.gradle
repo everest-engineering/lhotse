@@ -26,7 +26,7 @@ sonarqube {
         property 'sonar.projectKey', 'everest-engineering_lhotse'
         property 'sonar.organization', 'everestengineering'
         property 'sonar.host.url', 'https://sonarcloud.io'
-        property 'sonar.coverage.jacoco.xmlReportPaths', ["${project.rootDir}/build/reports/jacoco/testCodeCoverageReport/codeCoverageReport.xml"]
+        property 'sonar.coverage.jacoco.xmlReportPaths', ["${project.rootDir}/build/reports/jacoco/codeCoverageReport/codeCoverageReport.xml"]
         property 'sonar.test.exclusions', '**/*Test.java'
     }
 }
