@@ -67,11 +67,11 @@ subprojects {
         swaggerVersion = '3.0.0'
         webfluxVersion = '2.5.5'
 
+        gradleDockerComposeVersion = '0.15.2'
         hamcrestVersion = '2.2'
         junitVersion = '5.8.2'
         mockitoVersion = '4.4.0'
         slf4jTestVersion = '2.6.0'
-        undercouchVersion = '5.0.2'
         zonkyEmbeddedDbVersion = '2.1.1'
     }
 

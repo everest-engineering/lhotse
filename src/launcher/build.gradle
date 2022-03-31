@@ -6,8 +6,7 @@ buildscript {
 
 plugins {
     id 'org.springframework.boot'
-    id "com.dorongold.task-tree" version "2.1.0"
-    id "de.undercouch.download" version "${undercouchVersion}"
+    id "com.avast.gradle.docker-compose" version "${gradleDockerComposeVersion}"
 }
 
 apply plugin: 'jacoco'
@@ -30,6 +29,11 @@ test {
     testLogging {
         events "passed", "skipped", "failed"
     }
+}
+
+dockerCompose {
+    useComposeFiles.add("${rootProject.projectDir}/docker-compose.yml")
+    isRequiredBy(tasks.test)
 }
 
 dependencies {
@@ -74,87 +78,3 @@ dependencyManagement {
         mavenBom "org.keycloak.bom:keycloak-adapter-bom:${keycloakVersion}"
     }
 }
-
-task downloadKeycloak(type: Download) {
-    outputs.cacheIf { true }
-    src "https://github.com/keycloak/keycloak/releases/download/${keycloakVersion}/keycloak-${keycloakVersion}.zip"
-    dest new File('/tmp', "keycloak-${keycloakVersion}.zip") // Cache between clean builds
-    onlyIfModified true
-}
-
-task downloadAndUnzipKeycloak(dependsOn: downloadKeycloak, type: Copy) {
-    from zipTree(downloadKeycloak.dest)
-    into '/tmp'
-}
-
-task killKeycloak() {
-    doLast {
-        'pkill -f keycloak'.execute().waitFor()
-    }
-}
-
-task keycloakTestServer(dependsOn: downloadAndUnzipKeycloak) {
-    doFirst {
-        Properties properties = new Properties()
-        def file = project.rootProject.file('.env')
-        def port, testUser, testPass
-        if (file.exists()) {
-            properties.load(file.newDataInputStream())
-            port = properties.getProperty('KEYCLOAK_SERVER_PORT')
-            testUser = properties.getProperty('KEYCLOAK_USER')
-            testPass = properties.getProperty('KEYCLOAK_PASSWORD')
-        }
-
-        def keycloakDir = "/tmp/keycloak-${keycloakVersion}"
-        def waitTime = 5000L
-
-        def createUser = "$keycloakDir/bin/add-user-keycloak.sh -r master -u $testUser -p $testPass".execute()
-        createUser.consumeProcessOutput(System.out, System.err)
-        createUser.waitForOrKill(waitTime)
-
-        def keycloakProcess = "$keycloakDir/bin/standalone.sh -Djboss.http.port=$port".execute()
-        keycloakProcess.consumeProcessOutput(new FileOutputStream('/dev/null'), new FileOutputStream('/dev/null'))
-        sleep(waitTime)
-
-        def createRealm = "$keycloakDir/bin/kcadm.sh create realms -f $rootDir/keycloak/imports/realm-export.json --no-config --server http://localhost:$port/auth --realm master --user $testUser --password $testPass".execute()
-        createRealm.consumeProcessOutput(new FileOutputStream('/dev/null'), new FileOutputStream('/dev/null'))
-    }
-}
-
-task downloadAxonServer(type: Download) {
-    outputs.cacheIf { true }
-    src "https://download.axoniq.io/axonserver/AxonServer.zip"
-    dest new File('/tmp', "axonserver.zip") // Cache between clean builds
-    onlyIfModified true
-}
-
-task downloadAndUnzipAxonServer(dependsOn: downloadAxonServer, type: Copy) {
-    eachFile {
-        path -= ~/^.+?\//
-    }
-    from zipTree(downloadAxonServer.dest)
-    into '/tmp/axonserver'
-}
-
-task killAxonServer() {
-    doLast {
-        'pkill -f axonserver'.execute().waitFor()
-    }
-}
-
-task axonTestServer(dependsOn: downloadAndUnzipAxonServer) {
-    doFirst {
-        def axonServerDir = "/tmp/axonserver"
-        def waitTime = 5000L
-
-        def cleanupProcess = "rm -rf data".execute([] as String[], axonServerDir as File)
-        cleanupProcess.consumeProcessOutput(System.out, System.err)
-        cleanupProcess.waitForOrKill(waitTime)
-
-        def axonServerProcess = "java -jar axonserver.jar".execute([] as String[], axonServerDir as File)
-        axonServerProcess.consumeProcessOutput(new FileOutputStream('/dev/null'), new FileOutputStream('/dev/null'))
-    }
-}
-
-test.dependsOn([keycloakTestServer, axonTestServer])
-test.finalizedBy([killKeycloak, killAxonServer])
