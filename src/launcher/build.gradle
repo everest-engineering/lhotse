@@ -48,7 +48,6 @@ dependencies {
 //    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
     implementation 'org.keycloak:keycloak-spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation "com.h2database:h2:${h2Version}"
     implementation "org.axonframework:axon-micrometer:${axonVersion}"
     implementation "io.micrometer:micrometer-core:${microMeterPrometheusVersion}"
     implementation "io.micrometer:micrometer-registry-prometheus:${microMeterPrometheusVersion}"
@@ -67,6 +66,7 @@ dependencies {
     testImplementation "org.apache.commons:commons-text:${commonsTextVersion}"
     testImplementation "org.bouncycastle:bcpkix-jdk15on:${bouncyCastleVersion}"
     testImplementation "org.keycloak:keycloak-admin-client:${keycloakVersion}"
+    testImplementation "io.zonky.test:embedded-database-spring-test:${zonkyEmbeddedDbVersion}"
 }
 
 dependencyManagement {

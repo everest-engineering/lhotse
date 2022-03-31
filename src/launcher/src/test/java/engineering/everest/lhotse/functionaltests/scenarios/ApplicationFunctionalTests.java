@@ -8,6 +8,7 @@ import engineering.everest.lhotse.common.RetryWithExponentialBackoff;
 import engineering.everest.lhotse.functionaltests.helpers.ApiRestTestClient;
 import engineering.everest.lhotse.organizations.services.OrganizationsReadService;
 import engineering.everest.lhotse.users.services.UsersReadService;
+import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,13 +18,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.time.Instant;
 
 import static engineering.everest.lhotse.tasks.AdminUserProvisioningTask.ORGANIZATION_ID;
+import static io.zonky.test.db.AutoConfigureEmbeddedDatabase.DatabaseType.POSTGRES;
+import static io.zonky.test.db.AutoConfigureEmbeddedDatabase.RefreshMode.AFTER_EACH_TEST_METHOD;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
@@ -33,8 +34,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.web.reactive.function.BodyInserters.fromValue;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT, classes = Launcher.class)
-@ActiveProfiles("standalone")
-@DirtiesContext
+@AutoConfigureEmbeddedDatabase(refresh = AFTER_EACH_TEST_METHOD, type = POSTGRES)
 class ApplicationFunctionalTests {
 
     @Autowired

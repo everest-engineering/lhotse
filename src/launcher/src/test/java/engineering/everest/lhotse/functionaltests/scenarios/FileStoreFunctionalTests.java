@@ -6,6 +6,7 @@ import engineering.everest.starterkit.filestorage.FileService;
 import engineering.everest.starterkit.filestorage.persistence.FileMappingRepository;
 import engineering.everest.starterkit.filestorage.persistence.PersistableFileMapping;
 import engineering.everest.starterkit.media.thumbnails.ThumbnailService;
+import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,8 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ActiveProfiles;
 
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
@@ -23,13 +22,14 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.List;
 
+import static io.zonky.test.db.AutoConfigureEmbeddedDatabase.DatabaseType.POSTGRES;
+import static io.zonky.test.db.AutoConfigureEmbeddedDatabase.RefreshMode.AFTER_EACH_TEST_METHOD;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT, classes = Launcher.class)
-@ActiveProfiles("standalone")
+@AutoConfigureEmbeddedDatabase(refresh = AFTER_EACH_TEST_METHOD, type = POSTGRES)
 @Transactional
-@DirtiesContext
 @ExtendWith(MockitoExtension.class)
 class FileStoreFunctionalTests {
     private static final byte[] TEMPORARY_FILE_CONTENTS = "A temporary file for testing".getBytes();

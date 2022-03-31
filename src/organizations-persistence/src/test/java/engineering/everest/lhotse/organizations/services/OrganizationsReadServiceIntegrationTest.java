@@ -4,6 +4,7 @@ import engineering.everest.lhotse.organizations.Organization;
 import engineering.everest.lhotse.organizations.OrganizationAddress;
 import engineering.everest.lhotse.organizations.persistence.OrganizationsRepository;
 import engineering.everest.lhotse.users.services.UsersReadService;
+import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,6 +21,8 @@ import java.time.Instant;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
+import static io.zonky.test.db.AutoConfigureEmbeddedDatabase.DatabaseType.POSTGRES;
+import static io.zonky.test.db.AutoConfigureEmbeddedDatabase.RefreshMode.AFTER_EACH_TEST_METHOD;
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -28,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
+@AutoConfigureEmbeddedDatabase(refresh = AFTER_EACH_TEST_METHOD, type = POSTGRES)
 @DataJpaTest
 @ComponentScan(basePackages = "engineering.everest.lhotse.organizations")
 @EntityScan(basePackages = "engineering.everest.lhotse.organizations.persistence")

@@ -12,5 +12,6 @@ dependencies {
     testImplementation 'org.springframework:spring-test'
     testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
     testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
-    testRuntimeOnly "com.h2database:h2:${h2Version}"
+    testImplementation "org.postgresql:postgresql:${postgresDriverVersion}"
+    testImplementation "io.zonky.test:embedded-database-spring-test:${zonkyEmbeddedDbVersion}"
 }

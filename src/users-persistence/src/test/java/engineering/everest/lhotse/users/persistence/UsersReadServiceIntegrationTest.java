@@ -6,6 +6,7 @@ import engineering.everest.lhotse.users.services.UsersReadService;
 import engineering.everest.starterkit.filestorage.FileService;
 import engineering.everest.starterkit.filestorage.InputStreamOfKnownLength;
 import engineering.everest.starterkit.media.thumbnails.ThumbnailService;
+import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,6 +25,8 @@ import java.time.Instant;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
+import static io.zonky.test.db.AutoConfigureEmbeddedDatabase.DatabaseType.POSTGRES;
+import static io.zonky.test.db.AutoConfigureEmbeddedDatabase.RefreshMode.AFTER_EACH_TEST_METHOD;
 import static java.time.Instant.ofEpochSecond;
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
@@ -33,6 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
+@AutoConfigureEmbeddedDatabase(refresh = AFTER_EACH_TEST_METHOD, type = POSTGRES)
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
 @EnableAutoConfiguration
