@@ -2,6 +2,7 @@ package engineering.everest.lhotse.api.rest;
 
 import engineering.everest.lhotse.api.rest.responses.ApiErrorResponse;
 import engineering.everest.lhotse.i18n.exceptions.TranslatableException;
+import lombok.extern.slf4j.Slf4j;
 import org.axonframework.commandhandling.CommandExecutionException;
 import org.axonframework.modelling.command.AggregateNotFoundException;
 import org.springframework.http.HttpHeaders;
@@ -22,6 +23,7 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @ControllerAdvice
+@Slf4j
 public class ExceptionHandlingControllerAdvice extends ResponseEntityExceptionHandler {
 
     private final Clock clock;
@@ -33,6 +35,8 @@ public class ExceptionHandlingControllerAdvice extends ResponseEntityExceptionHa
 
     @ExceptionHandler
     public ResponseEntity<Object> handleExceptions(Exception exception) {
+        LOGGER.debug("Mapping exception:", exception);
+
         if (exception instanceof TranslatableException) {
             return handleTranslatableException((TranslatableException) exception);
         }

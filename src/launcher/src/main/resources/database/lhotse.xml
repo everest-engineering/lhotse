@@ -45,7 +45,7 @@
 
         <createTable tableName="sagaentry">
             <column name="sagaid" type="varchar(255)">
-                <constraints primaryKey="true" primaryKeyName="PK_sage_entry"/>
+                <constraints primaryKey="true" primaryKeyName="PK_saga_entry"/>
             </column>
             <column name="revision" type="varchar(255)"/>
             <column name="sagatype" type="varchar(255)"/>

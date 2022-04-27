@@ -23,12 +23,11 @@ import java.io.IOException;
 import java.util.List;
 
 import static io.zonky.test.db.AutoConfigureEmbeddedDatabase.DatabaseType.POSTGRES;
-import static io.zonky.test.db.AutoConfigureEmbeddedDatabase.RefreshMode.AFTER_EACH_TEST_METHOD;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT, classes = Launcher.class)
-@AutoConfigureEmbeddedDatabase(refresh = AFTER_EACH_TEST_METHOD, type = POSTGRES)
+@AutoConfigureEmbeddedDatabase(type = POSTGRES)
 @Transactional
 @ExtendWith(MockitoExtension.class)
 class FileStoreFunctionalTests {
