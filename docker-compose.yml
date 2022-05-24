@@ -32,7 +32,7 @@ services:
       KC_DB_DATABASE: keycloak
       KC_DB_USER: keycloak
       KC_DB_PASSWORD: keycloak
-      KC_HTTP_ENABLED: true
+      KC_HTTP_ENABLED: "true"
       KEYCLOAK_ADMIN: ${KEYCLOAK_USER}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_PASSWORD}
     entrypoint: [ "/opt/keycloak/bin/kc.sh", "start-dev", "--db=postgres", "--import-realm" ]
