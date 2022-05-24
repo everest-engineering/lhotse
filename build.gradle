@@ -57,7 +57,7 @@ subprojects {
         javaXCacheVersion = '1.1.1'
         javaXPersistenceVersion = '2.2'
         jsonHelperVersion = '20220320'
-        keycloakVersion = '16.1.1'
+        keycloakVersion = '18.0.0'
         liquibaseVersion = '4.9.0'
         lombokVersion = '1.18.22'
         microMeterPrometheusVersion = '1.8.4'

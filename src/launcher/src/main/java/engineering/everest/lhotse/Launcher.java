@@ -6,8 +6,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication(
     scanBasePackages = {
-        "engineering.everest.lhotse",
-        "engineering.everest.axon"
+        "engineering.everest.starterkit",
+        "engineering.everest.axon",
+        "engineering.everest.lhotse"
     })
 @EnableScheduling
 @SuppressWarnings("PMD.ClassWithOnlyPrivateConstructorsShouldBeFinal")
