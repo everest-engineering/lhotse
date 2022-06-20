@@ -60,7 +60,6 @@ dependencies {
     implementation "io.prometheus:simpleclient_pushgateway:${prometheusSimpleClientVersion}"
     implementation "org.liquibase:liquibase-core:${liquibaseVersion}"
     implementation "org.postgresql:postgresql:${postgresDriverVersion}"
-    implementation "com.amazonaws:aws-java-sdk-s3:${awsSdkVersion}"
 
     testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
     testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
@@ -68,7 +67,7 @@ dependencies {
     testImplementation "org.springframework.boot:spring-boot-starter-webflux"
     testImplementation "org.springframework.security:spring-security-test"
     testImplementation "org.apache.commons:commons-text:${commonsTextVersion}"
-    testImplementation "org.bouncycastle:bcpkix-jdk15on:${bouncyCastleVersion}"
+    testImplementation "org.bouncycastle:bcpkix-jdk18on:${bouncyCastleVersion}"
     testImplementation "org.keycloak:keycloak-admin-client:${keycloakVersion}"
     testImplementation "io.zonky.test:embedded-database-spring-test:${zonkyEmbeddedDbVersion}"
 }

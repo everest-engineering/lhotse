@@ -1,13 +1,13 @@
 import com.github.jk1.license.render.*
 
 plugins {
-    id 'com.palantir.git-version' version '0.14.0'
+    id 'com.palantir.git-version' version '0.15.0'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
-    id 'org.springframework.boot' version '2.6.5' apply false
+    id 'org.springframework.boot' version '2.7.0' apply false
     id 'org.owasp.dependencycheck' version '6.5.1'
     id 'com.github.jk1.dependency-license-report' version '1.16'
-    id 'org.sonarqube' version '3.3'
-    id 'com.diffplug.spotless' version '6.0.0'
+    id 'org.sonarqube' version '3.4.0.2513'
+    id 'com.diffplug.spotless' version '6.6.0'
     id 'jacoco'
 }
 
@@ -43,13 +43,12 @@ subprojects {
     }
 
     ext {
-        axonCryptoShreddingVersion = '0.9.11'
-        mediaVersion = '0.9.8'
-        storageVersion = '0.9.15'
+        axonCryptoShreddingVersion = '1.0.0'
+        mediaVersion = '0.9.10'
+        storageVersion = '1.0.0'
 
-        awsSdkVersion = '1.12.186'
-        axonVersion = '4.5.8'
-        bouncyCastleVersion = '1.70'
+        axonVersion = '4.5.10'
+        bouncyCastleVersion = '1.71'
         commonsLangVersion = '3.12.0'
         commonsTextVersion = '1.9'
         commonsValidatorVersion = '1.7'
@@ -59,18 +58,18 @@ subprojects {
         jsonHelperVersion = '20220320'
         keycloakVersion = '18.0.0'
         liquibaseVersion = '4.9.0'
-        lombokVersion = '1.18.22'
-        microMeterPrometheusVersion = '1.8.4'
-        postgresDriverVersion = '42.3.1'
+        lombokVersion = '1.18.24'
+        microMeterPrometheusVersion = '1.9.0'
+        postgresDriverVersion = '42.3.6'
         prometheusSimpleClientVersion = '0.15.0'
-        springBootVersion = '2.6.5'
+        springBootVersion = '2.7.0'
         swaggerVersion = '3.0.0'
-        webfluxVersion = '2.5.5'
+        webfluxVersion = '2.7.0'
 
         gradleDockerComposeVersion = '0.15.2'
         hamcrestVersion = '2.2'
         junitVersion = '5.8.2'
-        mockitoVersion = '4.4.0'
+        mockitoVersion = '4.6.1'
         slf4jTestVersion = '2.6.0'
         zonkyEmbeddedDbVersion = '2.1.1'
     }
@@ -96,14 +95,14 @@ subprojects {
     }
 
     checkstyle {
-        toolVersion = '9.2.1'
+        toolVersion = '10.3'
         maxWarnings = 0
         configFile = file("${project.rootDir}/build-config/checkstyle/checkstyle.xml")
         sourceSets = [sourceSets.main]
     }
 
     pmd {
-        toolVersion = '6.41.0'
+        toolVersion = '6.46.0'
         incrementalAnalysis = true
         ruleSets = []
         ruleSetFiles = files("${project.rootDir}/build-config/pmd/pmd-ruleset.xml")
