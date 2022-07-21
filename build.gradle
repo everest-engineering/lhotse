@@ -47,7 +47,7 @@ subprojects {
         mediaVersion = '0.9.10'
         storageVersion = '1.0.0'
 
-        axonVersion = '4.5.10'
+        axonVersion = '4.5.14'
         bouncyCastleVersion = '1.71'
         commonsLangVersion = '3.12.0'
         commonsTextVersion = '1.9'
@@ -56,7 +56,7 @@ subprojects {
         javaXCacheVersion = '1.1.1'
         javaXPersistenceVersion = '2.2'
         jsonHelperVersion = '20220320'
-        keycloakVersion = '18.0.0'
+        keycloakVersion = '18.0.2'
         liquibaseVersion = '4.9.0'
         lombokVersion = '1.18.24'
         microMeterPrometheusVersion = '1.9.0'
