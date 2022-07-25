@@ -8,8 +8,6 @@ import engineering.everest.lhotse.api.services.KeycloakSynchronizationService;
 import engineering.everest.lhotse.tasks.AdminUserProvisioningTask;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.keycloak.OAuth2Constants;
-import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,6 +21,8 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.keycloak.OAuth2Constants.CLIENT_CREDENTIALS;
+import static org.keycloak.OAuth2Constants.PASSWORD;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.web.reactive.function.BodyInserters.fromValue;
@@ -30,6 +30,10 @@ import static org.springframework.web.reactive.function.BodyInserters.fromValue;
 @Slf4j
 @Service
 public class ApiRestTestClient {
+
+    private static final String MONITORING_CLIENT_ID = "monitoring";
+    private static final String MONITORING_CLIENT_SECRET = "ac0n3x72";
+
     @Value("${keycloak.auth-server-url}")
     private String keycloakServerAuthUrl;
     @Value("${kc.server.admin-email}")
@@ -37,9 +41,9 @@ public class ApiRestTestClient {
     @Value("${kc.server.admin-password}")
     private String keycloakAdminPassword;
     @Value("${keycloak.realm}")
-    private String keycloakAdminRealm;
+    private String keycloakRealm;
     @Value("${keycloak.resource}")
-    private String keycloakAdminClientId;
+    private String keycloakClientId;
     @Value("${kc.server.connection.pool-size}")
     private int keycloakServerConnectionPoolSize;
 
@@ -69,16 +73,29 @@ public class ApiRestTestClient {
         login(keycloakAdminEmailAddress, keycloakAdminPassword);
     }
 
-    public String getAccessToken() {
-        return accessToken;
+    public void loginAsMonitoringUser() {
+        var keycloak = KeycloakBuilder.builder()
+            .serverUrl(keycloakServerAuthUrl)
+            .grantType(CLIENT_CREDENTIALS)
+            .realm(keycloakRealm)
+            .clientId(MONITORING_CLIENT_ID)
+            .clientSecret(MONITORING_CLIENT_SECRET)
+            .resteasyClient(new ResteasyClientBuilder()
+                .connectionPoolSize(keycloakServerConnectionPoolSize).build())
+            .build();
+
+        assertNotNull(keycloak);
+        var accessToken = keycloak.tokenManager().getAccessToken().getToken();
+        assertNotNull(accessToken);
+        this.accessToken = accessToken;
     }
 
     public void login(String emailAddress, String password) {
-        Keycloak keycloak = KeycloakBuilder.builder()
+        var keycloak = KeycloakBuilder.builder()
             .serverUrl(keycloakServerAuthUrl)
-            .grantType(OAuth2Constants.PASSWORD)
-            .realm(keycloakAdminRealm)
-            .clientId(keycloakAdminClientId)
+            .grantType(PASSWORD)
+            .realm(keycloakRealm)
+            .clientId(keycloakClientId)
             .clientSecret(adminPassword)
             .username(emailAddress)
             .password(password)
@@ -90,6 +107,10 @@ public class ApiRestTestClient {
         var accessToken = keycloak.tokenManager().getAccessToken().getToken();
         assertNotNull(accessToken);
         this.accessToken = accessToken;
+    }
+
+    public String getAccessToken() {
+        return accessToken;
     }
 
     public void logout() {

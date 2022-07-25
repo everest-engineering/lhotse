@@ -25,7 +25,6 @@ public class WebSecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
     public void configureGlobal(AuthenticationManagerBuilder auth) {
         KeycloakAuthenticationProvider keycloakAuthenticationProvider = keycloakAuthenticationProvider();
         keycloakAuthenticationProvider.setGrantedAuthoritiesMapper(new SimpleAuthorityMapper());
-
         auth.authenticationProvider(keycloakAuthenticationProvider);
     }
 
@@ -50,10 +49,7 @@ public class WebSecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
                 "/swagger-resources/**",
                 "/sso/login*")
             .permitAll()
-            .antMatchers(
-                "/api/**",
-                "/actuator/prometheus/**")
-            .authenticated()
+            .antMatchers("/api/**").authenticated()
             .antMatchers("/actuator/health/**", "/actuator/metrics/**", "/actuator/prometheus").hasAnyRole("ADMIN", "MONITORING")
             .antMatchers("/actuator/**", "/admin/**").hasRole("ADMIN")
             .anyRequest().permitAll()
