@@ -37,7 +37,7 @@ class SecurityFunctionalTests {
     @EnabledIfSystemProperty(named = "org.gradle.project.buildDir", matches = ".+")
     @WithAnonymousUser
     void swaggerApiDocIsAccessible() throws IOException {
-        String apiContent = webTestClient.get().uri("/api/doc")
+        var apiContent = webTestClient.get().uri("/api/doc")
             .exchange()
             .expectStatus().isOk()
             .returnResult(String.class).getResponseBody().blockFirst();

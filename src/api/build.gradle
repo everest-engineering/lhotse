@@ -8,7 +8,6 @@ dependencies {
     implementation project(':common')
     implementation project(':i18n-support')
     implementation project(':keycloak-support')
-    implementation project(':organizations-api')
     implementation project(':users-api')
 
     implementation "engineering.everest.starterkit:media:${mediaVersion}"

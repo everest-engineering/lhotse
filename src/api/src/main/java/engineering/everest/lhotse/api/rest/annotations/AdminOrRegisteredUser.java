@@ -13,5 +13,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
-@PreAuthorize("hasAnyRole('ADMIN', 'ORG_ADMIN')")
-public @interface AdminOrOrgAdmin {}
+@PreAuthorize("hasAnyRole('ADMIN', 'REGISTERED_USER')")
+public @interface AdminOrRegisteredUser {}

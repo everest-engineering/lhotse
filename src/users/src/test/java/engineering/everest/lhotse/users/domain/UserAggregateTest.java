@@ -2,10 +2,8 @@ package engineering.everest.lhotse.users.domain;
 
 import engineering.everest.lhotse.axon.command.AxonCommandExecutionExceptionFactory;
 import engineering.everest.lhotse.axon.command.validators.EmailAddressValidator;
-import engineering.everest.lhotse.axon.command.validators.OrganizationStatusValidator;
 import engineering.everest.lhotse.axon.command.validators.UserStatusValidator;
 import engineering.everest.lhotse.axon.command.validators.UsersUniqueEmailValidator;
-import engineering.everest.lhotse.common.domain.Role;
 import engineering.everest.lhotse.users.domain.commands.AddUserRolesCommand;
 import engineering.everest.lhotse.users.domain.commands.CreateOrganizationUserCommand;
 import engineering.everest.lhotse.users.domain.commands.CreateUserForNewlyRegisteredOrganizationCommand;
@@ -17,7 +15,6 @@ import engineering.everest.lhotse.users.domain.events.UserCreatedForNewlyRegiste
 import engineering.everest.lhotse.users.domain.events.UserDeletedAndForgottenEvent;
 import engineering.everest.lhotse.users.domain.events.UserDetailsUpdatedByAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserProfilePhotoUploadedEvent;
-import engineering.everest.lhotse.users.domain.events.UserRolesAddedByAdminEvent;
 import engineering.everest.lhotse.users.services.UsersReadService;
 import org.axonframework.commandhandling.CommandExecutionException;
 import org.axonframework.eventsourcing.AggregateDeletedException;
@@ -68,8 +65,6 @@ class UserAggregateTest {
     @Mock
     private UsersUniqueEmailValidator usersUniqueEmailValidator;
     @Mock
-    private OrganizationStatusValidator organizationStatusValidator;
-    @Mock
     private UserStatusValidator userStatusValidator;
 
     @BeforeEach
@@ -80,7 +75,6 @@ class UserAggregateTest {
             .registerCommandHandlerInterceptor(mockCommandValidatingMessageHandlerInterceptor(
                 emailAddressValidator,
                 usersUniqueEmailValidator,
-                organizationStatusValidator,
                 userStatusValidator))
             .registerInjectableResource(usersReadService)
             .registerInjectableResource(axonCommandExecutionExceptionFactory);
@@ -176,17 +170,6 @@ class UserAggregateTest {
     }
 
     @Test
-    void rejectsCreateOrganizationUserCommand_WhenOrganizationIdIsInvalid() {
-        var command = new CreateOrganizationUserCommand(USER_ID, ORGANIZATION_ID, ADMIN_ID, EMAIL_ADDRESS, USER_DISPLAY_NAME);
-        doThrow(IllegalStateException.class).when(organizationStatusValidator).validate(command);
-
-        testFixture.givenNoPriorActivity()
-            .when(command)
-            .expectNoEvents()
-            .expectException(IllegalStateException.class);
-    }
-
-    @Test
     void rejectsCreateOrganizationUserCommand_WhenUniqueUserEmailValidatorFails() {
         var command = new CreateOrganizationUserCommand(USER_ID, ORGANIZATION_ID, ADMIN_ID, EMAIL_ADDRESS, USER_DISPLAY_NAME);
         doThrow(IllegalArgumentException.class).when(usersUniqueEmailValidator).validate(command);
@@ -218,13 +201,6 @@ class UserAggregateTest {
                 DISPLAY_NAME_CHANGE, ADMIN_ID))
             .expectEvents(new UserDetailsUpdatedByAdminEvent(USER_ID, ORGANIZATION_ID, DISPLAY_NAME_CHANGE,
                 EMAIL_ADDRESS_CHANGE, ADMIN_ID));
-    }
-
-    @Test
-    void updateUserRolesCommandEmitsUserRoles_WhenCommandAccepted() {
-        testFixture.given(USER_CREATED_FOR_NEWLY_REGISTERED_ORGANIZATION_EVENT)
-            .when(new AddUserRolesCommand(USER_ID, Set.of(Role.ORG_USER, Role.ORG_ADMIN), ADMIN_ID))
-            .expectEvents(new UserRolesAddedByAdminEvent(USER_ID, Set.of(Role.ORG_USER, Role.ORG_ADMIN), ADMIN_ID));
     }
 
     @Test

@@ -35,7 +35,6 @@ class ReplayFunctionalTests {
     @BeforeEach
     void setUp() {
         apiRestTestClient.setWebTestClient(webTestClient);
-        apiRestTestClient.createAdminUserAndLogin();
     }
 
     @Test

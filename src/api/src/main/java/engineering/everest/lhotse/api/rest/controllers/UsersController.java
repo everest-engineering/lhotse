@@ -1,7 +1,7 @@
 package engineering.everest.lhotse.api.rest.controllers;
 
 import engineering.everest.lhotse.api.rest.annotations.AdminOnly;
-import engineering.everest.lhotse.api.rest.annotations.AdminOrOrgAdminOrOrgUser;
+import engineering.everest.lhotse.api.rest.annotations.AdminOrRegisteredUser;
 import engineering.everest.lhotse.api.rest.converters.DtoConverter;
 import engineering.everest.lhotse.api.rest.requests.DeleteAndForgetUserRequest;
 import engineering.everest.lhotse.api.rest.requests.UpdateUserRequest;
@@ -51,7 +51,7 @@ public class UsersController {
     @GetMapping
     @ApiOperation("Retrieves entire user list for all organisations")
     @AdminOnly
-    public List<UserResponse> getAllUsers() {
+    public List<UserResponse> getAllUsers(@ApiIgnore Principal principal) {
         return usersReadService.getUsers()
             .stream().map(dtoConverter::convert)
             .collect(toList());
@@ -68,14 +68,14 @@ public class UsersController {
 
     @GetMapping("/{userId}")
     @ApiOperation("Retrieves user details")
-    @AdminOrOrgAdminOrOrgUser
+    @AdminOrRegisteredUser
     public UserResponse getUser(@ApiIgnore Principal principal, @PathVariable UUID userId) {
         return dtoConverter.convert(usersReadService.getById(userId));
     }
 
     @PutMapping("/{userId}")
     @ApiOperation("Update an organization user's details")
-    @AdminOrOrgAdminOrOrgUser
+    @AdminOrRegisteredUser
     public void updateUser(@ApiIgnore Principal principal,
                            @PathVariable UUID userId,
                            @RequestBody @Valid UpdateUserRequest request) {

@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import static engineering.everest.lhotse.common.domain.Role.REGISTERED_USER;
 import static java.util.UUID.randomUUID;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -35,7 +36,7 @@ public class KeycloakSynchronizationSagaTest {
     private static final String DISPLAY_NAME_CHANGE = "display name change";
     private static final String EMAIL_ADDRESS = "tester@everest.engineering";
     private static final String EMAIL_ADDRESS_CHANGE = "email address change";
-    private static final Set<Role> roles = Set.of(Role.ORG_USER);
+    private static final Set<Role> roles = Set.of(REGISTERED_USER);
     private static final UserRolesAddedByAdminEvent USER_ROLES_ADDED_BY_ADMIN_EVENT =
         new UserRolesAddedByAdminEvent(REGISTERING_USER_ID, roles, REQUESTING_USER_ID);
     private static final UserRolesRemovedByAdminEvent USER_ROLES_REMOVED_BY_ADMIN_EVENT =

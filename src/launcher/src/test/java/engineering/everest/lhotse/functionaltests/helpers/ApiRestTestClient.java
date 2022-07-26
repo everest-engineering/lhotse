@@ -2,10 +2,8 @@ package engineering.everest.lhotse.functionaltests.helpers;
 
 import engineering.everest.lhotse.api.rest.requests.NewUserRequest;
 import engineering.everest.lhotse.api.rest.requests.UpdateUserRequest;
-import engineering.everest.lhotse.api.rest.responses.OrganizationResponse;
 import engineering.everest.lhotse.api.rest.responses.UserResponse;
 import engineering.everest.lhotse.api.services.KeycloakSynchronizationService;
-import engineering.everest.lhotse.tasks.AdminUserProvisioningTask;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.keycloak.admin.client.KeycloakBuilder;
@@ -50,30 +48,25 @@ public class ApiRestTestClient {
     @Autowired
     private KeycloakSynchronizationService keycloakSynchronizationService;
 
-    private final AdminUserProvisioningTask adminProvisionTask;
     private WebTestClient webTestClient;
     private String accessToken;
     private String adminPassword;
-
-    public ApiRestTestClient(AdminUserProvisioningTask adminProvisionTask) {
-        this.adminProvisionTask = adminProvisionTask;
-    }
 
     public void setWebTestClient(WebTestClient webTestClient) {
         this.webTestClient = webTestClient;
     }
 
-    public void createAdminUserAndLogin() {
-        var userDetails = adminProvisionTask.run();
-        assertNotNull(userDetails);
+    // public void createAdminUserAndLogin() {
+    // var userDetails = adminProvisionTask.run();
+    // assertNotNull(userDetails);
+    //
+    // adminPassword = userDetails.getOrDefault("clientSecret", null).toString();
+    // assertNotNull(adminPassword);
+    //
+    // login(keycloakAdminEmailAddress, keycloakAdminPassword);
+    // }
 
-        adminPassword = userDetails.getOrDefault("clientSecret", null).toString();
-        assertNotNull(adminPassword);
-
-        login(keycloakAdminEmailAddress, keycloakAdminPassword);
-    }
-
-    public void loginAsMonitoringUser() {
+    public void loginAsMonitoringClient() {
         var keycloak = KeycloakBuilder.builder()
             .serverUrl(keycloakServerAuthUrl)
             .grantType(CLIENT_CREDENTIALS)
@@ -131,14 +124,6 @@ public class ApiRestTestClient {
             .exchange()
             .expectStatus().isEqualTo(expectedHttpStatus)
             .returnResult(UserResponse.class).getResponseBody().buffer().blockFirst();
-    }
-
-    public List<OrganizationResponse> getAllOrganizations(HttpStatus expectedHttpStatus) {
-        return webTestClient.get().uri("/admin/organizations")
-            .header("Authorization", "Bearer " + accessToken)
-            .exchange()
-            .expectStatus().isEqualTo(expectedHttpStatus)
-            .returnResult(OrganizationResponse.class).getResponseBody().buffer().blockFirst();
     }
 
     public UUID createUser(UUID organizationId, NewUserRequest request, HttpStatus expectedHttpStatus) {

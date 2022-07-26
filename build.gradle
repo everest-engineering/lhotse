@@ -138,6 +138,8 @@ subprojects {
     tasks.withType(JavaCompile) {
         options.deprecation = true
     }
+
+    build.dependsOn(spotlessApply)
 }
 
 dependencyCheck {

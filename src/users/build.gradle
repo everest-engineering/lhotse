@@ -9,7 +9,6 @@ dependencies {
     implementation project(':command-validation-support')
     implementation project(':i18n-support')
     implementation project(':keycloak-support')
-    implementation project(':organizations-api')
     implementation project(':users-persistence')
 
     implementation "engineering.everest.axon:crypto-shredding-extension:${axonCryptoShreddingVersion}"
