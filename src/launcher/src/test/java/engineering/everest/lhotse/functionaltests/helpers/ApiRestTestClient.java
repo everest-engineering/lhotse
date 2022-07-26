@@ -2,17 +2,22 @@ package engineering.everest.lhotse.functionaltests.helpers;
 
 import engineering.everest.lhotse.api.rest.requests.NewUserRequest;
 import engineering.everest.lhotse.api.rest.requests.UpdateUserRequest;
+import engineering.everest.lhotse.api.rest.responses.PhotoResponse;
 import engineering.everest.lhotse.api.rest.responses.UserResponse;
 import engineering.everest.lhotse.api.services.KeycloakSynchronizationService;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.KeycloakBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.reactive.function.BodyInserters;
 
 import java.util.List;
 import java.util.Map;
@@ -20,9 +25,9 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.keycloak.OAuth2Constants.CLIENT_CREDENTIALS;
-import static org.keycloak.OAuth2Constants.PASSWORD;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
 import static org.springframework.web.reactive.function.BodyInserters.fromValue;
 
 @Slf4j
@@ -31,6 +36,7 @@ public class ApiRestTestClient {
 
     private static final String MONITORING_CLIENT_ID = "monitoring";
     private static final String MONITORING_CLIENT_SECRET = "ac0n3x72";
+    private static final String PASSWORD = "pa$$w0rd";
 
     @Value("${keycloak.auth-server-url}")
     private String keycloakServerAuthUrl;
@@ -50,21 +56,10 @@ public class ApiRestTestClient {
 
     private WebTestClient webTestClient;
     private String accessToken;
-    private String adminPassword;
 
     public void setWebTestClient(WebTestClient webTestClient) {
         this.webTestClient = webTestClient;
     }
-
-    // public void createAdminUserAndLogin() {
-    // var userDetails = adminProvisionTask.run();
-    // assertNotNull(userDetails);
-    //
-    // adminPassword = userDetails.getOrDefault("clientSecret", null).toString();
-    // assertNotNull(adminPassword);
-    //
-    // login(keycloakAdminEmailAddress, keycloakAdminPassword);
-    // }
 
     public void loginAsMonitoringClient() {
         var keycloak = KeycloakBuilder.builder()
@@ -86,10 +81,9 @@ public class ApiRestTestClient {
     public void login(String emailAddress, String password) {
         var keycloak = KeycloakBuilder.builder()
             .serverUrl(keycloakServerAuthUrl)
-            .grantType(PASSWORD)
+            .grantType(OAuth2Constants.PASSWORD)
             .realm(keycloakRealm)
             .clientId(keycloakClientId)
-            .clientSecret(adminPassword)
             .username(emailAddress)
             .password(password)
             .resteasyClient(new ResteasyClientBuilder()
@@ -163,5 +157,38 @@ public class ApiRestTestClient {
             .contentType(APPLICATION_JSON)
             .exchange()
             .expectStatus().isEqualTo(expectedHttpStatus);
+    }
+
+    public UUID createUserAndLogin(String displayName, String emailAddress) {
+        var userId = keycloakSynchronizationService.createNewKeycloakUser(displayName, emailAddress, PASSWORD);
+        login(emailAddress, PASSWORD);
+        return userId;
+    }
+
+    public UUID uploadPhoto(String photoFilename, HttpStatus expectedHttpStatus) {
+        var testPhotoResource = new ClassPathResource(photoFilename);
+        var multipartBodyBuilder = new MultipartBodyBuilder();
+        multipartBodyBuilder.part("file", testPhotoResource).contentType(MULTIPART_FORM_DATA);
+
+        return webTestClient.post().uri("/api/photos")
+            .header("Authorization", "Bearer " + accessToken)
+            .contentType(MULTIPART_FORM_DATA)
+            .body(BodyInserters.fromMultipartData(multipartBodyBuilder.build()))
+            .exchange()
+            .expectStatus().isEqualTo(expectedHttpStatus)
+            .returnResult(UUID.class)
+            .getResponseBody()
+            .blockFirst();
+    }
+
+    public List<PhotoResponse> getAllPhotosForCurrentUser(HttpStatus expectedHttpStatus) {
+        return webTestClient.get().uri("/api/photos")
+            .header("Authorization", "Bearer " + accessToken)
+            .accept(APPLICATION_JSON)
+            .exchange()
+            .expectStatus().isEqualTo(expectedHttpStatus)
+            .expectBodyList(PhotoResponse.class)
+            .returnResult()
+            .getResponseBody();
     }
 }

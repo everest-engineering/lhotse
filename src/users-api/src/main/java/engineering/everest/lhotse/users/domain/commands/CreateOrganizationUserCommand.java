@@ -1,7 +1,6 @@
 package engineering.everest.lhotse.users.domain.commands;
 
 import engineering.everest.lhotse.axon.command.validation.EmailAddressValidatableCommand;
-import engineering.everest.lhotse.axon.command.validation.OrganizationStatusValidatableCommand;
 import engineering.everest.lhotse.axon.command.validation.UserUniqueEmailValidatableCommand;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,8 +14,7 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateOrganizationUserCommand implements EmailAddressValidatableCommand, UserUniqueEmailValidatableCommand,
-    OrganizationStatusValidatableCommand {
+public class CreateOrganizationUserCommand implements EmailAddressValidatableCommand, UserUniqueEmailValidatableCommand {
 
     @TargetAggregateIdentifier
     private UUID userId;

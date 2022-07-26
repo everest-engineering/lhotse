@@ -3,9 +3,7 @@ package engineering.everest.lhotse.users.domain;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import engineering.everest.lhotse.api.services.KeycloakSynchronizationService;
 import engineering.everest.lhotse.common.RetryWithExponentialBackoff;
-import engineering.everest.lhotse.common.domain.UserAttribute;
 import engineering.everest.lhotse.users.domain.events.UserDeletedAndForgottenEvent;
-import engineering.everest.lhotse.users.domain.events.UserDetailsUpdatedByAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserRolesAddedByAdminEvent;
 import engineering.everest.lhotse.users.domain.events.UserRolesRemovedByAdminEvent;
 import engineering.everest.lhotse.users.services.UsersReadService;
@@ -15,7 +13,6 @@ import org.axonframework.modelling.saga.StartSaga;
 import org.axonframework.serialization.Revision;
 import org.axonframework.spring.stereotype.Saga;
 
-import java.util.Map;
 import java.util.concurrent.Callable;
 
 @Saga
@@ -39,24 +36,6 @@ public class KeycloakSynchronizationSaga {
     public void on(UserRolesRemovedByAdminEvent event,
                    KeycloakSynchronizationService keycloakSynchronizationService) {
         keycloakSynchronizationService.removeClientLevelUserRoles(event.getUserId(), event.getRoles());
-    }
-
-    @StartSaga
-    @EndSaga
-    @SagaEventHandler(associationProperty = USER_ID_PROPERTY)
-    public void on(UserDetailsUpdatedByAdminEvent event,
-                   UsersReadService usersReadService,
-                   KeycloakSynchronizationService keycloakSynchronizationService)
-        throws Exception {
-        var user = usersReadService.getById(event.getUserId());
-
-        waitForProjectionUpdate(() -> user.getEmailAddress().equals(event.getEmailChange())
-            || user.getDisplayName().equals(event.getDisplayNameChange()),
-            "user email address or display name projection update");
-
-        keycloakSynchronizationService.updateUserAttributes(event.getUserId(),
-            Map.of("attributes", new UserAttribute(user.getOrganizationId(), event.getDisplayNameChange()),
-                "email", event.getEmailChange()));
     }
 
     @StartSaga

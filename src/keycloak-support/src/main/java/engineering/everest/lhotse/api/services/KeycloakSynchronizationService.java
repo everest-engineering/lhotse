@@ -33,6 +33,7 @@ public class KeycloakSynchronizationService {
     private static final String BEARER = "Bearer ";
     private static final String AUTHORIZATION = "Authorization";
     private static final String NAME_KEY = "name";
+    private static final String TYPE_KEY = "type";
     private static final String VALUE_KEY = "value";
     private static final String USERNAME_KEY = "username";
 
@@ -47,27 +48,25 @@ public class KeycloakSynchronizationService {
                                           @Value("${kc.server.admin-email}") String keycloakAdminEmailAddress,
                                           @Value("${kc.server.admin-password}") String keycloakAdminPassword,
                                           @Value("${kc.server.master-realm.default.client-id}") String keycloakMasterRealmAdminClientId,
-                                          @Value("${keycloak.resource}") String keycloakDefaultRealmDefaultClientId,
+                                          @Value("${keycloak.resource}") String keycloakClientId,
                                           @Value("${kc.server.connection.pool-size}") int keycloakServerConnectionPoolSize) {
         this.keycloakServerAuthUrl = keycloakServerAuthUrl;
         this.keycloakAdminEmailAddress = keycloakAdminEmailAddress;
         this.keycloakAdminPassword = keycloakAdminPassword;
         this.keycloakMasterRealmAdminClientId = keycloakMasterRealmAdminClientId;
-        this.keycloakDefaultRealmDefaultClientId = keycloakDefaultRealmDefaultClientId;
+        this.keycloakDefaultRealmDefaultClientId = keycloakClientId;
         this.keycloakServerConnectionPoolSize = keycloakServerConnectionPoolSize;
     }
 
-    private Keycloak getAdminKeycloakClientInstance() {
-        return KeycloakBuilder.builder()
-            .serverUrl(keycloakServerAuthUrl)
-            .grantType(OAuth2Constants.PASSWORD)
-            .realm("master")
-            .clientId(keycloakMasterRealmAdminClientId)
-            .username(keycloakAdminEmailAddress)
-            .password(keycloakAdminPassword)
-            .resteasyClient(new ResteasyClientBuilder()
-                .connectionPoolSize(keycloakServerConnectionPoolSize).build())
-            .build();
+    public UUID createNewKeycloakUser(String displayName, String emailAddress, String password) {
+        createUser(Map.of(
+            "email", emailAddress,
+            "enabled", true,
+            "attributes", new UserAttribute(displayName),
+            "credentials",
+            List.of(Map.of(TYPE_KEY, "password", VALUE_KEY, password, "temporary", false))));
+
+        return getUserId(emailAddress);
     }
 
     public void updateUserAttributes(UUID userId, Map<String, Object> attributes) {
@@ -86,9 +85,9 @@ public class KeycloakSynchronizationService {
     }
 
     public UUID createNewKeycloakUserAndSendVerificationEmail(String emailAddress, UUID organizationId, String displayName) {
-        createNewKeycloakUser(Map.of("email", emailAddress,
+        createUser(Map.of("email", emailAddress,
             "enabled", true,
-            "attributes", new UserAttribute(organizationId, displayName),
+            "attributes", new UserAttribute(displayName),
             "credentials",
             List.of(Map.of("type", "password", VALUE_KEY, "changeme", "temporary", true))));
 
@@ -126,32 +125,6 @@ public class KeycloakSynchronizationService {
             .block();
     }
 
-    private void createNewKeycloakUser(Map<String, Object> userDetails) {
-        try {
-            webclient(constructUrlPath("/users", ""), POST)
-                .contentType(APPLICATION_JSON)
-                .accept(APPLICATION_JSON)
-                .bodyValue(userDetails)
-                .exchangeToMono(res -> Mono.just(res.statusCode()))
-                .block();
-        } catch (Exception e) {
-            LOGGER.error("Keycloak createUser error: " + e);
-        }
-    }
-
-    private void updateClientRoles(String path, HttpMethod method, Object data) {
-        webclient(path, method)
-            .contentType(APPLICATION_JSON)
-            .accept(APPLICATION_JSON)
-            .bodyValue(data)
-            .exchangeToMono(res -> Mono.just(res.statusCode()))
-            .block();
-    }
-
-    private String getClientRolesPath(UUID userId, UUID clientId) {
-        return constructUrlPath("/users/%s/role-mappings/clients/%s", userId, clientId);
-    }
-
     public void addClientLevelUserRoles(UUID userId, Set<Role> roles) {
         var clientId = getClientIdFromClientDetails();
         var availableClientRoles = new JSONArray(getClientRoles("available", userId, clientId));
@@ -174,19 +147,51 @@ public class KeycloakSynchronizationService {
         }
     }
 
-    public String getClientSecret(UUID clientId) {
-        return webclient(constructUrlPath("/clients/%s/client-secret", clientId), GET)
-            .retrieve()
-            .bodyToMono(String.class)
-            .block();
-    }
-
     public void sendUserVerificationEmail(UUID userId) {
         webclient(constructUrlPath("/users/%s/send-verify-email", userId), PUT)
             .contentType(APPLICATION_JSON)
             .accept(APPLICATION_JSON)
             .exchangeToMono(res -> Mono.just(res.statusCode()))
             .block();
+    }
+
+    private void createUser(Map<String, Object> userDetails) {
+        try {
+            webclient(constructUrlPath("/users", ""), POST)
+                .contentType(APPLICATION_JSON)
+                .accept(APPLICATION_JSON)
+                .bodyValue(userDetails)
+                .exchangeToMono(res -> Mono.just(res.statusCode()))
+                .block();
+        } catch (Exception e) {
+            LOGGER.error("Keycloak createUser error: " + e);
+        }
+    }
+
+    private Keycloak getAdminKeycloakClientInstance() {
+        return KeycloakBuilder.builder()
+            .serverUrl(keycloakServerAuthUrl)
+            .grantType(OAuth2Constants.PASSWORD)
+            .realm("master")
+            .clientId(keycloakMasterRealmAdminClientId)
+            .username(keycloakAdminEmailAddress)
+            .password(keycloakAdminPassword)
+            .resteasyClient(new ResteasyClientBuilder()
+                .connectionPoolSize(keycloakServerConnectionPoolSize).build())
+            .build();
+    }
+
+    private void updateClientRoles(String path, HttpMethod method, Object data) {
+        webclient(path, method)
+            .contentType(APPLICATION_JSON)
+            .accept(APPLICATION_JSON)
+            .bodyValue(data)
+            .exchangeToMono(res -> Mono.just(res.statusCode()))
+            .block();
+    }
+
+    private String getClientRolesPath(UUID userId, UUID clientId) {
+        return constructUrlPath("/users/%s/role-mappings/clients/%s", userId, clientId);
     }
 
     private StringBuilder getFilters(Map<String, Object> queryFilters) {
@@ -200,30 +205,6 @@ public class KeycloakSynchronizationService {
             }
         }
         return filters;
-    }
-
-    public Map<String, Object> setupKeycloakUser(String emailAddress,
-                                                 boolean enabled,
-                                                 UUID organizationId,
-                                                 Set<Role> roles,
-                                                 String displayName,
-                                                 String password,
-                                                 boolean passwordTemporary) {
-        createNewKeycloakUser(Map.of("email", emailAddress,
-            "enabled", enabled,
-            "attributes", new UserAttribute(organizationId, displayName),
-            "credentials",
-            List.of(Map.of("type", "password", VALUE_KEY, password, "temporary", passwordTemporary))));
-
-        var userId = getUserId(emailAddress);
-        sendUserVerificationEmail(userId);
-        addClientLevelUserRoles(userId, roles);
-
-        var secret = getClientSecret(getClientIdFromClientDetails());
-        return Map.of("userId", userId,
-            "clientSecret", secret.contains(VALUE_KEY)
-                ? new JSONObject(secret).getString(VALUE_KEY)
-                : "");
     }
 
     private UUID getClientIdFromClientDetails() {

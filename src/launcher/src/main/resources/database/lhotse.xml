@@ -117,26 +117,6 @@
 
     <!-- Projections -->
     <changeSet id="3" author="Lhotse starter kit">
-        <createTable tableName="organizations">
-            <column name="id" type="uuid">
-                <constraints primaryKey="true" primaryKeyName="PK_organizations"/>
-            </column>
-            <column name="city" type="varchar(255)"/>
-            <column name="country" type="varchar(255)"/>
-            <column name="postalcode" type="varchar(255)"/>
-            <column name="state" type="varchar(255)"/>
-            <column name="street" type="varchar(255)"/>
-            <column name="contactname" type="varchar(255)"/>
-            <column name="disabled" type="boolean" defaultValueBoolean="false">
-                <constraints nullable="false"/>
-            </column>
-            <column name="emailaddress" type="varchar(255)"/>
-            <column name="organizationname" type="varchar(255)"/>
-            <column name="phonenumber" type="varchar(255)"/>
-            <column name="registeredon" type="timestamp"/>
-            <column name="websiteurl" type="varchar(255)"/>
-        </createTable>
-
         <createTable tableName="users">
             <column name="id" type="uuid">
                 <constraints primaryKey="true" primaryKeyName="PK_users"/>
@@ -146,7 +126,6 @@
                 <constraints nullable="false"/>
             </column>
             <column name="displayname" type="varchar(255)"/>
-            <column name="organizationid" type="uuid"/>
             <column name="profilephotofileid" type="uuid"/>
             <column name="emailaddress" type="varchar(255)">
                 <constraints unique="true" uniqueConstraintName="UNIQUE_users_email" nullable="false"/>
@@ -155,8 +134,15 @@
         <createIndex tableName="users" indexName="INDEX_users_email_address">
             <column name="emailaddress"/>
         </createIndex>
-        <createIndex tableName="users" indexName="INDEX_users_organization_id">
-            <column name="organizationid"/>
-        </createIndex>
+
+        <createTable tableName="photos">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" primaryKeyName="PK_photos"/>
+            </column>
+            <column name="owneruserid" type="uuid"/>
+            <column name="backingfileid" type="uuid"/>
+            <column name="filename" type="varchar(255)"/>
+            <column name="uploadtimestamp" type="timestamp"/>
+        </createTable>
     </changeSet>
 </databaseChangeLog>
