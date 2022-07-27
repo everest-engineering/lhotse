@@ -45,7 +45,7 @@ subprojects {
     ext {
         axonCryptoShreddingVersion = '1.0.0'
         mediaVersion = '0.9.10'
-        storageVersion = '1.0.0'
+        storageVersion = '1.0.1'
 
         axonVersion = '4.5.14'
         bouncyCastleVersion = '1.71'

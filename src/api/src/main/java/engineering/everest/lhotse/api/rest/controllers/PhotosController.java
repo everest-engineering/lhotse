@@ -12,13 +12,16 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.SortDefault;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import springfox.documentation.annotations.ApiIgnore;
 
 import java.io.IOException;
@@ -30,6 +33,8 @@ import static java.util.stream.Collectors.toList;
 import static org.springframework.data.domain.Sort.Direction.DESC;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM;
+import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
 
 @RestController
 @RequestMapping("/api/photos")
@@ -66,11 +71,42 @@ public class PhotosController {
     @ResponseStatus(OK)
     @ApiOperation("Retrieves a page of photos accessible to the authenticated user")
     @AdminOrRegisteredUser
-    public List<PhotoResponse> getAllPhotos(@ApiIgnore Principal principal,
-                                            @SortDefault(sort = "uploadTimestamp", direction = DESC)
-                                            @PageableDefault(20) Pageable pageable) {
-        return photosReadService.getAllPhotosForUser(UUID.fromString(principal.getName()), pageable).stream()
+    public List<PhotoResponse> listPhotosForUser(@ApiIgnore Principal principal,
+                                                 @SortDefault(sort = "uploadTimestamp", direction = DESC)
+                                                 @PageableDefault(20) Pageable pageable) {
+        return photosReadService.getAllPhotos(UUID.fromString(principal.getName()), pageable).stream()
             .map(dtoConverter::convert)
             .collect(toList());
+    }
+
+    @GetMapping("/{photoId}")
+    @AdminOrRegisteredUser
+    public ResponseEntity<StreamingResponseBody> streamPhoto(@ApiIgnore Principal principal,
+                                                             @PathVariable UUID photoId) {
+        StreamingResponseBody streamingResponse = outputStream -> {
+            try (var inputStream = photosReadService.streamPhoto(UUID.fromString(principal.getName()), photoId)) {
+                inputStream.transferTo(outputStream);
+            }
+        };
+        return ResponseEntity.ok()
+            .contentType(APPLICATION_OCTET_STREAM)
+            .body(streamingResponse);
+    }
+
+    @GetMapping(value = "/{photoId}/thumbnail", produces = APPLICATION_OCTET_STREAM_VALUE)
+    @AdminOrRegisteredUser
+    public ResponseEntity<StreamingResponseBody> streamPhotoThumbnail(@ApiIgnore Principal principal,
+                                                                      @PathVariable UUID photoId,
+                                                                      @RequestParam int width,
+                                                                      @RequestParam int height) {
+        StreamingResponseBody streamingResponse = outputStream -> {
+            try (var inputStream = photosReadService.streamPhotoThumbnail(
+                UUID.fromString(principal.getName()), photoId, width, height)) {
+                inputStream.transferTo(outputStream);
+            }
+        };
+        return ResponseEntity.ok()
+            .contentType(APPLICATION_OCTET_STREAM)
+            .body(streamingResponse);
     }
 }

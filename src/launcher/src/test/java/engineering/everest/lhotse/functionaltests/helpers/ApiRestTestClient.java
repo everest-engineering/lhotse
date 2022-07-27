@@ -191,4 +191,15 @@ public class ApiRestTestClient {
             .returnResult()
             .getResponseBody();
     }
+
+    public byte[] downloadPhoto(UUID photoId, HttpStatus expectedHttpStatus) {
+        return webTestClient.get().uri("/api/photos/{photoId}", photoId)
+            .header("Authorization", "Bearer " + accessToken)
+            .accept(APPLICATION_JSON)
+            .exchange()
+            .expectStatus().isEqualTo(expectedHttpStatus)
+            .expectBody(new ParameterizedTypeReference<byte[]>() {})
+            .returnResult()
+            .getResponseBody();
+    }
 }

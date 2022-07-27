@@ -3,6 +3,7 @@ apply plugin: 'jacoco'
 dependencies {
     api project(':photos-api')
 
+    implementation "engineering.everest.starterkit:media:${mediaVersion}"
     implementation "engineering.everest.starterkit:storage:${storageVersion}"
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation "org.liquibase:liquibase-core:${liquibaseVersion}"

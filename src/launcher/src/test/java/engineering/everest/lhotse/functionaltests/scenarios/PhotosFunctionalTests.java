@@ -9,7 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
+import java.io.IOException;
+
 import static io.zonky.test.db.AutoConfigureEmbeddedDatabase.DatabaseType.POSTGRES;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
@@ -42,5 +45,16 @@ public class PhotosFunctionalTests {
 
         apiRestTestClient.createUserAndLogin("Not Alice", "not-alice@example.com");
         assertTrue(apiRestTestClient.getAllPhotosForCurrentUser(OK).isEmpty());
+    }
+
+    @Test
+    void uploadedPhotosCanBeRetrieved() throws IOException {
+        apiRestTestClient.createUserAndLogin("Bob", "bob@example.com");
+        var photoId = apiRestTestClient.uploadPhoto("test_photo_1.png", CREATED);
+
+        try (var resourceAsStream = this.getClass().getResourceAsStream("/test_photo_1.png")) {
+            var expected = resourceAsStream.readAllBytes();
+            assertArrayEquals(expected, apiRestTestClient.downloadPhoto(photoId, OK));
+        }
     }
 }
