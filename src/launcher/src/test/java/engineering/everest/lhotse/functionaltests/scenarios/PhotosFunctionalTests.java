@@ -1,7 +1,9 @@
 package engineering.everest.lhotse.functionaltests.scenarios;
 
 import engineering.everest.lhotse.Launcher;
+import engineering.everest.lhotse.common.RetryWithExponentialBackoff;
 import engineering.everest.lhotse.functionaltests.helpers.ApiRestTestClient;
+import engineering.everest.lhotse.photos.services.PhotosReadService;
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,12 +12,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.io.IOException;
+import java.time.Duration;
 
 import static io.zonky.test.db.AutoConfigureEmbeddedDatabase.DatabaseType.POSTGRES;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+import static org.springframework.data.domain.Pageable.unpaged;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 
@@ -27,6 +31,8 @@ public class PhotosFunctionalTests {
     private WebTestClient webTestClient;
     @Autowired
     private ApiRestTestClient apiRestTestClient;
+    @Autowired
+    private PhotosReadService photosReadService;
 
     @BeforeEach
     void setUp() {
@@ -56,5 +62,23 @@ public class PhotosFunctionalTests {
             var expected = resourceAsStream.readAllBytes();
             assertArrayEquals(expected, apiRestTestClient.downloadPhoto(photoId, OK));
         }
+    }
+
+    @Test
+    void deletingUserAlsoDeletesTheirPhotos() throws Exception {
+        var craigUserId = apiRestTestClient.createUserAndLogin("Craig", "craig@example.com");
+        apiRestTestClient.uploadPhoto("test_photo_1.png", CREATED);
+        apiRestTestClient.uploadPhoto("test_photo_2.png", CREATED);
+
+        apiRestTestClient.createAdminUserAndLogin("User Deleting Admin", "user-deleting-admin@example.com");
+        apiRestTestClient.deleteAndForgetUser(craigUserId, "GDPR request", OK);
+
+        RetryWithExponentialBackoff.withMaxDuration(Duration.ofSeconds(10)).waitOrThrow(
+            () -> photosReadService.getAllPhotos(craigUserId, unpaged()).isEmpty(), "photo deletion projection");
+
+        // User not automatically deleted in Keycloak so we can still authenticate (as of now). This test requires an admin API for
+        // retrieving photos for specific user. TODO.
+        apiRestTestClient.login("craig@example.com");
+        assertTrue(apiRestTestClient.getAllPhotosForCurrentUser(OK).isEmpty());
     }
 }

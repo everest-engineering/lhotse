@@ -71,4 +71,9 @@ public class RetryWithExponentialBackoff {
         return new RetryWithExponentialBackoff(Duration.ofMillis(200), 2L, Duration.ofMinutes(1),
             sleepDuration -> MILLISECONDS.sleep(sleepDuration.toMillis()));
     }
+
+    public static RetryWithExponentialBackoff withMaxDuration(Duration maxDuration) {
+        return new RetryWithExponentialBackoff(Duration.ofMillis(200), 2L, maxDuration,
+            sleepDuration -> MILLISECONDS.sleep(sleepDuration.toMillis()));
+    }
 }

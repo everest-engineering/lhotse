@@ -1,6 +1,7 @@
 package engineering.everest.lhotse.functionaltests.helpers;
 
 import engineering.everest.lhotse.api.rest.requests.CreateCompetitionRequest;
+import engineering.everest.lhotse.api.rest.requests.DeleteAndForgetUserRequest;
 import engineering.everest.lhotse.api.rest.responses.PhotoResponse;
 import engineering.everest.lhotse.api.services.KeycloakClient;
 import lombok.extern.slf4j.Slf4j;
@@ -103,6 +104,15 @@ public class ApiRestTestClient {
         var userId = keycloakClient.createNewAdminKeycloakUser(displayName, emailAddress, PASSWORD);
         login(emailAddress);
         return userId;
+    }
+
+    public void deleteAndForgetUser(UUID userIdToDelete, String reason, HttpStatus expectedHttpStatus) {
+        webTestClient.post().uri("/api/users/{userId}/forget", userIdToDelete)
+            .header("Authorization", "Bearer " + accessToken)
+            .contentType(APPLICATION_JSON)
+            .body(BodyInserters.fromValue(new DeleteAndForgetUserRequest(reason)))
+            .exchange()
+            .expectStatus().isEqualTo(expectedHttpStatus);
     }
 
     public String getAccessToken() {

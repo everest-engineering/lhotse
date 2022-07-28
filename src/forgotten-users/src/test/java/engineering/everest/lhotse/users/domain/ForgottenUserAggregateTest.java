@@ -18,9 +18,10 @@ class ForgottenUserAggregateTest {
 
     private static final UUID USER_ID = randomUUID();
     private static final UUID ADMIN_ID = randomUUID();
+    private static final String REQUEST_REASON = "It's the right thing to do";
 
     private static final UserDeletedAndForgottenEvent USER_DELETED_AND_FORGOTTEN_EVENT =
-        new UserDeletedAndForgottenEvent(USER_ID, ADMIN_ID, "It's the right thing to do");
+        new UserDeletedAndForgottenEvent(USER_ID, ADMIN_ID, REQUEST_REASON);
 
     private FixtureConfiguration<ForgottenUserAggregate> testFixture;
 
@@ -32,7 +33,7 @@ class ForgottenUserAggregateTest {
     @Test
     void emitsUserDeletedAndForgottenEvent_WhenUserIsDeletedAndForgotten() {
         testFixture.givenNoPriorActivity()
-            .when(new DeleteAndForgetUserCommand(USER_ID, ADMIN_ID, "It's the right thing to do"))
+            .when(new DeleteAndForgetUserCommand(USER_ID, ADMIN_ID, REQUEST_REASON))
             .expectEvents(USER_DELETED_AND_FORGOTTEN_EVENT);
     }
 }

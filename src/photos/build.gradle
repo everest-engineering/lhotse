@@ -11,6 +11,7 @@ dependencies {
     implementation project(':photos-persistence')
 
     implementation "engineering.everest.axon:crypto-shredding-extension:${axonCryptoShreddingVersion}"
+    implementation "engineering.everest.starterkit:storage:${storageVersion}"
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
     testImplementation project(':axon-support').sourceSets.test.output

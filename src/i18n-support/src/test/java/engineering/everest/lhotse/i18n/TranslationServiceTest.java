@@ -26,27 +26,27 @@ class TranslationServiceTest {
 
     @Test
     void willTranslateMessagesWithNoArguments_WhenLocaleUsesDefaultTranslation() {
-        assertEquals("Email address already exists",
-            TranslationService.getInstance().translate(new Locale("smurfs"), "EMAIL_ADDRESS_ALREADY_EXISTS"));
+        assertEquals("Malformed email address",
+            TranslationService.getInstance().translate(new Locale("smurfs"), "EMAIL_ADDRESS_MALFORMED"));
     }
 
     @Test
     void willTranslateMessagesWithNoArguments_WhenLocaleUsesNonDefaultTranslation() {
-        assertEquals("Diese E-Mail Adresse ist bereits vergeben",
-            TranslationService.getInstance().translate(GERMANY, "EMAIL_ADDRESS_ALREADY_EXISTS"));
+        assertEquals("Fehlerhafte E-Mail-Adresse",
+            TranslationService.getInstance().translate(GERMANY, "EMAIL_ADDRESS_MALFORMED"));
     }
 
     @Test
-    void willTranslateMessagesWithSingleArgument_WhenLocaleUsesDefaultTranslation() {
+    void willTranslateMessagesWithArguments_WhenLocaleUsesDefaultTranslation() {
         var australianEnglish = new Locale("en", "AU");
-        assertEquals("Organization org-name is already enabled",
-            TranslationService.getInstance().translate(australianEnglish, "ORGANIZATION_ALREADY_ENABLED", "org-name"));
+        assertEquals("File file-id does not exist",
+            TranslationService.getInstance().translate(australianEnglish, "FILE_DOES_NOT_EXIST", "file-id"));
     }
 
     @Test
-    void willTranslateMessagesWithSingleArgument_WhenLocaleUsesNonDefaultTranslation() {
-        assertEquals("Organisation org-name ist bereits aktiviert",
-            TranslationService.getInstance().translate(GERMANY, "ORGANIZATION_ALREADY_ENABLED", "org-name"));
+    void willTranslateMessagesWithArguments_WhenLocaleUsesNonDefaultTranslation() {
+        assertEquals("Datei file-id existiert nicht",
+            TranslationService.getInstance().translate(GERMANY, "FILE_DOES_NOT_EXIST", "file-id"));
     }
 
     @Test

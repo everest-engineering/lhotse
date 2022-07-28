@@ -2,7 +2,9 @@ package engineering.everest.lhotse.photos.domain;
 
 import engineering.everest.lhotse.axon.command.AxonCommandExecutionExceptionFactory;
 import engineering.everest.lhotse.axon.command.validators.FileStatusValidator;
+import engineering.everest.lhotse.photos.domain.commands.DeletePhotoForDeletedUserCommand;
 import engineering.everest.lhotse.photos.domain.commands.RegisterUploadedPhotoCommand;
+import engineering.everest.lhotse.photos.domain.events.PhotoDeletedAsPartOfUserDeletionEvent;
 import engineering.everest.lhotse.photos.domain.events.PhotoUploadedEvent;
 import org.axonframework.spring.stereotype.Aggregate;
 import org.axonframework.test.aggregate.AggregateTestFixture;
@@ -28,6 +30,8 @@ class PhotoAggregateTest {
     private static final UUID USER_ID = randomUUID();
     private static final UUID PHOTO_BACKING_FILE_ID = randomUUID();
     private static final String PHOTO_FILENAME = "holiday photo.png";
+    private static final PhotoUploadedEvent PHOTO_UPLOADED_EVENT =
+        new PhotoUploadedEvent(PHOTO_ID, USER_ID, PHOTO_BACKING_FILE_ID, PHOTO_FILENAME);
 
     private FixtureConfiguration<PhotoAggregate> testFixture;
     private AxonCommandExecutionExceptionFactory axonCommandExecutionExceptionFactory;
@@ -55,7 +59,7 @@ class PhotoAggregateTest {
     void emits_WhenPhotoRegistered() {
         testFixture.givenNoPriorActivity()
             .when(new RegisterUploadedPhotoCommand(PHOTO_ID, USER_ID, PHOTO_BACKING_FILE_ID, PHOTO_FILENAME))
-            .expectEvents(new PhotoUploadedEvent(PHOTO_ID, USER_ID, PHOTO_BACKING_FILE_ID, PHOTO_FILENAME));
+            .expectEvents(PHOTO_UPLOADED_EVENT);
     }
 
     @Test
@@ -67,5 +71,20 @@ class PhotoAggregateTest {
             .when(command)
             .expectNoEvents()
             .expectException(NoSuchElementException.class);
+    }
+
+    @Test
+    void emits_WhenPhotoDeletedAsPartOfUserDeletion() {
+        testFixture.given(PHOTO_UPLOADED_EVENT)
+            .when(new DeletePhotoForDeletedUserCommand(PHOTO_ID, USER_ID))
+            .expectEvents(new PhotoDeletedAsPartOfUserDeletionEvent(PHOTO_ID, PHOTO_BACKING_FILE_ID, USER_ID));
+    }
+
+    @Test
+    void rejects_WhenPhotoBelongsToDifferentDeletedUser() {
+        testFixture.given(PHOTO_UPLOADED_EVENT)
+            .when(new DeletePhotoForDeletedUserCommand(PHOTO_ID, randomUUID()))
+            .expectNoEvents()
+            .expectExceptionMessage("DELETED_PHOTO_OWNER_MISMATCH");
     }
 }

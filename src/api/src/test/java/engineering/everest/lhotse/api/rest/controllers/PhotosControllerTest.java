@@ -75,7 +75,7 @@ class PhotosControllerTest {
     @WithMockKeycloakAuth(authorities = ROLE_REGISTERED_USER)
     void uploadPhotosWillPersistAndRegisterUpload() throws Exception {
         var persistedFileId = randomUUID();
-        when(fileService.transferToPermanentStore(eq("photo1.png"), eq((long) PHOTO_FILE_CONTENTS.length), any(InputStream.class)))
+        when(fileService.transferToEphemeralStore(eq("photo1.png"), eq((long) PHOTO_FILE_CONTENTS.length), any(InputStream.class)))
             .thenReturn(persistedFileId);
 
         mockMvc.perform(multipart("/api/photos")
@@ -84,7 +84,7 @@ class PhotosControllerTest {
             .principal(USER_ID::toString))
             .andExpect(status().isCreated());
 
-        verify(fileService).transferToPermanentStore(
+        verify(fileService).transferToEphemeralStore(
             eq("photo1.png"),
             eq((long) PHOTO_FILE_CONTENTS.length),
             any(InputStream.class));

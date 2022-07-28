@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.axonframework.modelling.command.TargetAggregateIdentifier;
 
+import javax.validation.constraints.NotNull;
 import java.util.Set;
 import java.util.UUID;
 
@@ -15,7 +16,9 @@ import java.util.UUID;
 public class RegisterUploadedPhotoCommand implements FileStatusValidatableCommand {
     @TargetAggregateIdentifier
     private UUID photoId;
+    @NotNull
     private UUID owningUserId;
+    @NotNull
     private UUID backingFileId;
     private String filename;
 

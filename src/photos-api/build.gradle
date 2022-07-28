@@ -1,6 +1,7 @@
 dependencies {
     api project(':common')
     api project(':command-validation-api')
+    api project(':forgotten-users-api')
 
     api 'javax.validation:validation-api'
 

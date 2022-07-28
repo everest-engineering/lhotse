@@ -61,7 +61,7 @@ public class PhotosController {
     @ApiOperation("List all photos belonging to the current user")
     @RegisteredUser
     public UUID uploadPhoto(@ApiIgnore Principal principal, @RequestParam("file") MultipartFile uploadedFile) throws IOException {
-        var persistedFileId = fileService.transferToPermanentStore(uploadedFile.getOriginalFilename(),
+        var persistedFileId = fileService.transferToEphemeralStore(uploadedFile.getOriginalFilename(),
             uploadedFile.getSize(), uploadedFile.getInputStream());
         return photosService.registerUploadedPhoto(UUID.fromString(principal.getName()), persistedFileId,
             uploadedFile.getOriginalFilename());

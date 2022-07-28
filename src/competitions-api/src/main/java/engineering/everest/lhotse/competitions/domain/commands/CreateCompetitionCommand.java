@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.axonframework.modelling.command.TargetAggregateIdentifier;
 
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.UUID;
@@ -17,8 +18,11 @@ public class CreateCompetitionCommand implements Serializable {
     @TargetAggregateIdentifier
     private UUID competitionId;
     private String description;
+    @NotNull
     private Instant submissionsOpenTimestamp;
+    @NotNull
     private Instant submissionsCloseTimestamp;
+    @NotNull
     private Instant votingEndsTimestamp;
     private int maxEntriesPerUser;
 }
