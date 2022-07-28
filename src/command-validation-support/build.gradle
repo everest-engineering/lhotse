@@ -2,7 +2,7 @@ apply plugin: 'jacoco'
 
 dependencies {
     api project(':command-validation-api')
-    api project(':users-api')
+    api project(':forgotten-users-api')
 
     implementation project(':common')
     implementation project(':i18n-support')

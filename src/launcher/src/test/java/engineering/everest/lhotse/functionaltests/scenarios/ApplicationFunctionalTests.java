@@ -4,7 +4,6 @@ import engineering.everest.lhotse.Launcher;
 import engineering.everest.lhotse.api.services.KeycloakClient;
 import engineering.everest.lhotse.axon.CommandValidatingMessageHandlerInterceptor;
 import engineering.everest.lhotse.functionaltests.helpers.ApiRestTestClient;
-import engineering.everest.lhotse.users.services.UsersReadService;
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -34,8 +33,6 @@ class ApplicationFunctionalTests {
     private WebTestClient webTestClient;
     @Autowired
     private ApiRestTestClient apiRestTestClient;
-    @Autowired
-    private UsersReadService usersReadService;
     @Autowired
     private KeycloakClient keycloakClient;
 

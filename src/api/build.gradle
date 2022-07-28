@@ -10,7 +10,7 @@ dependencies {
     implementation project(':i18n-support')
     implementation project(':keycloak-support')
     implementation project(':photos-api')
-    implementation project(':users-api')
+    implementation project(':forgotten-users-api')
 
     implementation "engineering.everest.starterkit:media:${mediaVersion}"
     implementation "engineering.everest.starterkit:storage:${storageVersion}"
@@ -23,7 +23,6 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
-    testImplementation project(':users-api').sourceSets.test.output
     testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
     testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
     testImplementation "org.springframework.boot:spring-boot-starter-test"

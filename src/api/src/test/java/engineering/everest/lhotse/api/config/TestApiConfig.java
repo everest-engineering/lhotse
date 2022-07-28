@@ -2,7 +2,6 @@ package engineering.everest.lhotse.api.config;
 
 import engineering.everest.lhotse.api.rest.converters.DtoConverter;
 import engineering.everest.lhotse.common.services.ReadServiceProvider;
-import engineering.everest.lhotse.users.services.UsersReadService;
 import org.aopalliance.intercept.MethodInvocation;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.adapters.KeycloakConfigResolver;
@@ -47,11 +46,6 @@ public class TestApiConfig extends GlobalMethodSecurityConfiguration {
     }
 
     @Bean
-    public UsersReadService usersReadService() {
-        return mock(UsersReadService.class);
-    }
-
-    @Bean
     public ReadServiceProvider readServiceProvider() {
         return mock(ReadServiceProvider.class);
     }
@@ -91,7 +85,7 @@ public class TestApiConfig extends GlobalMethodSecurityConfiguration {
                 .and()
                 .disable()
                 .authorizeRequests()
-                .antMatchers("/api/organizations/**", "/api/version",
+                .antMatchers("/api/version",
                     "/actuator/health/**", "/api/doc/**", "/swagger-ui/**", "/swagger-resources/**", "/sso/login*")
                 .permitAll()
                 .antMatchers("/api/**", "/actuator/prometheus/**").authenticated()

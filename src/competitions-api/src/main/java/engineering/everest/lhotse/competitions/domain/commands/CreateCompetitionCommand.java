@@ -5,13 +5,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.axonframework.modelling.command.TargetAggregateIdentifier;
 
+import java.io.Serializable;
 import java.time.Instant;
 import java.util.UUID;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateCompetitionCommand {
+public class CreateCompetitionCommand implements Serializable {
     private UUID requestingUserId;
     @TargetAggregateIdentifier
     private UUID competitionId;

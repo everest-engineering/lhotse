@@ -5,7 +5,7 @@ repositories {
 }
 
 dependencies {
-    implementation project(':users-api')
+    implementation project(':forgotten-users-api')
 
     implementation "org.json:json:${jsonHelperVersion}"
     implementation "org.keycloak:keycloak-spring-boot-starter:${keycloakVersion}"

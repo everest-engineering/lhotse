@@ -33,7 +33,7 @@ public class CompetitionsFunctionalTests {
 
     @Test
     void adminUsersCanCreateCompetitions() {
-        apiRestTestClient.createNewAdminKeycloakUserAndLogin("Admin001", "admin001@example.com");
+        apiRestTestClient.createAdminUserAndLogin("Admin001", "admin001@example.com");
 
         var competitionId = apiRestTestClient.createCompetition("Best holiday snaps", Instant.now(),
             Instant.now().plus(Duration.ofHours(2)), Instant.now().plus(Duration.ofHours(4)), CREATED);

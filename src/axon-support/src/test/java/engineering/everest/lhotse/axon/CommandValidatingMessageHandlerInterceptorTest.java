@@ -2,8 +2,6 @@ package engineering.everest.lhotse.axon;
 
 import engineering.everest.lhotse.axon.command.AxonCommandExecutionExceptionFactory;
 import engineering.everest.lhotse.axon.command.validators.EmailAddressValidator;
-import engineering.everest.lhotse.axon.command.validators.UsersUniqueEmailValidator;
-import engineering.everest.lhotse.users.services.UsersReadService;
 import org.axonframework.commandhandling.CommandMessage;
 import org.axonframework.messaging.InterceptorChain;
 import org.axonframework.messaging.unitofwork.UnitOfWork;
@@ -34,13 +32,10 @@ class CommandValidatingMessageHandlerInterceptorTest {
     @Mock
     private InterceptorChain interceptorChain;
     @Mock
-    private UsersReadService usersReadService;
-    @Mock
     private Validator javaBeanValidator;
     @Mock
 
     private EmailAddressValidator emailAddressValidator;
-    private UsersUniqueEmailValidator usersUniqueEmailValidator;
     private CommandValidatingMessageHandlerInterceptor commandValidatingMessageHandlerInterceptor;
     private AxonCommandExecutionExceptionFactory axonCommandExecutionExceptionFactory;
 
@@ -50,10 +45,8 @@ class CommandValidatingMessageHandlerInterceptorTest {
         lenient().when(javaBeanValidator.validate(any())).thenReturn(emptySet());
         axonCommandExecutionExceptionFactory = new AxonCommandExecutionExceptionFactory();
         emailAddressValidator = new EmailAddressValidator(axonCommandExecutionExceptionFactory);
-        usersUniqueEmailValidator = new UsersUniqueEmailValidator(usersReadService, axonCommandExecutionExceptionFactory);
         commandValidatingMessageHandlerInterceptor = new CommandValidatingMessageHandlerInterceptor(
-            List.of(emailAddressValidator,
-                usersUniqueEmailValidator),
+            List.of(emailAddressValidator),
             javaBeanValidator);
     }
 

@@ -75,14 +75,14 @@ public class ApiRestTestClient {
         this.accessToken = accessToken;
     }
 
-    public void login(String emailAddress, String password) {
+    public void login(String emailAddress) {
         var keycloak = KeycloakBuilder.builder()
             .serverUrl(keycloakServerAuthUrl)
             .grantType(OAuth2Constants.PASSWORD)
             .realm(keycloakRealm)
             .clientId(keycloakClientId)
             .username(emailAddress)
-            .password(password)
+            .password(PASSWORD)
             .resteasyClient(new ResteasyClientBuilder()
                 .connectionPoolSize(keycloakServerConnectionPoolSize).build())
             .build();
@@ -95,13 +95,13 @@ public class ApiRestTestClient {
 
     public UUID createUserAndLogin(String displayName, String emailAddress) {
         var userId = keycloakClient.createNewKeycloakUser(displayName, emailAddress, PASSWORD);
-        login(emailAddress, PASSWORD);
+        login(emailAddress);
         return userId;
     }
 
-    public UUID createNewAdminKeycloakUserAndLogin(String displayName, String emailAddress) {
+    public UUID createAdminUserAndLogin(String displayName, String emailAddress) {
         var userId = keycloakClient.createNewAdminKeycloakUser(displayName, emailAddress, PASSWORD);
-        login(emailAddress, PASSWORD);
+        login(emailAddress);
         return userId;
     }
 
