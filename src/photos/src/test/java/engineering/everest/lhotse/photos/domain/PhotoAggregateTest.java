@@ -2,7 +2,6 @@ package engineering.everest.lhotse.photos.domain;
 
 import engineering.everest.lhotse.axon.command.AxonCommandExecutionExceptionFactory;
 import engineering.everest.lhotse.axon.command.validators.FileStatusValidator;
-import engineering.everest.lhotse.common.RandomFieldsGenerator;
 import engineering.everest.lhotse.photos.domain.commands.RegisterUploadedPhotoCommand;
 import engineering.everest.lhotse.photos.domain.events.PhotoUploadedEvent;
 import org.axonframework.spring.stereotype.Aggregate;
@@ -33,8 +32,6 @@ class PhotoAggregateTest {
     private FixtureConfiguration<PhotoAggregate> testFixture;
     private AxonCommandExecutionExceptionFactory axonCommandExecutionExceptionFactory;
 
-    @Mock
-    private RandomFieldsGenerator randomFieldsGenerator;
     @Mock
     private FileStatusValidator fileStatusValidator;
 

@@ -1,7 +1,7 @@
 package engineering.everest.lhotse.functionaltests.scenarios;
 
 import engineering.everest.lhotse.Launcher;
-import engineering.everest.lhotse.api.services.KeycloakSynchronizationService;
+import engineering.everest.lhotse.api.services.KeycloakClient;
 import engineering.everest.lhotse.axon.CommandValidatingMessageHandlerInterceptor;
 import engineering.everest.lhotse.functionaltests.helpers.ApiRestTestClient;
 import engineering.everest.lhotse.users.services.UsersReadService;
@@ -37,7 +37,7 @@ class ApplicationFunctionalTests {
     @Autowired
     private UsersReadService usersReadService;
     @Autowired
-    private KeycloakSynchronizationService keycloakSynchronizationService;
+    private KeycloakClient keycloakClient;
 
     @BeforeEach
     void setUp() {

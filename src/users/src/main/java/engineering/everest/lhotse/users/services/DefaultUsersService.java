@@ -1,6 +1,6 @@
 package engineering.everest.lhotse.users.services;
 
-import engineering.everest.lhotse.api.services.KeycloakSynchronizationService;
+import engineering.everest.lhotse.api.services.KeycloakClient;
 import engineering.everest.lhotse.common.domain.Role;
 import engineering.everest.lhotse.users.domain.commands.AddUserRolesCommand;
 import engineering.everest.lhotse.users.domain.commands.CreateOrganizationUserCommand;
@@ -20,11 +20,11 @@ import java.util.UUID;
 public class DefaultUsersService implements UsersService {
 
     private final CommandGateway commandGateway;
-    private final KeycloakSynchronizationService keycloakSynchronizationService;
+    private final KeycloakClient keycloakClient;
 
-    public DefaultUsersService(CommandGateway commandGateway, KeycloakSynchronizationService keycloakSynchronizationService) {
+    public DefaultUsersService(CommandGateway commandGateway, KeycloakClient keycloakClient) {
         this.commandGateway = commandGateway;
-        this.keycloakSynchronizationService = keycloakSynchronizationService;
+        this.keycloakClient = keycloakClient;
     }
 
     @Override
@@ -44,7 +44,7 @@ public class DefaultUsersService implements UsersService {
 
     @Override
     public UUID createOrganizationUser(UUID requestingUserId, UUID organizationId, String emailAddress, String displayName) {
-        var keycloakUserId = createUserAndRetrieveKeycloakUserId(emailAddress, organizationId, displayName);
+        var keycloakUserId = createUserAndRetrieveKeycloakUserId(emailAddress, displayName);
         return commandGateway.sendAndWait(
             new CreateOrganizationUserCommand(keycloakUserId, organizationId, requestingUserId, emailAddress, displayName));
     }
@@ -59,7 +59,7 @@ public class DefaultUsersService implements UsersService {
         commandGateway.sendAndWait(new DeleteAndForgetUserCommand(userId, requestingUserId, requestReason));
     }
 
-    private UUID createUserAndRetrieveKeycloakUserId(String emailAddress, UUID organizationId, String displayName) {
-        return keycloakSynchronizationService.createNewKeycloakUserAndSendVerificationEmail(emailAddress, organizationId, displayName);
+    private UUID createUserAndRetrieveKeycloakUserId(String emailAddress, String displayName) {
+        return keycloakClient.createNewKeycloakUserAndSendVerificationEmail(emailAddress, displayName);
     }
 }

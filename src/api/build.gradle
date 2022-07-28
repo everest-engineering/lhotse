@@ -6,6 +6,7 @@ repositories {
 
 dependencies {
     implementation project(':common')
+    implementation project(':competitions-api')
     implementation project(':i18n-support')
     implementation project(':keycloak-support')
     implementation project(':photos-api')

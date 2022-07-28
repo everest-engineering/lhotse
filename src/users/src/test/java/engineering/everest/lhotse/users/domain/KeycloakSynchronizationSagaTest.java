@@ -1,6 +1,6 @@
 package engineering.everest.lhotse.users.domain;
 
-import engineering.everest.lhotse.api.services.KeycloakSynchronizationService;
+import engineering.everest.lhotse.api.services.KeycloakClient;
 import engineering.everest.lhotse.common.domain.Role;
 import engineering.everest.lhotse.common.domain.User;
 import engineering.everest.lhotse.users.domain.events.UserDeletedAndForgottenEvent;
@@ -50,13 +50,13 @@ public class KeycloakSynchronizationSagaTest {
     @Mock
     private UsersReadService usersReadService;
     @Mock
-    private KeycloakSynchronizationService keycloakSynchronizationService;
+    private KeycloakClient keycloakClient;
 
     @BeforeEach
     void setUp() {
         testFixture = new SagaTestFixture<>(KeycloakSynchronizationSaga.class);
         testFixture.registerResource(usersReadService);
-        testFixture.registerResource(keycloakSynchronizationService);
+        testFixture.registerResource(keycloakClient);
         testFixture.withTransienceCheckDisabled();
     }
 
@@ -67,7 +67,7 @@ public class KeycloakSynchronizationSagaTest {
             .expectNoDispatchedCommands()
             .expectActiveSagas(0);
 
-        verify(keycloakSynchronizationService).addClientLevelUserRoles(USER.getId(), roles);
+        verify(keycloakClient).addClientLevelUserRoles(USER.getId(), roles);
     }
 
     @Test
@@ -77,7 +77,7 @@ public class KeycloakSynchronizationSagaTest {
             .expectNoDispatchedCommands()
             .expectActiveSagas(0);
 
-        verify(keycloakSynchronizationService).removeClientLevelUserRoles(USER.getId(), roles);
+        verify(keycloakClient).removeClientLevelUserRoles(USER.getId(), roles);
     }
 
     // @Test
@@ -102,6 +102,6 @@ public class KeycloakSynchronizationSagaTest {
             .expectNoDispatchedCommands()
             .expectActiveSagas(0);
 
-        verify(keycloakSynchronizationService).deleteUser(USER.getId());
+        verify(keycloakClient).deleteUser(USER.getId());
     }
 }

@@ -1,6 +1,6 @@
 package engineering.everest.lhotse.users.services;
 
-import engineering.everest.lhotse.api.services.KeycloakSynchronizationService;
+import engineering.everest.lhotse.api.services.KeycloakClient;
 import engineering.everest.lhotse.users.domain.commands.CreateOrganizationUserCommand;
 import engineering.everest.lhotse.users.domain.commands.DeleteAndForgetUserCommand;
 import engineering.everest.lhotse.users.domain.commands.RegisterUploadedUserProfilePhotoCommand;
@@ -31,13 +31,13 @@ class DefaultUsersServiceTest {
     @Mock
     private CommandGateway commandGateway;
     @Mock
-    private KeycloakSynchronizationService keycloakSynchronizationService;
+    private KeycloakClient keycloakClient;
 
     private DefaultUsersService defaultUsersService;
 
     @BeforeEach
     void setUp() {
-        defaultUsersService = new DefaultUsersService(commandGateway, keycloakSynchronizationService);
+        defaultUsersService = new DefaultUsersService(commandGateway, keycloakClient);
     }
 
     @Test
@@ -65,9 +65,8 @@ class DefaultUsersServiceTest {
 
     @Test
     void createNewKeycloakUser_WillSendCommandAndWaitForCompletion() {
-        when(keycloakSynchronizationService.createNewKeycloakUserAndSendVerificationEmail(NEW_USER_EMAIL, ORGANIZATION_ID,
-            NEW_USER_DISPLAY_NAME))
-                .thenReturn(USER_ID);
+        when(keycloakClient.createNewKeycloakUserAndSendVerificationEmail(NEW_USER_EMAIL, NEW_USER_DISPLAY_NAME))
+            .thenReturn(USER_ID);
 
         defaultUsersService.createOrganizationUser(ADMIN_ID, ORGANIZATION_ID, NEW_USER_EMAIL, NEW_USER_DISPLAY_NAME);
         verify(commandGateway)

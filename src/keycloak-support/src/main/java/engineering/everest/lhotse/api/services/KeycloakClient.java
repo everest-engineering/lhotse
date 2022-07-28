@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import static java.util.Collections.emptyMap;
 import static java.util.UUID.fromString;
 import static org.springframework.http.HttpMethod.DELETE;
 import static org.springframework.http.HttpMethod.GET;
@@ -29,7 +30,8 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @Slf4j
 @Component
-public class KeycloakSynchronizationService {
+public class KeycloakClient {
+    private static final String ADMIN_USER_ROLE = "ADMIN";
     private static final String BEARER = "Bearer ";
     private static final String AUTHORIZATION = "Authorization";
     private static final String NAME_KEY = "name";
@@ -41,20 +43,23 @@ public class KeycloakSynchronizationService {
     private final String keycloakAdminEmailAddress;
     private final String keycloakAdminPassword;
     private final String keycloakMasterRealmAdminClientId;
-    private final String keycloakDefaultRealmDefaultClientId;
+    private final String keycloakRealmClientId;
+    private final String keycloakRealm;
     private final int keycloakServerConnectionPoolSize;
 
-    public KeycloakSynchronizationService(@Value("${keycloak.auth-server-url}") String keycloakServerAuthUrl,
-                                          @Value("${kc.server.admin-email}") String keycloakAdminEmailAddress,
-                                          @Value("${kc.server.admin-password}") String keycloakAdminPassword,
-                                          @Value("${kc.server.master-realm.default.client-id}") String keycloakMasterRealmAdminClientId,
-                                          @Value("${keycloak.resource}") String keycloakClientId,
-                                          @Value("${kc.server.connection.pool-size}") int keycloakServerConnectionPoolSize) {
+    public KeycloakClient(@Value("${keycloak.auth-server-url}") String keycloakServerAuthUrl,
+                          @Value("${kc.server.admin-email}") String keycloakAdminEmailAddress,
+                          @Value("${kc.server.admin-password}") String keycloakAdminPassword,
+                          @Value("${kc.server.master-realm.default.client-id}") String keycloakMasterRealmAdminClientId,
+                          @Value("${keycloak.resource}") String keycloakClientId,
+                          @Value("${keycloak.realm}") String keycloakRealm,
+                          @Value("${kc.server.connection.pool-size}") int keycloakServerConnectionPoolSize) {
         this.keycloakServerAuthUrl = keycloakServerAuthUrl;
         this.keycloakAdminEmailAddress = keycloakAdminEmailAddress;
         this.keycloakAdminPassword = keycloakAdminPassword;
         this.keycloakMasterRealmAdminClientId = keycloakMasterRealmAdminClientId;
-        this.keycloakDefaultRealmDefaultClientId = keycloakClientId;
+        this.keycloakRealmClientId = keycloakClientId;
+        this.keycloakRealm = keycloakRealm;
         this.keycloakServerConnectionPoolSize = keycloakServerConnectionPoolSize;
     }
 
@@ -69,13 +74,19 @@ public class KeycloakSynchronizationService {
         return getUserId(emailAddress);
     }
 
-    public void updateUserAttributes(UUID userId, Map<String, Object> attributes) {
-        webclient(constructUrlPath("/users/%s", userId), PUT)
-            .contentType(APPLICATION_JSON)
-            .accept(APPLICATION_JSON)
-            .bodyValue(attributes)
-            .exchangeToMono(res -> Mono.just(res.statusCode()))
-            .block();
+    public UUID createNewAdminKeycloakUser(String displayName, String emailAddress, String password) {
+        var userProperties = Map.of(
+            "email", emailAddress,
+            "enabled", true,
+            "attributes", new UserAttribute(displayName),
+            // "realmRoles", List.of(ADMIN_USER_ROLE), // looks like this is ignored by Keycloak
+            "credentials",
+            List.of(Map.of(TYPE_KEY, "password", VALUE_KEY, password, "temporary", false)));
+        createUser(userProperties);
+        var newUserId = getUserId(emailAddress);
+        var adminRoleDefinition = fetchRealmRoleDefinition(ADMIN_USER_ROLE);
+        addRealmRoleToUser(newUserId, adminRoleDefinition);
+        return newUserId;
     }
 
     public void deleteUser(UUID userId) {
@@ -84,7 +95,7 @@ public class KeycloakSynchronizationService {
             .block();
     }
 
-    public UUID createNewKeycloakUserAndSendVerificationEmail(String emailAddress, UUID organizationId, String displayName) {
+    public UUID createNewKeycloakUserAndSendVerificationEmail(String emailAddress, String displayName) {
         createUser(Map.of("email", emailAddress,
             "enabled", true,
             "attributes", new UserAttribute(displayName),
@@ -131,7 +142,7 @@ public class KeycloakSynchronizationService {
         for (var i = 0; i < availableClientRoles.length(); i++) {
             var role = availableClientRoles.getJSONObject(i);
             if (roles.contains(Role.valueOf(role.getString(NAME_KEY)))) {
-                updateClientRoles(getClientRolesPath(userId, clientId), POST, getClientLevelRolesRequestData(role));
+                updateClientRoles(getClientRolesPath(userId, clientId), POST, createClientLevelRolesRequestData(role));
             }
         }
     }
@@ -142,7 +153,7 @@ public class KeycloakSynchronizationService {
         for (var i = 0; i < availableClientRoles.length(); i++) {
             var role = availableClientRoles.getJSONObject(i);
             if (roles.contains(Role.valueOf(role.getString(NAME_KEY)))) {
-                updateClientRoles(getClientRolesPath(userId, clientId), DELETE, getClientLevelRolesRequestData(role));
+                updateClientRoles(getClientRolesPath(userId, clientId), DELETE, createClientLevelRolesRequestData(role));
             }
         }
     }
@@ -208,7 +219,7 @@ public class KeycloakSynchronizationService {
     }
 
     private UUID getClientIdFromClientDetails() {
-        return fromString(new JSONArray(getClientDetails(Map.of("clientId", keycloakDefaultRealmDefaultClientId)))
+        return fromString(new JSONArray(getClientDetails(Map.of("clientId", keycloakRealmClientId)))
             .getJSONObject(0).getString("id"));
     }
 
@@ -229,12 +240,37 @@ public class KeycloakSynchronizationService {
             .header(AUTHORIZATION, accessToken());
     }
 
-    private List<Map<Object, Object>> getClientLevelRolesRequestData(JSONObject role) {
+    private List<Map<Object, Object>> createClientLevelRolesRequestData(JSONObject role) {
         return List.of(Map.of("id", role.getString("id"),
             NAME_KEY, role.getString(NAME_KEY),
             "description", role.getString("description"),
             "composite", role.getBoolean("composite"),
             "clientRole", role.getBoolean("clientRole"),
             "containerId", role.getString("containerId")));
+    }
+
+    private void addRealmRoleToUser(UUID newUserId, Map<String, String> adminRoleDefinition) {
+        webclient(String.format("%s/admin/realms/%s/users/%s/role-mappings/realm", keycloakServerAuthUrl, keycloakRealm, newUserId),
+            POST)
+                .contentType(APPLICATION_JSON)
+                .accept(APPLICATION_JSON)
+                .bodyValue(List.of(adminRoleDefinition))
+                .exchangeToMono(res -> Mono.just(res.statusCode()))
+                .block();
+    }
+
+    private Map<String, String> fetchRealmRoleDefinition(String targetRealmRole) {
+        var realmRoles = new JSONArray(webclient(String.format("%s/admin/realms/%s/roles", keycloakServerAuthUrl, keycloakRealm), GET)
+            .retrieve()
+            .bodyToMono(String.class)
+            .block());
+
+        for (var i = 0; i < realmRoles.length(); i++) {
+            var role = realmRoles.getJSONObject(i);
+            if (targetRealmRole.equals(role.getString(NAME_KEY))) {
+                return Map.of(NAME_KEY, targetRealmRole, "id", role.getString("id"));
+            }
+        }
+        return emptyMap();
     }
 }

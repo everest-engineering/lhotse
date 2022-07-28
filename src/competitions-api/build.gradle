@@ -1,0 +1,14 @@
+dependencies {
+    api project(':common')
+    api project(':command-validation-api')
+
+    api 'javax.validation:validation-api'
+
+    implementation "engineering.everest.starterkit:storage:${storageVersion}"
+    implementation "engineering.everest.axon:crypto-shredding-extension:${axonCryptoShreddingVersion}"
+    implementation "org.axonframework:axon-modelling:${axonVersion}"
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
+    testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
+}

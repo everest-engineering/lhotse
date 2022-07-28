@@ -1,7 +1,7 @@
 package engineering.everest.lhotse.users.domain;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import engineering.everest.lhotse.api.services.KeycloakSynchronizationService;
+import engineering.everest.lhotse.api.services.KeycloakClient;
 import engineering.everest.lhotse.common.RetryWithExponentialBackoff;
 import engineering.everest.lhotse.users.domain.events.UserDeletedAndForgottenEvent;
 import engineering.everest.lhotse.users.domain.events.UserRolesAddedByAdminEvent;
@@ -26,16 +26,16 @@ public class KeycloakSynchronizationSaga {
     @EndSaga
     @SagaEventHandler(associationProperty = USER_ID_PROPERTY)
     public void on(UserRolesAddedByAdminEvent event,
-                   KeycloakSynchronizationService keycloakSynchronizationService) {
-        keycloakSynchronizationService.addClientLevelUserRoles(event.getUserId(), event.getRoles());
+                   KeycloakClient keycloakClient) {
+        keycloakClient.addClientLevelUserRoles(event.getUserId(), event.getRoles());
     }
 
     @StartSaga
     @EndSaga
     @SagaEventHandler(associationProperty = USER_ID_PROPERTY)
     public void on(UserRolesRemovedByAdminEvent event,
-                   KeycloakSynchronizationService keycloakSynchronizationService) {
-        keycloakSynchronizationService.removeClientLevelUserRoles(event.getUserId(), event.getRoles());
+                   KeycloakClient keycloakClient) {
+        keycloakClient.removeClientLevelUserRoles(event.getUserId(), event.getRoles());
     }
 
     @StartSaga
@@ -43,12 +43,12 @@ public class KeycloakSynchronizationSaga {
     @SagaEventHandler(associationProperty = DELETED_USER_ID_PROPERTY)
     public void on(UserDeletedAndForgottenEvent event,
                    UsersReadService usersReadService,
-                   KeycloakSynchronizationService keycloakSynchronizationService)
+                   KeycloakClient keycloakClient)
         throws Exception {
         waitForProjectionUpdate(() -> !usersReadService.exists(event.getDeletedUserId()),
             "user deletion projection update");
 
-        keycloakSynchronizationService.deleteUser(event.getDeletedUserId());
+        keycloakClient.deleteUser(event.getDeletedUserId());
 
         // If this user is the last one on the organisation then it might also need to be removed.
         // This isn't catered for in this contrived example.

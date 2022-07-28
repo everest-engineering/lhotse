@@ -1,10 +1,8 @@
 package engineering.everest.lhotse.functionaltests.helpers;
 
-import engineering.everest.lhotse.api.rest.requests.NewUserRequest;
-import engineering.everest.lhotse.api.rest.requests.UpdateUserRequest;
+import engineering.everest.lhotse.api.rest.requests.CreateCompetitionRequest;
 import engineering.everest.lhotse.api.rest.responses.PhotoResponse;
-import engineering.everest.lhotse.api.rest.responses.UserResponse;
-import engineering.everest.lhotse.api.services.KeycloakSynchronizationService;
+import engineering.everest.lhotse.api.services.KeycloakClient;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.keycloak.OAuth2Constants;
@@ -19,16 +17,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.keycloak.OAuth2Constants.CLIENT_CREDENTIALS;
-import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
-import static org.springframework.web.reactive.function.BodyInserters.fromValue;
 
 @Slf4j
 @Service
@@ -52,7 +49,7 @@ public class ApiRestTestClient {
     private int keycloakServerConnectionPoolSize;
 
     @Autowired
-    private KeycloakSynchronizationService keycloakSynchronizationService;
+    private KeycloakClient keycloakClient;
 
     private WebTestClient webTestClient;
     private String accessToken;
@@ -96,51 +93,20 @@ public class ApiRestTestClient {
         this.accessToken = accessToken;
     }
 
+    public UUID createUserAndLogin(String displayName, String emailAddress) {
+        var userId = keycloakClient.createNewKeycloakUser(displayName, emailAddress, PASSWORD);
+        login(emailAddress, PASSWORD);
+        return userId;
+    }
+
+    public UUID createNewAdminKeycloakUserAndLogin(String displayName, String emailAddress) {
+        var userId = keycloakClient.createNewAdminKeycloakUser(displayName, emailAddress, PASSWORD);
+        login(emailAddress, PASSWORD);
+        return userId;
+    }
+
     public String getAccessToken() {
         return accessToken;
-    }
-
-    public void logout() {
-        this.accessToken = null;
-    }
-
-    public UserResponse getUser(UUID userId, HttpStatus expectedHttpStatus) {
-        return webTestClient.get().uri("/api/users/{userId}", userId)
-            .header("Authorization", "Bearer " + accessToken)
-            .exchange()
-            .expectStatus().isEqualTo(expectedHttpStatus)
-            .returnResult(UserResponse.class).getResponseBody().blockFirst();
-    }
-
-    public List<UserResponse> getAllUsers(HttpStatus expectedHttpStatus) {
-        return webTestClient.get().uri("/api/users")
-            .header("Authorization", "Bearer " + accessToken)
-            .exchange()
-            .expectStatus().isEqualTo(expectedHttpStatus)
-            .returnResult(UserResponse.class).getResponseBody().buffer().blockFirst();
-    }
-
-    public UUID createUser(UUID organizationId, NewUserRequest request, HttpStatus expectedHttpStatus) {
-        var responseSpec = webTestClient.post().uri("/api/organizations/{organizationId}/users", organizationId)
-            .header("Authorization", "Bearer " + accessToken)
-            .contentType(APPLICATION_JSON)
-            .body(fromValue(request))
-            .exchange()
-            .expectStatus().isEqualTo(expectedHttpStatus);
-        if (expectedHttpStatus == CREATED) {
-            return responseSpec.returnResult(UUID.class).getResponseBody().blockFirst();
-        }
-        return null;
-    }
-
-    public void updateUser(UUID userId, UpdateUserRequest request, HttpStatus expectedHttpStatus) {
-        webTestClient.put().uri("/api/users/{userId}", userId)
-            .header("Authorization", "Bearer " + accessToken)
-            .contentType(APPLICATION_JSON)
-            .body(fromValue(request))
-            .exchange()
-            .expectStatus().isEqualTo(expectedHttpStatus)
-            .returnResult(UUID.class).getResponseBody().blockFirst();
     }
 
     public Map<String, Object> getReplayStatus(HttpStatus expectedHttpStatus) {
@@ -157,12 +123,6 @@ public class ApiRestTestClient {
             .contentType(APPLICATION_JSON)
             .exchange()
             .expectStatus().isEqualTo(expectedHttpStatus);
-    }
-
-    public UUID createUserAndLogin(String displayName, String emailAddress) {
-        var userId = keycloakSynchronizationService.createNewKeycloakUser(displayName, emailAddress, PASSWORD);
-        login(emailAddress, PASSWORD);
-        return userId;
     }
 
     public UUID uploadPhoto(String photoFilename, HttpStatus expectedHttpStatus) {
@@ -201,5 +161,23 @@ public class ApiRestTestClient {
             .expectBody(new ParameterizedTypeReference<byte[]>() {})
             .returnResult()
             .getResponseBody();
+    }
+
+    public UUID createCompetition(String description,
+                                  Instant submissionsOpen,
+                                  Instant submissionsClose,
+                                  Instant votingEnds,
+                                  HttpStatus expectedHttpStatus) {
+        var requestBody = new CreateCompetitionRequest(description, submissionsOpen, submissionsClose, votingEnds, 1);
+
+        return webTestClient.post().uri("/api/competitions")
+            .header("Authorization", "Bearer " + accessToken)
+            .contentType(APPLICATION_JSON)
+            .body(BodyInserters.fromValue(requestBody))
+            .exchange()
+            .expectStatus().isEqualTo(expectedHttpStatus)
+            .returnResult(UUID.class)
+            .getResponseBody()
+            .blockFirst();
     }
 }

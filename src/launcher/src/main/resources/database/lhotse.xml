@@ -144,5 +144,16 @@
             <column name="filename" type="varchar(255)"/>
             <column name="uploadtimestamp" type="timestamp"/>
         </createTable>
+
+        <createTable tableName="competitions">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" primaryKeyName="PK_competitions"/>
+            </column>
+            <column name="description" type="text"/>
+            <column name="submissionsopentimestamp" type="timestamp"/>
+            <column name="submissionsclosetimestamp" type="timestamp"/>
+            <column name="votingendstimestamp" type="timestamp"/>
+            <column name="maxentriesperuser" type="int"/>
+        </createTable>
     </changeSet>
 </databaseChangeLog>
