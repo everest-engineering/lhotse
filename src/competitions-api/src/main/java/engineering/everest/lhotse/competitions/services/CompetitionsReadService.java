@@ -1,3 +1,10 @@
 package engineering.everest.lhotse.competitions.services;
 
-public interface CompetitionsReadService {}
+import engineering.everest.lhotse.competitions.domain.Competition;
+
+import java.util.List;
+
+public interface CompetitionsReadService {
+
+    List<Competition> getAllCompetitionsOrderedByDescVotingEndsTimestamp();
+}

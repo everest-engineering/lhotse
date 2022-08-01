@@ -1,5 +1,6 @@
 package engineering.everest.lhotse.competitions.persistence;
 
+import engineering.everest.lhotse.competitions.domain.Competition;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,4 +22,9 @@ public class PersistableCompetition {
     private Instant submissionsCloseTimestamp;
     private Instant votingEndsTimestamp;
     private int maxEntriesPerUser;
+
+    public Competition toDomain() {
+        return new Competition(id, description, submissionsOpenTimestamp, submissionsCloseTimestamp,
+            votingEndsTimestamp, maxEntriesPerUser);
+    }
 }

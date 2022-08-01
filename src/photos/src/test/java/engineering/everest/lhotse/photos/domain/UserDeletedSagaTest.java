@@ -46,7 +46,7 @@ class UserDeletedSagaTest {
     }
 
     @Test
-    void participantAddedToTwineEvent_WillQueueOutboundMail() {
+    void userDeletedAndForgotten_WillDispatchPhotoDeletionCommands() {
         when(photosReadService.getAllPhotos(USER_ID, unpaged()))
             .thenReturn(List.of(
                 new Photo(PHOTO_ID_1, USER_ID, BACKING_FILE_ID_1, "photo1.png", Instant.now()),

@@ -26,8 +26,8 @@ import static org.axonframework.modelling.command.AggregateLifecycle.apply;
 @Aggregate(snapshotTriggerDefinition = "competitionAggregateSnapshotTriggerDefinition")
 public class CompetitionAggregate implements Serializable {
 
-    private static final Duration MINIMUM_SUBMISSION_PERIOD = Duration.ofHours(1);
-    private static final Duration MINIMUM_VOTING_PERIOD = Duration.ofHours(1);
+    private static final Duration MINIMUM_SUBMISSION_PERIOD = Duration.ofMinutes(5);
+    private static final Duration MINIMUM_VOTING_PERIOD = Duration.ofMinutes(5);
     private static final int MIN_ENTRIES_PER_USER = 1;
 
     @AggregateIdentifier
