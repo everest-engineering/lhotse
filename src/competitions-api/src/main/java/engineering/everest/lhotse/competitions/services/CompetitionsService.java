@@ -11,4 +11,6 @@ public interface CompetitionsService {
                            Instant submissionsCloseTimestamp,
                            Instant votingEndsTimestamp,
                            int maxEntriesPerUser);
+
+    void submitPhoto(UUID requestingUserId, UUID competitionId, UUID photoId, String submissionNotes);
 }

@@ -2,6 +2,7 @@ apply plugin: 'jacoco'
 
 dependencies {
     api project(':competitions-api')
+    api project(':photos-api')
     api "org.axonframework:axon-spring:${axonVersion}"
 
     implementation project(':axon-support')

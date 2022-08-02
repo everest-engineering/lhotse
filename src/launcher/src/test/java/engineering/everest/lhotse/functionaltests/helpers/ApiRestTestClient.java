@@ -1,5 +1,6 @@
 package engineering.everest.lhotse.functionaltests.helpers;
 
+import engineering.everest.lhotse.api.rest.requests.CompetitionSubmissionRequest;
 import engineering.everest.lhotse.api.rest.requests.CreateCompetitionRequest;
 import engineering.everest.lhotse.api.rest.requests.DeleteAndForgetUserRequest;
 import engineering.everest.lhotse.api.rest.responses.PhotoResponse;
@@ -189,5 +190,16 @@ public class ApiRestTestClient {
             .returnResult(UUID.class)
             .getResponseBody()
             .blockFirst();
+    }
+
+    public void submitPhoto(UUID competitionId, UUID photoId, HttpStatus expectedHttpStatus) {
+        var requestBody = new CompetitionSubmissionRequest(photoId, "submission notes go here");
+
+        webTestClient.post().uri("/api/competitions/{competitionId}/submission", competitionId)
+            .header("Authorization", "Bearer " + accessToken)
+            .contentType(APPLICATION_JSON)
+            .body(BodyInserters.fromValue(requestBody))
+            .exchange()
+            .expectStatus().isEqualTo(expectedHttpStatus);
     }
 }

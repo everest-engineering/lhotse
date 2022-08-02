@@ -36,6 +36,11 @@ public class DefaultPhotosReadService implements PhotosReadService {
     }
 
     @Override
+    public Photo getPhoto(UUID photoId) {
+        return photosRepository.findById(photoId).orElseThrow().toDomain();
+    }
+
+    @Override
     public InputStream streamPhoto(UUID requestingUserId, UUID photoId) throws IOException {
         var persistablePhoto = photosRepository.findByIdAndOwnerUserId(photoId, requestingUserId).orElseThrow();
         return fileService.stream(persistablePhoto.getBackingFileId()).getInputStream();

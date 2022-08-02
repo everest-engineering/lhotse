@@ -9,7 +9,6 @@ import java.time.Instant;
 @Data
 @Builder
 public class ApiErrorResponse {
-
     private final HttpStatus status;
     private final String message;
     private final Instant timestamp;

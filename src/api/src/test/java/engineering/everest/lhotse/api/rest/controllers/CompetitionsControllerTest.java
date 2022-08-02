@@ -3,6 +3,7 @@ package engineering.everest.lhotse.api.rest.controllers;
 import com.c4_soft.springaddons.security.oauth2.test.annotations.keycloak.WithMockKeycloakAuth;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import engineering.everest.lhotse.api.config.TestApiConfig;
+import engineering.everest.lhotse.api.rest.requests.CompetitionSubmissionRequest;
 import engineering.everest.lhotse.api.rest.requests.CreateCompetitionRequest;
 import engineering.everest.lhotse.competitions.domain.Competition;
 import engineering.everest.lhotse.competitions.services.CompetitionsReadService;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static java.util.UUID.randomUUID;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -36,6 +38,7 @@ class CompetitionsControllerTest {
     private static final String ROLE_ADMIN = "ROLE_ADMIN";
     private static final String ROLE_REGISTERED_USER = "ROLE_REGISTERED_USER";
     private static final UUID USER_ID = randomUUID();
+    private static final UUID PHOTO_ID = randomUUID();
     private static final UUID COMPETITION_ID_1 = randomUUID();
     private static final UUID COMPETITION_ID_2 = randomUUID();
     private static final Instant SUBMISSIONS_OPEN_TIMESTAMP = Instant.ofEpochMilli(123);
@@ -66,8 +69,8 @@ class CompetitionsControllerTest {
     @Test
     @WithMockKeycloakAuth(authorities = ROLE_ADMIN)
     void adminsCanCreateCompetitions() throws Exception {
-        when(competitionsService.createCompetition(USER_ID, "description", SUBMISSIONS_OPEN_TIMESTAMP, SUBMISSIONS_CLOSE_TIMESTAMP,
-            VOTING_ENDS_TIMESTAMP, 2))
+        when(competitionsService.createCompetition(USER_ID, "description", SUBMISSIONS_OPEN_TIMESTAMP,
+            SUBMISSIONS_CLOSE_TIMESTAMP, VOTING_ENDS_TIMESTAMP, 2))
                 .thenReturn(COMPETITION_ID_1);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/competitions")
@@ -101,5 +104,21 @@ class CompetitionsControllerTest {
             .andExpect(jsonPath("$[1].submissionsCloseTimestamp").value(COMPETITION_1.getSubmissionsCloseTimestamp().toString()))
             .andExpect(jsonPath("$[1].votingEndsTimestamp").value(COMPETITION_1.getVotingEndsTimestamp().toString()))
             .andExpect(jsonPath("$[1].maxEntriesPerUser").value(COMPETITION_1.getMaxEntriesPerUser()));
+    }
+
+    @Test
+    @WithMockKeycloakAuth(authorities = ROLE_REGISTERED_USER)
+    void photosCanBeEnteredIntoCompetitions() throws Exception {
+        when(competitionsReadService.getAllCompetitionsOrderedByDescVotingEndsTimestamp())
+            .thenReturn(List.of(COMPETITION_1));
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/competitions/{competitionId}/submission",
+            COMPETITION_1.getId().toString())
+            .principal(USER_ID::toString)
+            .contentType(APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(new CompetitionSubmissionRequest(PHOTO_ID, "much wow look"))))
+            .andExpect(status().isCreated());
+
+        verify(competitionsService).submitPhoto(USER_ID, COMPETITION_ID_1, PHOTO_ID, "much wow look");
     }
 }
