@@ -6,11 +6,15 @@ import engineering.everest.lhotse.api.rest.annotations.RegisteredUser;
 import engineering.everest.lhotse.api.rest.converters.DtoConverter;
 import engineering.everest.lhotse.api.rest.requests.CompetitionSubmissionRequest;
 import engineering.everest.lhotse.api.rest.requests.CreateCompetitionRequest;
-import engineering.everest.lhotse.api.rest.responses.CompetitionResponse;
+import engineering.everest.lhotse.api.rest.responses.CompetitionSummaryResponse;
+import engineering.everest.lhotse.api.rest.responses.CompetitionWithEntriesResponse;
+import engineering.everest.lhotse.competitions.domain.CompetitionWithEntries;
+import engineering.everest.lhotse.competitions.domain.queries.CompetitionWithEntriesQuery;
 import engineering.everest.lhotse.competitions.services.CompetitionsReadService;
 import engineering.everest.lhotse.competitions.services.CompetitionsService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.axonframework.queryhandling.QueryGateway;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Flux;
 import springfox.documentation.annotations.ApiIgnore;
 
 import java.security.Principal;
@@ -27,6 +32,7 @@ import java.util.UUID;
 import static java.util.stream.Collectors.toList;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.MediaType.APPLICATION_NDJSON_VALUE;
 
 @RestController
 @RequestMapping("/api/competitions")
@@ -36,13 +42,16 @@ public class CompetitionsController {
     private final DtoConverter dtoConverter;
     private final CompetitionsService competitionsService;
     private final CompetitionsReadService competitionsReadService;
+    private final QueryGateway queryGateway;
 
     public CompetitionsController(DtoConverter dtoConverter,
                                   CompetitionsService competitionsService,
-                                  CompetitionsReadService competitionsReadService) {
+                                  CompetitionsReadService competitionsReadService,
+                                  QueryGateway queryGateway) {
         this.dtoConverter = dtoConverter;
         this.competitionsService = competitionsService;
         this.competitionsReadService = competitionsReadService;
+        this.queryGateway = queryGateway;
     }
 
     @PostMapping
@@ -57,9 +66,9 @@ public class CompetitionsController {
 
     @GetMapping
     @ResponseStatus(OK)
-    @ApiOperation("List all competitions")
+    @ApiOperation("Retrieve a summary of all competitions")
     @AdminOrRegisteredUser
-    public List<CompetitionResponse> getAllCompetitions(@ApiIgnore Principal principal) {
+    public List<CompetitionSummaryResponse> getSummaryOfAllCompetitions(@ApiIgnore Principal principal) {
         return competitionsReadService.getAllCompetitionsOrderedByDescVotingEndsTimestamp().stream()
             .map(dtoConverter::convert)
             .collect(toList());
@@ -69,10 +78,32 @@ public class CompetitionsController {
     @ResponseStatus(CREATED)
     @ApiOperation("Submit a photo to the competition")
     @RegisteredUser
-    public void enterPhoto(@ApiIgnore Principal principal,
-                           @PathVariable UUID competitionId,
-                           @RequestBody CompetitionSubmissionRequest request) {
+    public void submitPhotoToCompetition(@ApiIgnore Principal principal,
+                                         @PathVariable UUID competitionId,
+                                         @RequestBody CompetitionSubmissionRequest request) {
         competitionsService.submitPhoto(UUID.fromString(principal.getName()), competitionId, request.getPhotoId(),
             request.getSubmissionNotes());
+    }
+
+    @GetMapping(path = "/{competitionId}")
+    @ResponseStatus(OK)
+    @ApiOperation("Full details for a single competition")
+    @AdminOrRegisteredUser
+    public CompetitionWithEntriesResponse getCompetition(@ApiIgnore Principal principal, @PathVariable UUID competitionId) {
+        return dtoConverter.convert(competitionsReadService.getCompetitionWithEntries(competitionId));
+    }
+
+    @GetMapping(path = "/{competitionId}", produces = APPLICATION_NDJSON_VALUE)
+    @ResponseStatus(OK)
+    @ApiOperation("Retrieve a competition and subscribe to updates")
+    @AdminOrRegisteredUser
+    public Flux<CompetitionWithEntriesResponse> getCompetitionWithEntriesUpdates(@ApiIgnore Principal principal,
+                                                                                 @PathVariable UUID competitionId) {
+        var subscriptionQueryResult = queryGateway.subscriptionQuery(
+            new CompetitionWithEntriesQuery(competitionId), CompetitionWithEntries.class, CompetitionWithEntries.class);
+
+        return subscriptionQueryResult.updates()
+            .mergeWith(subscriptionQueryResult.initialResult())
+            .map(dtoConverter::convert);
     }
 }

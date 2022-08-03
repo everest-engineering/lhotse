@@ -4,7 +4,7 @@ import engineering.everest.lhotse.axon.command.AxonCommandExecutionExceptionFact
 import engineering.everest.lhotse.competitions.domain.commands.EnterPhotoInCompetitionCommand;
 import engineering.everest.lhotse.competitions.domain.commands.CreateCompetitionCommand;
 import engineering.everest.lhotse.competitions.domain.events.CompetitionCreatedEvent;
-import engineering.everest.lhotse.competitions.domain.events.PhotoEnteredIntoCompetitionEvent;
+import engineering.everest.lhotse.competitions.domain.events.PhotoEnteredInCompetitionEvent;
 import org.axonframework.spring.stereotype.Aggregate;
 import org.axonframework.test.aggregate.AggregateTestFixture;
 import org.axonframework.test.aggregate.FixtureConfiguration;
@@ -37,8 +37,8 @@ class CompetitionAggregateTest {
     private static final Instant SUBMISSIONS_CLOSE = FIXED_INSTANT.plus(Duration.ofDays(2));
     private static final Instant VOTING_ENDS = FIXED_INSTANT.plus(Duration.ofDays(3));
     private static final String SUBMISSION_NOTES = "I took this while hiking";
-    private static final PhotoEnteredIntoCompetitionEvent PHOTO_ACCEPTED_INTO_COMPETITION_EVENT =
-        new PhotoEnteredIntoCompetitionEvent(COMPETITION_ID, SUBMISSION_PHOTO_ID, SUBMITTER_ID, SUBMITTER_ID, SUBMISSION_NOTES);
+    private static final PhotoEnteredInCompetitionEvent PHOTO_ACCEPTED_INTO_COMPETITION_EVENT =
+        new PhotoEnteredInCompetitionEvent(COMPETITION_ID, SUBMISSION_PHOTO_ID, SUBMITTER_ID, SUBMITTER_ID, SUBMISSION_NOTES);
     private static final CompetitionCreatedEvent COMPETITION_CREATED_EVENT =
         new CompetitionCreatedEvent(USER_ID, COMPETITION_ID, "", SUBMISSIONS_OPEN, SUBMISSIONS_CLOSE, VOTING_ENDS, 1);
 

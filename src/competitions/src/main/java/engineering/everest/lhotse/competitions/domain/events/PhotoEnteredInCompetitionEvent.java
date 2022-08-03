@@ -13,7 +13,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Revision("0")
-public class PhotoEnteredIntoCompetitionEvent {
+public class PhotoEnteredInCompetitionEvent {
     private UUID competitionId;
     private UUID photoId;
     @EncryptionKeyIdentifier

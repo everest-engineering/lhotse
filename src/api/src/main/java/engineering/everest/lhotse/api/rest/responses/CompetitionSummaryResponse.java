@@ -10,7 +10,7 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CompetitionResponse {
+public class CompetitionSummaryResponse {
     private UUID id;
     private String description;
     private Instant submissionsOpenTimestamp;

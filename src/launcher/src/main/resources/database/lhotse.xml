@@ -155,5 +155,17 @@
             <column name="votingendstimestamp" type="timestamp"/>
             <column name="maxentriesperuser" type="int"/>
         </createTable>
+
+        <createTable tableName="competition_entries">
+            <column name="competitionid" type="uuid"/>
+            <column name="photoid" type="uuid"/>
+            <column name="submitteruserid" type="uuid"/>
+            <column name="entrytimestamp" type="timestamp"/>
+            <column name="votesreceived" type="int"/>
+        </createTable>
+        <addPrimaryKey tableName="competition_entries" columnNames="competitionid,photoid" constraintName="PK_competition_entries"/>
+        <createIndex tableName="competition_entries" indexName="INDEX_competition_entries_competitionid">
+            <column name="competitionid"/>
+        </createIndex>
     </changeSet>
 </databaseChangeLog>

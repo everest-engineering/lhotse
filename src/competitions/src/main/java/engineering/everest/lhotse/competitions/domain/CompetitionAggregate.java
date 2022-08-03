@@ -4,7 +4,7 @@ import engineering.everest.lhotse.axon.command.AxonCommandExecutionExceptionFact
 import engineering.everest.lhotse.competitions.domain.commands.EnterPhotoInCompetitionCommand;
 import engineering.everest.lhotse.competitions.domain.commands.CreateCompetitionCommand;
 import engineering.everest.lhotse.competitions.domain.events.CompetitionCreatedEvent;
-import engineering.everest.lhotse.competitions.domain.events.PhotoEnteredIntoCompetitionEvent;
+import engineering.everest.lhotse.competitions.domain.events.PhotoEnteredInCompetitionEvent;
 import engineering.everest.lhotse.i18n.exceptions.TranslatableIllegalArgumentException;
 import engineering.everest.lhotse.i18n.exceptions.TranslatableIllegalStateException;
 import org.axonframework.commandhandling.CommandHandler;
@@ -75,7 +75,7 @@ public class CompetitionAggregate implements Serializable {
         validateSubmissionsOpen(axonCommandExecutionExceptionFactory, clock);
         validateMaxEntriesNotExceeded(command.getRequestingUserId(), axonCommandExecutionExceptionFactory);
 
-        apply(new PhotoEnteredIntoCompetitionEvent(command.getCompetitionId(), command.getPhotoId(), command.getRequestingUserId(),
+        apply(new PhotoEnteredInCompetitionEvent(command.getCompetitionId(), command.getPhotoId(), command.getRequestingUserId(),
             command.getPhotoOwnerUserId(), command.getSubmissionNotes()));
     }
 
@@ -91,7 +91,7 @@ public class CompetitionAggregate implements Serializable {
     }
 
     @EventSourcingHandler
-    void on(PhotoEnteredIntoCompetitionEvent event) {
+    void on(PhotoEnteredInCompetitionEvent event) {
         var previousNumEntriesForSubmitter = numEntriesReceivedPerUser.computeIfAbsent(event.getSubmittedByUserId(), (uuid) -> 0);
         numEntriesReceivedPerUser.put(event.getSubmittedByUserId(), previousNumEntriesForSubmitter + 1);
         submittedPhotos.add(event.getPhotoId());

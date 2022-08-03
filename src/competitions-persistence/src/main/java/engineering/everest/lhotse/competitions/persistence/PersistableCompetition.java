@@ -24,7 +24,7 @@ public class PersistableCompetition {
     private int maxEntriesPerUser;
 
     public Competition toDomain() {
-        return new Competition(id, description, submissionsOpenTimestamp, submissionsCloseTimestamp,
-            votingEndsTimestamp, maxEntriesPerUser);
+        return new Competition(id, description, submissionsOpenTimestamp, submissionsCloseTimestamp, votingEndsTimestamp,
+            maxEntriesPerUser);
     }
 }
