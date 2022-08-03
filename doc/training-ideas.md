@@ -29,7 +29,5 @@ human.
 
 We're pivoting the company! 
 
-** TODO think of a scenario ;) **
-
 Assume that the changes are being made to a system already in production. Write event upcasters and perform a replay
 (assume that you can disconnect a load balancer so life is easier).
