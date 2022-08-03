@@ -74,7 +74,7 @@ public class CompetitionsController {
             .collect(toList());
     }
 
-    @PostMapping("/{competitionId}/submission")
+    @PostMapping("/{competitionId}/photos")
     @ResponseStatus(CREATED)
     @ApiOperation("Submit a photo to the competition")
     @RegisteredUser
@@ -105,5 +105,15 @@ public class CompetitionsController {
         return subscriptionQueryResult.updates()
             .mergeWith(subscriptionQueryResult.initialResult())
             .map(dtoConverter::convert);
+    }
+
+    @PostMapping("/{competitionId}/photos/{photoId}/vote")
+    @ResponseStatus(CREATED)
+    @ApiOperation("Vote for an entry in a competition")
+    @RegisteredUser
+    public void voteForCompetitionEntry(@ApiIgnore Principal principal,
+                                        @PathVariable UUID competitionId,
+                                        @PathVariable UUID photoId) {
+        competitionsService.voteForPhoto(UUID.fromString(principal.getName()), competitionId, photoId);
     }
 }

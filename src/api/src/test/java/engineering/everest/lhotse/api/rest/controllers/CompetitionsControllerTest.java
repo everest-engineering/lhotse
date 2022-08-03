@@ -19,7 +19,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -125,7 +124,7 @@ class CompetitionsControllerTest {
     void photosCanBeEnteredIntoCompetitions() throws Exception {
         when(competitionsReadService.getAllCompetitionsOrderedByDescVotingEndsTimestamp()).thenReturn(List.of(COMPETITION_1));
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/competitions/{competitionId}/submission", COMPETITION_ID_1.toString())
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/competitions/{competitionId}/photos", COMPETITION_ID_1.toString())
             .principal(USER_ID::toString)
             .contentType(APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(new CompetitionSubmissionRequest(PHOTO_ID_1, "much wow look"))))
@@ -143,7 +142,6 @@ class CompetitionsControllerTest {
             .principal(USER_ID::toString)
             .accept(APPLICATION_JSON))
             .andExpect(status().isOk())
-            .andDo(MockMvcResultHandlers.print())
             .andExpect(jsonPath("$.id").value(COMPETITION_1.getId().toString()))
             .andExpect(jsonPath("$.description").value(COMPETITION_1.getDescription()))
             .andExpect(jsonPath("$.submissionsOpenTimestamp").value(COMPETITION_1.getSubmissionsOpenTimestamp().toString()))
@@ -158,5 +156,17 @@ class CompetitionsControllerTest {
             .andExpect(jsonPath("$.entries[1].submitterUserId").value(COMPETITION_1_ENTRY_2.getSubmittedByUserId().toString()))
             .andExpect(jsonPath("$.entries[1].entryTimestamp").value(COMPETITION_1_ENTRY_2.getEntryTimestamp().toString()))
             .andExpect(jsonPath("$.entries[1].votesReceived").value(COMPETITION_1_ENTRY_2.getNumVotesReceived()));
+    }
+
+    @Test
+    @WithMockKeycloakAuth(authorities = ROLE_REGISTERED_USER)
+    void photosInCompetitionsCanBeVotedFor() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/competitions/{competitionId}/photos/{photoId}/vote",
+            COMPETITION_ID_1.toString(), PHOTO_ID_1.toString())
+            .principal(USER_ID::toString)
+            .contentType(APPLICATION_JSON))
+            .andExpect(status().isCreated());
+
+        verify(competitionsService).voteForPhoto(USER_ID, COMPETITION_ID_1, PHOTO_ID_1);
     }
 }

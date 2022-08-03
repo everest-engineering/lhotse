@@ -2,8 +2,10 @@ package engineering.everest.lhotse.competitions.handlers;
 
 import engineering.everest.lhotse.competitions.domain.events.CompetitionCreatedEvent;
 import engineering.everest.lhotse.competitions.domain.events.PhotoEnteredInCompetitionEvent;
+import engineering.everest.lhotse.competitions.domain.events.PhotoEntryReceivedVoteEvent;
 import engineering.everest.lhotse.competitions.domain.queries.CompetitionWithEntriesQuery;
 import engineering.everest.lhotse.competitions.persistence.CompetitionEntriesRepository;
+import engineering.everest.lhotse.competitions.persistence.CompetitionEntryId;
 import engineering.everest.lhotse.competitions.persistence.CompetitionsRepository;
 import engineering.everest.lhotse.competitions.services.CompetitionsReadService;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +16,7 @@ import org.axonframework.queryhandling.QueryUpdateEmitter;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -54,8 +57,24 @@ public class CompetitionsEventHandler {
         competitionEntriesRepository.createCompetitionEntry(event.getCompetitionId(), event.getPhotoId(),
             event.getSubmittedByUserId(), entryTimestamp);
 
+        emitCompetitionWithEntriesQueryUpdate(event.getCompetitionId());
+    }
+
+    @EventHandler
+    void on(PhotoEntryReceivedVoteEvent event) {
+        LOGGER.info("Photo {} in competition {} was voted for by user {}", event.getPhotoId(), event.getCompetitionId(),
+            event.getVotingUserId());
+
+        var id = new CompetitionEntryId(event.getCompetitionId(), event.getPhotoId());
+        var competitionEntry = competitionEntriesRepository.findById(id).orElseThrow();
+        competitionEntry.setVotesReceived(competitionEntry.getVotesReceived() + 1);
+
+        emitCompetitionWithEntriesQueryUpdate(event.getCompetitionId());
+    }
+
+    private void emitCompetitionWithEntriesQueryUpdate(UUID event) {
         queryUpdateEmitter.emit(CompetitionWithEntriesQuery.class,
-            filter -> event.getCompetitionId().equals(filter.getCompetitionId()),
-            competitionsReadService.getCompetitionWithEntries(event.getCompetitionId()));
+            filter -> event.equals(filter.getCompetitionId()),
+            competitionsReadService.getCompetitionWithEntries(event));
     }
 }

@@ -13,4 +13,6 @@ public interface CompetitionsService {
                            int maxEntriesPerUser);
 
     void submitPhoto(UUID requestingUserId, UUID competitionId, UUID photoId, String submissionNotes);
+
+    void voteForPhoto(UUID requestingUserId, UUID competitionId, UUID photoId);
 }

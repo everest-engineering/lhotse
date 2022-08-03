@@ -3,6 +3,7 @@ package engineering.everest.lhotse.competitions.services;
 import engineering.everest.lhotse.common.RandomFieldsGenerator;
 import engineering.everest.lhotse.competitions.domain.commands.CreateCompetitionCommand;
 import engineering.everest.lhotse.competitions.domain.commands.EnterPhotoInCompetitionCommand;
+import engineering.everest.lhotse.competitions.domain.commands.VoteForPhotoCommand;
 import engineering.everest.lhotse.photos.services.PhotosReadService;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.springframework.stereotype.Service;
@@ -43,5 +44,10 @@ public class DefaultCompetitionsService implements CompetitionsService {
         var owningUserId = photosReadService.getPhoto(photoId).getOwningUserId();
         commandGateway.sendAndWait(new EnterPhotoInCompetitionCommand(competitionId, photoId, requestingUserId,
             owningUserId, submissionNotes));
+    }
+
+    @Override
+    public void voteForPhoto(UUID requestingUserId, UUID competitionId, UUID photoId) {
+        commandGateway.sendAndWait(new VoteForPhotoCommand(competitionId, photoId, requestingUserId));
     }
 }

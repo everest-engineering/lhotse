@@ -195,7 +195,7 @@ public class ApiRestTestClient {
     public void submitPhoto(UUID competitionId, UUID photoId, HttpStatus expectedHttpStatus) {
         var requestBody = new CompetitionSubmissionRequest(photoId, "submission notes go here");
 
-        webTestClient.post().uri("/api/competitions/{competitionId}/submission", competitionId)
+        webTestClient.post().uri("/api/competitions/{competitionId}/photos", competitionId)
             .header("Authorization", "Bearer " + accessToken)
             .contentType(APPLICATION_JSON)
             .body(BodyInserters.fromValue(requestBody))

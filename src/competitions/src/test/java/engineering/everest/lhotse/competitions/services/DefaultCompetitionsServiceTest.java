@@ -3,6 +3,7 @@ package engineering.everest.lhotse.competitions.services;
 import engineering.everest.lhotse.common.RandomFieldsGenerator;
 import engineering.everest.lhotse.competitions.domain.commands.CreateCompetitionCommand;
 import engineering.everest.lhotse.competitions.domain.commands.EnterPhotoInCompetitionCommand;
+import engineering.everest.lhotse.competitions.domain.commands.VoteForPhotoCommand;
 import engineering.everest.lhotse.photos.Photo;
 import engineering.everest.lhotse.photos.services.PhotosReadService;
 import org.axonframework.commandhandling.gateway.CommandGateway;
@@ -50,9 +51,8 @@ class DefaultCompetitionsServiceTest {
         defaultCompetitionsService.createCompetition(USER_ID, "description", SUBMISSIONS_OPEN_TIMESTAMP,
             SUBMISSIONS_CLOSE_TIMESTAMP, VOTING_ENDS_TIMESTAMP, 2);
 
-        verify(commandGateway).sendAndWait(
-            new CreateCompetitionCommand(USER_ID, COMPETITION_ID, "description", SUBMISSIONS_OPEN_TIMESTAMP,
-                SUBMISSIONS_CLOSE_TIMESTAMP, VOTING_ENDS_TIMESTAMP, 2));
+        verify(commandGateway).sendAndWait(new CreateCompetitionCommand(USER_ID, COMPETITION_ID, "description",
+            SUBMISSIONS_OPEN_TIMESTAMP, SUBMISSIONS_CLOSE_TIMESTAMP, VOTING_ENDS_TIMESTAMP, 2));
     }
 
     @Test
@@ -63,7 +63,14 @@ class DefaultCompetitionsServiceTest {
 
         defaultCompetitionsService.submitPhoto(USER_ID, COMPETITION_ID, PHOTO_ID, "submission notes");
 
-        verify(commandGateway).sendAndWait(
-            new EnterPhotoInCompetitionCommand(COMPETITION_ID, PHOTO_ID, USER_ID, ownerUserId, "submission notes"));
+        verify(commandGateway).sendAndWait(new EnterPhotoInCompetitionCommand(COMPETITION_ID, PHOTO_ID, USER_ID,
+            ownerUserId, "submission notes"));
+    }
+
+    @Test
+    void voteForPhoto_WillDispatch() {
+        defaultCompetitionsService.voteForPhoto(USER_ID, COMPETITION_ID, PHOTO_ID);
+
+        verify(commandGateway).sendAndWait(new VoteForPhotoCommand(COMPETITION_ID, PHOTO_ID, USER_ID));
     }
 }

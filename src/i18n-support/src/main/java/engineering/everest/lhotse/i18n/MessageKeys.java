@@ -3,6 +3,7 @@ package engineering.everest.lhotse.i18n;
 @SuppressWarnings("PMD.ClassNamingConventions")
 public class MessageKeys {
     public static final String ALREADY_ENTERED_IN_COMPETITION = "ALREADY_ENTERED_IN_COMPETITION";
+    public static final String ALREADY_VOTED_FOR_THIS_ENTRY = "ALREADY_VOTED_FOR_THIS_ENTRY";
     public static final String COMPETITION_MAX_ENTRIES_REACHED = "COMPETITION_MAX_ENTRIES_REACHED";
     public static final String COMPETITION_MINIMUM_SUBMISSION_PERIOD = "COMPETITION_MINIMUM_SUBMISSION_PERIOD";
     public static final String COMPETITION_MINIMUM_VOTING_PERIOD = "COMPETITION_MINIMUM_VOTING_PERIOD";
@@ -12,8 +13,11 @@ public class MessageKeys {
     public static final String DELETED_PHOTO_OWNER_MISMATCH = "DELETED_PHOTO_OWNER_MISMATCH";
     public static final String EMAIL_ADDRESS_MALFORMED = "EMAIL_ADDRESS_MALFORMED";
     public static final String FILE_DOES_NOT_EXIST = "FILE_DOES_NOT_EXIST";
+    public static final String PHOTO_NOT_ENTERED_IN_COMPETITION = "PHOTO_NOT_ENTERED_IN_COMPETITION";
     public static final String SUBMISSIONS_CLOSE_TIMESTAMP_IN_PAST = "SUBMISSIONS_CLOSE_TIMESTAMP_IN_PAST";
     public static final String SUBMISSION_BY_NON_PHOTO_OWNER = "SUBMISSION_BY_NON_PHOTO_OWNER";
+    public static final String VOTING_ENDED = "VOTING_ENDED";
+    public static final String VOTING_PERIOD_NOT_STARTED = "VOTING_PERIOD_NOT_STARTED";
 
     private MessageKeys() {}
 }
