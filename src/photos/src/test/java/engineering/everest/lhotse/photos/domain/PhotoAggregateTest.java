@@ -1,6 +1,5 @@
 package engineering.everest.lhotse.photos.domain;
 
-import engineering.everest.lhotse.axon.command.AxonCommandExecutionExceptionFactory;
 import engineering.everest.lhotse.axon.command.validators.FileStatusValidator;
 import engineering.everest.lhotse.photos.domain.commands.DeletePhotoForDeletedUserCommand;
 import engineering.everest.lhotse.photos.domain.commands.RegisterUploadedPhotoCommand;
@@ -34,19 +33,14 @@ class PhotoAggregateTest {
         new PhotoUploadedEvent(PHOTO_ID, USER_ID, PHOTO_BACKING_FILE_ID, PHOTO_FILENAME);
 
     private FixtureConfiguration<PhotoAggregate> testFixture;
-    private AxonCommandExecutionExceptionFactory axonCommandExecutionExceptionFactory;
 
     @Mock
     private FileStatusValidator fileStatusValidator;
 
     @BeforeEach
     void setUp() {
-        axonCommandExecutionExceptionFactory = new AxonCommandExecutionExceptionFactory();
-
         testFixture = new AggregateTestFixture<>(PhotoAggregate.class)
-            .registerCommandHandlerInterceptor(mockCommandValidatingMessageHandlerInterceptor(
-                fileStatusValidator))
-            .registerInjectableResource(axonCommandExecutionExceptionFactory);
+            .registerCommandHandlerInterceptor(mockCommandValidatingMessageHandlerInterceptor(fileStatusValidator));
     }
 
     @Test

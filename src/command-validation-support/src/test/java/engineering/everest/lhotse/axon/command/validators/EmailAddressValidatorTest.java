@@ -1,6 +1,5 @@
 package engineering.everest.lhotse.axon.command.validators;
 
-import engineering.everest.lhotse.axon.command.AxonCommandExecutionExceptionFactory;
 import engineering.everest.lhotse.i18n.exceptions.TranslatableIllegalArgumentException;
 import org.axonframework.commandhandling.CommandExecutionException;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,7 +14,7 @@ class EmailAddressValidatorTest {
 
     @BeforeEach
     void setUp() {
-        emailAddressValidator = new EmailAddressValidator(new AxonCommandExecutionExceptionFactory());
+        emailAddressValidator = new EmailAddressValidator();
     }
 
     @Test

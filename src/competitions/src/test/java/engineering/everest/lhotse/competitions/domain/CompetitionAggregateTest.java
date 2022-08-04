@@ -1,6 +1,5 @@
 package engineering.everest.lhotse.competitions.domain;
 
-import engineering.everest.lhotse.axon.command.AxonCommandExecutionExceptionFactory;
 import engineering.everest.lhotse.competitions.domain.commands.CountVotesAndDeclareOutcomeCommand;
 import engineering.everest.lhotse.competitions.domain.commands.CreateCompetitionCommand;
 import engineering.everest.lhotse.competitions.domain.commands.EnterPhotoInCompetitionCommand;
@@ -62,18 +61,14 @@ class CompetitionAggregateTest {
         new CompetitionEndedAndWinnersDeclaredEvent(COMPETITION_ID, List.of(Pair.of(SUBMITTER_ID, PHOTO_ID)), 1);
 
     private FixtureConfiguration<CompetitionAggregate> testFixture;
-    private AxonCommandExecutionExceptionFactory axonCommandExecutionExceptionFactory;
 
     @Mock
     private Clock clock;
 
     @BeforeEach
     void setUp() {
-        axonCommandExecutionExceptionFactory = new AxonCommandExecutionExceptionFactory();
-
         testFixture = new AggregateTestFixture<>(CompetitionAggregate.class)
             .registerCommandHandlerInterceptor(mockCommandValidatingMessageHandlerInterceptor())
-            .registerInjectableResource(axonCommandExecutionExceptionFactory)
             .registerInjectableResource(clock);
 
         lenient().when(clock.instant()).thenReturn(FIXED_INSTANT);

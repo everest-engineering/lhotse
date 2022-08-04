@@ -1,6 +1,5 @@
 package engineering.everest.lhotse.axon;
 
-import engineering.everest.lhotse.axon.command.AxonCommandExecutionExceptionFactory;
 import engineering.everest.lhotse.axon.command.validators.EmailAddressValidator;
 import org.axonframework.commandhandling.CommandMessage;
 import org.axonframework.messaging.InterceptorChain;
@@ -13,17 +12,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.validation.Validator;
 import java.util.List;
-import java.util.UUID;
 
 import static java.util.Collections.emptySet;
-import static java.util.UUID.randomUUID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 
 @ExtendWith(MockitoExtension.class)
 class CommandValidatingMessageHandlerInterceptorTest {
-
-    private static final UUID ORGANIZATION_ID = randomUUID();
 
     @Mock
     private UnitOfWork<? extends CommandMessage<?>> unitOfWork;
@@ -37,14 +32,12 @@ class CommandValidatingMessageHandlerInterceptorTest {
 
     private EmailAddressValidator emailAddressValidator;
     private CommandValidatingMessageHandlerInterceptor commandValidatingMessageHandlerInterceptor;
-    private AxonCommandExecutionExceptionFactory axonCommandExecutionExceptionFactory;
 
     @BeforeEach
     void setUp() {
         Mockito.<CommandMessage<?>>when(unitOfWork.getMessage()).thenReturn(commandMessage);
         lenient().when(javaBeanValidator.validate(any())).thenReturn(emptySet());
-        axonCommandExecutionExceptionFactory = new AxonCommandExecutionExceptionFactory();
-        emailAddressValidator = new EmailAddressValidator(axonCommandExecutionExceptionFactory);
+        emailAddressValidator = new EmailAddressValidator();
         commandValidatingMessageHandlerInterceptor = new CommandValidatingMessageHandlerInterceptor(
             List.of(emailAddressValidator),
             javaBeanValidator);

@@ -1,2 +1,5 @@
 dependencies {
+    implementation project(':i18n-support')
+
+    implementation "org.axonframework:axon-messaging:${axonVersion}"
 }

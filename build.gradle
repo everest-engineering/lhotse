@@ -47,7 +47,7 @@ subprojects {
         mediaVersion = '0.9.10'
         storageVersion = '1.0.1'
 
-        axonVersion = '4.5.14'
+        axonVersion = '4.5.15'
         bouncyCastleVersion = '1.71'
         commonsLangVersion = '3.12.0'
         commonsTextVersion = '1.9'

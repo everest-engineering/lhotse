@@ -1,6 +1,5 @@
 package engineering.everest.lhotse.axon.command.validators;
 
-import engineering.everest.lhotse.axon.command.AxonCommandExecutionExceptionFactory;
 import engineering.everest.lhotse.axon.command.validation.FileStatusValidatableCommand;
 import engineering.everest.starterkit.filestorage.FileService;
 import org.axonframework.commandhandling.CommandExecutionException;
@@ -33,7 +32,7 @@ class FileStatusValidatorTest {
 
     @BeforeEach
     void setUp() {
-        fileStatusValidator = new FileStatusValidator(fileService, new AxonCommandExecutionExceptionFactory());
+        fileStatusValidator = new FileStatusValidator(fileService);
     }
 
     @Test

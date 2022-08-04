@@ -1,12 +1,13 @@
 package engineering.everest.lhotse.competitions.domain;
 
-import engineering.everest.lhotse.axon.command.AxonCommandExecutionExceptionFactory;
 import engineering.everest.lhotse.competitions.domain.commands.VoteForPhotoCommand;
 import engineering.everest.lhotse.competitions.domain.events.PhotoEntryReceivedVoteEvent;
+import engineering.everest.lhotse.i18n.exceptions.TranslatableException;
 import engineering.everest.lhotse.i18n.exceptions.TranslatableIllegalStateException;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.axonframework.commandhandling.CommandExecutionException;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.modelling.command.EntityId;
 
@@ -34,9 +35,8 @@ public class CompetitionEntryEntity {
     }
 
     // Not annotated with @CommandHandler on purpose. Some validation occurs in aggregate root.
-    void handle(VoteForPhotoCommand command,
-                AxonCommandExecutionExceptionFactory axonCommandExecutionExceptionFactory) {
-        validateUserHasNotVotedForPhotoBefore(command.getRequestingUserId(), axonCommandExecutionExceptionFactory);
+    void handle(VoteForPhotoCommand command) {
+        validateUserHasNotVotedForPhotoBefore(command.getRequestingUserId());
 
         apply(new PhotoEntryReceivedVoteEvent(command.getCompetitionId(), photoId, command.getRequestingUserId()));
     }
@@ -48,11 +48,13 @@ public class CompetitionEntryEntity {
         }
     }
 
-    private void validateUserHasNotVotedForPhotoBefore(UUID requestingUserId,
-                                                       AxonCommandExecutionExceptionFactory axonCommandExecutionExceptionFactory) {
+    private void validateUserHasNotVotedForPhotoBefore(UUID requestingUserId) {
         if (usersVotedFor.contains(requestingUserId)) {
-            axonCommandExecutionExceptionFactory.throwWrappedInCommandExecutionException(
-                new TranslatableIllegalStateException(ALREADY_VOTED_FOR_THIS_ENTRY));
+            throwWrappedInCommandExecutionException(new TranslatableIllegalStateException(ALREADY_VOTED_FOR_THIS_ENTRY));
         }
+    }
+
+    private static void throwWrappedInCommandExecutionException(TranslatableException translatableException) {
+        throw new CommandExecutionException(translatableException.getMessage(), null, translatableException);
     }
 }

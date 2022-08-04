@@ -1,6 +1,5 @@
 package engineering.everest.lhotse.axon.command.validators;
 
-import engineering.everest.lhotse.axon.command.AxonCommandExecutionExceptionFactory;
 import engineering.everest.lhotse.axon.command.validation.FileStatusValidatableCommand;
 import engineering.everest.lhotse.axon.command.validation.Validates;
 import engineering.everest.lhotse.i18n.exceptions.TranslatableIllegalStateException;
@@ -15,11 +14,9 @@ import static engineering.everest.lhotse.i18n.MessageKeys.FILE_DOES_NOT_EXIST;
 public class FileStatusValidator implements Validates<FileStatusValidatableCommand> {
 
     private final FileService fileService;
-    private final AxonCommandExecutionExceptionFactory axonCommandExecutionExceptionFactory;
 
-    public FileStatusValidator(FileService fileService, AxonCommandExecutionExceptionFactory axonCommandExecutionExceptionFactory) {
+    public FileStatusValidator(FileService fileService) {
         this.fileService = fileService;
-        this.axonCommandExecutionExceptionFactory = axonCommandExecutionExceptionFactory;
     }
 
     @Override
@@ -28,8 +25,7 @@ public class FileStatusValidator implements Validates<FileStatusValidatableComma
             try {
                 fileService.fileSizeInBytes(fileId);
             } catch (NoSuchElementException e) {
-                axonCommandExecutionExceptionFactory.throwWrappedInCommandExecutionException(
-                    new TranslatableIllegalStateException(FILE_DOES_NOT_EXIST, fileId));
+                throwWrappedInCommandExecutionException(new TranslatableIllegalStateException(FILE_DOES_NOT_EXIST, fileId));
             }
         });
     }
