@@ -12,7 +12,7 @@ import java.util.UUID;
 public interface CompetitionEntriesRepository extends JpaRepository<PersistableCompetitionEntry, CompetitionEntryId> {
 
     default void createCompetitionEntry(UUID competitionId, UUID photoId, UUID submittedByUserId, Instant entryTimestamp) {
-        save(new PersistableCompetitionEntry(competitionId, photoId, submittedByUserId, entryTimestamp, 0));
+        save(new PersistableCompetitionEntry(competitionId, photoId, submittedByUserId, entryTimestamp));
     }
 
     List<PersistableCompetitionEntry> findAllByCompetitionId(UUID competitionId, Sort sort);

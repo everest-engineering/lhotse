@@ -54,9 +54,9 @@ class CompetitionsControllerTest {
         new Competition(COMPETITION_ID_2, "second ending", Instant.ofEpochMilli(1), Instant.ofEpochMilli(4), Instant.ofEpochMilli(5), 99);
 
     private static final CompetitionEntry COMPETITION_1_ENTRY_1 =
-        new CompetitionEntry(COMPETITION_ID_1, PHOTO_ID_1, USER_ID, Instant.ofEpochMilli(444), 0);
+        new CompetitionEntry(COMPETITION_ID_1, PHOTO_ID_1, USER_ID, Instant.ofEpochMilli(444), 0, false);
     private static final CompetitionEntry COMPETITION_1_ENTRY_2 =
-        new CompetitionEntry(COMPETITION_ID_1, PHOTO_ID_2, USER_ID, Instant.ofEpochMilli(555), 0);
+        new CompetitionEntry(COMPETITION_ID_1, PHOTO_ID_2, USER_ID, Instant.ofEpochMilli(555), 0, false);
     private static final CompetitionWithEntries COMPETITION_WITH_ENTRIES_1 =
         new CompetitionWithEntries(COMPETITION_1, List.of(COMPETITION_1_ENTRY_1, COMPETITION_1_ENTRY_2));
 

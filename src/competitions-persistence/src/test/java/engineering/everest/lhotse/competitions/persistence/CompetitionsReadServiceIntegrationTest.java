@@ -53,9 +53,9 @@ public class CompetitionsReadServiceIntegrationTest {
     private static final Competition COMPETITION_2 = new Competition(COMPETITION_ID_2, DESCRIPTION_2, SUBMISSIONS_OPEN_TIMESTAMP_2,
         SUBMISSIONS_CLOSE_TIMESTAMP_2, VOTING_ENDS_TIMESTAMP_2, 2);
     private static final CompetitionEntry COMPETITION_2_ENTRY_1 = new CompetitionEntry(COMPETITION_ID_2, PHOTO_ID_1, USER_ID_1,
-        Instant.ofEpochMilli(108), 0);
+        Instant.ofEpochMilli(108), 0, false);
     private static final CompetitionEntry COMPETITION_2_ENTRY_2 = new CompetitionEntry(COMPETITION_ID_2, PHOTO_ID_2, USER_ID_2,
-        Instant.ofEpochMilli(110), 0);
+        Instant.ofEpochMilli(110), 0, false);
     private static final CompetitionWithEntries COMPETITION_2_WITH_ENTRIES =
         new CompetitionWithEntries(COMPETITION_2, List.of(COMPETITION_2_ENTRY_1, COMPETITION_2_ENTRY_2));
 

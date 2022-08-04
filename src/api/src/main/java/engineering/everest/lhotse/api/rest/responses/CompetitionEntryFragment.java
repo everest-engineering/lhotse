@@ -15,4 +15,5 @@ public class CompetitionEntryFragment {
     private UUID submitterUserId;
     private Instant entryTimestamp;
     private int votesReceived;
+    private boolean didWin;
 }

@@ -26,7 +26,7 @@ public class DtoConverter {
     public CompetitionWithEntriesResponse convert(CompetitionWithEntries competitionWithEntries) {
         var entries = competitionWithEntries.getEntries().stream()
             .map(x -> new CompetitionEntryFragment(x.getPhotoId(), x.getSubmittedByUserId(), x.getEntryTimestamp(),
-                x.getNumVotesReceived()))
+                x.getNumVotesReceived(), x.isWinner()))
             .collect(toList());
 
         return new CompetitionWithEntriesResponse(

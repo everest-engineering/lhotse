@@ -10,6 +10,7 @@ import engineering.everest.lhotse.competitions.domain.events.CompetitionEndedWit
 import engineering.everest.lhotse.competitions.domain.events.CompetitionEndedWithNoEntriesSubmittedEvent;
 import engineering.everest.lhotse.competitions.domain.events.PhotoEnteredInCompetitionEvent;
 import engineering.everest.lhotse.competitions.domain.events.PhotoEntryReceivedVoteEvent;
+import engineering.everest.lhotse.competitions.domain.events.WinnerAndSubmittedPhotoPair;
 import org.axonframework.spring.stereotype.Aggregate;
 import org.axonframework.test.aggregate.AggregateTestFixture;
 import org.axonframework.test.aggregate.FixtureConfiguration;
@@ -18,7 +19,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.util.Pair;
 
 import java.time.Clock;
 import java.time.Duration;
@@ -58,7 +58,7 @@ class CompetitionAggregateTest {
     private static final CompetitionEndedWithNoEntriesReceivingVotesEvent COMPETITION_ENDED_WITH_NO_ENTRIES_RECEIVING_VOTES_EVENT =
         new CompetitionEndedWithNoEntriesReceivingVotesEvent(COMPETITION_ID);
     private static final CompetitionEndedAndWinnersDeclaredEvent COMPETITION_ENDED_AND_SINGLE_WINNER_DECLARED_EVENT =
-        new CompetitionEndedAndWinnersDeclaredEvent(COMPETITION_ID, List.of(Pair.of(SUBMITTER_ID, PHOTO_ID)), 1);
+        new CompetitionEndedAndWinnersDeclaredEvent(COMPETITION_ID, List.of(new WinnerAndSubmittedPhotoPair(SUBMITTER_ID, PHOTO_ID)), 1);
 
     private FixtureConfiguration<CompetitionAggregate> testFixture;
 
@@ -271,8 +271,9 @@ class CompetitionAggregateTest {
             new PhotoEnteredInCompetitionEvent(COMPETITION_ID, secondPhoto, secondSubmitter, secondSubmitter, SUBMISSION_NOTES);
         var additionalVote = new PhotoEntryReceivedVoteEvent(COMPETITION_ID, secondPhoto, secondSubmitter);
 
-        var expectedWinnersWithPhotos = new ArrayList<>(List.of(Pair.of(SUBMITTER_ID, PHOTO_ID), Pair.of(secondSubmitter, secondPhoto)));
-        expectedWinnersWithPhotos.sort(comparing(Pair::getSecond));
+        var expectedWinnersWithPhotos = new ArrayList<>(List.of(new WinnerAndSubmittedPhotoPair(SUBMITTER_ID, PHOTO_ID),
+            new WinnerAndSubmittedPhotoPair(secondSubmitter, secondPhoto)));
+        expectedWinnersWithPhotos.sort(comparing(WinnerAndSubmittedPhotoPair::getPhotoId));
 
         testFixture.given(COMPETITION_CREATED_EVENT,
             PHOTO_ENTERED_INTO_COMPETITION_EVENT,

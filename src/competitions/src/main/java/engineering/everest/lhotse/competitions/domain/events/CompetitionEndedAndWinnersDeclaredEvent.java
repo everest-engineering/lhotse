@@ -5,7 +5,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.axonframework.serialization.Revision;
-import org.springframework.data.util.Pair;
 
 import java.util.List;
 import java.util.UUID;
@@ -16,12 +15,15 @@ import java.util.UUID;
 @EqualsAndHashCode(callSuper = true)
 @Revision("0")
 public class CompetitionEndedAndWinnersDeclaredEvent extends CompetitionEndedEvent {
-    private List<Pair<UUID, UUID>> winnersToPhotoIdList;
+    private List<WinnerAndSubmittedPhotoPair> winnersToPhotoIdList;
     private int numVotesReceived;
 
-    public CompetitionEndedAndWinnersDeclaredEvent(UUID competitionId, List<Pair<UUID, UUID>> winnersToPhotoIdList, int numVotesReceived) {
+    public CompetitionEndedAndWinnersDeclaredEvent(UUID competitionId,
+                                                   List<WinnerAndSubmittedPhotoPair> winnersToPhotoIdList,
+                                                   int numVotesReceived) {
         super(competitionId);
         this.winnersToPhotoIdList = winnersToPhotoIdList;
         this.numVotesReceived = numVotesReceived;
     }
+
 }

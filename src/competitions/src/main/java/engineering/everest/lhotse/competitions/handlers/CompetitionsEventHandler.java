@@ -1,6 +1,7 @@
 package engineering.everest.lhotse.competitions.handlers;
 
 import engineering.everest.lhotse.competitions.domain.events.CompetitionCreatedEvent;
+import engineering.everest.lhotse.competitions.domain.events.CompetitionEndedAndWinnersDeclaredEvent;
 import engineering.everest.lhotse.competitions.domain.events.PhotoEnteredInCompetitionEvent;
 import engineering.everest.lhotse.competitions.domain.events.PhotoEntryReceivedVoteEvent;
 import engineering.everest.lhotse.competitions.domain.queries.CompetitionWithEntriesQuery;
@@ -72,9 +73,21 @@ public class CompetitionsEventHandler {
         emitCompetitionWithEntriesQueryUpdate(event.getCompetitionId());
     }
 
-    private void emitCompetitionWithEntriesQueryUpdate(UUID event) {
-        queryUpdateEmitter.emit(CompetitionWithEntriesQuery.class,
-            filter -> event.equals(filter.getCompetitionId()),
-            competitionsReadService.getCompetitionWithEntries(event));
+    @EventHandler
+    void on(CompetitionEndedAndWinnersDeclaredEvent event) {
+        LOGGER.info("winner(s) declared for competition {}", event.getCompetitionId());
+
+        event.getWinnersToPhotoIdList().forEach(winnerAndPhotoId -> {
+            var entryId = new CompetitionEntryId(event.getCompetitionId(), winnerAndPhotoId.getPhotoId());
+            var entry = competitionEntriesRepository.findById(entryId).orElseThrow();
+            entry.setWinner(true);
+        });
+
+        emitCompetitionWithEntriesQueryUpdate(event.getCompetitionId());
+    }
+
+    private void emitCompetitionWithEntriesQueryUpdate(UUID competitionId) {
+        queryUpdateEmitter.emit(CompetitionWithEntriesQuery.class, filter -> competitionId.equals(filter.getCompetitionId()),
+            competitionsReadService.getCompetitionWithEntries(competitionId));
     }
 }

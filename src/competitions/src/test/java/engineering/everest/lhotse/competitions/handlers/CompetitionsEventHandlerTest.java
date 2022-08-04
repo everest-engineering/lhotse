@@ -2,8 +2,10 @@ package engineering.everest.lhotse.competitions.handlers;
 
 import engineering.everest.lhotse.competitions.domain.CompetitionWithEntries;
 import engineering.everest.lhotse.competitions.domain.events.CompetitionCreatedEvent;
+import engineering.everest.lhotse.competitions.domain.events.CompetitionEndedAndWinnersDeclaredEvent;
 import engineering.everest.lhotse.competitions.domain.events.PhotoEnteredInCompetitionEvent;
 import engineering.everest.lhotse.competitions.domain.events.PhotoEntryReceivedVoteEvent;
+import engineering.everest.lhotse.competitions.domain.events.WinnerAndSubmittedPhotoPair;
 import engineering.everest.lhotse.competitions.domain.queries.CompetitionWithEntriesQuery;
 import engineering.everest.lhotse.competitions.persistence.CompetitionEntriesRepository;
 import engineering.everest.lhotse.competitions.persistence.CompetitionEntryId;
@@ -18,11 +20,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -94,7 +98,7 @@ class CompetitionsEventHandlerTest {
 
     @Test
     void onPhotoEntryReceivedVoteEvent_WillProject() {
-        var persistableCompetitionEntry = new PersistableCompetitionEntry(COMPETITION_ID, PHOTO_ID, USER_ID, ENTRY_TIMESTAMP, 0);
+        var persistableCompetitionEntry = new PersistableCompetitionEntry(COMPETITION_ID, PHOTO_ID, USER_ID, ENTRY_TIMESTAMP);
         when(competitionEntriesRepository.findById(new CompetitionEntryId(COMPETITION_ID, PHOTO_ID))).thenReturn(
             Optional.of(persistableCompetitionEntry));
 
@@ -102,5 +106,44 @@ class CompetitionsEventHandlerTest {
         competitionsEventHandler.on(new PhotoEntryReceivedVoteEvent(COMPETITION_ID, PHOTO_ID, USER_ID));
 
         assertEquals(2, persistableCompetitionEntry.getVotesReceived());
+    }
+
+    @Test
+    void onPhotoEntryReceivedVoteEvent_WillEmitQueryUpdate() {
+        var persistableCompetitionEntry = new PersistableCompetitionEntry(COMPETITION_ID, PHOTO_ID, USER_ID, ENTRY_TIMESTAMP);
+        when(competitionEntriesRepository.findById(new CompetitionEntryId(COMPETITION_ID, PHOTO_ID)))
+            .thenReturn(Optional.of(persistableCompetitionEntry));
+        var expectedCompetitionWithEntries = mock(CompetitionWithEntries.class);
+        when(competitionsReadService.getCompetitionWithEntries(COMPETITION_ID)).thenReturn(expectedCompetitionWithEntries);
+
+        competitionsEventHandler.on(new PhotoEntryReceivedVoteEvent(COMPETITION_ID, PHOTO_ID, USER_ID));
+
+        verify(queryUpdateEmitter).emit(eq(CompetitionWithEntriesQuery.class), any(), eq(expectedCompetitionWithEntries));
+    }
+
+    @Test
+    void onCompetitionWinnersDeclared_WillProject() {
+        var persistableCompetitionEntry = new PersistableCompetitionEntry(COMPETITION_ID, PHOTO_ID, USER_ID, ENTRY_TIMESTAMP);
+        when(competitionEntriesRepository.findById(new CompetitionEntryId(COMPETITION_ID, PHOTO_ID)))
+            .thenReturn(Optional.of(persistableCompetitionEntry));
+
+        competitionsEventHandler.on(
+            new CompetitionEndedAndWinnersDeclaredEvent(COMPETITION_ID, List.of(new WinnerAndSubmittedPhotoPair(USER_ID, PHOTO_ID)), 1));
+
+        assertTrue(persistableCompetitionEntry.isWinner());
+    }
+
+    @Test
+    void onCompetitionWinnersDeclared_WillEmitQueryUpdate() {
+        var persistableCompetitionEntry = new PersistableCompetitionEntry(COMPETITION_ID, PHOTO_ID, USER_ID, ENTRY_TIMESTAMP);
+        when(competitionEntriesRepository.findById(eq(new CompetitionEntryId(COMPETITION_ID, PHOTO_ID))))
+            .thenReturn(Optional.of(persistableCompetitionEntry));
+        var expectedCompetitionWithEntries = mock(CompetitionWithEntries.class);
+        when(competitionsReadService.getCompetitionWithEntries(COMPETITION_ID)).thenReturn(expectedCompetitionWithEntries);
+
+        competitionsEventHandler.on(
+            new CompetitionEndedAndWinnersDeclaredEvent(COMPETITION_ID, List.of(new WinnerAndSubmittedPhotoPair(USER_ID, PHOTO_ID)), 1));
+
+        verify(queryUpdateEmitter).emit(eq(CompetitionWithEntriesQuery.class), any(), eq(expectedCompetitionWithEntries));
     }
 }

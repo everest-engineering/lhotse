@@ -16,4 +16,5 @@ public class CompetitionEntry {
     private UUID submittedByUserId;
     private Instant entryTimestamp;
     private int numVotesReceived;
+    private boolean isWinner;
 }

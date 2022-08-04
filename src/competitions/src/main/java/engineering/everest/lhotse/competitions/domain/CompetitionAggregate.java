@@ -10,6 +10,7 @@ import engineering.everest.lhotse.competitions.domain.events.CompetitionEndedEve
 import engineering.everest.lhotse.competitions.domain.events.CompetitionEndedWithNoEntriesReceivingVotesEvent;
 import engineering.everest.lhotse.competitions.domain.events.CompetitionEndedWithNoEntriesSubmittedEvent;
 import engineering.everest.lhotse.competitions.domain.events.PhotoEnteredInCompetitionEvent;
+import engineering.everest.lhotse.competitions.domain.events.WinnerAndSubmittedPhotoPair;
 import engineering.everest.lhotse.i18n.exceptions.TranslatableException;
 import engineering.everest.lhotse.i18n.exceptions.TranslatableIllegalArgumentException;
 import engineering.everest.lhotse.i18n.exceptions.TranslatableIllegalStateException;
@@ -19,7 +20,6 @@ import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.modelling.command.AggregateIdentifier;
 import org.axonframework.modelling.command.AggregateMember;
 import org.axonframework.spring.stereotype.Aggregate;
-import org.springframework.data.util.Pair;
 
 import java.io.Serializable;
 import java.time.Clock;
@@ -122,7 +122,7 @@ public class CompetitionAggregate implements Serializable {
         var numVotesReceived = entriesReceivingMostVotes.get(0).getUsersVotedFor().size();
         var winnersToPhotoList = entriesReceivingMostVotes.stream()
             .sorted(comparing(CompetitionEntryEntity::getPhotoId))
-            .map(entry -> Pair.of(entry.getSubmittedByUserId(), entry.getPhotoId()))
+            .map(entry -> new WinnerAndSubmittedPhotoPair(entry.getSubmittedByUserId(), entry.getPhotoId()))
             .collect(toList());
         apply(new CompetitionEndedAndWinnersDeclaredEvent(competitionId, winnersToPhotoList, numVotesReceived));
     }

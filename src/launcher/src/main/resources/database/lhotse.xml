@@ -162,6 +162,7 @@
             <column name="submitteruserid" type="uuid"/>
             <column name="entrytimestamp" type="timestamp"/>
             <column name="votesreceived" type="int"/>
+            <column name="iswinner" type="boolean" defaultValueBoolean="false"/>
         </createTable>
         <addPrimaryKey tableName="competition_entries" columnNames="competitionid,photoid" constraintName="PK_competition_entries"/>
         <createIndex tableName="competition_entries" indexName="INDEX_competition_entries_competitionid">
