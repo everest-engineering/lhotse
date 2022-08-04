@@ -1,0 +1,21 @@
+package engineering.everest.lhotse.competitions.domain.events;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.axonframework.serialization.Revision;
+
+import java.util.UUID;
+
+@Data
+@NoArgsConstructor
+@Getter
+@EqualsAndHashCode(callSuper = true)
+@Revision("0")
+public class CompetitionEndedWithNoEntriesSubmittedEvent extends CompetitionEndedEvent {
+
+    public CompetitionEndedWithNoEntriesSubmittedEvent(UUID competitionId) {
+        super(competitionId);
+    }
+}

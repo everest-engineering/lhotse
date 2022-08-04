@@ -1,10 +1,14 @@
 package engineering.everest.lhotse.competitions.domain;
 
 import engineering.everest.lhotse.axon.command.AxonCommandExecutionExceptionFactory;
-import engineering.everest.lhotse.competitions.domain.commands.EnterPhotoInCompetitionCommand;
+import engineering.everest.lhotse.competitions.domain.commands.CountVotesAndDeclareOutcomeCommand;
 import engineering.everest.lhotse.competitions.domain.commands.CreateCompetitionCommand;
+import engineering.everest.lhotse.competitions.domain.commands.EnterPhotoInCompetitionCommand;
 import engineering.everest.lhotse.competitions.domain.commands.VoteForPhotoCommand;
 import engineering.everest.lhotse.competitions.domain.events.CompetitionCreatedEvent;
+import engineering.everest.lhotse.competitions.domain.events.CompetitionEndedAndWinnersDeclaredEvent;
+import engineering.everest.lhotse.competitions.domain.events.CompetitionEndedWithNoEntriesReceivingVotesEvent;
+import engineering.everest.lhotse.competitions.domain.events.CompetitionEndedWithNoEntriesSubmittedEvent;
 import engineering.everest.lhotse.competitions.domain.events.PhotoEnteredInCompetitionEvent;
 import engineering.everest.lhotse.competitions.domain.events.PhotoEntryReceivedVoteEvent;
 import org.axonframework.spring.stereotype.Aggregate;
@@ -15,13 +19,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.util.Pair;
 
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import static engineering.everest.lhotse.axon.AxonTestUtils.mockCommandValidatingMessageHandlerInterceptor;
+import static java.util.Comparator.comparing;
 import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.lenient;
@@ -39,12 +47,19 @@ class CompetitionAggregateTest {
     private static final Instant SUBMISSIONS_CLOSE = FIXED_INSTANT.plus(Duration.ofDays(2));
     private static final Instant VOTING_ENDS = FIXED_INSTANT.plus(Duration.ofDays(3));
     private static final String SUBMISSION_NOTES = "I took this while hiking";
-    private static final PhotoEnteredInCompetitionEvent PHOTO_ACCEPTED_INTO_COMPETITION_EVENT =
+
+    private static final PhotoEnteredInCompetitionEvent PHOTO_ENTERED_INTO_COMPETITION_EVENT =
         new PhotoEnteredInCompetitionEvent(COMPETITION_ID, PHOTO_ID, SUBMITTER_ID, SUBMITTER_ID, SUBMISSION_NOTES);
     private static final CompetitionCreatedEvent COMPETITION_CREATED_EVENT =
         new CompetitionCreatedEvent(USER_ID, COMPETITION_ID, "", SUBMISSIONS_OPEN, SUBMISSIONS_CLOSE, VOTING_ENDS, 1);
     private static final PhotoEntryReceivedVoteEvent PHOTO_ENTRY_RECEIVED_VOTE_EVENT =
         new PhotoEntryReceivedVoteEvent(COMPETITION_ID, PHOTO_ID, USER_ID);
+    private static final CompetitionEndedWithNoEntriesSubmittedEvent COMPETITION_ENDED_WITH_NO_ENTRIES_SUBMITTED_EVENT =
+        new CompetitionEndedWithNoEntriesSubmittedEvent(COMPETITION_ID);
+    private static final CompetitionEndedWithNoEntriesReceivingVotesEvent COMPETITION_ENDED_WITH_NO_ENTRIES_RECEIVING_VOTES_EVENT =
+        new CompetitionEndedWithNoEntriesReceivingVotesEvent(COMPETITION_ID);
+    private static final CompetitionEndedAndWinnersDeclaredEvent COMPETITION_ENDED_AND_SINGLE_WINNER_DECLARED_EVENT =
+        new CompetitionEndedAndWinnersDeclaredEvent(COMPETITION_ID, List.of(Pair.of(SUBMITTER_ID, PHOTO_ID)), 1);
 
     private FixtureConfiguration<CompetitionAggregate> testFixture;
     private AxonCommandExecutionExceptionFactory axonCommandExecutionExceptionFactory;
@@ -134,12 +149,12 @@ class CompetitionAggregateTest {
 
         testFixture.given(COMPETITION_CREATED_EVENT)
             .when(new EnterPhotoInCompetitionCommand(COMPETITION_ID, PHOTO_ID, SUBMITTER_ID, SUBMITTER_ID, SUBMISSION_NOTES))
-            .expectEvents(PHOTO_ACCEPTED_INTO_COMPETITION_EVENT);
+            .expectEvents(PHOTO_ENTERED_INTO_COMPETITION_EVENT);
     }
 
     @Test
     void rejects_WhenPhotoAlreadyEnteredInCompetition() {
-        testFixture.given(COMPETITION_CREATED_EVENT, PHOTO_ACCEPTED_INTO_COMPETITION_EVENT)
+        testFixture.given(COMPETITION_CREATED_EVENT, PHOTO_ENTERED_INTO_COMPETITION_EVENT)
             .when(new EnterPhotoInCompetitionCommand(COMPETITION_ID, PHOTO_ID, SUBMITTER_ID, SUBMITTER_ID, SUBMISSION_NOTES))
             .expectNoEvents()
             .expectExceptionMessage("ALREADY_ENTERED_IN_COMPETITION");
@@ -169,7 +184,7 @@ class CompetitionAggregateTest {
     void rejects_WhenMaxEntriesPerPersonReached() {
         when(clock.instant()).thenReturn(SUBMISSIONS_OPEN.plus(Duration.ofHours(1)));
 
-        testFixture.given(COMPETITION_CREATED_EVENT, PHOTO_ACCEPTED_INTO_COMPETITION_EVENT)
+        testFixture.given(COMPETITION_CREATED_EVENT, PHOTO_ENTERED_INTO_COMPETITION_EVENT)
             .when(new EnterPhotoInCompetitionCommand(COMPETITION_ID, randomUUID(), SUBMITTER_ID, SUBMITTER_ID, SUBMISSION_NOTES))
             .expectNoEvents()
             .expectExceptionMessage("COMPETITION_MAX_ENTRIES_REACHED");
@@ -187,7 +202,7 @@ class CompetitionAggregateTest {
     void emits_WhenPhotoReceivesVote() {
         when(clock.instant()).thenReturn(SUBMISSIONS_CLOSE);
 
-        testFixture.given(COMPETITION_CREATED_EVENT, PHOTO_ACCEPTED_INTO_COMPETITION_EVENT)
+        testFixture.given(COMPETITION_CREATED_EVENT, PHOTO_ENTERED_INTO_COMPETITION_EVENT)
             .when(new VoteForPhotoCommand(COMPETITION_ID, PHOTO_ID, USER_ID))
             .expectEvents(PHOTO_ENTRY_RECEIVED_VOTE_EVENT);
     }
@@ -196,7 +211,7 @@ class CompetitionAggregateTest {
     void rejects_WhenPhotoReceivesVoteAndVotingPeriodNotStarted() {
         when(clock.instant()).thenReturn(SUBMISSIONS_CLOSE.minus(Duration.ofSeconds(1)));
 
-        testFixture.given(COMPETITION_CREATED_EVENT, PHOTO_ACCEPTED_INTO_COMPETITION_EVENT)
+        testFixture.given(COMPETITION_CREATED_EVENT, PHOTO_ENTERED_INTO_COMPETITION_EVENT)
             .when(new VoteForPhotoCommand(COMPETITION_ID, PHOTO_ID, USER_ID))
             .expectNoEvents()
             .expectExceptionMessage("VOTING_PERIOD_NOT_STARTED");
@@ -206,7 +221,7 @@ class CompetitionAggregateTest {
     void rejects_WhenPhotoReceivesVoteAndVotingPeriodEnded() {
         when(clock.instant()).thenReturn(VOTING_ENDS.plus(Duration.ofSeconds(1)));
 
-        testFixture.given(COMPETITION_CREATED_EVENT, PHOTO_ACCEPTED_INTO_COMPETITION_EVENT)
+        testFixture.given(COMPETITION_CREATED_EVENT, PHOTO_ENTERED_INTO_COMPETITION_EVENT)
             .when(new VoteForPhotoCommand(COMPETITION_ID, PHOTO_ID, USER_ID))
             .expectNoEvents()
             .expectExceptionMessage("VOTING_ENDED");
@@ -216,19 +231,68 @@ class CompetitionAggregateTest {
     void rejects_WhenUserHasVotedForPhotoBefore() {
         when(clock.instant()).thenReturn(SUBMISSIONS_CLOSE);
 
-        testFixture.given(COMPETITION_CREATED_EVENT, PHOTO_ACCEPTED_INTO_COMPETITION_EVENT, PHOTO_ENTRY_RECEIVED_VOTE_EVENT)
+        testFixture.given(COMPETITION_CREATED_EVENT, PHOTO_ENTERED_INTO_COMPETITION_EVENT, PHOTO_ENTRY_RECEIVED_VOTE_EVENT)
             .when(new VoteForPhotoCommand(COMPETITION_ID, PHOTO_ID, USER_ID))
             .expectNoEvents()
             .expectExceptionMessage("ALREADY_VOTED_FOR_THIS_ENTRY");
     }
 
     @Test
-    void rejects_WhenPhotoNotPartOfCompetition() {
+    void rejects_WhenVotingForPhotoNotPartOfCompetition() {
         when(clock.instant()).thenReturn(SUBMISSIONS_CLOSE);
 
-        testFixture.given(COMPETITION_CREATED_EVENT, PHOTO_ACCEPTED_INTO_COMPETITION_EVENT)
+        testFixture.given(COMPETITION_CREATED_EVENT, PHOTO_ENTERED_INTO_COMPETITION_EVENT)
             .when(new VoteForPhotoCommand(COMPETITION_ID, randomUUID(), USER_ID))
             .expectNoEvents()
             .expectExceptionMessage("PHOTO_NOT_ENTERED_IN_COMPETITION");
+    }
+
+    @Test
+    void emits_WhenVotesCountedAndNoEntriesWereSubmitted() {
+        testFixture.given(COMPETITION_CREATED_EVENT)
+            .when(new CountVotesAndDeclareOutcomeCommand(COMPETITION_ID))
+            .expectEvents(COMPETITION_ENDED_WITH_NO_ENTRIES_SUBMITTED_EVENT);
+    }
+
+    @Test
+    void emits_WhenVotesCountedAndSubmittedEntriesReceivedNoVotes() {
+        testFixture.given(COMPETITION_CREATED_EVENT, PHOTO_ENTERED_INTO_COMPETITION_EVENT)
+            .when(new CountVotesAndDeclareOutcomeCommand(COMPETITION_ID))
+            .expectEvents(COMPETITION_ENDED_WITH_NO_ENTRIES_RECEIVING_VOTES_EVENT);
+    }
+
+    @Test
+    void emits_WhenVotesCountedAndASingleWinnerIsDeclared() {
+        testFixture.given(COMPETITION_CREATED_EVENT, PHOTO_ENTERED_INTO_COMPETITION_EVENT, PHOTO_ENTRY_RECEIVED_VOTE_EVENT)
+            .when(new CountVotesAndDeclareOutcomeCommand(COMPETITION_ID))
+            .expectEvents(COMPETITION_ENDED_AND_SINGLE_WINNER_DECLARED_EVENT);
+    }
+
+    @Test
+    void emits_WhenVotesCountedAndMultipleWinnersAreDeclared() {
+        var secondPhoto = randomUUID();
+        var secondSubmitter = randomUUID();
+        var additionalEntry =
+            new PhotoEnteredInCompetitionEvent(COMPETITION_ID, secondPhoto, secondSubmitter, secondSubmitter, SUBMISSION_NOTES);
+        var additionalVote = new PhotoEntryReceivedVoteEvent(COMPETITION_ID, secondPhoto, secondSubmitter);
+
+        var expectedWinnersWithPhotos = new ArrayList<>(List.of(Pair.of(SUBMITTER_ID, PHOTO_ID), Pair.of(secondSubmitter, secondPhoto)));
+        expectedWinnersWithPhotos.sort(comparing(Pair::getSecond));
+
+        testFixture.given(COMPETITION_CREATED_EVENT,
+            PHOTO_ENTERED_INTO_COMPETITION_EVENT,
+            additionalEntry,
+            PHOTO_ENTRY_RECEIVED_VOTE_EVENT,
+            additionalVote)
+            .when(new CountVotesAndDeclareOutcomeCommand(COMPETITION_ID))
+            .expectEvents(new CompetitionEndedAndWinnersDeclaredEvent(COMPETITION_ID, expectedWinnersWithPhotos, 1));
+    }
+
+    @Test
+    void rejects_WhenCountingVotesThatAreAlreadyCounted() {
+        testFixture.given(COMPETITION_CREATED_EVENT, COMPETITION_ENDED_WITH_NO_ENTRIES_SUBMITTED_EVENT)
+            .when(new CountVotesAndDeclareOutcomeCommand(COMPETITION_ID))
+            .expectNoEvents()
+            .expectExceptionMessage("COMPETITION_ALREADY_ENDED");
     }
 }

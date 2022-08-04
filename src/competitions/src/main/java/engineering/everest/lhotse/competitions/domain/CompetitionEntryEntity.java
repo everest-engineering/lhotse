@@ -2,10 +2,10 @@ package engineering.everest.lhotse.competitions.domain;
 
 import engineering.everest.lhotse.axon.command.AxonCommandExecutionExceptionFactory;
 import engineering.everest.lhotse.competitions.domain.commands.VoteForPhotoCommand;
-import engineering.everest.lhotse.competitions.domain.events.PhotoEnteredInCompetitionEvent;
 import engineering.everest.lhotse.competitions.domain.events.PhotoEntryReceivedVoteEvent;
 import engineering.everest.lhotse.i18n.exceptions.TranslatableIllegalStateException;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.modelling.command.EntityId;
@@ -19,11 +19,19 @@ import static org.axonframework.modelling.command.AggregateLifecycle.apply;
 
 @NoArgsConstructor
 @EqualsAndHashCode
+@Getter
 public class CompetitionEntryEntity {
 
     @EntityId
     private UUID photoId;
+    private UUID submittedByUserId;
     private Set<UUID> usersVotedFor;
+
+    CompetitionEntryEntity(UUID photoId, UUID submittedByUserId) {
+        this.photoId = photoId;
+        this.submittedByUserId = submittedByUserId;
+        this.usersVotedFor = new HashSet<>();
+    }
 
     // Not annotated with @CommandHandler on purpose. Some validation occurs in aggregate root.
     void handle(VoteForPhotoCommand command,
@@ -34,14 +42,10 @@ public class CompetitionEntryEntity {
     }
 
     @EventSourcingHandler
-    void on(PhotoEnteredInCompetitionEvent event) {
-        photoId = event.getPhotoId();
-        usersVotedFor = new HashSet<>();
-    }
-
-    @EventSourcingHandler
     void on(PhotoEntryReceivedVoteEvent event) {
-        usersVotedFor.add(event.getVotingUserId());
+        if (event.getPhotoId().equals(photoId)) {
+            usersVotedFor.add(event.getVotingUserId());
+        }
     }
 
     private void validateUserHasNotVotedForPhotoBefore(UUID requestingUserId,

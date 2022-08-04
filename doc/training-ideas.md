@@ -18,6 +18,11 @@ Consider renaming events.
 There is no limit on the number of photos a registered user can vote for within a competition. Track the votes received,
 rejecting when a user has reached their voting quota. Prevent someone from voting for their own work.
 
+## Adjustable competition deadlines (easy)
+
+There are many cases where an admin might want to change the submission opening and closing times, and the voting ending
+deadline. 
+
 ## Introduce (optional) moderator approval of submissions (moderate)
 
 Not all holiday snaps are equal and deserving of attention.

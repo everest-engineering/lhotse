@@ -1,10 +1,15 @@
 package engineering.everest.lhotse.competitions.domain;
 
 import engineering.everest.lhotse.axon.command.AxonCommandExecutionExceptionFactory;
+import engineering.everest.lhotse.competitions.domain.commands.CountVotesAndDeclareOutcomeCommand;
 import engineering.everest.lhotse.competitions.domain.commands.CreateCompetitionCommand;
 import engineering.everest.lhotse.competitions.domain.commands.EnterPhotoInCompetitionCommand;
 import engineering.everest.lhotse.competitions.domain.commands.VoteForPhotoCommand;
 import engineering.everest.lhotse.competitions.domain.events.CompetitionCreatedEvent;
+import engineering.everest.lhotse.competitions.domain.events.CompetitionEndedAndWinnersDeclaredEvent;
+import engineering.everest.lhotse.competitions.domain.events.CompetitionEndedEvent;
+import engineering.everest.lhotse.competitions.domain.events.CompetitionEndedWithNoEntriesReceivingVotesEvent;
+import engineering.everest.lhotse.competitions.domain.events.CompetitionEndedWithNoEntriesSubmittedEvent;
 import engineering.everest.lhotse.competitions.domain.events.PhotoEnteredInCompetitionEvent;
 import engineering.everest.lhotse.i18n.exceptions.TranslatableIllegalArgumentException;
 import engineering.everest.lhotse.i18n.exceptions.TranslatableIllegalStateException;
@@ -13,16 +18,19 @@ import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.modelling.command.AggregateIdentifier;
 import org.axonframework.modelling.command.AggregateMember;
 import org.axonframework.spring.stereotype.Aggregate;
+import org.springframework.data.util.Pair;
 
 import java.io.Serializable;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import static engineering.everest.lhotse.i18n.MessageKeys.ALREADY_ENTERED_IN_COMPETITION;
+import static engineering.everest.lhotse.i18n.MessageKeys.COMPETITION_ALREADY_ENDED;
 import static engineering.everest.lhotse.i18n.MessageKeys.COMPETITION_MAX_ENTRIES_REACHED;
 import static engineering.everest.lhotse.i18n.MessageKeys.COMPETITION_MINIMUM_SUBMISSION_PERIOD;
 import static engineering.everest.lhotse.i18n.MessageKeys.COMPETITION_MINIMUM_VOTING_PERIOD;
@@ -34,6 +42,9 @@ import static engineering.everest.lhotse.i18n.MessageKeys.SUBMISSIONS_CLOSE_TIME
 import static engineering.everest.lhotse.i18n.MessageKeys.SUBMISSION_BY_NON_PHOTO_OWNER;
 import static engineering.everest.lhotse.i18n.MessageKeys.VOTING_ENDED;
 import static engineering.everest.lhotse.i18n.MessageKeys.VOTING_PERIOD_NOT_STARTED;
+import static java.lang.Integer.MIN_VALUE;
+import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.toList;
 import static org.axonframework.modelling.command.AggregateLifecycle.apply;
 
 @Aggregate(snapshotTriggerDefinition = "competitionAggregateSnapshotTriggerDefinition")
@@ -50,9 +61,9 @@ public class CompetitionAggregate implements Serializable {
     private Instant votingEndsTimestamp;
     private int maxEntriesPerUser;
     private Map<UUID, Integer> numEntriesReceivedPerUser;
-
     @AggregateMember
     private Map<UUID, CompetitionEntryEntity> submittedPhotos;
+    private boolean competitionEnded;
 
     CompetitionAggregate() {}
 
@@ -74,6 +85,7 @@ public class CompetitionAggregate implements Serializable {
     void handle(EnterPhotoInCompetitionCommand command,
                 Clock clock,
                 AxonCommandExecutionExceptionFactory axonCommandExecutionExceptionFactory) {
+        validateCompetitionHasNotEnded(axonCommandExecutionExceptionFactory);
         validateRequestingUserIsOwnerOfPhoto(command.getRequestingUserId(), command.getPhotoOwnerUserId(),
             axonCommandExecutionExceptionFactory);
         validatePhotoNotAlreadyEntered(command.getPhotoId(), axonCommandExecutionExceptionFactory);
@@ -88,10 +100,34 @@ public class CompetitionAggregate implements Serializable {
     void handle(VoteForPhotoCommand command,
                 Clock clock,
                 AxonCommandExecutionExceptionFactory axonCommandExecutionExceptionFactory) {
+        validateCompetitionHasNotEnded(axonCommandExecutionExceptionFactory);
         validateVotingPeriodOpen(axonCommandExecutionExceptionFactory, clock);
         validatePhotoIsEnteredInCompetition(command.getPhotoId(), axonCommandExecutionExceptionFactory);
 
         submittedPhotos.get(command.getPhotoId()).handle(command, axonCommandExecutionExceptionFactory);
+    }
+
+    @CommandHandler
+    void handle(CountVotesAndDeclareOutcomeCommand command, AxonCommandExecutionExceptionFactory axonCommandExecutionExceptionFactory) {
+        validateCompetitionHasNotEnded(axonCommandExecutionExceptionFactory);
+
+        if (submittedPhotos.isEmpty()) {
+            apply(new CompetitionEndedWithNoEntriesSubmittedEvent(competitionId));
+            return;
+        }
+
+        var entriesReceivingMostVotes = findEntriesWithMostVotes();
+        if (entriesReceivingMostVotes.isEmpty()) {
+            apply(new CompetitionEndedWithNoEntriesReceivingVotesEvent(competitionId));
+            return;
+        }
+
+        var numVotesReceived = entriesReceivingMostVotes.get(0).getUsersVotedFor().size();
+        var winnersToPhotoList = entriesReceivingMostVotes.stream()
+            .sorted(comparing(CompetitionEntryEntity::getPhotoId))
+            .map(entry -> Pair.of(entry.getSubmittedByUserId(), entry.getPhotoId()))
+            .collect(toList());
+        apply(new CompetitionEndedAndWinnersDeclaredEvent(competitionId, winnersToPhotoList, numVotesReceived));
     }
 
     @EventSourcingHandler
@@ -103,13 +139,26 @@ public class CompetitionAggregate implements Serializable {
         maxEntriesPerUser = event.getMaxEntriesPerUser();
         numEntriesReceivedPerUser = new HashMap<>();
         submittedPhotos = new HashMap<>();
+        competitionEnded = false;
     }
 
     @EventSourcingHandler
     void on(PhotoEnteredInCompetitionEvent event) {
         var previousNumEntriesForSubmitter = numEntriesReceivedPerUser.computeIfAbsent(event.getSubmittedByUserId(), (uuid) -> 0);
         numEntriesReceivedPerUser.put(event.getSubmittedByUserId(), previousNumEntriesForSubmitter + 1);
-        submittedPhotos.put(event.getPhotoId(), new CompetitionEntryEntity());
+        submittedPhotos.put(event.getPhotoId(), new CompetitionEntryEntity(event.getPhotoId(), event.getSubmittedByUserId()));
+    }
+
+    @EventSourcingHandler
+    void on(CompetitionEndedEvent event) {
+        competitionEnded = true;
+    }
+
+    private void validateCompetitionHasNotEnded(AxonCommandExecutionExceptionFactory axonCommandExecutionExceptionFactory) {
+        if (competitionEnded) {
+            axonCommandExecutionExceptionFactory.throwWrappedInCommandExecutionException(
+                new TranslatableIllegalStateException(COMPETITION_ALREADY_ENDED));
+        }
     }
 
     private static void validateMaxVotesPerUserAtLeastOne(CreateCompetitionCommand command,
@@ -201,5 +250,16 @@ public class CompetitionAggregate implements Serializable {
             axonCommandExecutionExceptionFactory.throwWrappedInCommandExecutionException(
                 new TranslatableIllegalStateException(PHOTO_NOT_ENTERED_IN_COMPETITION));
         }
+    }
+
+    private List<CompetitionEntryEntity> findEntriesWithMostVotes() {
+        var highestVoteCount = submittedPhotos.values().stream()
+            .filter(entry -> !entry.getUsersVotedFor().isEmpty())
+            .mapToInt(entry -> entry.getUsersVotedFor().size())
+            .max()
+            .orElse(MIN_VALUE);
+        return submittedPhotos.values().stream()
+            .filter(entry -> entry.getUsersVotedFor().size() == highestVoteCount)
+            .collect(toList());
     }
 }
