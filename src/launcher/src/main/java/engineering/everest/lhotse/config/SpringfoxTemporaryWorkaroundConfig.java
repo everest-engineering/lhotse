@@ -31,17 +31,9 @@ public class SpringfoxTemporaryWorkaroundConfig {
         allEndpoints.addAll(servletEndpointsSupplier.getEndpoints());
         allEndpoints.addAll(controllerEndpointsSupplier.getEndpoints());
         var endpointMapping = new EndpointMapping(webEndpointProperties.getBasePath());
-        // boolean shouldRegisterLinksMapping = this.shouldRegisterLinksMapping(webEndpointProperties, environment,
-        // webEndpointProperties.getBasePath());
         var linksResolver = new EndpointLinksResolver(allEndpoints, webEndpointProperties.getBasePath());
         return new WebMvcEndpointHandlerMapping(endpointMapping, webEndpointsSupplier.getEndpoints(), endpointMediaTypes,
             corsProperties.toCorsConfiguration(),
             linksResolver, true);
     }
-
-    //
-    // private boolean shouldRegisterLinksMapping(WebEndpointProperties webEndpointProperties, Environment environment, String basePath) {
-    // return webEndpointProperties.getDiscovery().isEnabled() && (StringUtils.hasText(basePath) ||
-    // ManagementPortType.get(environment).equals(ManagementPortType.DIFFERENT));
-    // }
 }

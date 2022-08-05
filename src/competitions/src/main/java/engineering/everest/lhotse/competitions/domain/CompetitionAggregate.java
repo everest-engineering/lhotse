@@ -142,7 +142,7 @@ public class CompetitionAggregate implements Serializable {
 
     @EventSourcingHandler
     void on(PhotoEnteredInCompetitionEvent event) {
-        var previousNumEntriesForSubmitter = numEntriesReceivedPerUser.computeIfAbsent(event.getSubmittedByUserId(), (uuid) -> 0);
+        var previousNumEntriesForSubmitter = numEntriesReceivedPerUser.computeIfAbsent(event.getSubmittedByUserId(), uuid -> 0);
         numEntriesReceivedPerUser.put(event.getSubmittedByUserId(), previousNumEntriesForSubmitter + 1);
         submittedPhotos.put(event.getPhotoId(), new CompetitionEntryEntity(event.getPhotoId(), event.getSubmittedByUserId()));
     }
@@ -228,7 +228,7 @@ public class CompetitionAggregate implements Serializable {
     }
 
     private void validateMaxEntriesNotExceeded(UUID requestingUserId) {
-        if (numEntriesReceivedPerUser.computeIfAbsent(requestingUserId, (uuid) -> 0) == maxEntriesPerUser) {
+        if (numEntriesReceivedPerUser.computeIfAbsent(requestingUserId, uuid -> 0) == maxEntriesPerUser) {
             throwWrappedInCommandExecutionException(
                 new TranslatableIllegalStateException(COMPETITION_MAX_ENTRIES_REACHED, maxEntriesPerUser));
         }

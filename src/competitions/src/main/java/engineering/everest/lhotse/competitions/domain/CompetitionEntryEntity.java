@@ -11,6 +11,7 @@ import org.axonframework.commandhandling.CommandExecutionException;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.modelling.command.EntityId;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -21,7 +22,7 @@ import static org.axonframework.modelling.command.AggregateLifecycle.apply;
 @NoArgsConstructor
 @EqualsAndHashCode
 @Getter
-public class CompetitionEntryEntity {
+public class CompetitionEntryEntity implements Serializable {
 
     @EntityId
     private UUID photoId;
