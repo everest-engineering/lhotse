@@ -3,8 +3,8 @@ package engineering.everest.lhotse.functionaltests.scenarios;
 import engineering.everest.lhotse.Launcher;
 import engineering.everest.lhotse.common.RetryWithExponentialBackoff;
 import engineering.everest.lhotse.functionaltests.helpers.ApiRestTestClient;
-import engineering.everest.lhotse.photos.persistence.PhotosRepository;
 import engineering.everest.lhotse.photos.services.PhotosReadService;
+import engineering.everest.starterkit.filestorage.FileService;
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,15 +33,16 @@ public class PhotosFunctionalTests {
     @Autowired
     private PhotosReadService photosReadService;
     @Autowired
-    private PhotosRepository photosRepository;
+    private FileService fileService;
 
     @BeforeEach
     void setUp() {
         apiRestTestClient.setWebTestClient(webTestClient);
+        fileService.markAllEphemeralFilesForDeletion();
     }
 
     @Test
-    void registeredUsersCanOnlySeeTheirOwnUploadPhotos() {
+    void registeredUsersCanOnlySeeTheirOwnUploadPhotos() throws Exception {
         apiRestTestClient.createUserAndLogin("Alice", "alice@example.com");
         var firstPhotoId = apiRestTestClient.uploadPhoto("test_photo_1.png", CREATED);
         var secondPhotoId = apiRestTestClient.uploadPhoto("test_photo_2.png", CREATED);
@@ -58,9 +59,6 @@ public class PhotosFunctionalTests {
     void uploadedPhotosCanBeRetrieved() throws Exception {
         apiRestTestClient.createUserAndLogin("Bob", "bob@example.com");
         var photoId = apiRestTestClient.uploadPhoto("test_photo_1.png", CREATED);
-
-        RetryWithExponentialBackoff.withMaxDuration(ofSeconds(20)).waitOrThrow(
-            () -> photosRepository.existsById(photoId), "photo upload projection");
 
         try (var resourceAsStream = this.getClass().getResourceAsStream("/test_photo_1.png")) {
             var expected = resourceAsStream.readAllBytes();

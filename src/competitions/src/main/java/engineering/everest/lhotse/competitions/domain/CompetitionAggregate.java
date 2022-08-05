@@ -51,8 +51,9 @@ import static org.axonframework.modelling.command.AggregateLifecycle.apply;
 @Aggregate(snapshotTriggerDefinition = "competitionAggregateSnapshotTriggerDefinition")
 public class CompetitionAggregate implements Serializable {
 
-    private static final Duration MINIMUM_SUBMISSION_PERIOD = Duration.ofMinutes(5);
-    private static final Duration MINIMUM_VOTING_PERIOD = Duration.ofMinutes(5);
+    // Make configurable or salt to taste
+    private static final Duration MINIMUM_SUBMISSION_PERIOD = Duration.ofSeconds(10);
+    private static final Duration MINIMUM_VOTING_PERIOD = Duration.ofSeconds(30);
     private static final int MIN_ENTRIES_PER_USER = 1;
 
     @AggregateIdentifier
@@ -171,7 +172,7 @@ public class CompetitionAggregate implements Serializable {
         var votingPeriod = Duration.between(command.getSubmissionsCloseTimestamp(), command.getVotingEndsTimestamp());
         if (votingPeriod.minus(MINIMUM_VOTING_PERIOD).isNegative()) {
             throwWrappedInCommandExecutionException(
-                new TranslatableIllegalArgumentException(COMPETITION_MINIMUM_VOTING_PERIOD, MINIMUM_SUBMISSION_PERIOD));
+                new TranslatableIllegalArgumentException(COMPETITION_MINIMUM_VOTING_PERIOD, MINIMUM_VOTING_PERIOD));
         }
     }
 

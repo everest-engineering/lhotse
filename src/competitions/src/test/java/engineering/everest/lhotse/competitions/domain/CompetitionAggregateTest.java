@@ -115,7 +115,7 @@ class CompetitionAggregateTest {
     @Test
     void rejects_WhenSubmissionPeriodTooShort() {
         testFixture.givenNoPriorActivity()
-            .when(new CreateCompetitionCommand(USER_ID, COMPETITION_ID, "", SUBMISSIONS_OPEN, SUBMISSIONS_OPEN.plus(Duration.ofSeconds(10)),
+            .when(new CreateCompetitionCommand(USER_ID, COMPETITION_ID, "", SUBMISSIONS_OPEN, SUBMISSIONS_OPEN.plus(Duration.ofSeconds(2)),
                 VOTING_ENDS, 3))
             .expectNoEvents()
             .expectExceptionMessage("COMPETITION_MINIMUM_SUBMISSION_PERIOD");

@@ -5,6 +5,8 @@ import engineering.everest.lhotse.api.rest.requests.CreateCompetitionRequest;
 import engineering.everest.lhotse.api.rest.requests.DeleteAndForgetUserRequest;
 import engineering.everest.lhotse.api.rest.responses.PhotoResponse;
 import engineering.everest.lhotse.api.services.KeycloakClient;
+import engineering.everest.lhotse.common.RetryWithExponentialBackoff;
+import engineering.everest.lhotse.photos.persistence.PhotosRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.keycloak.OAuth2Constants;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +55,8 @@ public class ApiRestTestClient {
 
     @Autowired
     private KeycloakClient keycloakClient;
+    @Autowired
+    private PhotosRepository photosRepository;
 
     private WebTestClient webTestClient;
     private String accessToken;
@@ -136,12 +141,12 @@ public class ApiRestTestClient {
             .expectStatus().isEqualTo(expectedHttpStatus);
     }
 
-    public UUID uploadPhoto(String photoFilename, HttpStatus expectedHttpStatus) {
+    public UUID uploadPhoto(String photoFilename, HttpStatus expectedHttpStatus) throws Exception {
         var testPhotoResource = new ClassPathResource(photoFilename);
         var multipartBodyBuilder = new MultipartBodyBuilder();
         multipartBodyBuilder.part("file", testPhotoResource).contentType(MULTIPART_FORM_DATA);
 
-        return webTestClient.post().uri("/api/photos")
+        var photoId = webTestClient.post().uri("/api/photos")
             .header("Authorization", "Bearer " + accessToken)
             .contentType(MULTIPART_FORM_DATA)
             .body(BodyInserters.fromMultipartData(multipartBodyBuilder.build()))
@@ -150,6 +155,11 @@ public class ApiRestTestClient {
             .returnResult(UUID.class)
             .getResponseBody()
             .blockFirst();
+
+        RetryWithExponentialBackoff.withMaxDuration(Duration.ofSeconds(10)).waitOrThrow(
+            () -> photosRepository.existsById(photoId), "photo upload projection");
+
+        return photoId;
     }
 
     public List<PhotoResponse> getAllPhotosForCurrentUser(HttpStatus expectedHttpStatus) {
@@ -199,6 +209,14 @@ public class ApiRestTestClient {
             .header("Authorization", "Bearer " + accessToken)
             .contentType(APPLICATION_JSON)
             .body(BodyInserters.fromValue(requestBody))
+            .exchange()
+            .expectStatus().isEqualTo(expectedHttpStatus);
+    }
+
+    public void voteForPhoto(UUID competitionId, UUID photoId, HttpStatus expectedHttpStatus) {
+        webTestClient.post().uri("/api/competitions/{competitionId}/photos/{photoId}/vote", competitionId, photoId)
+            .header("Authorization", "Bearer " + accessToken)
+            .contentType(APPLICATION_JSON)
             .exchange()
             .expectStatus().isEqualTo(expectedHttpStatus);
     }
