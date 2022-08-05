@@ -15,7 +15,9 @@ dependencies {
     implementation "engineering.everest.starterkit:media:${mediaVersion}"
     implementation "engineering.everest.starterkit:storage:${storageVersion}"
     implementation 'org.keycloak:keycloak-spring-boot-starter'
-    implementation "io.springfox:springfox-boot-starter:${swaggerVersion}"
+    implementation "org.springdoc:springdoc-openapi-ui:${springdocVersion}"
+    implementation "org.springdoc:springdoc-openapi-webmvc-core:${springdocVersion}"
+    implementation "org.springdoc:springdoc-openapi-security:${springdocVersion}"
     implementation "org.axonframework:axon-modelling:${axonVersion}"
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-security'

@@ -49,7 +49,6 @@ dependencies {
     implementation "engineering.everest.starterkit:media:${mediaVersion}"
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-//    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
     implementation 'org.keycloak:keycloak-spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation "org.axonframework:axon-micrometer:${axonVersion}"

@@ -7,8 +7,10 @@ import engineering.everest.lhotse.api.rest.responses.PhotoResponse;
 import engineering.everest.lhotse.photos.services.PhotosReadService;
 import engineering.everest.lhotse.photos.services.PhotosService;
 import engineering.everest.starterkit.filestorage.FileService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.SortDefault;
@@ -22,7 +24,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
-import springfox.documentation.annotations.ApiIgnore;
 
 import java.io.IOException;
 import java.security.Principal;
@@ -38,7 +39,8 @@ import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
 
 @RestController
 @RequestMapping("/api/photos")
-@Api(tags = "Photos")
+@Tag(name = "Photos")
+@SecurityRequirement(name = "bearerAuth")
 public class PhotosController {
 
     private final DtoConverter dtoConverter;
@@ -58,9 +60,10 @@ public class PhotosController {
 
     @PostMapping
     @ResponseStatus(CREATED)
-    @ApiOperation("List all photos belonging to the current user")
+    @Operation(description = "List all photos belonging to the current user")
     @RegisteredUser
-    public UUID uploadPhoto(@ApiIgnore Principal principal, @RequestParam("file") MultipartFile uploadedFile) throws IOException {
+    public UUID uploadPhoto(@Parameter(hidden = true) Principal principal, @RequestParam("file") MultipartFile uploadedFile)
+        throws IOException {
         var persistedFileId = fileService.transferToEphemeralStore(uploadedFile.getOriginalFilename(),
             uploadedFile.getSize(), uploadedFile.getInputStream());
         return photosService.registerUploadedPhoto(UUID.fromString(principal.getName()), persistedFileId,
@@ -69,9 +72,9 @@ public class PhotosController {
 
     @GetMapping
     @ResponseStatus(OK)
-    @ApiOperation("Retrieves a page of photos accessible to the authenticated user")
+    @Operation(description = "Retrieves a page of photos accessible to the authenticated user")
     @AdminOrRegisteredUser
-    public List<PhotoResponse> listPhotosForUser(@ApiIgnore Principal principal,
+    public List<PhotoResponse> listPhotosForUser(@Parameter(hidden = true) Principal principal,
                                                  @SortDefault(sort = "uploadTimestamp", direction = DESC)
                                                  @PageableDefault(20) Pageable pageable) {
         return photosReadService.getAllPhotos(UUID.fromString(principal.getName()), pageable).stream()
@@ -81,7 +84,7 @@ public class PhotosController {
 
     @GetMapping("/{photoId}")
     @AdminOrRegisteredUser
-    public ResponseEntity<StreamingResponseBody> streamPhoto(@ApiIgnore Principal principal,
+    public ResponseEntity<StreamingResponseBody> streamPhoto(@Parameter(hidden = true) Principal principal,
                                                              @PathVariable UUID photoId) {
         StreamingResponseBody streamingResponse = outputStream -> {
             try (var inputStream = photosReadService.streamPhoto(UUID.fromString(principal.getName()), photoId)) {
@@ -95,7 +98,7 @@ public class PhotosController {
 
     @GetMapping(value = "/{photoId}/thumbnail", produces = APPLICATION_OCTET_STREAM_VALUE)
     @AdminOrRegisteredUser
-    public ResponseEntity<StreamingResponseBody> streamPhotoThumbnail(@ApiIgnore Principal principal,
+    public ResponseEntity<StreamingResponseBody> streamPhotoThumbnail(@Parameter(hidden = true) Principal principal,
                                                                       @PathVariable UUID photoId,
                                                                       @RequestParam int width,
                                                                       @RequestParam int height) {

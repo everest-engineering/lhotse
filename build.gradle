@@ -63,7 +63,7 @@ subprojects {
         postgresDriverVersion = '42.3.6'
         prometheusSimpleClientVersion = '0.15.0'
         springBootVersion = '2.7.0'
-        swaggerVersion = '3.0.0'
+        springdocVersion = '1.6.9'
         webfluxVersion = '2.7.0'
 
         gradleDockerComposeVersion = '0.15.2'
