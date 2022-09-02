@@ -4,7 +4,6 @@ import engineering.everest.lhotse.Launcher;
 import engineering.everest.lhotse.tasks.PeriodicFilesMarkedForDeletionRemovalTask;
 import engineering.everest.starterkit.filestorage.FileService;
 import engineering.everest.starterkit.filestorage.persistence.FileMappingRepository;
-import engineering.everest.starterkit.filestorage.persistence.PersistableFileMapping;
 import engineering.everest.starterkit.media.thumbnails.ThumbnailService;
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,9 +19,12 @@ import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.List;
+import java.util.Set;
 
 import static io.zonky.test.db.AutoConfigureEmbeddedDatabase.DatabaseType.POSTGRES;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
@@ -46,20 +48,63 @@ class FileStoreFunctionalTests {
     private PeriodicFilesMarkedForDeletionRemovalTask periodicFilesMarkedForDeletionRemovalTask;
 
     @BeforeEach
-    void setUp() throws IOException {
-        fileService.transferToEphemeralStore(new ByteArrayInputStream(TEMPORARY_FILE_CONTENTS));
+    void setUp() {
+        fileMappingRepository.deleteAll();
 
-        periodicFilesMarkedForDeletionRemovalTask =
-            new PeriodicFilesMarkedForDeletionRemovalTask(entityManager, fileService, thumbnailService, 10);
+        periodicFilesMarkedForDeletionRemovalTask = new PeriodicFilesMarkedForDeletionRemovalTask(entityManager,
+            fileService, thumbnailService, 10);
     }
 
     @Test
-    void ephemeralFilesMarkedForDeletionAreDeletedWhenDeleteTaskRuns() {
+    void ephemeralFilesMarkedForDeletionAreDeletedWhenDeleteTaskRuns() throws IOException {
+        fileService.transferToEphemeralStore(new ByteArrayInputStream(TEMPORARY_FILE_CONTENTS));
         fileService.markAllEphemeralFilesForDeletion();
 
         periodicFilesMarkedForDeletionRemovalTask.deleteFilesInBatches();
 
-        List<PersistableFileMapping> byMarkedForDeletionTrue = fileMappingRepository.findByMarkedForDeletionTrue(PageRequest.of(0, 10));
+        var byMarkedForDeletionTrue = fileMappingRepository.findByMarkedForDeletionTrue(PageRequest.of(0, 10));
         assertTrue(byMarkedForDeletionTrue.isEmpty());
+    }
+
+    @Test
+    void backingFileIsRetained_WhenDeduplicatedFileDeletedAndTaskRuns() throws Exception {
+        var firstFileId = fileService.transferToEphemeralStore(new ByteArrayInputStream(TEMPORARY_FILE_CONTENTS));
+        var secondFileId = fileService.transferToEphemeralStore(new ByteArrayInputStream(TEMPORARY_FILE_CONTENTS));
+
+        fileService.markEphemeralFileForDeletion(firstFileId);
+
+        periodicFilesMarkedForDeletionRemovalTask.deleteFilesInBatches();
+
+        try (var inputStreamOfKnownLength = fileService.stream(secondFileId)) {
+            assertArrayEquals(TEMPORARY_FILE_CONTENTS, inputStreamOfKnownLength.getInputStream().readAllBytes());
+        }
+    }
+
+    @Test
+    void filesWithSameContentAreDeduplicated() throws Exception {
+        var firstFileId = fileService.transferToEphemeralStore(new ByteArrayInputStream(TEMPORARY_FILE_CONTENTS));
+        var secondFileId = fileService.transferToEphemeralStore(new ByteArrayInputStream(TEMPORARY_FILE_CONTENTS));
+
+        assertEquals(fileMappingRepository.findById(firstFileId).orElseThrow().getBackingStorageFileId(),
+            fileMappingRepository.findById(secondFileId).orElseThrow().getBackingStorageFileId());
+    }
+
+    @Test
+    void newBackingFileIsAssigned_WhenAllExistingDeduplicatedFilesMarkedAsDeleted() throws Exception {
+        var firstFileId = fileService.transferToEphemeralStore(new ByteArrayInputStream(TEMPORARY_FILE_CONTENTS));
+        var secondFileId = fileService.transferToEphemeralStore(new ByteArrayInputStream(TEMPORARY_FILE_CONTENTS));
+
+        fileService.markEphemeralFilesForDeletion(Set.of(firstFileId, secondFileId));
+
+        var thirdFileId = fileService.transferToEphemeralStore(new ByteArrayInputStream(TEMPORARY_FILE_CONTENTS));
+
+        assertNotEquals(fileMappingRepository.findById(firstFileId).orElseThrow().getBackingStorageFileId(),
+            fileMappingRepository.findById(thirdFileId).orElseThrow().getBackingStorageFileId());
+
+        periodicFilesMarkedForDeletionRemovalTask.deleteFilesInBatches();
+
+        try (var inputStreamOfKnownLength = fileService.stream(thirdFileId)) {
+            assertArrayEquals(TEMPORARY_FILE_CONTENTS, inputStreamOfKnownLength.getInputStream().readAllBytes());
+        }
     }
 }

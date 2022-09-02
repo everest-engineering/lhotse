@@ -87,6 +87,12 @@
             <column name="sha256"/>
             <column name="sha512"/>
         </createIndex>
+        <createIndex tableName="filemapping" indexName="INDEX_file_mapping_backingstoragefileid">
+            <column name="backingstoragefileid"/>
+        </createIndex>
+        <createIndex tableName="filemapping" indexName="INDEX_file_mapping_markedfordeletion">
+            <column name="markedfordeletion"/>
+        </createIndex>
 
         <createTable tableName="thumbnailedfiles">
             <column name="sourcefileid" type="uuid">

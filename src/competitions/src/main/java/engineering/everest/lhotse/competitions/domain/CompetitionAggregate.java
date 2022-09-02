@@ -70,8 +70,7 @@ public class CompetitionAggregate implements Serializable {
     CompetitionAggregate() {}
 
     @CommandHandler
-    CompetitionAggregate(CreateCompetitionCommand command,
-                         Clock clock) {
+    CompetitionAggregate(CreateCompetitionCommand command, Clock clock) {
         validateSubmissionsCloseTimestampNotInThePast(command, clock);
         validateSubmissionPeriodEqualOrGreaterThanMinDuration(command);
         validateVotingPeriodEqualOrGreaterThanMinDuration(command);
@@ -83,8 +82,7 @@ public class CompetitionAggregate implements Serializable {
     }
 
     @CommandHandler
-    void handle(EnterPhotoInCompetitionCommand command,
-                Clock clock) {
+    void handle(EnterPhotoInCompetitionCommand command, Clock clock) {
         validateCompetitionHasNotEnded();
         validateRequestingUserIsOwnerOfPhoto(command.getRequestingUserId(), command.getPhotoOwnerUserId());
         validatePhotoNotAlreadyEntered(command.getPhotoId());
@@ -96,8 +94,7 @@ public class CompetitionAggregate implements Serializable {
     }
 
     @CommandHandler
-    void handle(VoteForPhotoCommand command,
-                Clock clock) {
+    void handle(VoteForPhotoCommand command, Clock clock) {
         validateCompetitionHasNotEnded();
         validateVotingPeriodOpen(clock);
         validatePhotoIsEnteredInCompetition(command.getPhotoId());
