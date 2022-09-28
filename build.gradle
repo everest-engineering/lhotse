@@ -3,11 +3,11 @@ import com.github.jk1.license.render.*
 plugins {
     id 'com.palantir.git-version' version '0.15.0'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
-    id 'org.springframework.boot' version '2.7.0' apply false
-    id 'org.owasp.dependencycheck' version '6.5.1'
+    id 'org.springframework.boot' version '2.7.4' apply false
+    id 'org.owasp.dependencycheck' version '7.2.1'
     id 'com.github.jk1.dependency-license-report' version '1.16'
     id 'org.sonarqube' version '3.4.0.2513'
-    id 'com.diffplug.spotless' version '6.6.0'
+    id 'com.diffplug.spotless' version '6.11.0'
     id 'jacoco'
 }
 
@@ -43,12 +43,11 @@ subprojects {
     }
 
     ext {
-        axonCryptoShreddingVersion = '1.0.0'
-        mediaVersion = '0.9.10'
-        storageVersion = '1.0.2'
+        axonCryptoShreddingVersion = '1.0.1'
+        mediaVersion = '0.9.11'
+        storageVersion = '1.0.3'
 
-        axonVersion = '4.5.15'
-        bouncyCastleVersion = '1.71'
+        axonVersion = '4.6.0'
         commonsLangVersion = '3.12.0'
         commonsTextVersion = '1.9'
         commonsValidatorVersion = '1.7'
@@ -56,22 +55,21 @@ subprojects {
         javaXCacheVersion = '1.1.1'
         javaXPersistenceVersion = '2.2'
         jsonHelperVersion = '20220320'
-        keycloakVersion = '19.0.0'
-        liquibaseVersion = '4.9.0'
+        keycloakVersion = '19.0.2'
+        liquibaseVersion = '4.16.1'
         lombokVersion = '1.18.24'
-        microMeterPrometheusVersion = '1.9.0'
-        postgresDriverVersion = '42.3.6'
-        prometheusSimpleClientVersion = '0.15.0'
-        springBootVersion = '2.7.0'
-        springdocVersion = '1.6.9'
-        webfluxVersion = '2.7.0'
+        microMeterPrometheusVersion = '1.9.4'
+        postgresDriverVersion = '42.5.0'
+        prometheusSimpleClientVersion = '0.16.0'
+        springBootVersion = '2.7.4'
+        springdocVersion = '1.6.11'
 
-        gradleDockerComposeVersion = '0.15.2'
+        gradleDockerComposeVersion = '0.16.9'
         hamcrestVersion = '2.2'
-        junitVersion = '5.8.2'
-        mockitoVersion = '4.6.1'
+        junitVersion = '5.9.0'
+        mockitoVersion = '4.8.0'
         slf4jTestVersion = '2.6.0'
-        zonkyEmbeddedDbVersion = '2.1.1'
+        zonkyEmbeddedDbVersion = '2.1.2'
     }
 
     java {

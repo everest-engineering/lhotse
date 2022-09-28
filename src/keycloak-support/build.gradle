@@ -11,7 +11,7 @@ dependencies {
     implementation "org.keycloak:keycloak-spring-boot-starter:${keycloakVersion}"
     implementation "org.keycloak:keycloak-admin-client:${keycloakVersion}"
     implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation "org.springframework.boot:spring-boot-starter-webflux:${webfluxVersion}"
+    implementation "org.springframework.boot:spring-boot-starter-webflux:${springBootVersion}"
 
     testImplementation "org.springframework.boot:spring-boot-starter-test"
     testImplementation "org.springframework.security:spring-security-test"

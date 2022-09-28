@@ -4,21 +4,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import engineering.everest.axon.cryptoshredding.CryptoShreddingKeyService;
 import engineering.everest.axon.cryptoshredding.CryptoShreddingSerializer;
 import engineering.everest.axon.cryptoshredding.encryption.EncrypterDecrypterFactory;
-import engineering.everest.lhotse.axon.CommandValidatingMessageHandlerInterceptor;
-import engineering.everest.lhotse.axon.LoggingMessageHandlerInterceptor;
 import engineering.everest.lhotse.axon.replay.ReplayMarkerAwareTrackingEventProcessorBuilder;
 import lombok.extern.slf4j.Slf4j;
-import org.axonframework.commandhandling.CommandBus;
 import org.axonframework.common.jpa.EntityManagerProvider;
 import org.axonframework.config.EventProcessingModule;
 import org.axonframework.eventhandling.tokenstore.TokenStore;
 import org.axonframework.eventhandling.tokenstore.jpa.JpaTokenStore;
-import org.axonframework.messaging.interceptors.CorrelationDataInterceptor;
 import org.axonframework.modelling.saga.repository.SagaStore;
 import org.axonframework.modelling.saga.repository.jpa.JpaSagaStore;
 import org.axonframework.serialization.Serializer;
 import org.axonframework.serialization.json.JacksonSerializer;
-import org.axonframework.spring.config.AxonConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -63,15 +58,5 @@ public class AxonConfig {
             .serializer(defaultSerializer)
             .nodeId(ManagementFactory.getRuntimeMXBean().getName())
             .build();
-    }
-
-    @Autowired
-    public void registerInterceptors(@Autowired CommandBus commandBus,
-                                     @Autowired AxonConfiguration axonConfiguration,
-                                     @Autowired CommandValidatingMessageHandlerInterceptor commandValidatingMessageHandlerInterceptor,
-                                     @Autowired LoggingMessageHandlerInterceptor loggingMessageHandlerInterceptor) {
-        commandBus.registerHandlerInterceptor(new CorrelationDataInterceptor<>(axonConfiguration.correlationDataProviders()));
-        commandBus.registerHandlerInterceptor(commandValidatingMessageHandlerInterceptor);
-        commandBus.registerHandlerInterceptor(loggingMessageHandlerInterceptor);
     }
 }

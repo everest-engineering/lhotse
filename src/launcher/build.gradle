@@ -66,7 +66,6 @@ dependencies {
     testImplementation "org.springframework.boot:spring-boot-starter-webflux"
     testImplementation "org.springframework.security:spring-security-test"
     testImplementation "org.apache.commons:commons-text:${commonsTextVersion}"
-    testImplementation "org.bouncycastle:bcpkix-jdk18on:${bouncyCastleVersion}"
     testImplementation "org.keycloak:keycloak-admin-client:${keycloakVersion}"
     testImplementation "io.zonky.test:embedded-database-spring-test:${zonkyEmbeddedDbVersion}"
 }

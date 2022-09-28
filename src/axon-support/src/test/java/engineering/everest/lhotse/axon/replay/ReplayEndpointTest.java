@@ -1,11 +1,12 @@
 package engineering.everest.lhotse.axon.replay;
 
 import engineering.everest.lhotse.axon.replay.ReplayableEventProcessor.ListenerRegistry;
+import org.axonframework.config.Configuration;
 import org.axonframework.config.EventProcessingConfiguration;
 import org.axonframework.eventhandling.TrackingToken;
 import org.axonframework.eventhandling.gateway.EventGateway;
 import org.axonframework.eventsourcing.eventstore.EventStore;
-import org.axonframework.spring.config.AxonConfiguration;
+import org.axonframework.spring.config.SpringAxonConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,7 +35,9 @@ import static org.mockito.Mockito.when;
 class ReplayEndpointTest {
 
     @Mock
-    private AxonConfiguration axonConfiguration;
+    private SpringAxonConfiguration springAxonConfiguration;
+    @Mock
+    private Configuration configuration;
     @Mock
     private ReplayCompletionAware replayCompletionAware;
     @Mock
@@ -56,11 +59,12 @@ class ReplayEndpointTest {
 
     @BeforeEach
     void setUp() {
-        lenient().when(axonConfiguration.eventProcessingConfiguration()).thenReturn(eventProcessingConfiguration);
-        lenient().when(eventProcessingConfiguration.eventProcessors()).thenReturn(Map.of("default",
-            replayMarkerAwareTrackingEventProcessor));
+        lenient().when(springAxonConfiguration.getObject()).thenReturn(configuration);
+        lenient().when(configuration.eventProcessingConfiguration()).thenReturn(eventProcessingConfiguration);
+        lenient().when(eventProcessingConfiguration.eventProcessors()).thenReturn(
+            Map.of("default", replayMarkerAwareTrackingEventProcessor));
         lenient().when(replayMarkerAwareTrackingEventProcessor.isReplaying()).thenReturn(false);
-        replayEndpoint = new ReplayEndpoint(axonConfiguration, List.of(replayCompletionAware), taskExecutor);
+        replayEndpoint = new ReplayEndpoint(springAxonConfiguration, List.of(replayCompletionAware), taskExecutor);
     }
 
     @Test
@@ -73,8 +77,8 @@ class ReplayEndpointTest {
 
     @Test
     void willStartReplay() throws IOException {
-        when(axonConfiguration.eventStore()).thenReturn(eventStore);
-        when(axonConfiguration.eventGateway()).thenReturn(eventGateway);
+        when(configuration.eventStore()).thenReturn(eventStore);
+        when(configuration.eventGateway()).thenReturn(eventGateway);
         when(eventStore.createTailToken()).thenReturn(startPosition);
         doAnswer(invocation -> {
             ((Runnable) invocation.getArgument(0)).run();

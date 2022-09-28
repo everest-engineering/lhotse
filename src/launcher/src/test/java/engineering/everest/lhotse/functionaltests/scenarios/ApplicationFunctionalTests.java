@@ -9,7 +9,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,6 +20,7 @@ import java.time.Instant;
 
 import static io.zonky.test.db.AutoConfigureEmbeddedDatabase.DatabaseType.POSTGRES;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT, classes = Launcher.class)
@@ -47,10 +47,12 @@ class ApplicationFunctionalTests {
     }
 
     @Test
-    @Disabled("until admin account refactoring complete")
-    void metricsEndpointPublishesAxonMetrics() {
-        apiRestTestClient.loginAsMonitoringClient();
+    void metricsEndpointPublishesAxonMetrics() throws Exception {
+        // Trigger commands + events so that metrics are published
+        apiRestTestClient.createUserAndLogin("Zoltan", "zoltan@example.com");
+        apiRestTestClient.uploadPhoto("test_photo_1.png", CREATED);
 
+        apiRestTestClient.loginAsMonitoringClient();
         webTestClient.get().uri("/actuator/metrics/commandBus.successCounter")
             .header("Authorization", "Bearer " + apiRestTestClient.getAccessToken())
             .exchange()

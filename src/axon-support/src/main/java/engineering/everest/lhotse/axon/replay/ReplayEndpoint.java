@@ -2,7 +2,7 @@ package engineering.everest.lhotse.axon.replay;
 
 import engineering.everest.lhotse.axon.replay.ReplayableEventProcessor.ListenerRegistry;
 import lombok.extern.slf4j.Slf4j;
-import org.axonframework.spring.config.AxonConfiguration;
+import org.axonframework.spring.config.SpringAxonConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
 import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
@@ -28,13 +28,13 @@ import static java.util.stream.Collectors.toList;
 @Endpoint(id = "replay")
 public class ReplayEndpoint {
 
-    private final AxonConfiguration axonConfiguration;
+    private final SpringAxonConfiguration axonConfiguration;
     private final List<ReplayCompletionAware> replayCompletionAwareListeners;
     private final TaskExecutor taskExecutor;
     private final ConcurrentHashMap<ReplayableEventProcessor, ListenerRegistry> replayingProcessors;
 
     @Autowired
-    public ReplayEndpoint(AxonConfiguration axonConfiguration,
+    public ReplayEndpoint(SpringAxonConfiguration axonConfiguration,
                           List<ReplayCompletionAware> replayCompletionAwareListeners,
                           TaskExecutor taskExecutor) {
         this.axonConfiguration = axonConfiguration;
@@ -69,15 +69,15 @@ public class ReplayEndpoint {
                 throw new IllegalStateException("Cannot start replay while an existing one is running");
             }
             var startPosition = startTime == null
-                ? axonConfiguration.eventStore().createTailToken()
-                : axonConfiguration.eventStore().createTokenAt(startTime.toInstant());
+                ? axonConfiguration.getObject().eventStore().createTailToken()
+                : axonConfiguration.getObject().eventStore().createTokenAt(startTime.toInstant());
 
             var replayMarkerEvent = new ReplayMarkerEvent(randomUUID());
             replayableEventProcessors.forEach(x -> {
                 replayingProcessors.put(x, x.registerReplayCompletionListener(this::onSingleProcessorReplayCompletion));
                 x.startReplay(startPosition, replayMarkerEvent);
             });
-            axonConfiguration.eventGateway().publish(replayMarkerEvent);
+            axonConfiguration.getObject().eventGateway().publish(replayMarkerEvent);
         }
     }
 
@@ -112,7 +112,7 @@ public class ReplayEndpoint {
     }
 
     private List<ReplayableEventProcessor> getReplayableEventProcessors() {
-        return axonConfiguration.eventProcessingConfiguration().eventProcessors().values().stream()
+        return axonConfiguration.getObject().eventProcessingConfiguration().eventProcessors().values().stream()
             .filter(ReplayableEventProcessor.class::isInstance)
             .map(ReplayableEventProcessor.class::cast)
             .collect(toList());
@@ -120,7 +120,7 @@ public class ReplayEndpoint {
 
     private List<ReplayableEventProcessor> getReplayableEventProcessor(Set<String> processingGroups) {
         return processingGroups.stream()
-            .map(e -> axonConfiguration.eventProcessingConfiguration()
+            .map(e -> axonConfiguration.getObject().eventProcessingConfiguration()
                 .eventProcessorByProcessingGroup(e, ReplayableEventProcessor.class))
             .filter(Optional::isPresent)
             .map(Optional::get)

@@ -9,7 +9,6 @@ dependencies {
 
     implementation "engineering.everest.axon:crypto-shredding-extension:${axonCryptoShreddingVersion}"
     implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation "org.springframework.boot:spring-boot-starter-webflux:${webfluxVersion}"
 
     testImplementation project(':axon-support').sourceSets.test.output
     testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
