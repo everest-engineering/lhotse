@@ -57,7 +57,6 @@ class SecurityFunctionalTests {
             .expectHeader().location("http://localhost:" + serverPort + "/sso/login");
     }
 
-    @Test
     private static Stream<Arguments> authenticatedGetEndpoints() {
         return Stream.of(
             Arguments.of("/api/competitions"),
