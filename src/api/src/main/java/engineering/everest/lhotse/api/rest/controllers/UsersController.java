@@ -36,7 +36,7 @@ public class UsersController {
     @AdminOnly
     public void forgetUser(@Parameter(hidden = true) Principal principal,
                            @PathVariable UUID userId,
-                           @RequestBody @Valid DeleteAndForgetUserRequest request) {
+                           @Valid @RequestBody DeleteAndForgetUserRequest request) {
         usersService.deleteAndForgetUser(UUID.fromString(principal.getName()), userId, request.getRequestReason());
     }
 }

@@ -49,8 +49,9 @@ dependencies {
     implementation "engineering.everest.starterkit:media:${mediaVersion}"
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.keycloak:keycloak-spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.keycloak:keycloak-spring-boot-starter'
     implementation "org.axonframework:axon-micrometer:${axonVersion}"
     implementation "io.micrometer:micrometer-core:${microMeterPrometheusVersion}"
     implementation "io.micrometer:micrometer-registry-prometheus:${microMeterPrometheusVersion}"

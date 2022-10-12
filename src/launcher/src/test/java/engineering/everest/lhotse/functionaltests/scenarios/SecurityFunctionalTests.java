@@ -4,14 +4,19 @@ import engineering.everest.lhotse.Launcher;
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.stream.Stream;
 
 import static io.zonky.test.db.AutoConfigureEmbeddedDatabase.DatabaseType.POSTGRES;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -24,14 +29,8 @@ class SecurityFunctionalTests {
     @Autowired
     private WebTestClient webTestClient;
 
-    @Test
-    @WithAnonymousUser
-    void applicationIsAbleToStart() {
-        webTestClient.get().uri("/api/version")
-            .exchange()
-            .expectStatus().isOk()
-            .expectBody(String.class);
-    }
+    @LocalServerPort
+    int serverPort;
 
     @Test
     @EnabledIfSystemProperty(named = "org.gradle.project.buildDir", matches = ".+")
@@ -49,10 +48,21 @@ class SecurityFunctionalTests {
             apiContent);
     }
 
-    @Test
-    void retrievingOrganizationListWillRedirectToLogin_WhenUserIsNotAuthenticated() {
-        webTestClient.get().uri("/admin/organizations")
+    @ParameterizedTest
+    @MethodSource("authenticatedGetEndpoints")
+    void retrievingAuthenticatedGetEndpointsWillRedirectToLogin_WhenUserIsNotAuthenticated() {
+        webTestClient.get().uri("/api/competitions")
             .exchange()
-            .expectStatus().isFound();
+            .expectStatus().isFound()
+            .expectHeader().location("http://localhost:" + serverPort + "/sso/login");
+    }
+
+    @Test
+    private static Stream<Arguments> authenticatedGetEndpoints() {
+        return Stream.of(
+            Arguments.of("/api/competitions"),
+            Arguments.of("/api/competitions/some-id"),
+            Arguments.of("/api/photos"),
+            Arguments.of("/api/photos/some-id"));
     }
 }

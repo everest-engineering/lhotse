@@ -11,7 +11,6 @@ import javax.validation.constraints.NotBlank;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DeleteAndForgetUserRequest {
-
     @NotBlank
     @Schema(required = true)
     private String requestReason;

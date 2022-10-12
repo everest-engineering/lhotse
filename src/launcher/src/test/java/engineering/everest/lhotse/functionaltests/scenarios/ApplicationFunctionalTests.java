@@ -1,7 +1,7 @@
 package engineering.everest.lhotse.functionaltests.scenarios;
 
 import engineering.everest.lhotse.Launcher;
-import engineering.everest.lhotse.api.services.KeycloakClient;
+import engineering.everest.lhotse.api.rest.requests.CreateCompetitionRequest;
 import engineering.everest.lhotse.axon.CommandValidatingMessageHandlerInterceptor;
 import engineering.everest.lhotse.functionaltests.helpers.ApiRestTestClient;
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
@@ -14,14 +14,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.reactive.function.BodyInserters;
 
 import java.time.Instant;
 
 import static io.zonky.test.db.AutoConfigureEmbeddedDatabase.DatabaseType.POSTGRES;
+import static java.time.temporal.ChronoUnit.MINUTES;
+import static java.time.temporal.ChronoUnit.SECONDS;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT, classes = Launcher.class)
 @AutoConfigureEmbeddedDatabase(type = POSTGRES)
@@ -33,12 +40,19 @@ class ApplicationFunctionalTests {
     private WebTestClient webTestClient;
     @Autowired
     private ApiRestTestClient apiRestTestClient;
-    @Autowired
-    private KeycloakClient keycloakClient;
 
     @BeforeEach
     void setUp() {
         apiRestTestClient.setWebTestClient(webTestClient);
+    }
+
+    @Test
+    @WithAnonymousUser
+    void applicationIsAbleToStart() {
+        webTestClient.get().uri("/api/version")
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody(String.class);
     }
 
     @Test
@@ -59,6 +73,45 @@ class ApplicationFunctionalTests {
             .expectStatus().isEqualTo(OK);
     }
 
+    @Test
+    void jsr303errorMessagesAreInternationalized() {
+        apiRestTestClient.createAdminUserAndLogin("Admin Adam", "adam@example.com");
+
+        var requestBody = new CreateCompetitionRequest(null, Instant.now(),
+            Instant.now().plus(5, MINUTES), Instant.now().plus(10, MINUTES), 1);
+        var response = webTestClient.post().uri("/api/competitions")
+            .header("Authorization", "Bearer " + apiRestTestClient.getAccessToken())
+            .header("Accept-Language", "de-DE")
+            .contentType(APPLICATION_JSON)
+            .body(BodyInserters.fromValue(requestBody))
+            .exchange()
+            .returnResult(ErrorResponse.class)
+            .getResponseBody()
+            .blockFirst();
+        assertNotNull(response);
+        assertEquals("description: darf nicht leer sein", response.getMessage());
+    }
+
+    @Test
+    void domainValidationErrorMessagesAreInternationalized() {
+        apiRestTestClient.createAdminUserAndLogin("Admin Alice", "alice@example.com");
+
+        var requestBody = new CreateCompetitionRequest("description", Instant.now(),
+            Instant.now().plus(5, SECONDS), Instant.now().plus(10, SECONDS), 1);
+
+        var response = webTestClient.post().uri("/api/competitions")
+            .header("Authorization", "Bearer " + apiRestTestClient.getAccessToken())
+            .header("Accept-Language", "de-DE")
+            .contentType(APPLICATION_JSON)
+            .body(BodyInserters.fromValue(requestBody))
+            .exchange()
+            .returnResult(ErrorResponse.class)
+            .getResponseBody()
+            .blockFirst();
+        assertNotNull(response);
+        assertEquals("Einreichungen muessen mindestens PT10S offen sein", response.getMessage());
+    }
+
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
@@ -67,46 +120,4 @@ class ApplicationFunctionalTests {
         private String message;
         private Instant timestamp;
     }
-
-    // @Test
-    // void jsr303errorMessagesAreInternationalized() {
-    // apiRestTestClient.createAdminUserAndLogin();
-    //
-    // var newUserRequest = new NewUserRequest("a-user", "");
-    // var response = webTestClient.post().uri("/api/organizations/{organizationId}/users",
-    // ORGANIZATION_ID)
-    // .header("Authorization", "Bearer " + apiRestTestClient.getAccessToken())
-    // .header("Accept-Language", "de-DE")
-    // .contentType(APPLICATION_JSON)
-    // .body(fromValue(newUserRequest))
-    // .exchange()
-    // .returnResult(ErrorResponse.class)
-    // .getResponseBody()
-    // .blockFirst();
-    // assertNotNull(response);
-    // assertEquals("displayName: darf nicht leer sein", response.getMessage());
-    // }
-    //
-    // @Test
-    // @Disabled("until admin account refactoring complete")
-    // void domainValidationErrorMessagesAreInternationalized() throws Exception {
-    // apiRestTestClient.createAdminUserAndLogin();
-    //
-    // var newUserRequest = new NewUserRequest("user123@example.com", "Captain Fancypants");
-    // var userId = apiRestTestClient.createUser(ORGANIZATION_ID, newUserRequest, CREATED);
-    // RetryWithExponentialBackoff.oneMinuteWaiter()
-    // .waitOrThrow(() -> usersReadService.exists(userId), "user registration projection update");
-    //
-    // var response = webTestClient.post().uri("/api/organizations/{organizationId}/users", ORGANIZATION_ID)
-    // .header("Authorization", "Bearer " + apiRestTestClient.getAccessToken())
-    // .header("Accept-Language", "de-DE")
-    // .contentType(APPLICATION_JSON)
-    // .body(fromValue(newUserRequest))
-    // .exchange()
-    // .returnResult(ErrorResponse.class)
-    // .getResponseBody()
-    // .blockFirst();
-    // assertNotNull(response);
-    // assertEquals("Diese E-Mail Adresse ist bereits vergeben", response.getMessage());
-    // }
 }

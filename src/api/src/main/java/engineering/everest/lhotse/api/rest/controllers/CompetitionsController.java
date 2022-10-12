@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 
+import javax.validation.Valid;
 import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
@@ -60,7 +61,7 @@ public class CompetitionsController {
     @ResponseStatus(CREATED)
     @Operation(description = "Create a new competition to run")
     @AdminOnly
-    public UUID createCompetition(@Parameter(hidden = true) Principal principal, @RequestBody CreateCompetitionRequest request) {
+    public UUID createCompetition(@Parameter(hidden = true) Principal principal, @Valid @RequestBody CreateCompetitionRequest request) {
         return competitionsService.createCompetition(UUID.fromString(principal.getName()), request.getDescription(),
             request.getSubmissionsOpenTimestamp(), request.getSubmissionsCloseTimestamp(), request.getVotingEndsTimestamp(),
             request.getMaxEntriesPerUser());
@@ -82,7 +83,7 @@ public class CompetitionsController {
     @RegisteredUser
     public void submitPhotoToCompetition(@Parameter(hidden = true) Principal principal,
                                          @PathVariable UUID competitionId,
-                                         @RequestBody CompetitionSubmissionRequest request) {
+                                         @Valid @RequestBody CompetitionSubmissionRequest request) {
         competitionsService.submitPhoto(UUID.fromString(principal.getName()), competitionId, request.getPhotoId(),
             request.getSubmissionNotes());
     }
@@ -105,6 +106,7 @@ public class CompetitionsController {
             new CompetitionWithEntriesQuery(competitionId), CompetitionWithEntries.class, CompetitionWithEntries.class);
 
         return subscriptionQueryResult.updates()
+            .doFinally(signal -> subscriptionQueryResult.close())
             .mergeWith(subscriptionQueryResult.initialResult())
             .map(dtoConverter::convert);
     }
