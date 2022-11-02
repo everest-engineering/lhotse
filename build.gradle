@@ -47,7 +47,7 @@ subprojects {
         mediaVersion = '0.9.11'
         storageVersion = '1.0.3'
 
-        axonVersion = '4.6.0'
+        axonVersion = '4.6.1'
         commonsLangVersion = '3.12.0'
         commonsTextVersion = '1.9'
         commonsValidatorVersion = '1.7'
