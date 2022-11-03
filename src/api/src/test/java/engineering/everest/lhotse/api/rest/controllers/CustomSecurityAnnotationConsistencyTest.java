@@ -46,7 +46,7 @@ class CustomSecurityAnnotationConsistencyTest {
     private void controllerClassHasMatchingAnnotationAndSignature(Class<?> controllerClass) {
         List<Method> methods = Arrays.stream(controllerClass.getMethods())
             .filter(this::isSecurityAnnotationPresent)
-            .collect(toList());
+            .toList();
         for (Method method : methods) {
             if (!isMethodSignatureConsistentWithSecurityAnnotation(method)) {
                 throw new AssertionError(String.format("%s.%s has inconsistent usage of custom security annotation and method signature",

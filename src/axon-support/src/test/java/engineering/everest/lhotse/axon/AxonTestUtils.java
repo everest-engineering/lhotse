@@ -10,13 +10,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static java.util.stream.Collectors.toList;
-
 public class AxonTestUtils {
 
     public static CommandValidatingMessageHandlerInterceptor mockCommandValidatingMessageHandlerInterceptor(Validates<
         ?>... mockValidators) {
-        var validatorClasses = Arrays.stream(mockValidators).map(e -> e.getClass().getSuperclass()).collect(toList());
+        var validatorClasses = Arrays.stream(mockValidators).map(e -> e.getClass().getSuperclass()).toList();
         Map<Class<?>, Validates<?>> validatorLookup = new ConcurrentHashMap<>();
         for (int i = 0; i < validatorClasses.size(); i++) {
             Class<?> validator = validatorClasses.get(i);

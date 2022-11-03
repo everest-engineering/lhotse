@@ -13,8 +13,6 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.UUID;
 
-import static java.util.stream.Collectors.toList;
-
 @Service
 public class DefaultPhotosReadService implements PhotosReadService {
 
@@ -32,7 +30,7 @@ public class DefaultPhotosReadService implements PhotosReadService {
     public List<Photo> getAllPhotos(UUID requestingUserId, Pageable pageable) {
         return photosRepository.findByOwnerUserId(requestingUserId, pageable).stream()
             .map(PersistablePhoto::toDomain)
-            .collect(toList());
+            .toList();
     }
 
     @Override
