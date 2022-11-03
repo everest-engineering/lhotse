@@ -21,7 +21,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static java.util.UUID.randomUUID;
-import static java.util.stream.Collectors.toList;
 
 @Slf4j
 @Component
@@ -115,7 +114,7 @@ public class ReplayEndpoint {
         return axonConfiguration.getObject().eventProcessingConfiguration().eventProcessors().values().stream()
             .filter(ReplayableEventProcessor.class::isInstance)
             .map(ReplayableEventProcessor.class::cast)
-            .collect(toList());
+            .toList();
     }
 
     private List<ReplayableEventProcessor> getReplayableEventProcessor(Set<String> processingGroups) {
@@ -124,6 +123,6 @@ public class ReplayEndpoint {
                 .eventProcessorByProcessingGroup(e, ReplayableEventProcessor.class))
             .filter(Optional::isPresent)
             .map(Optional::get)
-            .collect(toList());
+            .toList();
     }
 }

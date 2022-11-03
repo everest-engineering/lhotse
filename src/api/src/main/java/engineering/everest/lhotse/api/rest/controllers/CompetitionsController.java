@@ -31,7 +31,6 @@ import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
 
-import static java.util.stream.Collectors.toList;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_NDJSON_VALUE;
@@ -74,7 +73,7 @@ public class CompetitionsController {
     public List<CompetitionSummaryResponse> getSummaryOfAllCompetitions(@Parameter(hidden = true) Principal principal) {
         return competitionsReadService.getAllCompetitionsOrderedByDescVotingEndsTimestamp().stream()
             .map(dtoConverter::convert)
-            .collect(toList());
+            .toList();
     }
 
     @PostMapping("/{competitionId}/photos")

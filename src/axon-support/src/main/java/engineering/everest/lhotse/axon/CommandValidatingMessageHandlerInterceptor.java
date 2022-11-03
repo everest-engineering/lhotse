@@ -81,8 +81,7 @@ public class CommandValidatingMessageHandlerInterceptor implements MessageHandle
         // Add super-interfaces first
         interfaces.addAll(0, interfaces.stream()
             .map(this::getValidatableInterfaces)
-            .flatMap(Collection::stream)
-            .collect(toList()));
+            .flatMap(Collection::stream).toList());
 
         if (commandClass.getSuperclass() != null) {
             interfaces.addAll(0, getValidatableInterfaces(commandClass.getSuperclass()));

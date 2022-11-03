@@ -45,7 +45,6 @@ import static engineering.everest.lhotse.i18n.MessageKeys.VOTING_ENDED;
 import static engineering.everest.lhotse.i18n.MessageKeys.VOTING_PERIOD_NOT_STARTED;
 import static java.lang.Integer.MIN_VALUE;
 import static java.util.Comparator.comparing;
-import static java.util.stream.Collectors.toList;
 import static org.axonframework.modelling.command.AggregateLifecycle.apply;
 
 @Aggregate(snapshotTriggerDefinition = "competitionAggregateSnapshotTriggerDefinition")
@@ -121,7 +120,7 @@ public class CompetitionAggregate implements Serializable {
         var winnersToPhotoList = entriesReceivingMostVotes.stream()
             .sorted(comparing(CompetitionEntryEntity::getPhotoId))
             .map(entry -> new WinnerAndSubmittedPhotoPair(entry.getSubmittedByUserId(), entry.getPhotoId()))
-            .collect(toList());
+            .toList();
         apply(new CompetitionEndedAndWinnersDeclaredEvent(competitionId, winnersToPhotoList, numVotesReceived));
     }
 
@@ -245,6 +244,6 @@ public class CompetitionAggregate implements Serializable {
             .orElse(MIN_VALUE);
         return submittedPhotos.values().stream()
             .filter(entry -> entry.getUsersVotedFor().size() == highestVoteCount)
-            .collect(toList());
+            .toList();
     }
 }

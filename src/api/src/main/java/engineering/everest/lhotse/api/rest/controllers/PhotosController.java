@@ -30,7 +30,6 @@ import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
 
-import static java.util.stream.Collectors.toList;
 import static org.springframework.data.domain.Sort.Direction.DESC;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
@@ -79,7 +78,7 @@ public class PhotosController {
                                                  @PageableDefault(20) Pageable pageable) {
         return photosReadService.getAllPhotos(UUID.fromString(principal.getName()), pageable).stream()
             .map(dtoConverter::convert)
-            .collect(toList());
+            .toList();
     }
 
     @GetMapping("/{photoId}")

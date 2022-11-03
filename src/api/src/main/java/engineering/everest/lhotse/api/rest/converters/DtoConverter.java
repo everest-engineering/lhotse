@@ -9,8 +9,6 @@ import engineering.everest.lhotse.competitions.domain.CompetitionWithEntries;
 import engineering.everest.lhotse.photos.Photo;
 import org.springframework.stereotype.Service;
 
-import static java.util.stream.Collectors.toList;
-
 @Service
 public class DtoConverter {
 
@@ -27,7 +25,7 @@ public class DtoConverter {
         var entries = competitionWithEntries.getEntries().stream()
             .map(x -> new CompetitionEntryFragment(x.getPhotoId(), x.getSubmittedByUserId(), x.getEntryTimestamp(),
                 x.getNumVotesReceived(), x.isWinner()))
-            .collect(toList());
+            .toList();
 
         return new CompetitionWithEntriesResponse(
             competitionWithEntries.getId(),

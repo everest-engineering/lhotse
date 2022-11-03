@@ -24,7 +24,7 @@ import static org.springframework.http.HttpStatus.OK;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT, classes = Launcher.class)
 @AutoConfigureEmbeddedDatabase(type = POSTGRES)
-public class PhotosFunctionalTests {
+class PhotosFunctionalTests {
 
     @Autowired
     private WebTestClient webTestClient;

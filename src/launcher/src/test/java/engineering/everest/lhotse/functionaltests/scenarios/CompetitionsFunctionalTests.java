@@ -22,7 +22,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT, classes = Launcher.class)
 @AutoConfigureEmbeddedDatabase(type = POSTGRES)
-public class CompetitionsFunctionalTests {
+class CompetitionsFunctionalTests {
 
     @Autowired
     private WebTestClient webTestClient;

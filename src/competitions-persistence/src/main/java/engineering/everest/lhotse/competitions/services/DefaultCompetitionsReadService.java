@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.UUID;
 
-import static java.util.stream.Collectors.toList;
 import static org.springframework.data.domain.Sort.Direction.ASC;
 import static org.springframework.data.domain.Sort.Direction.DESC;
 
@@ -32,7 +31,7 @@ public class DefaultCompetitionsReadService implements CompetitionsReadService {
     public List<Competition> getAllCompetitionsOrderedByDescVotingEndsTimestamp() {
         return competitionsRepository.findAll(Sort.by(DESC, "votingEndsTimestamp")).stream()
             .map(PersistableCompetition::toDomain)
-            .collect(toList());
+            .toList();
     }
 
     @Override
@@ -40,7 +39,7 @@ public class DefaultCompetitionsReadService implements CompetitionsReadService {
         var entries = competitionEntriesRepository
             .findAllByCompetitionId(competitionId, Sort.by(ASC, "entryTimestamp")).stream()
             .map(PersistableCompetitionEntry::toDomain)
-            .collect(toList());
+            .toList();
         return new CompetitionWithEntries(competitionsRepository.findById(competitionId).orElseThrow().toDomain(), entries);
     }
 }

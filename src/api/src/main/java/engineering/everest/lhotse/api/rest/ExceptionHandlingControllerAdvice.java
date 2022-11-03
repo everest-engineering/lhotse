@@ -37,17 +37,17 @@ public class ExceptionHandlingControllerAdvice extends ResponseEntityExceptionHa
     public ResponseEntity<Object> handleExceptions(Exception exception) {
         LOGGER.debug("Mapping exception:", exception);
 
-        if (exception instanceof TranslatableException) {
-            return handleTranslatableException((TranslatableException) exception);
+        if (exception instanceof TranslatableException e) {
+            return handleTranslatableException(e);
         }
-        if (exception instanceof AggregateNotFoundException) {
-            return handleNotFoundException((AggregateNotFoundException) exception);
+        if (exception instanceof AggregateNotFoundException e) {
+            return handleNotFoundException(e);
         }
-        if (exception instanceof ExecutionException) {
-            return handleExecutionException((ExecutionException) exception);
+        if (exception instanceof ExecutionException e) {
+            return handleExecutionException(e);
         }
-        if (exception instanceof CommandExecutionException) {
-            return handleCommandExecutionException((CommandExecutionException) exception);
+        if (exception instanceof CommandExecutionException e) {
+            return handleCommandExecutionException(e);
         }
         return handleGenericException(exception);
     }
@@ -86,8 +86,8 @@ public class ExceptionHandlingControllerAdvice extends ResponseEntityExceptionHa
         String message = exception.getMessage();
         if (exception.getDetails().isPresent()) {
             var details = exception.getDetails().orElseThrow();
-            if (details instanceof TranslatableException) {
-                message = ((TranslatableException) details).getLocalizedMessage();
+            if (details instanceof TranslatableException e) {
+                message = e.getLocalizedMessage();
             }
         }
         return new ResponseEntity<>(createResponseBody(message, BAD_REQUEST), new HttpHeaders(), BAD_REQUEST);
