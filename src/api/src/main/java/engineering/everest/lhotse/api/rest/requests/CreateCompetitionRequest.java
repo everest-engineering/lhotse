@@ -16,14 +16,14 @@ public class CreateCompetitionRequest {
     @NotBlank
     private String description;
     @NotNull
-    @Schema(required = true)
+    @Schema
     private Instant submissionsOpenTimestamp;
     @NotNull
-    @Schema(required = true)
+    @Schema
     private Instant submissionsCloseTimestamp;
     @NotNull
-    @Schema(required = true)
+    @Schema
     private Instant votingEndsTimestamp;
-    @Schema(required = true)
+    @Schema
     private int maxEntriesPerUser;
 }

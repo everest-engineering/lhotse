@@ -13,7 +13,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CompetitionSubmissionRequest {
     @NotNull
-    @Schema(required = true)
+    @Schema
     private UUID photoId;
     private String submissionNotes;
 }
