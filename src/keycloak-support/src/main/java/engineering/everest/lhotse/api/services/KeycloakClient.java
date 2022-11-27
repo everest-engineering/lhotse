@@ -2,7 +2,7 @@ package engineering.everest.lhotse.api.services;
 
 import engineering.everest.lhotse.common.domain.UserAttribute;
 import lombok.extern.slf4j.Slf4j;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.jboss.resteasy.client.jaxrs.internal.ResteasyClientBuilderImpl;
 import org.json.JSONArray;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
@@ -121,8 +121,7 @@ public class KeycloakClient {
             .clientId(keycloakMasterRealmAdminClientId)
             .username(keycloakAdminEmailAddress)
             .password(keycloakAdminPassword)
-            .resteasyClient(new ResteasyClientBuilder()
-                .connectionPoolSize(keycloakServerConnectionPoolSize).build())
+            .resteasyClient(new ResteasyClientBuilderImpl().connectionPoolSize(keycloakServerConnectionPoolSize).build())
             .build();
     }
 

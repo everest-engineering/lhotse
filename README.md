@@ -48,8 +48,7 @@ sample code demonstrates end-to-end command handling and event processing flows 
 
 # Tooling
 
-This project uses [Java 11](https://openjdk.java.net/projects/jdk/11/). We will update to Java 17 as soon as all third
-party dependencies are ready.
+This project uses Java 17.
 
 Container convenience tooling is [Docker](https://www.docker.com/).
 

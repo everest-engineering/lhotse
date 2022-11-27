@@ -8,7 +8,7 @@ import engineering.everest.lhotse.api.services.KeycloakClient;
 import engineering.everest.lhotse.common.RetryWithExponentialBackoff;
 import engineering.everest.lhotse.photos.persistence.PhotosRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.jboss.resteasy.client.jaxrs.internal.ResteasyClientBuilderImpl;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.KeycloakBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,8 +72,7 @@ public class ApiRestTestClient {
             .realm(keycloakRealm)
             .clientId(MONITORING_CLIENT_ID)
             .clientSecret(MONITORING_CLIENT_SECRET)
-            .resteasyClient(new ResteasyClientBuilder()
-                .connectionPoolSize(keycloakServerConnectionPoolSize).build())
+            .resteasyClient(new ResteasyClientBuilderImpl().connectionPoolSize(keycloakServerConnectionPoolSize).build())
             .build();
 
         assertNotNull(keycloak);
@@ -90,8 +89,7 @@ public class ApiRestTestClient {
             .clientId(keycloakClientId)
             .username(emailAddress)
             .password(PASSWORD)
-            .resteasyClient(new ResteasyClientBuilder()
-                .connectionPoolSize(keycloakServerConnectionPoolSize).build())
+            .resteasyClient(new ResteasyClientBuilderImpl().connectionPoolSize(keycloakServerConnectionPoolSize).build())
             .build();
 
         assertNotNull(keycloak);

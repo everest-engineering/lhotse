@@ -1,6 +1,7 @@
 package engineering.everest.lhotse.axon.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.thoughtworks.xstream.XStream;
 import engineering.everest.axon.cryptoshredding.CryptoShreddingKeyService;
 import engineering.everest.axon.cryptoshredding.CryptoShreddingSerializer;
 import engineering.everest.axon.cryptoshredding.encryption.EncrypterDecrypterFactory;
@@ -15,7 +16,6 @@ import org.axonframework.modelling.saga.repository.jpa.JpaSagaStore;
 import org.axonframework.serialization.Serializer;
 import org.axonframework.serialization.json.JacksonSerializer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.TaskExecutor;
@@ -33,12 +33,24 @@ public class AxonConfig {
             new ReplayMarkerAwareTrackingEventProcessorBuilder(taskExecutor, eventProcessingModule));
     }
 
-    @Qualifier("eventSerializer")
     @Bean
     public CryptoShreddingSerializer eventSerializer(CryptoShreddingKeyService cryptoShreddingKeyService,
                                                      EncrypterDecrypterFactory aesEncrypterDecrypterFactory) {
         return new CryptoShreddingSerializer(JacksonSerializer.defaultSerializer(),
             cryptoShreddingKeyService, aesEncrypterDecrypterFactory, new ObjectMapper());
+    }
+
+    @Bean
+    @SuppressWarnings("MethodName")
+    public XStream xStream() {
+        @SuppressWarnings("LocalVariableName")
+        var xStream = new XStream();
+
+        xStream.allowTypesByWildcard(new String[] {
+            "engineering.everest.**",
+            "java.util.**"
+        });
+        return xStream;
     }
 
     @Bean
