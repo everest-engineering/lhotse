@@ -3,9 +3,15 @@ package engineering.everest.lhotse.i18n.exceptions;
 import engineering.everest.lhotse.i18n.TranslationService;
 import org.springframework.context.NoSuchMessageException;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 import static org.springframework.context.i18n.LocaleContextHolder.getLocale;
 
-public class TranslatableException extends RuntimeException {
+public class TranslatableException extends RuntimeException implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = -7056456777581329666L;
 
     private final String i18nMessageKey;
     private final Object[] args;
