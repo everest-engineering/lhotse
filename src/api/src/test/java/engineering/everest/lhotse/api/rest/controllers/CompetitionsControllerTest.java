@@ -1,6 +1,6 @@
 package engineering.everest.lhotse.api.rest.controllers;
 
-import com.c4_soft.springaddons.security.oauth2.test.annotations.keycloak.WithMockKeycloakAuth;
+import com.c4_soft.springaddons.security.oauth2.test.annotations.WithMockAuthentication;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import engineering.everest.lhotse.api.config.TestApiConfig;
 import engineering.everest.lhotse.api.rest.requests.CompetitionSubmissionRequest;
@@ -80,7 +80,7 @@ class CompetitionsControllerTest {
     }
 
     @Test
-    @WithMockKeycloakAuth(authorities = ROLE_ADMIN)
+    @WithMockAuthentication(authorities = ROLE_ADMIN)
     void adminsCanCreateCompetitions() throws Exception {
         when(competitionsService.createCompetition(USER_ID, "description", SUBMISSIONS_OPEN_TIMESTAMP,
             SUBMISSIONS_CLOSE_TIMESTAMP, VOTING_ENDS_TIMESTAMP, 2))
@@ -96,7 +96,7 @@ class CompetitionsControllerTest {
     }
 
     @Test
-    @WithMockKeycloakAuth(authorities = ROLE_REGISTERED_USER)
+    @WithMockAuthentication(authorities = ROLE_REGISTERED_USER)
     void competitionSummariesCanBeListed() throws Exception {
         when(competitionsReadService.getAllCompetitionsOrderedByDescVotingEndsTimestamp())
             .thenReturn(List.of(COMPETITION_2, COMPETITION_1));
@@ -120,7 +120,7 @@ class CompetitionsControllerTest {
     }
 
     @Test
-    @WithMockKeycloakAuth(authorities = ROLE_REGISTERED_USER)
+    @WithMockAuthentication(authorities = ROLE_REGISTERED_USER)
     void photosCanBeEnteredIntoCompetitions() throws Exception {
         when(competitionsReadService.getAllCompetitionsOrderedByDescVotingEndsTimestamp()).thenReturn(List.of(COMPETITION_1));
 
@@ -134,7 +134,7 @@ class CompetitionsControllerTest {
     }
 
     @Test
-    @WithMockKeycloakAuth(authorities = ROLE_REGISTERED_USER)
+    @WithMockAuthentication(authorities = ROLE_REGISTERED_USER)
     void competitionsCanBeRetrievedInFull() throws Exception {
         when(competitionsReadService.getCompetitionWithEntries(COMPETITION_ID_1)).thenReturn(COMPETITION_WITH_ENTRIES_1);
 
@@ -159,7 +159,7 @@ class CompetitionsControllerTest {
     }
 
     @Test
-    @WithMockKeycloakAuth(authorities = ROLE_REGISTERED_USER)
+    @WithMockAuthentication(authorities = ROLE_REGISTERED_USER)
     void photosInCompetitionsCanBeVotedFor() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.post("/api/competitions/{competitionId}/photos/{photoId}/vote",
             COMPETITION_ID_1.toString(), PHOTO_ID_1.toString())

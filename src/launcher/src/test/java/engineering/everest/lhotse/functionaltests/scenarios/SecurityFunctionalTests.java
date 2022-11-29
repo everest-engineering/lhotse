@@ -50,11 +50,10 @@ class SecurityFunctionalTests {
 
     @ParameterizedTest
     @MethodSource("authenticatedGetEndpoints")
-    void retrievingAuthenticatedGetEndpointsWillRedirectToLogin_WhenUserIsNotAuthenticated() {
-        webTestClient.get().uri("/api/competitions")
+    void retrievingAuthenticatedGetEndpointsWillReturnUnauthorised_WhenUserIsNotAuthenticated(String endpoint) {
+        webTestClient.get().uri(endpoint)
             .exchange()
-            .expectStatus().isFound()
-            .expectHeader().location("http://localhost:" + serverPort + "/sso/login");
+            .expectStatus().isUnauthorized();
     }
 
     private static Stream<Arguments> authenticatedGetEndpoints() {
