@@ -5,10 +5,12 @@ import engineering.everest.lhotse.common.RetryWithExponentialBackoff;
 import engineering.everest.lhotse.functionaltests.helpers.ApiRestTestClient;
 import engineering.everest.starterkit.filestorage.FileService;
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
+import org.json.JSONException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.time.Duration;
@@ -22,6 +24,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT, classes = Launcher.class)
 @AutoConfigureEmbeddedDatabase(type = POSTGRES)
+@ActiveProfiles("functionaltests")
 class CompetitionsFunctionalTests {
 
     @Autowired
@@ -38,7 +41,7 @@ class CompetitionsFunctionalTests {
     }
 
     @Test
-    void adminUsersCanCreateCompetitions() {
+    void adminUsersCanCreateCompetitions() throws JSONException {
         apiRestTestClient.createAdminUserAndLogin("Admin001", "admin001@example.com");
         var competitionId = apiRestTestClient.createCompetition("Best holiday snaps", Instant.now(),
             Instant.now().plus(Duration.ofHours(2)), Instant.now().plus(Duration.ofHours(4)), CREATED);

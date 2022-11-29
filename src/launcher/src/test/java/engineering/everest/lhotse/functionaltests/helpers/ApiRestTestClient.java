@@ -4,11 +4,11 @@ import engineering.everest.lhotse.api.rest.requests.CompetitionSubmissionRequest
 import engineering.everest.lhotse.api.rest.requests.CreateCompetitionRequest;
 import engineering.everest.lhotse.api.rest.requests.DeleteAndForgetUserRequest;
 import engineering.everest.lhotse.api.rest.responses.PhotoResponse;
-import engineering.everest.lhotse.api.services.KeycloakClient;
 import engineering.everest.lhotse.common.RetryWithExponentialBackoff;
 import engineering.everest.lhotse.photos.persistence.PhotosRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.client.jaxrs.internal.ResteasyClientBuilderImpl;
+import org.json.JSONException;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.KeycloakBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,13 +98,13 @@ public class ApiRestTestClient {
         this.accessToken = accessToken;
     }
 
-    public UUID createUserAndLogin(String displayName, String emailAddress) {
+    public UUID createUserAndLogin(String displayName, String emailAddress) throws JSONException {
         var userId = keycloakClient.createNewKeycloakUser(displayName, emailAddress, PASSWORD);
         login(emailAddress);
         return userId;
     }
 
-    public UUID createAdminUserAndLogin(String displayName, String emailAddress) {
+    public UUID createAdminUserAndLogin(String displayName, String emailAddress) throws JSONException {
         var userId = keycloakClient.createNewAdminKeycloakUser(displayName, emailAddress, PASSWORD);
         login(emailAddress);
         return userId;

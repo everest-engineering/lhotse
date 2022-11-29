@@ -1,9 +1,10 @@
-package engineering.everest.lhotse.api.services;
+package engineering.everest.lhotse.functionaltests.helpers;
 
 import engineering.everest.lhotse.common.domain.UserAttribute;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.client.jaxrs.internal.ResteasyClientBuilderImpl;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
@@ -61,7 +62,7 @@ public class KeycloakClient {
         this.keycloakServerConnectionPoolSize = keycloakServerConnectionPoolSize;
     }
 
-    public UUID createNewKeycloakUser(String displayName, String emailAddress, String password) {
+    public UUID createNewKeycloakUser(String displayName, String emailAddress, String password) throws JSONException {
         createUser(Map.of(
             EMAIL_KEY, emailAddress,
             ENABLED_KEY, true,
@@ -72,7 +73,7 @@ public class KeycloakClient {
         return getUserId(emailAddress);
     }
 
-    public UUID createNewAdminKeycloakUser(String displayName, String emailAddress, String password) {
+    public UUID createNewAdminKeycloakUser(String displayName, String emailAddress, String password) throws JSONException {
         var userProperties = Map.of(
             EMAIL_KEY, emailAddress,
             ENABLED_KEY, true,
@@ -86,7 +87,7 @@ public class KeycloakClient {
         return newUserId;
     }
 
-    public UUID getUserId(String emailAddress) {
+    public UUID getUserId(String emailAddress) throws JSONException {
         return fromString(new JSONArray(getUsers(Map.of(USERNAME_KEY, emailAddress)))
             .getJSONObject(0)
             .getString("id"));
@@ -161,7 +162,7 @@ public class KeycloakClient {
                 .block();
     }
 
-    private Map<String, String> fetchRealmRoleDefinition(String targetRealmRole) {
+    private Map<String, String> fetchRealmRoleDefinition(String targetRealmRole) throws JSONException {
         var realmRoles = new JSONArray(webclient(String.format("%s/admin/realms/%s/roles", keycloakServerAuthUrl, keycloakRealm), GET)
             .retrieve()
             .bodyToMono(String.class)

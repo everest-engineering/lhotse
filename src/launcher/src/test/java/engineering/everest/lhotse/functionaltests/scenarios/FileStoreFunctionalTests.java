@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.test.context.ActiveProfiles;
 
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
@@ -32,6 +33,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @AutoConfigureEmbeddedDatabase(type = POSTGRES)
 @Transactional
 @ExtendWith(MockitoExtension.class)
+@ActiveProfiles("functionaltests")
 class FileStoreFunctionalTests {
     private static final byte[] TEMPORARY_FILE_CONTENTS = "A temporary file for testing".getBytes();
 

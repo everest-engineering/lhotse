@@ -8,6 +8,7 @@ import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.json.JSONException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.test.context.support.WithAnonymousUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
 
@@ -32,6 +34,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT, classes = Launcher.class)
 @AutoConfigureEmbeddedDatabase(type = POSTGRES)
+@ActiveProfiles("functionaltests")
 class ApplicationFunctionalTests {
 
     @Autowired
@@ -74,7 +77,7 @@ class ApplicationFunctionalTests {
     }
 
     @Test
-    void jsr303errorMessagesAreInternationalized() {
+    void jsr303errorMessagesAreInternationalized() throws JSONException {
         apiRestTestClient.createAdminUserAndLogin("Admin Adam", "adam@example.com");
 
         var requestBody = new CreateCompetitionRequest(null, Instant.now(),
@@ -93,7 +96,7 @@ class ApplicationFunctionalTests {
     }
 
     @Test
-    void domainValidationErrorMessagesAreInternationalized() {
+    void domainValidationErrorMessagesAreInternationalized() throws JSONException {
         apiRestTestClient.createAdminUserAndLogin("Admin Alice", "alice@example.com");
 
         var requestBody = new CreateCompetitionRequest("description", Instant.now(),
