@@ -1,4 +1,4 @@
-package engineering.everest.lhotse.common.domain;
+package engineering.everest.lhotse.functionaltests.helpers;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

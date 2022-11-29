@@ -1,6 +1,5 @@
 package engineering.everest.lhotse.functionaltests.helpers;
 
-import engineering.everest.lhotse.common.domain.UserAttribute;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.client.jaxrs.internal.ResteasyClientBuilderImpl;
 import org.json.JSONArray;
