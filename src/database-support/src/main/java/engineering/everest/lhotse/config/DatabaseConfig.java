@@ -1,9 +1,7 @@
 package engineering.everest.lhotse.config;
 
 import com.zaxxer.hikari.HikariConfig;
-import liquibase.integration.spring.SpringLiquibase;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
@@ -31,19 +29,19 @@ import javax.sql.DataSource;
 public class DatabaseConfig {
 
     @Bean
-    @ConfigurationProperties(prefix = "lhotse.datasource.hikari")
+    @ConfigurationProperties(prefix = "spring.datasource.hikari")
     public DataSource dataSource() {
         return DataSourceBuilder.create().build();
     }
 
     @Bean
-    @ConfigurationProperties(prefix = "lhotse.datasource.hikari")
+    @ConfigurationProperties(prefix = "spring.datasource.hikari")
     public HikariConfig hikariConfig() {
         return new HikariConfig();
     }
 
     @Bean
-    @ConfigurationProperties(prefix = "lhotse.jpa")
+    @ConfigurationProperties(prefix = "spring.jpa")
     public JpaProperties jpaProperties() {
         return new JpaProperties();
     }
@@ -67,26 +65,5 @@ public class DatabaseConfig {
     @Bean
     public EntityManager sharedEntityManager(EntityManagerFactory entityManagerFactory) {
         return SharedEntityManagerCreator.createSharedEntityManager(entityManagerFactory);
-    }
-
-    @Bean
-    @ConfigurationProperties(prefix = "lhotse.liquibase")
-    public LiquibaseProperties liquibaseProperties() {
-        return new LiquibaseProperties();
-    }
-
-    @Bean
-    public SpringLiquibase springLiquibase(DataSource dataSource, LiquibaseProperties properties) {
-        var liquibase = new SpringLiquibase();
-        liquibase.setDataSource(dataSource);
-        liquibase.setChangeLog(properties.getChangeLog());
-        liquibase.setContexts(properties.getContexts());
-        liquibase.setDefaultSchema(properties.getDefaultSchema());
-        liquibase.setDropFirst(properties.isDropFirst());
-        liquibase.setShouldRun(properties.isEnabled());
-        liquibase.setLabelFilter(properties.getLabels());
-        liquibase.setChangeLogParameters(properties.getParameters());
-        liquibase.setRollbackFile(properties.getRollbackFile());
-        return liquibase;
     }
 }

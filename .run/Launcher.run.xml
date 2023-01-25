@@ -1,0 +1,15 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Launcher" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+    <module name="lhotse.launcher.main" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="engineering.everest.lhotse.Launcher" />
+    <option name="VM_PARAMETERS" value="            &quot;--add-opens&quot; &quot;java.base/java.lang=ALL-UNNAMED&quot;, &quot;--add-opens&quot; &quot;java.base/java.io=ALL-UNNAMED&quot;, &quot;--add-opens&quot; &quot;java.base/java.util=ALL-UNNAMED&quot;, &quot;--add-opens&quot; &quot;java.base/java.util.concurrent=ALL-UNNAMED&quot;" />
+    <extension name="software.aws.toolkits.jetbrains.core.execution.JavaAwsConnectionExtension">
+      <option name="credential" />
+      <option name="region" />
+      <option name="useCurrentConnection" value="false" />
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

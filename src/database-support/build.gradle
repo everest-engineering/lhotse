@@ -1,0 +1,7 @@
+apply plugin: 'jacoco'
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation "org.postgresql:postgresql:${postgresDriverVersion}"
+    implementation "org.liquibase:liquibase-core:${liquibaseVersion}"
+}
