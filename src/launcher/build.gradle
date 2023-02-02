@@ -72,7 +72,6 @@ dependencies {
     implementation "io.prometheus:simpleclient_hotspot:${prometheusSimpleClientVersion}"
     implementation "io.prometheus:simpleclient_pushgateway:${prometheusSimpleClientVersion}"
     implementation "org.axonframework:axon-micrometer:${axonVersion}"
-    implementation "org.axonframework:axon-micrometer:${axonVersion}"
     implementation "org.liquibase:liquibase-core:${liquibaseVersion}"
     implementation "org.postgresql:postgresql:${postgresDriverVersion}"
     implementation 'io.micrometer:micrometer-registry-prometheus'

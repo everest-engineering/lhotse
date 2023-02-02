@@ -78,5 +78,3 @@ dependencies {
 }
 EOT
 echo "Created src/$1-persistence/build.gradle"
-
-
