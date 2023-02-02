@@ -7,6 +7,7 @@ import org.axonframework.commandhandling.CommandExecutionException;
 import org.axonframework.modelling.command.AggregateNotFoundException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -55,7 +56,7 @@ public class ExceptionHandlingControllerAdvice extends ResponseEntityExceptionHa
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException exception,
                                                                   HttpHeaders headers,
-                                                                  HttpStatus status,
+                                                                  HttpStatusCode status,
                                                                   WebRequest request) {
         var errors = exception.getBindingResult().getFieldErrors().stream()
             .map(x -> String.format("%s: %s", x.getField(), x.getDefaultMessage()))

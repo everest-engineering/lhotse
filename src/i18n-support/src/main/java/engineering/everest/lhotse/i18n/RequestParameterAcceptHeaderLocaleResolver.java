@@ -1,8 +1,8 @@
 package engineering.everest.lhotse.i18n;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Locale;
 
 import static org.springframework.util.StringUtils.parseLocaleString;

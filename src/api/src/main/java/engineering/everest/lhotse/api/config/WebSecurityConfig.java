@@ -31,7 +31,7 @@ public class WebSecurityConfig {
 
         http.cors().and().csrf().disable()
             .authorizeHttpRequests()
-            .antMatchers(
+            .requestMatchers(
                 "/api/organizations/**",
                 "/api/version",
                 "/actuator/health",
@@ -40,9 +40,9 @@ public class WebSecurityConfig {
                 "/swagger-resources/**",
                 "/sso/login*")
             .permitAll()
-            .antMatchers("/api/**").authenticated()
-            .antMatchers("/actuator/health/**", "/actuator/metrics/**", "/actuator/prometheus").hasAnyRole("ADMIN", "MONITORING")
-            .antMatchers("/actuator/**", "/admin/**").hasRole("ADMIN")
+            .requestMatchers("/api/**").authenticated()
+            .requestMatchers("/actuator/health/**", "/actuator/metrics/**", "/actuator/prometheus").hasAnyRole("ADMIN", "MONITORING")
+            .requestMatchers("/actuator/**", "/admin/**").hasRole("ADMIN")
             .anyRequest().permitAll()
             .and().logout().logoutRequestMatcher(new AntPathRequestMatcher("/logout", "GET")).logoutSuccessUrl("/")
             .and().oauth2ResourceServer(configurer -> configurer.jwt().jwtAuthenticationConverter(jwtAuthenticationConverter));

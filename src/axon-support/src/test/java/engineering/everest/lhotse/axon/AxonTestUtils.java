@@ -1,8 +1,8 @@
 package engineering.everest.lhotse.axon;
 
 import engineering.everest.lhotse.axon.command.validation.Validates;
+import jakarta.validation.Validation;
 
-import javax.validation.Validation;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Arrays;

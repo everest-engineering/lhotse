@@ -1,6 +1,6 @@
 package engineering.everest.lhotse.api.rest.controllers;
 
-import com.c4_soft.springaddons.security.oauth2.test.annotations.WithMockAuthentication;
+import com.c4_soft.springaddons.security.oauth2.test.annotations.WithMockBearerTokenAuthentication;
 import engineering.everest.lhotse.api.config.TestApiConfig;
 import engineering.everest.lhotse.photos.Photo;
 import engineering.everest.lhotse.photos.services.PhotosReadService;
@@ -72,7 +72,7 @@ class PhotosControllerTest {
     }
 
     @Test
-    @WithMockAuthentication(authorities = ROLE_REGISTERED_USER)
+    @WithMockBearerTokenAuthentication(authorities = ROLE_REGISTERED_USER)
     void uploadPhotosWillPersistAndRegisterUpload() throws Exception {
         var persistedFileId = randomUUID();
         when(fileService.transferToEphemeralStore(eq("photo1.png"), eq((long) PHOTO_FILE_CONTENTS.length), any(InputStream.class)))
@@ -92,7 +92,7 @@ class PhotosControllerTest {
     }
 
     @Test
-    @WithMockAuthentication(authorities = ROLE_REGISTERED_USER)
+    @WithMockBearerTokenAuthentication(authorities = ROLE_REGISTERED_USER)
     void getListOfPhotosForAuthenticatedUserWillDelegate() throws Exception {
         when(photosReadService.getAllPhotos(eq(USER_ID), any(Pageable.class)))
             .thenReturn(List.of(PHOTO_1, PHOTO_2));
@@ -109,7 +109,7 @@ class PhotosControllerTest {
     }
 
     @Test
-    @WithMockAuthentication(authorities = ROLE_REGISTERED_USER)
+    @WithMockBearerTokenAuthentication(authorities = ROLE_REGISTERED_USER)
     void streamPhoto_WillReturnPhoto() throws Exception {
         var photoInputStream = mock(InputStream.class);
         when(photoInputStream.transferTo(any(OutputStream.class))).thenAnswer(invocation -> {
@@ -131,7 +131,7 @@ class PhotosControllerTest {
     }
 
     @Test
-    @WithMockAuthentication(authorities = ROLE_REGISTERED_USER)
+    @WithMockBearerTokenAuthentication(authorities = ROLE_REGISTERED_USER)
     void streamProfilePhotoThumbnail_WillReturnProfilePhotoThumbnail() throws Exception {
         var photoThumbnailInputStream = mock(InputStream.class);
         when(photoThumbnailInputStream.transferTo(any(OutputStream.class))).thenAnswer(invocation -> {

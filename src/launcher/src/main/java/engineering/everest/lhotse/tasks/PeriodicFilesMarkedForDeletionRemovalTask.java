@@ -3,6 +3,7 @@ package engineering.everest.lhotse.tasks;
 import engineering.everest.lhotse.axon.replay.ReplayCompletionAware;
 import engineering.everest.starterkit.filestorage.FileService;
 import engineering.everest.starterkit.media.thumbnails.ThumbnailService;
+import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -10,8 +11,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.EntityManager;
 
 import static org.springframework.transaction.annotation.Propagation.REQUIRES_NEW;
 

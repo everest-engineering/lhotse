@@ -1,12 +1,12 @@
 package engineering.everest.lhotse.photos.domain.commands;
 
 import engineering.everest.lhotse.axon.command.validation.FileStatusValidatableCommand;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.axonframework.modelling.command.TargetAggregateIdentifier;
 
-import javax.validation.constraints.NotNull;
 import java.util.Set;
 import java.util.UUID;
 

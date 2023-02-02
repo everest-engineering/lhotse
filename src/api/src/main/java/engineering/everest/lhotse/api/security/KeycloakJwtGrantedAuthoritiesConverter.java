@@ -1,7 +1,5 @@
 package engineering.everest.lhotse.api.security;
 
-import com.nimbusds.jose.shaded.json.JSONArray;
-import com.nimbusds.jose.shaded.json.JSONObject;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -12,9 +10,19 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+
+import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.toList;
 
 @Component
 public class KeycloakJwtGrantedAuthoritiesConverter implements Converter<Jwt, Collection<GrantedAuthority>> {
+
+    private final Locale defaultLocale;
+
+    public KeycloakJwtGrantedAuthoritiesConverter() {
+        this.defaultLocale = Locale.getDefault();
+    }
 
     @Override
     public Collection<GrantedAuthority> convert(Jwt jwt) {
@@ -23,35 +31,29 @@ public class KeycloakJwtGrantedAuthoritiesConverter implements Converter<Jwt, Co
         return authorities;
     }
 
-    private static List<GrantedAuthority> extractRealms(Jwt jwt) {
-        var grantedAuthorities = new ArrayList<GrantedAuthority>();
-
+    private List<GrantedAuthority> extractRealms(Jwt jwt) {
         if (jwt.hasClaim("realm_access")) {
-            var realmAccess = (JSONObject) jwt.getClaims().get("realm_access");
-            if (realmAccess.containsKey("roles")) {
-                var realmRoles = (JSONArray) realmAccess.get("roles");
-                for (var realmRole : realmRoles) {
-                    grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_" + realmRole.toString().toUpperCase(Locale.getDefault())));
-                }
-            }
+            var realmAccess = (Map<String, Object>) jwt.getClaims().get("realm_access");
+            var roles = (List<String>) realmAccess.get("roles");
+            return roles.stream()
+                .map(name -> "ROLE_" + name.toUpperCase(defaultLocale))
+                .map(SimpleGrantedAuthority::new)
+                .collect(toList());
         }
-
-        return grantedAuthorities;
+        return new ArrayList<>();
     }
 
-    private static List<GrantedAuthority> extractScopes(Jwt jwt) {
-        var grantedAuthorities = new ArrayList<GrantedAuthority>();
-
+    private List<GrantedAuthority> extractScopes(Jwt jwt) {
         if (jwt.hasClaim("scope")) {
             var scope = (String) jwt.getClaims().get("scope");
             if (!scope.isBlank() && !scope.isEmpty()) {
                 var scopes = scope.split("\\s");
-                for (var scopeAuthority : scopes) {
-                    grantedAuthorities.add(new SimpleGrantedAuthority("SCOPE_" + scopeAuthority.toUpperCase(Locale.getDefault())));
-                }
+                return stream(scopes)
+                    .map(name -> "SCOPE_" + name.toUpperCase(defaultLocale))
+                    .map(SimpleGrantedAuthority::new)
+                    .collect(toList());
             }
         }
-
-        return grantedAuthorities;
+        return new ArrayList<>();
     }
 }

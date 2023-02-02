@@ -75,7 +75,7 @@ public class CompetitionsEventHandler {
 
     @EventHandler
     void on(CompetitionEndedAndWinnersDeclaredEvent event) {
-        LOGGER.info("winner(s) declared for competition {}", event.getCompetitionId());
+        LOGGER.info("Winner(s) declared for competition {}", event.getCompetitionId());
 
         event.getWinnersToPhotoIdList().forEach(winnerAndPhotoId -> {
             var entryId = new CompetitionEntryId(event.getCompetitionId(), winnerAndPhotoId.getPhotoId());

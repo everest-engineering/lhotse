@@ -6,6 +6,8 @@ import engineering.everest.starterkit.filestorage.FileService;
 import engineering.everest.starterkit.filestorage.persistence.FileMappingRepository;
 import engineering.everest.starterkit.media.thumbnails.ThumbnailService;
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
+import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,8 +18,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 
-import javax.persistence.EntityManager;
-import javax.transaction.Transactional;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Set;

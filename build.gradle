@@ -3,7 +3,7 @@ import com.github.jk1.license.render.*
 plugins {
     id 'com.palantir.git-version' version '0.15.0'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
-    id 'org.springframework.boot' version '2.7.4' apply false
+    id 'org.springframework.boot' version '3.0.2' apply false
     id 'org.owasp.dependencycheck' version '7.2.1'
     id 'com.github.jk1.dependency-license-report' version '1.16'
     id 'org.sonarqube' version '3.4.0.2513'
@@ -43,11 +43,11 @@ subprojects {
     }
 
     ext {
-        axonCryptoShreddingVersion = '1.0.1'
-        mediaVersion = '0.9.11'
-        storageVersion = '1.0.3'
+        axonCryptoShreddingVersion = '1.1.0'
+        mediaVersion = '0.9.12'
+        storageVersion = '1.1.0'
 
-        axonVersion = '4.6.3'
+        axonVersion = '4.7.1'
         commonsLangVersion = '3.12.0'
         commonsTextVersion = '1.9'
         commonsValidatorVersion = '1.7'
@@ -58,15 +58,16 @@ subprojects {
         microMeterPrometheusVersion = '1.9.4'
         postgresDriverVersion = '42.5.1'
         prometheusSimpleClientVersion = '0.16.0'
-        springBootVersion = '2.7.6'
-        springdocVersion = '1.6.13'
+        springBootVersion = '3.0.2'
+        springdocVersion = '2.0.2'
 
         gradleDockerComposeVersion = '0.16.11'
         hamcrestVersion = '2.2'
-        junitVersion = '5.9.0'
-        mockitoVersion = '4.8.0'
+        junitVersion = '5.9.2'
+        mockitoVersion = '5.1.1'
         slf4jTestVersion = '2.6.1'
-        zonkyEmbeddedDbVersion = '2.1.2'
+        springSecurityTestAddonVersion = '6.0.12'
+        zonkyEmbeddedDbVersion = '2.2.0'
     }
 
     java {

@@ -1,12 +1,12 @@
 package engineering.everest.lhotse.competitions.persistence;
 
 import engineering.everest.lhotse.competitions.domain.CompetitionEntry;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.IdClass;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -15,6 +15,7 @@ import java.util.UUID;
 @Entity(name = "competition_entries")
 @IdClass(CompetitionEntryId.class)
 public class PersistableCompetitionEntry {
+
     @Id
     private UUID competitionId;
     @Id

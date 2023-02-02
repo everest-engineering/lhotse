@@ -1,6 +1,7 @@
 package engineering.everest.lhotse.axon;
 
 import engineering.everest.lhotse.axon.command.validators.EmailAddressValidator;
+import jakarta.validation.Validator;
 import org.axonframework.commandhandling.CommandMessage;
 import org.axonframework.messaging.InterceptorChain;
 import org.axonframework.messaging.unitofwork.UnitOfWork;
@@ -10,7 +11,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.validation.Validator;
 import java.util.List;
 
 import static java.util.Collections.emptySet;

@@ -13,9 +13,8 @@ dependencies {
 
     implementation "engineering.everest.starterkit:media:${mediaVersion}"
     implementation "engineering.everest.starterkit:storage:${storageVersion}"
-    implementation "org.springdoc:springdoc-openapi-ui:${springdocVersion}"
-    implementation "org.springdoc:springdoc-openapi-webmvc-core:${springdocVersion}"
-    implementation "org.springdoc:springdoc-openapi-security:${springdocVersion}"
+    implementation "org.springdoc:springdoc-openapi-starter-common:${springdocVersion}"
+    implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}"
     implementation "org.axonframework:axon-modelling:${axonVersion}"
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
@@ -23,11 +22,12 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation 'com.nimbusds:nimbus-jose-jwt'
 
     testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
     testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
     testImplementation "org.springframework.boot:spring-boot-starter-test"
     testImplementation "org.springframework.security:spring-security-test"
     testImplementation "org.apache.commons:commons-lang3:${commonsLangVersion}"
-    testImplementation "com.c4-soft.springaddons:spring-security-oauth2-test-webmvc-addons:2.6.6"
+    testImplementation "com.c4-soft.springaddons:spring-addons-oauth2-test:${springSecurityTestAddonVersion}"
 }

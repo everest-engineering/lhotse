@@ -2,6 +2,9 @@ package engineering.everest.lhotse.axon;
 
 import engineering.everest.lhotse.axon.command.validation.ValidatableCommand;
 import engineering.everest.lhotse.axon.command.validation.Validates;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validator;
 import org.axonframework.commandhandling.CommandMessage;
 import org.axonframework.messaging.InterceptorChain;
 import org.axonframework.messaging.MessageHandlerInterceptor;
@@ -9,9 +12,6 @@ import org.axonframework.messaging.unitofwork.UnitOfWork;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
-import javax.validation.Validator;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Arrays;

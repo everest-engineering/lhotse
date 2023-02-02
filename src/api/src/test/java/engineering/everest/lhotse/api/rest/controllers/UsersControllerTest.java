@@ -1,6 +1,6 @@
 package engineering.everest.lhotse.api.rest.controllers;
 
-import com.c4_soft.springaddons.security.oauth2.test.annotations.WithMockAuthentication;
+import com.c4_soft.springaddons.security.oauth2.test.annotations.WithMockBearerTokenAuthentication;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import engineering.everest.lhotse.api.config.TestApiConfig;
 import engineering.everest.lhotse.api.rest.requests.DeleteAndForgetUserRequest;
@@ -47,7 +47,7 @@ class UsersControllerTest {
     }
 
     @Test
-    @WithMockAuthentication(authorities = ROLE_ADMIN)
+    @WithMockBearerTokenAuthentication(authorities = ROLE_ADMIN)
     void deleteAndForgetUser_WillDelegate() throws Exception {
         mockMvc.perform(post("/api/users/{userId}/forget", USER_ID)
             .principal(ADMIN_ID::toString)
