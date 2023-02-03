@@ -8,7 +8,6 @@ steps:
   - label: ':hammer: Build & test'
     agents:
       java: 17
-      docker: yes
     commands:
       - ./gradlew clean build --console plain
 
@@ -17,6 +16,6 @@ steps:
     <<: *if-main-branch
     agents:
       java: 17
-      docker: yes
     commands:
       - ./gradlew clean codeCoverageReport sonarqube --console plain
+
