@@ -2,11 +2,10 @@ package engineering.everest.lhotse.api.config;
 
 import engineering.everest.lhotse.api.rest.converters.DtoConverter;
 import org.springframework.context.annotation.Bean;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
-import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 
-@EnableGlobalMethodSecurity(jsr250Enabled = true, prePostEnabled = true)
-public class TestApiConfig extends GlobalMethodSecurityConfiguration {
+@EnableMethodSecurity(jsr250Enabled = true)
+public class TestApiConfig {
 
     @Bean
     public DtoConverter dtoConverter() {
