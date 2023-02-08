@@ -3,8 +3,10 @@ package engineering.everest.lhotse.axon.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thoughtworks.xstream.XStream;
 import engineering.everest.axon.cryptoshredding.CryptoShreddingKeyService;
-import engineering.everest.axon.cryptoshredding.CryptoShreddingSerializer;
 import engineering.everest.axon.cryptoshredding.encryption.EncrypterDecrypterFactory;
+import engineering.everest.axon.cryptoshredding.serialization.CryptoShreddingSerializer;
+import engineering.everest.axon.cryptoshredding.serialization.DefaultValueProvider;
+import engineering.everest.axon.cryptoshredding.serialization.KeyIdentifierToStringConverter;
 import engineering.everest.lhotse.axon.replay.ReplayMarkerAwareTrackingEventProcessorBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.common.jpa.EntityManagerProvider;
@@ -35,9 +37,11 @@ public class AxonConfig {
 
     @Bean
     public CryptoShreddingSerializer eventSerializer(CryptoShreddingKeyService cryptoShreddingKeyService,
-                                                     EncrypterDecrypterFactory aesEncrypterDecrypterFactory) {
-        return new CryptoShreddingSerializer(JacksonSerializer.defaultSerializer(),
-            cryptoShreddingKeyService, aesEncrypterDecrypterFactory, new ObjectMapper());
+                                                     EncrypterDecrypterFactory aesEncrypterDecrypterFactory,
+                                                     DefaultValueProvider defaultValueProvider,
+                                                     KeyIdentifierToStringConverter keyIdentifierToStringConverter) {
+        return new CryptoShreddingSerializer(JacksonSerializer.defaultSerializer(), cryptoShreddingKeyService,
+            aesEncrypterDecrypterFactory, new ObjectMapper(), defaultValueProvider, keyIdentifierToStringConverter);
     }
 
     @Bean

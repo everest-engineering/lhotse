@@ -34,6 +34,6 @@ class ForgottenUsersEventHandlerTest {
     void onUserDeletedAndForgottenEvent_WillDiscardSecretKey() {
         forgottenUsersEventHandler.on(new UserDeletedAndForgottenEvent(USER_ID, ADMIN_ID, "GDPR request"));
 
-        verify(cryptoShreddingKeyService).deleteSecretKey(new TypeDifferentiatedSecretKeyId(USER_ID.toString(), ""));
+        verify(cryptoShreddingKeyService).shredSecretKey(new TypeDifferentiatedSecretKeyId(USER_ID.toString(), ""));
     }
 }
