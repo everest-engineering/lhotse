@@ -39,9 +39,10 @@ public class AxonConfig {
     public CryptoShreddingSerializer eventSerializer(CryptoShreddingKeyService cryptoShreddingKeyService,
                                                      EncrypterDecrypterFactory aesEncrypterDecrypterFactory,
                                                      DefaultValueProvider defaultValueProvider,
-                                                     KeyIdentifierToStringConverter keyIdentifierToStringConverter) {
+                                                     KeyIdentifierToStringConverter keyIdentifierToStringConverter,
+                                                     ObjectMapper objectMapper) {
         return new CryptoShreddingSerializer(JacksonSerializer.defaultSerializer(), cryptoShreddingKeyService,
-            aesEncrypterDecrypterFactory, new ObjectMapper(), defaultValueProvider, keyIdentifierToStringConverter);
+            aesEncrypterDecrypterFactory, objectMapper, defaultValueProvider, keyIdentifierToStringConverter);
     }
 
     @Bean
