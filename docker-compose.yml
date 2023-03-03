@@ -13,7 +13,7 @@ services:
       POSTGRES_PASSWORD: postgres
 
   axonserver:
-    image: axoniq/axonserver:4.6.7-dev
+    image: axoniq/axonserver:4.6.10-dev
     restart: unless-stopped
     ports:
      - "${AXON_SERVER_DASHBOARD_PORT}:8024"
@@ -22,11 +22,11 @@ services:
       JAVA_TOOL_OPTIONS: "-Xmx1g"
 
   keycloak:
-    image: quay.io/keycloak/keycloak:20.0.3
+    image: quay.io/keycloak/keycloak:21.0.1
     restart: unless-stopped
     volumes:
       - ./keycloak/imports:/opt/keycloak/data/import
-      - ./keycloak/themes/custom:/opt/jboss/keycloak/themes/custom
+      - ./keycloak/themes/custom:/opt/keycloak/themes/custom
     environment:
       KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
       KC_DB_DATABASE: keycloak
