@@ -17,5 +17,5 @@ steps:
     agents:
       java: 17
     commands:
-      - ./gradlew clean codeCoverageReport sonarqube --console plain
+      - ./gradlew clean codeCoverageReport sonar --console plain
 
