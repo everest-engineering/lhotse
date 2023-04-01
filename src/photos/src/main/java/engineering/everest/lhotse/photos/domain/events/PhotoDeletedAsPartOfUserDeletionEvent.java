@@ -13,6 +13,6 @@ import java.util.UUID;
 @Revision("0")
 public class PhotoDeletedAsPartOfUserDeletionEvent {
     private UUID photoId;
-    private UUID backingFileId;
+    private UUID persistedFileId;
     private UUID deletedUserId;
 }

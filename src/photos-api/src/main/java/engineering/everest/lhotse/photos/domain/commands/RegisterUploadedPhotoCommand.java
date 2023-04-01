@@ -19,11 +19,11 @@ public class RegisterUploadedPhotoCommand implements FileStatusValidatableComman
     @NotNull
     private UUID owningUserId;
     @NotNull
-    private UUID backingFileId;
+    private UUID persistedFileId;
     private String filename;
 
     @Override
     public Set<UUID> getFileIDs() {
-        return Set.of(backingFileId);
+        return Set.of(persistedFileId);
     }
 }

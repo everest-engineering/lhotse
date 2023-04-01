@@ -41,12 +41,12 @@ public class DefaultPhotosReadService implements PhotosReadService {
     @Override
     public InputStream streamPhoto(UUID requestingUserId, UUID photoId) throws IOException {
         var persistablePhoto = photosRepository.findByIdAndOwnerUserId(photoId, requestingUserId).orElseThrow();
-        return fileService.stream(persistablePhoto.getBackingFileId()).getInputStream();
+        return fileService.stream(persistablePhoto.getPersistedFileId()).getInputStream();
     }
 
     @Override
     public InputStream streamPhotoThumbnail(UUID requestingUserId, UUID photoId, int width, int height) throws IOException {
         var persistablePhoto = photosRepository.findByIdAndOwnerUserId(photoId, requestingUserId).orElseThrow();
-        return thumbnailService.streamThumbnailForOriginalFile(persistablePhoto.getBackingFileId(), width, height);
+        return thumbnailService.streamThumbnailForOriginalFile(persistablePhoto.getPersistedFileId(), width, height);
     }
 }

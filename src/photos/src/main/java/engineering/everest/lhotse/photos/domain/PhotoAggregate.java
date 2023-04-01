@@ -24,27 +24,27 @@ public class PhotoAggregate implements Serializable {
 
     @AggregateIdentifier
     private UUID photoId;
-    private UUID backingFileId;
+    private UUID persistedFileId;
     private UUID ownerUserId;
 
     PhotoAggregate() {}
 
     @CommandHandler
     PhotoAggregate(RegisterUploadedPhotoCommand command) {
-        apply(new PhotoUploadedEvent(command.getPhotoId(), command.getOwningUserId(), command.getBackingFileId(), command.getFilename()));
+        apply(new PhotoUploadedEvent(command.getPhotoId(), command.getOwningUserId(), command.getPersistedFileId(), command.getFilename()));
     }
 
     @CommandHandler
     void handle(DeletePhotoForDeletedUserCommand command) {
         validatePhotoBelongsToDeletedUser(command);
 
-        apply(new PhotoDeletedAsPartOfUserDeletionEvent(photoId, backingFileId, command.getDeletedUserId()));
+        apply(new PhotoDeletedAsPartOfUserDeletionEvent(photoId, persistedFileId, command.getDeletedUserId()));
     }
 
     @EventSourcingHandler
     void on(PhotoUploadedEvent event) {
         photoId = event.getPhotoId();
-        backingFileId = event.getBackingFileId();
+        persistedFileId = event.getPersistedFileId();
         ownerUserId = event.getOwningUserId();
     }
 

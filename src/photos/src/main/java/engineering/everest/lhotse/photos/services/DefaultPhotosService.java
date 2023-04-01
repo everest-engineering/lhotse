@@ -19,9 +19,9 @@ public class DefaultPhotosService implements PhotosService {
     }
 
     @Override
-    public UUID registerUploadedPhoto(UUID requestingUserId, UUID backingFileId, String filename) {
+    public UUID registerUploadedPhoto(UUID requestingUserId, UUID persistedFileId, String filename) {
         var photoId = randomFieldsGenerator.genRandomUUID();
-        commandGateway.sendAndWait(new RegisterUploadedPhotoCommand(photoId, requestingUserId, backingFileId, filename));
+        commandGateway.sendAndWait(new RegisterUploadedPhotoCommand(photoId, requestingUserId, persistedFileId, filename));
         return photoId;
     }
 }

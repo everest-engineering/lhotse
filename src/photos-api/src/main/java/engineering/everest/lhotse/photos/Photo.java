@@ -13,7 +13,7 @@ import java.util.UUID;
 public class Photo {
     private UUID id;
     private UUID owningUserId;
-    private UUID backingFileId;
+    private UUID persistedFileId;
     private String filename;
     private Instant uploadTimestamp;
 }
