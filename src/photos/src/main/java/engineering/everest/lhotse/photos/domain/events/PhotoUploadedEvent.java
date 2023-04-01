@@ -17,7 +17,7 @@ public class PhotoUploadedEvent {
     private UUID photoId;
     @EncryptionKeyIdentifier
     private UUID owningUserId;
-    private UUID backingFileId;
+    private UUID persistedFileId;
     @EncryptedField
     private String filename;
 }

@@ -19,11 +19,11 @@ public class PersistablePhoto {
     @Id
     private UUID id;
     private UUID ownerUserId;
-    private UUID backingFileId;
+    private UUID persistedFileId;
     private String filename;
     private Instant uploadTimestamp;
 
     public Photo toDomain() {
-        return new Photo(id, ownerUserId, backingFileId, filename, uploadTimestamp);
+        return new Photo(id, ownerUserId, persistedFileId, filename, uploadTimestamp);
     }
 }

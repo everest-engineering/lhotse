@@ -32,16 +32,16 @@ public class PhotosEventHandler {
 
     @EventHandler
     void on(PhotoUploadedEvent event, @Timestamp Instant uploadTimestamp) {
-        LOGGER.info("User {} uploaded photo {} (backing file {})", event.getOwningUserId(), event.getPhotoId(), event.getBackingFileId());
-        photosRepository.createPhoto(event.getPhotoId(), event.getOwningUserId(), event.getBackingFileId(), event.getFilename(),
+        LOGGER.info("User {} uploaded photo {} (backing file {})", event.getOwningUserId(), event.getPhotoId(), event.getPersistedFileId());
+        photosRepository.createPhoto(event.getPhotoId(), event.getOwningUserId(), event.getPersistedFileId(), event.getFilename(),
             uploadTimestamp);
     }
 
     @EventHandler
     void on(PhotoDeletedAsPartOfUserDeletionEvent event) {
-        LOGGER.info("Deleting photo {} (backing file {}) for deleted user {}", event.getPhotoId(), event.getBackingFileId(),
+        LOGGER.info("Deleting photo {} (backing file {}) for deleted user {}", event.getPhotoId(), event.getPersistedFileId(),
             event.getDeletedUserId());
-        fileService.markEphemeralFileForDeletion(event.getBackingFileId());
+        fileService.markEphemeralFileForDeletion(event.getPersistedFileId());
         photosRepository.deleteById(event.getPhotoId());
     }
 }

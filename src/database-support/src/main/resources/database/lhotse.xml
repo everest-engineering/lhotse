@@ -147,7 +147,7 @@
                 <constraints primaryKey="true" primaryKeyName="PK_photos"/>
             </column>
             <column name="owneruserid" type="uuid"/>
-            <column name="backingfileid" type="uuid"/>
+            <column name="persistedfileid" type="uuid"/>
             <column name="filename" type="varchar(255)"/>
             <column name="uploadtimestamp" type="timestamp"/>
         </createTable>

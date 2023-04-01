@@ -12,8 +12,8 @@ import java.util.UUID;
 @Repository
 public interface PhotosRepository extends JpaRepository<PersistablePhoto, UUID> {
 
-    default void createPhoto(UUID id, UUID ownerUserId, UUID backingFileId, String filename, Instant uploadTimestamp) {
-        save(new PersistablePhoto(id, ownerUserId, backingFileId, filename, uploadTimestamp));
+    default void createPhoto(UUID id, UUID ownerUserId, UUID persistedFileId, String filename, Instant uploadTimestamp) {
+        save(new PersistablePhoto(id, ownerUserId, persistedFileId, filename, uploadTimestamp));
     }
 
     List<PersistablePhoto> findByOwnerUserId(UUID ownerId, Pageable pageable);
