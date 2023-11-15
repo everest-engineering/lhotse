@@ -51,6 +51,7 @@ test {
 dockerCompose {
     useComposeFiles.add("${rootProject.projectDir}/docker-compose.yml")
     isRequiredBy(tasks.test)
+    isRequiredBy(tasks.bootRun)
 }
 
 dependencies {
