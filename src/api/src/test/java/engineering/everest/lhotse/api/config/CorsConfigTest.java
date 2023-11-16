@@ -7,7 +7,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.servlet.config.annotation.CorsRegistration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -30,7 +29,7 @@ class CorsConfigTest {
         var registry = mock(CorsRegistry.class);
         var corsRegistration = mock(CorsRegistration.class);
         when(registry.addMapping("/**")).thenReturn(corsRegistration);
-        when(corsRegistration.allowedOrigins(any())).thenReturn(corsRegistration);
+        when(corsRegistration.allowedOrigins(ALLOWED_ORIGINS)).thenReturn(corsRegistration);
 
         corsConfig.addCorsMappings(registry);
 
