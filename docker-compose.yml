@@ -22,7 +22,7 @@ services:
       JAVA_TOOL_OPTIONS: "-Xmx1g"
 
   keycloak:
-    image: quay.io/keycloak/keycloak:21.0.1
+    image: quay.io/keycloak/keycloak:22.0
     restart: unless-stopped
     volumes:
       - ./keycloak/imports:/opt/keycloak/data/import
