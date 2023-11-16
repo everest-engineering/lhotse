@@ -57,7 +57,7 @@ subprojects {
         lombokVersion = '1.18.26'
         postgresDriverVersion = '42.5.1'
         prometheusSimpleClientVersion = '0.16.0'
-        springBootVersion = '3.0.4'
+        springBootVersion = '3.1.5'
         springdocVersion = '2.0.2'
 
         gradleDockerComposeVersion = '0.16.11'
