@@ -13,7 +13,7 @@ services:
       POSTGRES_PASSWORD: postgres
 
   axonserver:
-    image: axoniq/axonserver:4.6.10-dev
+    image: axoniq/axonserver:4.6.11-dev
     restart: unless-stopped
     ports:
      - "${AXON_SERVER_DASHBOARD_PORT}:8024"
