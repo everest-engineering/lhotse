@@ -35,7 +35,6 @@ public class WebSecurityConfig {
         http.cors(withDefaults()).csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers(
-                    "/api/organizations/**",
                     "/api/version",
                     "/actuator/health",
                     "/api/doc/**",

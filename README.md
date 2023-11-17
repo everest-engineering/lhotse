@@ -78,9 +78,10 @@ This project uses keycloak for authentication and authorization. `docker-compose
 expose it on the `KEYCLOAK_SERVER_PORT` specified in the `.env` file.
 
 ## Running
+Bring up the dependencies:
+`docker compose up`
 
-To run the application server using Gradle:
-
+Run the application server using Gradle:
 `./gradlew bootRun`
 
 To create a docker image:
