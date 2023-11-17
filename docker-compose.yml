@@ -13,13 +13,14 @@ services:
       POSTGRES_PASSWORD: postgres
 
   axonserver:
-    image: axoniq/axonserver:4.6.11-dev
+    image: axoniq/axonserver:2023.2.1-jdk-17
     restart: unless-stopped
     ports:
      - "${AXON_SERVER_DASHBOARD_PORT}:8024"
      - "${AXON_SERVER_GRPC_PORT}:8124"
     environment:
       JAVA_TOOL_OPTIONS: "-Xmx1g"
+      AXONIQ_AXONSERVER_STANDALONE: "true"
 
   keycloak:
     image: quay.io/keycloak/keycloak:22.0
