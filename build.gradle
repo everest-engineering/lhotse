@@ -43,7 +43,7 @@ subprojects {
     }
 
     ext {
-        axonCryptoShreddingVersion = '1.2.0'
+        axonCryptoShreddingVersion = '2.0.0'
         mediaVersion = '0.9.12'
         storageVersion = '1.1.0'
 
