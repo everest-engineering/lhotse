@@ -74,7 +74,7 @@ Start up containers for Postgres and Keycloak:
 
 `docker-compose up`
 
-This project uses keycloak for authentication and authorization. `docker-compose up` will run the keycloak container and
+This project uses keycloak for authentication and session management. `docker-compose up` will run the keycloak container and
 expose it on the `KEYCLOAK_SERVER_PORT` specified in the `.env` file.
 
 ## Running
