@@ -1,4 +1,4 @@
-package engineering.everest.lhotse.secretkeys.persistence;
+package engineering.everest.lhotse.cryptoshredding.persistence;
 
 import engineering.everest.axon.cryptoshredding.TypeDifferentiatedSecretKeyId;
 import engineering.everest.axon.cryptoshredding.persistence.PersistableSecretKey;
