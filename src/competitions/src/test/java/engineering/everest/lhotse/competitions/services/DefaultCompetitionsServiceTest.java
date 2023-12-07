@@ -1,5 +1,6 @@
 package engineering.everest.lhotse.competitions.services;
 
+import engineering.everest.lhotse.common.AuthenticationFacade;
 import engineering.everest.lhotse.common.RandomFieldsGenerator;
 import engineering.everest.lhotse.competitions.domain.commands.CreateCompetitionCommand;
 import engineering.everest.lhotse.competitions.domain.commands.EnterPhotoInCompetitionCommand;
@@ -39,16 +40,21 @@ class DefaultCompetitionsServiceTest {
     @Mock
     private PhotosReadService photosReadService;
 
+    @Mock
+    private AuthenticationFacade authenticationFacade;
+
     @BeforeEach
     void setUp() {
-        defaultCompetitionsService = new DefaultCompetitionsService(commandGateway, randomFieldsGenerator, photosReadService);
+        defaultCompetitionsService = new DefaultCompetitionsService(commandGateway, randomFieldsGenerator,
+                photosReadService, authenticationFacade);
     }
 
     @Test
     void createCompetition_WillDispatch() {
         when(randomFieldsGenerator.genRandomUUID()).thenReturn(COMPETITION_ID);
+        when(authenticationFacade.getRequestingUserId()).thenReturn(USER_ID.toString());
 
-        defaultCompetitionsService.createCompetition(USER_ID, "description", SUBMISSIONS_OPEN_TIMESTAMP,
+        defaultCompetitionsService.createCompetition( "description", SUBMISSIONS_OPEN_TIMESTAMP,
             SUBMISSIONS_CLOSE_TIMESTAMP, VOTING_ENDS_TIMESTAMP, 2);
 
         verify(commandGateway).sendAndWait(new CreateCompetitionCommand(USER_ID, COMPETITION_ID, "description",

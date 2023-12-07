@@ -61,7 +61,7 @@ public class CompetitionsController {
     @Operation(description = "Create a new competition to run")
     @AdminOnly
     public UUID createCompetition(@Parameter(hidden = true) Principal principal, @Valid @RequestBody CreateCompetitionRequest request) {
-        return competitionsService.createCompetition(UUID.fromString(principal.getName()), request.getDescription(),
+        return competitionsService.createCompetition(request.getDescription(),
             request.getSubmissionsOpenTimestamp(), request.getSubmissionsCloseTimestamp(), request.getVotingEndsTimestamp(),
             request.getMaxEntriesPerUser());
     }

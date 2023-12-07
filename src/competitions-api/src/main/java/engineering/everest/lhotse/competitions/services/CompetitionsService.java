@@ -5,7 +5,7 @@ import java.util.UUID;
 
 public interface CompetitionsService {
 
-    UUID createCompetition(UUID requestingUserId,
+    UUID createCompetition(
                            String description,
                            Instant submissionsOpenTimestamp,
                            Instant submissionsCloseTimestamp,

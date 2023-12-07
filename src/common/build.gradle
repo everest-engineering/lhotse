@@ -4,6 +4,7 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-starter-logging:${springBootVersion}"
     implementation "org.springframework.boot:spring-boot-starter-json:${springBootVersion}"
     implementation "org.apache.commons:commons-lang3:${commonsLangVersion}"
+    implementation("org.springframework.security:spring-security-core:6.2.0")
 
     testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
     testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
