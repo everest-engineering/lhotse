@@ -76,7 +76,8 @@ class DefaultCompetitionsServiceTest {
 
     @Test
     void voteForPhoto_WillDispatch() {
-        defaultCompetitionsService.voteForPhoto(USER_ID, COMPETITION_ID, PHOTO_ID);
+        when(authenticatedUser.getUserId()).thenReturn(USER_ID);
+        defaultCompetitionsService.voteForPhoto(COMPETITION_ID, PHOTO_ID);
 
         verify(commandGateway).sendAndWait(new VoteForPhotoCommand(COMPETITION_ID, PHOTO_ID, USER_ID));
     }

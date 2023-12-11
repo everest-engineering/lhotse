@@ -14,5 +14,5 @@ public interface CompetitionsService {
 
     void submitPhoto(UUID competitionId, UUID photoId, String submissionNotes);
 
-    void voteForPhoto(UUID requestingUserId, UUID competitionId, UUID photoId);
+    void voteForPhoto(UUID competitionId, UUID photoId);
 }

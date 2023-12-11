@@ -117,6 +117,6 @@ public class CompetitionsController {
     public void voteForCompetitionEntry(@Parameter(hidden = true) Principal principal,
                                         @PathVariable UUID competitionId,
                                         @PathVariable UUID photoId) {
-        competitionsService.voteForPhoto(UUID.fromString(principal.getName()), competitionId, photoId);
+        competitionsService.voteForPhoto(competitionId, photoId);
     }
 }

@@ -167,6 +167,6 @@ class CompetitionsControllerTest {
             .contentType(APPLICATION_JSON))
             .andExpect(status().isCreated());
 
-        verify(competitionsService).voteForPhoto(USER_ID, COMPETITION_ID_1, PHOTO_ID_1);
+        verify(competitionsService).voteForPhoto(COMPETITION_ID_1, PHOTO_ID_1);
     }
 }

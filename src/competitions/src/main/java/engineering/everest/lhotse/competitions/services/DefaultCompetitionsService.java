@@ -52,7 +52,8 @@ public class DefaultCompetitionsService implements CompetitionsService {
     }
 
     @Override
-    public void voteForPhoto(UUID requestingUserId, UUID competitionId, UUID photoId) {
+    public void voteForPhoto(UUID competitionId, UUID photoId) {
+        var requestingUserId = authenticatedUser.getUserId();
         commandGateway.sendAndWait(new VoteForPhotoCommand(competitionId, photoId, requestingUserId));
     }
 }
