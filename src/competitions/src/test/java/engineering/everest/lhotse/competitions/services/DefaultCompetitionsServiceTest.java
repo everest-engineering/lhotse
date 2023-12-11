@@ -66,8 +66,9 @@ class DefaultCompetitionsServiceTest {
         var ownerUserId = randomUUID();
         when(photosReadService.getPhoto(PHOTO_ID))
             .thenReturn(new Photo(PHOTO_ID, ownerUserId, randomUUID(), "file name", Instant.ofEpochMilli(10)));
+        when(authenticatedUser.getUserId()).thenReturn(USER_ID);
 
-        defaultCompetitionsService.submitPhoto(USER_ID, COMPETITION_ID, PHOTO_ID, "submission notes");
+        defaultCompetitionsService.submitPhoto(COMPETITION_ID, PHOTO_ID, "submission notes");
 
         verify(commandGateway).sendAndWait(new EnterPhotoInCompetitionCommand(COMPETITION_ID, PHOTO_ID, USER_ID,
             ownerUserId, "submission notes"));

@@ -83,7 +83,7 @@ public class CompetitionsController {
     public void submitPhotoToCompetition(@Parameter(hidden = true) Principal principal,
                                          @PathVariable UUID competitionId,
                                          @Valid @RequestBody CompetitionSubmissionRequest request) {
-        competitionsService.submitPhoto(UUID.fromString(principal.getName()), competitionId, request.getPhotoId(),
+        competitionsService.submitPhoto(competitionId, request.getPhotoId(),
             request.getSubmissionNotes());
     }
 

@@ -18,16 +18,16 @@ public class DefaultCompetitionsService implements CompetitionsService {
     private final CommandGateway commandGateway;
     private final RandomFieldsGenerator randomFieldsGenerator;
     private final PhotosReadService photosReadService;
-    private final AuthenticatedUser authFacade;
+    private final AuthenticatedUser authenticatedUser;
 
     public DefaultCompetitionsService(CommandGateway commandGateway,
                                       RandomFieldsGenerator randomFieldsGenerator,
                                       PhotosReadService photosReadService,
-                                      AuthenticatedUser authFacade) {
+                                      AuthenticatedUser authenticatedUser) {
         this.commandGateway = commandGateway;
         this.randomFieldsGenerator = randomFieldsGenerator;
         this.photosReadService = photosReadService;
-        this.authFacade = authFacade;
+        this.authenticatedUser = authenticatedUser;
     }
 
     @Override
@@ -37,15 +37,16 @@ public class DefaultCompetitionsService implements CompetitionsService {
                                   Instant votingEndsTimestamp,
                                   int maxEntriesPerUser) {
         var competitionId = randomFieldsGenerator.genRandomUUID();
-        var requestingUserId = authFacade.getUserId();
+        var requestingUserId = authenticatedUser.getUserId();
         commandGateway.sendAndWait(new CreateCompetitionCommand(requestingUserId, competitionId, description,
             submissionsOpenTimestamp, submissionsCloseTimestamp, votingEndsTimestamp, maxEntriesPerUser));
         return competitionId;
     }
 
     @Override
-    public void submitPhoto(UUID requestingUserId, UUID competitionId, UUID photoId, String submissionNotes) {
+    public void submitPhoto(UUID competitionId, UUID photoId, String submissionNotes) {
         var owningUserId = photosReadService.getPhoto(photoId).getOwningUserId();
+        var requestingUserId = authenticatedUser.getUserId();
         commandGateway.sendAndWait(new EnterPhotoInCompetitionCommand(competitionId, photoId, requestingUserId,
             owningUserId, submissionNotes));
     }

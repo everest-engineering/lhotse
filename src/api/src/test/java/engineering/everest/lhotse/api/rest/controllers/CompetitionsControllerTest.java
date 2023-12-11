@@ -130,7 +130,7 @@ class CompetitionsControllerTest {
             .content(objectMapper.writeValueAsString(new CompetitionSubmissionRequest(PHOTO_ID_1, "much wow look"))))
             .andExpect(status().isCreated());
 
-        verify(competitionsService).submitPhoto(USER_ID, COMPETITION_ID_1, PHOTO_ID_1, "much wow look");
+        verify(competitionsService).submitPhoto(COMPETITION_ID_1, PHOTO_ID_1, "much wow look");
     }
 
     @Test

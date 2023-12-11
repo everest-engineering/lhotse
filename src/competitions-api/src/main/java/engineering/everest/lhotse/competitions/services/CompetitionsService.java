@@ -12,7 +12,7 @@ public interface CompetitionsService {
                            Instant votingEndsTimestamp,
                            int maxEntriesPerUser);
 
-    void submitPhoto(UUID requestingUserId, UUID competitionId, UUID photoId, String submissionNotes);
+    void submitPhoto(UUID competitionId, UUID photoId, String submissionNotes);
 
     void voteForPhoto(UUID requestingUserId, UUID competitionId, UUID photoId);
 }
