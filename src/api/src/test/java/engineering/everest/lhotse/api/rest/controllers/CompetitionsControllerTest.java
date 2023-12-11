@@ -82,7 +82,7 @@ class CompetitionsControllerTest {
     @Test
     @WithMockBearerTokenAuthentication(authorities = ROLE_ADMIN)
     void adminsCanCreateCompetitions() throws Exception {
-        when(competitionsService.createCompetition(USER_ID, "description", SUBMISSIONS_OPEN_TIMESTAMP,
+        when(competitionsService.createCompetition("description", SUBMISSIONS_OPEN_TIMESTAMP,
             SUBMISSIONS_CLOSE_TIMESTAMP, VOTING_ENDS_TIMESTAMP, 2))
                 .thenReturn(COMPETITION_ID_1);
 

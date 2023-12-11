@@ -1,6 +1,6 @@
 package engineering.everest.lhotse.competitions.services;
 
-import engineering.everest.lhotse.common.AuthenticationFacade;
+import engineering.everest.lhotse.common.AuthenticatedUser;
 import engineering.everest.lhotse.common.RandomFieldsGenerator;
 import engineering.everest.lhotse.competitions.domain.commands.CreateCompetitionCommand;
 import engineering.everest.lhotse.competitions.domain.commands.EnterPhotoInCompetitionCommand;
@@ -18,11 +18,12 @@ public class DefaultCompetitionsService implements CompetitionsService {
     private final CommandGateway commandGateway;
     private final RandomFieldsGenerator randomFieldsGenerator;
     private final PhotosReadService photosReadService;
-    private final AuthenticationFacade authFacade;
+    private final AuthenticatedUser authFacade;
 
     public DefaultCompetitionsService(CommandGateway commandGateway,
                                       RandomFieldsGenerator randomFieldsGenerator,
-                                      PhotosReadService photosReadService, AuthenticationFacade authFacade) {
+                                      PhotosReadService photosReadService,
+                                      AuthenticatedUser authFacade) {
         this.commandGateway = commandGateway;
         this.randomFieldsGenerator = randomFieldsGenerator;
         this.photosReadService = photosReadService;
@@ -36,8 +37,8 @@ public class DefaultCompetitionsService implements CompetitionsService {
                                   Instant votingEndsTimestamp,
                                   int maxEntriesPerUser) {
         var competitionId = randomFieldsGenerator.genRandomUUID();
-        var requestingUserId = authFacade.getRequestingUserId();
-        commandGateway.sendAndWait(new CreateCompetitionCommand(UUID.fromString(requestingUserId), competitionId, description,
+        var requestingUserId = authFacade.getUserId();
+        commandGateway.sendAndWait(new CreateCompetitionCommand(requestingUserId, competitionId, description,
             submissionsOpenTimestamp, submissionsCloseTimestamp, votingEndsTimestamp, maxEntriesPerUser));
         return competitionId;
     }
