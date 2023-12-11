@@ -78,7 +78,7 @@ class PhotosFunctionalTests {
         apiRestTestClient.deleteAndForgetUser(craigUserId, "GDPR request", OK);
 
         RetryWithExponentialBackoff.withMaxDuration(ofSeconds(20)).waitOrThrow(
-            () -> photosReadService.getAllPhotos(craigUserId, unpaged()).isEmpty(), "photo deletion projection");
+            () -> photosReadService.getAllPhotos(unpaged()).isEmpty(), "photo deletion projection");
 
         // User not automatically deleted in Keycloak so we can still authenticate (as of now). This test requires an admin API for
         // retrieving photos for specific user. TODO.

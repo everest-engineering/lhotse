@@ -24,7 +24,7 @@ public class UserDeletedSaga implements Serializable {
     @SagaEventHandler(associationProperty = "deletedUserId")
     public void on(UserDeletedAndForgottenEvent event, PhotosReadService photosReadService, CommandGateway commandGateway) {
         LOGGER.debug("Deleting photos for deleted user {}", event.getDeletedUserId());
-        photosReadService.getAllPhotos(event.getDeletedUserId(), Pageable.unpaged())
+        photosReadService.getAllPhotos(Pageable.unpaged())
             .forEach(photo -> commandGateway.send(new DeletePhotoForDeletedUserCommand(photo.getId(), event.getDeletedUserId())));
     }
 }

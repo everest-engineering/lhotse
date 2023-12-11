@@ -47,7 +47,7 @@ class UserDeletedSagaTest {
 
     @Test
     void userDeletedAndForgotten_WillDispatchPhotoDeletionCommands() {
-        when(photosReadService.getAllPhotos(USER_ID, unpaged()))
+        when(photosReadService.getAllPhotos(unpaged()))
             .thenReturn(List.of(
                 new Photo(PHOTO_ID_1, USER_ID, BACKING_FILE_ID_1, "photo1.png", Instant.now()),
                 new Photo(PHOTO_ID_2, USER_ID, BACKING_FILE_ID_2, "photo2.png", Instant.now())));

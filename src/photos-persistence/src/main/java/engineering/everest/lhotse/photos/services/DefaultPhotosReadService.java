@@ -1,5 +1,6 @@
 package engineering.everest.lhotse.photos.services;
 
+import engineering.everest.lhotse.common.AuthenticatedUser;
 import engineering.everest.lhotse.photos.Photo;
 import engineering.everest.lhotse.photos.persistence.PersistablePhoto;
 import engineering.everest.lhotse.photos.persistence.PhotosRepository;
@@ -20,14 +21,21 @@ public class DefaultPhotosReadService implements PhotosReadService {
     private final FileService fileService;
     private final ThumbnailService thumbnailService;
 
-    public DefaultPhotosReadService(PhotosRepository photosRepository, FileService fileService, ThumbnailService thumbnailService) {
+    private final AuthenticatedUser authenticatedUser;
+
+    public DefaultPhotosReadService(PhotosRepository photosRepository,
+                                    FileService fileService,
+                                    ThumbnailService thumbnailService,
+                                    AuthenticatedUser authenticatedUser) {
         this.photosRepository = photosRepository;
         this.fileService = fileService;
         this.thumbnailService = thumbnailService;
+        this.authenticatedUser = authenticatedUser;
     }
 
     @Override
-    public List<Photo> getAllPhotos(UUID requestingUserId, Pageable pageable) {
+    public List<Photo> getAllPhotos(Pageable pageable) {
+        var requestingUserId = authenticatedUser.getUserId();
         return photosRepository.findByOwnerUserId(requestingUserId, pageable).stream()
             .map(PersistablePhoto::toDomain)
             .toList();
@@ -39,13 +47,15 @@ public class DefaultPhotosReadService implements PhotosReadService {
     }
 
     @Override
-    public InputStream streamPhoto(UUID requestingUserId, UUID photoId) throws IOException {
+    public InputStream streamPhoto(UUID photoId) throws IOException {
+        var requestingUserId = authenticatedUser.getUserId();
         var persistablePhoto = photosRepository.findByIdAndOwnerUserId(photoId, requestingUserId).orElseThrow();
         return fileService.stream(persistablePhoto.getPersistedFileId()).getInputStream();
     }
 
     @Override
-    public InputStream streamPhotoThumbnail(UUID requestingUserId, UUID photoId, int width, int height) throws IOException {
+    public InputStream streamPhotoThumbnail(UUID photoId, int width, int height) throws IOException {
+        var requestingUserId = authenticatedUser.getUserId();
         var persistablePhoto = photosRepository.findByIdAndOwnerUserId(photoId, requestingUserId).orElseThrow();
         return thumbnailService.streamThumbnailForOriginalFile(persistablePhoto.getPersistedFileId(), width, height);
     }

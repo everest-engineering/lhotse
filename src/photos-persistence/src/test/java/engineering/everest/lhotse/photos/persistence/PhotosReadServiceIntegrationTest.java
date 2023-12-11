@@ -37,7 +37,7 @@ import static org.springframework.data.domain.Sort.Direction.DESC;
 @AutoConfigureEmbeddedDatabase(refresh = AFTER_EACH_TEST_METHOD, type = POSTGRES)
 @DataJpaTest
 @EnableAutoConfiguration
-@ComponentScan(basePackages = "engineering.everest.lhotse.photos")
+@ComponentScan(basePackages = { "engineering.everest.lhotse.photos", "engineering.everest.lhotse.common" })
 @ContextConfiguration(classes = { TestPhotosJpaConfig.class })
 @Execution(SAME_THREAD)
 public class PhotosReadServiceIntegrationTest {
@@ -74,13 +74,13 @@ public class PhotosReadServiceIntegrationTest {
     @Test
     void getAllPhotosForUser_WillReturnPhotosOwnedByUser() {
         var expectedPhotos = List.of(PHOTO_1, PHOTO_2);
-        assertEquals(expectedPhotos, photosReadService.getAllPhotos(USER_ID_1, Pageable.unpaged()));
+        assertEquals(expectedPhotos, photosReadService.getAllPhotos(Pageable.unpaged()));
     }
 
     @Test
     void getAllPhotosForUser_WillRetrievePagesWhenRequestedRespectingOrder() {
-        var firstPage = photosReadService.getAllPhotos(USER_ID_1, PageRequest.of(0, 1, DESC, "uploadTimestamp"));
-        var secondPage = photosReadService.getAllPhotos(USER_ID_1, PageRequest.of(1, 1, DESC, "uploadTimestamp"));
+        var firstPage = photosReadService.getAllPhotos(PageRequest.of(0, 1, DESC, "uploadTimestamp"));
+        var secondPage = photosReadService.getAllPhotos(PageRequest.of(1, 1, DESC, "uploadTimestamp"));
 
         assertEquals(List.of(PHOTO_2), firstPage);
         assertEquals(List.of(PHOTO_1), secondPage);
@@ -92,12 +92,12 @@ public class PhotosReadServiceIntegrationTest {
         when(fileService.stream(BACKING_FILE_ID_1)).thenReturn(
             new InputStreamOfKnownLength(inputStream, PHOTO_FILE_CONTENTS.length()));
 
-        assertEquals(inputStream, photosReadService.streamPhoto(USER_ID_1, PHOTO_ID_1));
+        assertEquals(inputStream, photosReadService.streamPhoto(PHOTO_ID_1));
     }
 
     @Test
     void streamPhoto_WillFail_WhenPhotoNotAccessibleToRequestingUser() {
-        assertThrows(NoSuchElementException.class, () -> photosReadService.streamPhoto(USER_ID_1, PHOTO_ID_3));
+        assertThrows(NoSuchElementException.class, () -> photosReadService.streamPhoto(PHOTO_ID_3));
     }
 
     @Test
@@ -105,11 +105,11 @@ public class PhotosReadServiceIntegrationTest {
         var inputStream = new ByteArrayInputStream("thumbnail contents".getBytes());
         when(thumbnailService.streamThumbnailForOriginalFile(BACKING_FILE_ID_1, 100, 100)).thenReturn(inputStream);
 
-        assertEquals(inputStream, photosReadService.streamPhotoThumbnail(USER_ID_1, PHOTO_ID_1, 100, 100));
+        assertEquals(inputStream, photosReadService.streamPhotoThumbnail(PHOTO_ID_1, 100, 100));
     }
 
     @Test
     void streamPhotoThumbnail_WillFail_WhenPhotoNotAccessibleToRequestingUser() {
-        assertThrows(NoSuchElementException.class, () -> photosReadService.streamPhotoThumbnail(USER_ID_1, PHOTO_ID_3, 100, 100));
+        assertThrows(NoSuchElementException.class, () -> photosReadService.streamPhotoThumbnail(PHOTO_ID_3, 100, 100));
     }
 }

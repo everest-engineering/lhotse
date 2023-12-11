@@ -88,13 +88,13 @@ class PhotosControllerTest {
             eq("photo1.png"),
             eq((long) PHOTO_FILE_CONTENTS.length),
             any(InputStream.class));
-        verify(photosService).registerUploadedPhoto(USER_ID, persistedFileId, "photo1.png");
+        verify(photosService).registerUploadedPhoto(persistedFileId, "photo1.png");
     }
 
     @Test
     @WithMockBearerTokenAuthentication(authorities = ROLE_REGISTERED_USER)
     void getListOfPhotosForAuthenticatedUserWillDelegate() throws Exception {
-        when(photosReadService.getAllPhotos(eq(USER_ID), any(Pageable.class)))
+        when(photosReadService.getAllPhotos(any(Pageable.class)))
             .thenReturn(List.of(PHOTO_1, PHOTO_2));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/photos")
@@ -117,7 +117,7 @@ class PhotosControllerTest {
             new ByteArrayInputStream(PHOTO_FILE_CONTENTS).transferTo((OutputStream) outputStream);
             return null;
         });
-        when(photosReadService.streamPhoto(USER_ID, PHOTO_1.getId())).thenReturn(photoInputStream);
+        when(photosReadService.streamPhoto(PHOTO_1.getId())).thenReturn(photoInputStream);
 
         var response = mockMvc.perform(get("/api/photos/{photoId}", PHOTO_1.getId())
             .principal(USER_ID::toString))
@@ -139,7 +139,7 @@ class PhotosControllerTest {
             new ByteArrayInputStream(PHOTO_THUMBNAIL_FILE_CONTENTS).transferTo((OutputStream) outputStream);
             return null;
         });
-        when(photosReadService.streamPhotoThumbnail(USER_ID, PHOTO_1.getId(), 100, 100))
+        when(photosReadService.streamPhotoThumbnail(PHOTO_1.getId(), 100, 100))
             .thenReturn(photoThumbnailInputStream);
 
         var response = mockMvc.perform(get("/api/photos/{photoId}/thumbnail?width=100&height=100", PHOTO_1.getId())

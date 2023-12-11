@@ -65,7 +65,7 @@ public class PhotosController {
         throws IOException {
         var persistedFileId = fileService.transferToEphemeralStore(uploadedFile.getOriginalFilename(),
             uploadedFile.getSize(), uploadedFile.getInputStream());
-        return photosService.registerUploadedPhoto(UUID.fromString(principal.getName()), persistedFileId,
+        return photosService.registerUploadedPhoto(persistedFileId,
             uploadedFile.getOriginalFilename());
     }
 
@@ -76,7 +76,7 @@ public class PhotosController {
     public List<PhotoResponse> listPhotosForUser(@Parameter(hidden = true) Principal principal,
                                                  @SortDefault(sort = "uploadTimestamp", direction = DESC)
                                                  @PageableDefault(20) Pageable pageable) {
-        return photosReadService.getAllPhotos(UUID.fromString(principal.getName()), pageable).stream()
+        return photosReadService.getAllPhotos(pageable).stream()
             .map(dtoConverter::convert)
             .toList();
     }
@@ -86,7 +86,7 @@ public class PhotosController {
     public ResponseEntity<StreamingResponseBody> streamPhoto(@Parameter(hidden = true) Principal principal,
                                                              @PathVariable UUID photoId) {
         StreamingResponseBody streamingResponse = outputStream -> {
-            try (var inputStream = photosReadService.streamPhoto(UUID.fromString(principal.getName()), photoId)) {
+            try (var inputStream = photosReadService.streamPhoto(photoId)) {
                 inputStream.transferTo(outputStream);
             }
         };
@@ -103,7 +103,7 @@ public class PhotosController {
                                                                       @RequestParam int height) {
         StreamingResponseBody streamingResponse = outputStream -> {
             try (var inputStream = photosReadService.streamPhotoThumbnail(
-                UUID.fromString(principal.getName()), photoId, width, height)) {
+                photoId, width, height)) {
                 inputStream.transferTo(outputStream);
             }
         };

@@ -1,5 +1,6 @@
 package engineering.everest.lhotse.photos.services;
 
+import engineering.everest.lhotse.common.AuthenticatedUser;
 import engineering.everest.lhotse.common.RandomFieldsGenerator;
 import engineering.everest.lhotse.photos.domain.commands.RegisterUploadedPhotoCommand;
 import org.axonframework.commandhandling.gateway.CommandGateway;
@@ -29,16 +30,19 @@ class DefaultPhotosServiceTest {
     private CommandGateway commandGateway;
     @Mock
     private RandomFieldsGenerator randomFieldsGenerator;
+    @Mock
+    private AuthenticatedUser authenticatedUser;
 
     @BeforeEach
     void setUp() {
-        defaultPhotosService = new DefaultPhotosService(commandGateway, randomFieldsGenerator);
+        defaultPhotosService = new DefaultPhotosService(commandGateway, randomFieldsGenerator, authenticatedUser);
     }
 
     @Test
     void willDispatch_WhenUploadedPhotoRegistered() {
         when(randomFieldsGenerator.genRandomUUID()).thenReturn(PHOTO_ID);
-        defaultPhotosService.registerUploadedPhoto(USER_ID, BACKING_FILE_ID, PHOTO_FILENAME);
+        when(authenticatedUser.getUserId()).thenReturn(USER_ID);
+        defaultPhotosService.registerUploadedPhoto(BACKING_FILE_ID, PHOTO_FILENAME);
 
         verify(commandGateway).sendAndWait(new RegisterUploadedPhotoCommand(PHOTO_ID, USER_ID, BACKING_FILE_ID, PHOTO_FILENAME));
     }

@@ -4,5 +4,5 @@ import java.util.UUID;
 
 public interface PhotosService {
 
-    UUID registerUploadedPhoto(UUID requestingUserId, UUID persistedFileId, String filename);
+    UUID registerUploadedPhoto(UUID persistedFileId, String filename);
 }

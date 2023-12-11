@@ -2,6 +2,7 @@ apply plugin: 'jacoco'
 
 dependencies {
     api project(':photos-api')
+    api project(':common')
 
     implementation "engineering.everest.starterkit:media:${mediaVersion}"
     implementation "engineering.everest.starterkit:storage:${storageVersion}"

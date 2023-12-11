@@ -9,11 +9,11 @@ import java.util.List;
 import java.util.UUID;
 
 public interface PhotosReadService {
-    List<Photo> getAllPhotos(UUID requestingUserId, Pageable pageable);
+    List<Photo> getAllPhotos(Pageable pageable);
 
     Photo getPhoto(UUID photoId);
 
-    InputStream streamPhoto(UUID requestingUserId, UUID photoId) throws IOException;
+    InputStream streamPhoto(UUID photoId) throws IOException;
 
-    InputStream streamPhotoThumbnail(UUID requestingUserId, UUID photoId, int width, int height) throws IOException;
+    InputStream streamPhotoThumbnail(UUID photoId, int width, int height) throws IOException;
 }
