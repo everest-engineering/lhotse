@@ -5,6 +5,7 @@ import engineering.everest.lhotse.competitions.domain.CompetitionEntry;
 import engineering.everest.lhotse.competitions.domain.CompetitionWithEntries;
 import engineering.everest.lhotse.competitions.persistence.config.TestCompetitionsJpaConfig;
 import engineering.everest.lhotse.competitions.services.DefaultCompetitionsReadService;
+import engineering.everest.lhotse.competitions.services.DefaultCompetitionsWriteService;
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -60,20 +61,18 @@ public class CompetitionsReadServiceIntegrationTest {
         new CompetitionWithEntries(COMPETITION_2, List.of(COMPETITION_2_ENTRY_1, COMPETITION_2_ENTRY_2));
 
     @Autowired
-    private CompetitionsRepository competitionsRepository;
-    @Autowired
-    private CompetitionEntriesRepository competitionEntriesRepository;
+    private DefaultCompetitionsWriteService competitionsWriteService;
     @Autowired
     private DefaultCompetitionsReadService competitionsReadService;
 
     @BeforeEach
     void setUp() {
-        competitionsRepository.createCompetition(COMPETITION_ID_1, DESCRIPTION_1, SUBMISSIONS_OPEN_TIMESTAMP_1,
+        competitionsWriteService.createCompetition(COMPETITION_ID_1, DESCRIPTION_1, SUBMISSIONS_OPEN_TIMESTAMP_1,
             SUBMISSIONS_CLOSE_TIMESTAMP_1, VOTING_ENDS_TIMESTAMP_1, 2);
-        competitionsRepository.createCompetition(COMPETITION_ID_2, DESCRIPTION_2, SUBMISSIONS_OPEN_TIMESTAMP_2,
+        competitionsWriteService.createCompetition(COMPETITION_ID_2, DESCRIPTION_2, SUBMISSIONS_OPEN_TIMESTAMP_2,
             SUBMISSIONS_CLOSE_TIMESTAMP_2, VOTING_ENDS_TIMESTAMP_2, 2);
-        competitionEntriesRepository.createCompetitionEntry(COMPETITION_ID_2, PHOTO_ID_1, USER_ID_1, Instant.ofEpochMilli(108));
-        competitionEntriesRepository.createCompetitionEntry(COMPETITION_ID_2, PHOTO_ID_2, USER_ID_2, Instant.ofEpochMilli(110));
+        competitionsWriteService.createCompetitionEntry(COMPETITION_ID_2, PHOTO_ID_1, USER_ID_1, Instant.ofEpochMilli(108));
+        competitionsWriteService.createCompetitionEntry(COMPETITION_ID_2, PHOTO_ID_2, USER_ID_2, Instant.ofEpochMilli(110));
     }
 
     @Test

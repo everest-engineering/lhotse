@@ -7,11 +7,8 @@ import engineering.everest.lhotse.competitions.domain.events.PhotoEnteredInCompe
 import engineering.everest.lhotse.competitions.domain.events.PhotoEntryReceivedVoteEvent;
 import engineering.everest.lhotse.competitions.domain.events.WinnerAndSubmittedPhotoPair;
 import engineering.everest.lhotse.competitions.domain.queries.CompetitionWithEntriesQuery;
-import engineering.everest.lhotse.competitions.persistence.CompetitionEntriesRepository;
-import engineering.everest.lhotse.competitions.persistence.CompetitionEntryId;
-import engineering.everest.lhotse.competitions.persistence.CompetitionsRepository;
-import engineering.everest.lhotse.competitions.persistence.PersistableCompetitionEntry;
 import engineering.everest.lhotse.competitions.services.CompetitionsReadService;
+import engineering.everest.lhotse.competitions.services.CompetitionsWriteService;
 import org.axonframework.queryhandling.QueryUpdateEmitter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,15 +18,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.UUID.randomUUID;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -51,21 +46,19 @@ class CompetitionsEventHandlerTest {
     @Mock
     private CompetitionsReadService competitionsReadService;
     @Mock
-    private CompetitionsRepository competitionsRepository;
-    @Mock
-    private CompetitionEntriesRepository competitionEntriesRepository;
+    private CompetitionsWriteService competitionsWriteService;
 
     @BeforeEach
     void setUp() {
         competitionsEventHandler = new CompetitionsEventHandler(queryUpdateEmitter, competitionsReadService,
-            competitionsRepository, competitionEntriesRepository);
+            competitionsWriteService);
     }
 
     @Test
     void prepareForReplay_WillClearProjection() {
         competitionsEventHandler.prepareForReplay();
 
-        verify(competitionsRepository).deleteAll();
+        verify(competitionsWriteService).deleteAll();
     }
 
     @Test
@@ -73,7 +66,7 @@ class CompetitionsEventHandlerTest {
         competitionsEventHandler.on(new CompetitionCreatedEvent(USER_ID, COMPETITION_ID, "description", SUBMISSIONS_OPEN_TIMESTAMP,
             SUBMISSIONS_CLOSE_TIMESTAMP, VOTING_ENDS_TIMESTAMP, 2));
 
-        verify(competitionsRepository).createCompetition(COMPETITION_ID, "description", SUBMISSIONS_OPEN_TIMESTAMP,
+        verify(competitionsWriteService).createCompetition(COMPETITION_ID, "description", SUBMISSIONS_OPEN_TIMESTAMP,
             SUBMISSIONS_CLOSE_TIMESTAMP, VOTING_ENDS_TIMESTAMP, 2);
     }
 
@@ -82,7 +75,7 @@ class CompetitionsEventHandlerTest {
         competitionsEventHandler.on(
             new PhotoEnteredInCompetitionEvent(COMPETITION_ID, PHOTO_ID, USER_ID, USER_ID, "notes"), ENTRY_TIMESTAMP);
 
-        verify(competitionEntriesRepository).createCompetitionEntry(COMPETITION_ID, PHOTO_ID, USER_ID, ENTRY_TIMESTAMP);
+        verify(competitionsWriteService).createCompetitionEntry(COMPETITION_ID, PHOTO_ID, USER_ID, ENTRY_TIMESTAMP);
     }
 
     @Test
@@ -98,21 +91,14 @@ class CompetitionsEventHandlerTest {
 
     @Test
     void onPhotoEntryReceivedVoteEvent_WillProject() {
-        var persistableCompetitionEntry = new PersistableCompetitionEntry(COMPETITION_ID, PHOTO_ID, USER_ID, ENTRY_TIMESTAMP);
-        when(competitionEntriesRepository.findById(new CompetitionEntryId(COMPETITION_ID, PHOTO_ID))).thenReturn(
-            Optional.of(persistableCompetitionEntry));
-
         competitionsEventHandler.on(new PhotoEntryReceivedVoteEvent(COMPETITION_ID, PHOTO_ID, USER_ID));
         competitionsEventHandler.on(new PhotoEntryReceivedVoteEvent(COMPETITION_ID, PHOTO_ID, USER_ID));
 
-        assertEquals(2, persistableCompetitionEntry.getVotesReceived());
+        verify(competitionsWriteService, times(2)).incrementVotesReceived(COMPETITION_ID, PHOTO_ID);
     }
 
     @Test
     void onPhotoEntryReceivedVoteEvent_WillEmitQueryUpdate() {
-        var persistableCompetitionEntry = new PersistableCompetitionEntry(COMPETITION_ID, PHOTO_ID, USER_ID, ENTRY_TIMESTAMP);
-        when(competitionEntriesRepository.findById(new CompetitionEntryId(COMPETITION_ID, PHOTO_ID)))
-            .thenReturn(Optional.of(persistableCompetitionEntry));
         var expectedCompetitionWithEntries = mock(CompetitionWithEntries.class);
         when(competitionsReadService.getCompetitionWithEntries(COMPETITION_ID)).thenReturn(expectedCompetitionWithEntries);
 
@@ -123,21 +109,14 @@ class CompetitionsEventHandlerTest {
 
     @Test
     void onCompetitionWinnersDeclared_WillProject() {
-        var persistableCompetitionEntry = new PersistableCompetitionEntry(COMPETITION_ID, PHOTO_ID, USER_ID, ENTRY_TIMESTAMP);
-        when(competitionEntriesRepository.findById(new CompetitionEntryId(COMPETITION_ID, PHOTO_ID)))
-            .thenReturn(Optional.of(persistableCompetitionEntry));
-
         competitionsEventHandler.on(
             new CompetitionEndedAndWinnersDeclaredEvent(COMPETITION_ID, List.of(new WinnerAndSubmittedPhotoPair(USER_ID, PHOTO_ID)), 1));
 
-        assertTrue(persistableCompetitionEntry.isWinner());
+        verify(competitionsWriteService).setCompetitionWinner(COMPETITION_ID, PHOTO_ID);
     }
 
     @Test
     void onCompetitionWinnersDeclared_WillEmitQueryUpdate() {
-        var persistableCompetitionEntry = new PersistableCompetitionEntry(COMPETITION_ID, PHOTO_ID, USER_ID, ENTRY_TIMESTAMP);
-        when(competitionEntriesRepository.findById(eq(new CompetitionEntryId(COMPETITION_ID, PHOTO_ID))))
-            .thenReturn(Optional.of(persistableCompetitionEntry));
         var expectedCompetitionWithEntries = mock(CompetitionWithEntries.class);
         when(competitionsReadService.getCompetitionWithEntries(COMPETITION_ID)).thenReturn(expectedCompetitionWithEntries);
 
@@ -145,5 +124,6 @@ class CompetitionsEventHandlerTest {
             new CompetitionEndedAndWinnersDeclaredEvent(COMPETITION_ID, List.of(new WinnerAndSubmittedPhotoPair(USER_ID, PHOTO_ID)), 1));
 
         verify(queryUpdateEmitter).emit(eq(CompetitionWithEntriesQuery.class), any(), eq(expectedCompetitionWithEntries));
+        verify(competitionsWriteService).setCompetitionWinner(COMPETITION_ID, PHOTO_ID);
     }
 }

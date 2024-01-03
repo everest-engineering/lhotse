@@ -7,7 +7,6 @@ dependencies {
 
     implementation project(':axon-support')
     implementation project(':common')
-    implementation project(':competitions-persistence')
     implementation project(':command-validation-support')
     implementation project(':i18n-support')
     implementation project(':competitions-persistence')

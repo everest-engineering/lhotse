@@ -5,10 +5,8 @@ import engineering.everest.lhotse.competitions.domain.events.CompetitionEndedAnd
 import engineering.everest.lhotse.competitions.domain.events.PhotoEnteredInCompetitionEvent;
 import engineering.everest.lhotse.competitions.domain.events.PhotoEntryReceivedVoteEvent;
 import engineering.everest.lhotse.competitions.domain.queries.CompetitionWithEntriesQuery;
-import engineering.everest.lhotse.competitions.persistence.CompetitionEntriesRepository;
-import engineering.everest.lhotse.competitions.persistence.CompetitionEntryId;
-import engineering.everest.lhotse.competitions.persistence.CompetitionsRepository;
 import engineering.everest.lhotse.competitions.services.CompetitionsReadService;
+import engineering.everest.lhotse.competitions.services.CompetitionsWriteService;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventhandling.ResetHandler;
@@ -25,29 +23,26 @@ public class CompetitionsEventHandler {
 
     private final QueryUpdateEmitter queryUpdateEmitter;
     private final CompetitionsReadService competitionsReadService;
-    private final CompetitionsRepository competitionsRepository;
-    private final CompetitionEntriesRepository competitionEntriesRepository;
+    private final CompetitionsWriteService competitionsWriteService;
 
     public CompetitionsEventHandler(QueryUpdateEmitter queryUpdateEmitter,
                                     CompetitionsReadService competitionsReadService,
-                                    CompetitionsRepository competitionsRepository,
-                                    CompetitionEntriesRepository competitionEntriesRepository) {
+                                    CompetitionsWriteService competitionsWriteService) {
         this.queryUpdateEmitter = queryUpdateEmitter;
         this.competitionsReadService = competitionsReadService;
-        this.competitionsRepository = competitionsRepository;
-        this.competitionEntriesRepository = competitionEntriesRepository;
+        this.competitionsWriteService = competitionsWriteService;
     }
 
     @ResetHandler
     public void prepareForReplay() {
-        LOGGER.info("{} deleting projections", CompetitionsRepository.class.getSimpleName());
-        competitionsRepository.deleteAll();
+        LOGGER.info("Deleting Competition projections");
+        competitionsWriteService.deleteAll();
     }
 
     @EventHandler
     void on(CompetitionCreatedEvent event) {
         LOGGER.info("Competition {} created", event.getCompetitionId());
-        competitionsRepository.createCompetition(event.getCompetitionId(), event.getDescription(), event.getSubmissionsOpenTimestamp(),
+        competitionsWriteService.createCompetition(event.getCompetitionId(), event.getDescription(), event.getSubmissionsOpenTimestamp(),
             event.getSubmissionsCloseTimestamp(), event.getVotingEndsTimestamp(), event.getMaxEntriesPerUser());
     }
 
@@ -55,7 +50,7 @@ public class CompetitionsEventHandler {
     void on(PhotoEnteredInCompetitionEvent event, @Timestamp Instant entryTimestamp) {
         LOGGER.info("Photo {} entered into competition {} by user {}", event.getPhotoId(), event.getCompetitionId(),
             event.getSubmittedByUserId());
-        competitionEntriesRepository.createCompetitionEntry(event.getCompetitionId(), event.getPhotoId(),
+        competitionsWriteService.createCompetitionEntry(event.getCompetitionId(), event.getPhotoId(),
             event.getSubmittedByUserId(), entryTimestamp);
 
         emitCompetitionWithEntriesQueryUpdate(event.getCompetitionId());
@@ -66,9 +61,7 @@ public class CompetitionsEventHandler {
         LOGGER.info("Photo {} in competition {} was voted for by user {}", event.getPhotoId(), event.getCompetitionId(),
             event.getVotingUserId());
 
-        var id = new CompetitionEntryId(event.getCompetitionId(), event.getPhotoId());
-        var competitionEntry = competitionEntriesRepository.findById(id).orElseThrow();
-        competitionEntry.setVotesReceived(competitionEntry.getVotesReceived() + 1);
+        competitionsWriteService.incrementVotesReceived(event.getCompetitionId(), event.getPhotoId());
 
         emitCompetitionWithEntriesQueryUpdate(event.getCompetitionId());
     }
@@ -78,9 +71,7 @@ public class CompetitionsEventHandler {
         LOGGER.info("Winner(s) declared for competition {}", event.getCompetitionId());
 
         event.getWinnersToPhotoIdList().forEach(winnerAndPhotoId -> {
-            var entryId = new CompetitionEntryId(event.getCompetitionId(), winnerAndPhotoId.getPhotoId());
-            var entry = competitionEntriesRepository.findById(entryId).orElseThrow();
-            entry.setWinner(true);
+            competitionsWriteService.setCompetitionWinner(event.getCompetitionId(), winnerAndPhotoId.getPhotoId());
         });
 
         emitCompetitionWithEntriesQueryUpdate(event.getCompetitionId());
