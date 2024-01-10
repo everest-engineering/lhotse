@@ -40,7 +40,7 @@ import static org.springframework.data.domain.Sort.Direction.DESC;
 @ComponentScan(basePackages = "engineering.everest.lhotse.photos")
 @ContextConfiguration(classes = { TestPhotosJpaConfig.class })
 @Execution(SAME_THREAD)
-public class PhotosReadServiceIntegrationTest {
+public class DefaultPhotosReadServiceIntegrationTest {
 
     private static final UUID PHOTO_ID_1 = UUID.randomUUID();
     private static final UUID PHOTO_ID_2 = UUID.randomUUID();
@@ -52,7 +52,7 @@ public class PhotosReadServiceIntegrationTest {
     private static final UUID BACKING_FILE_ID_3 = UUID.randomUUID();
     private static final Photo PHOTO_1 = new Photo(PHOTO_ID_1, USER_ID_1, BACKING_FILE_ID_1, "photo1.png", Instant.ofEpochMilli(123));
     private static final Photo PHOTO_2 = new Photo(PHOTO_ID_2, USER_ID_1, BACKING_FILE_ID_2, "photo2.png", Instant.ofEpochMilli(456));
-    public static final String PHOTO_FILE_CONTENTS = "my holiday snap bits";
+    private static final String PHOTO_FILE_CONTENTS = "my holiday snap bits";
 
     @Autowired
     private PhotosRepository photosRepository;

@@ -2,7 +2,7 @@ package engineering.everest.lhotse.photos.handlers;
 
 import engineering.everest.lhotse.photos.domain.events.PhotoDeletedAsPartOfUserDeletionEvent;
 import engineering.everest.lhotse.photos.domain.events.PhotoUploadedEvent;
-import engineering.everest.lhotse.photos.persistence.PhotosRepository;
+import engineering.everest.lhotse.photos.services.PhotosWriteService;
 import engineering.everest.starterkit.filestorage.FileService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,31 +28,31 @@ class PhotosEventHandlerTest {
     private PhotosEventHandler photosEventHandler;
 
     @Mock
-    private PhotosRepository photosRepository;
+    private PhotosWriteService photosWriteService;
     @Mock
     private FileService fileService;
 
     @BeforeEach
     void setUp() {
-        photosEventHandler = new PhotosEventHandler(photosRepository, fileService);
+        photosEventHandler = new PhotosEventHandler(photosWriteService, fileService);
     }
 
     @Test
     void prepareForReplay_WillClearProjection() {
         photosEventHandler.prepareForReplay();
-        verify(photosRepository).deleteAll();
+        verify(photosWriteService).deleteAll();
     }
 
     @Test
     void onPhotoUploadedEvent_WillProject() {
         photosEventHandler.on(new PhotoUploadedEvent(PHOTO_ID, USER_ID, BACKING_FILE_ID, PHOTO_FILENAME), UPLOAD_TIMESTAMP);
-        verify(photosRepository).createPhoto(PHOTO_ID, USER_ID, BACKING_FILE_ID, PHOTO_FILENAME, UPLOAD_TIMESTAMP);
+        verify(photosWriteService).createPhoto(PHOTO_ID, USER_ID, BACKING_FILE_ID, PHOTO_FILENAME, UPLOAD_TIMESTAMP);
     }
 
     @Test
     void onPhotoDeletedAsPartOfUserDeletionEvent_WillDeletePhoto() {
         photosEventHandler.on(new PhotoDeletedAsPartOfUserDeletionEvent(PHOTO_ID, BACKING_FILE_ID, USER_ID));
-        verify(photosRepository).deleteById(PHOTO_ID);
+        verify(photosWriteService).deleteById(PHOTO_ID);
     }
 
     @Test
