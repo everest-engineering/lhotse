@@ -2,7 +2,7 @@ import com.github.jk1.license.render.*
 
 plugins {
     id 'com.palantir.git-version' version '0.15.0'
-    id 'io.spring.dependency-management' version '1.1.0'
+    id 'io.spring.dependency-management' version '1.1.5'
     id 'org.springframework.boot' version '3.0.4' apply false
     id 'org.owasp.dependencycheck' version '8.0.2'
     id 'com.github.jk1.dependency-license-report' version '1.16'
@@ -47,7 +47,7 @@ subprojects {
         mediaVersion = '0.9.12'
         storageVersion = '1.1.0'
 
-        axonVersion = '4.7.2'
+        axonVersion = '4.9.3'
         commonsLangVersion = '3.12.0'
         commonsTextVersion = '1.9'
         commonsValidatorVersion = '1.7'
@@ -57,22 +57,26 @@ subprojects {
         lombokVersion = '1.18.26'
         postgresDriverVersion = '42.5.1'
         prometheusSimpleClientVersion = '0.16.0'
-        springBootVersion = '3.1.5'
+        springBootVersion = '3.3.0'
         springdocVersion = '2.0.2'
 
-        gradleDockerComposeVersion = '0.16.11'
+        gradleDockerComposeVersion = '0.17.7'
         hamcrestVersion = '2.2'
         junitVersion = '5.9.2'
         mockitoVersion = '5.1.1'
         slf4jTestVersion = '2.6.1'
         springSecurityTestAddonVersion = '6.0.12'
-        zonkyEmbeddedDbVersion = '2.2.0'
+        zonkyEmbeddedDbVersion = '2.5.1'
     }
 
     java {
         toolchain {
             languageVersion = JavaLanguageVersion.of(17)
         }
+    }
+
+    compileJava {
+        options.compilerArgs << '-parameters'
     }
 
     dependencyManagement {
