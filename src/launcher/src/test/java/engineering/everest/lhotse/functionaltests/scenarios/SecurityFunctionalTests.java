@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.security.test.context.support.WithAnonymousUser;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
@@ -26,6 +27,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @SpringBootTest(webEnvironment = RANDOM_PORT, classes = Launcher.class)
 @AutoConfigureEmbeddedDatabase(type = POSTGRES)
 @ActiveProfiles("functionaltests")
+@DirtiesContext // Avoids logging noise. Can remove when test containers support shutting down after Spring shut down
 class SecurityFunctionalTests {
 
     @Autowired

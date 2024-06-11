@@ -9,10 +9,12 @@ dependencies {
 
     implementation "engineering.everest.axon:crypto-shredding-extension:${axonCryptoShreddingVersion}"
     implementation 'org.springframework.boot:spring-boot-starter-security'
+    compileOnly 'org.springframework:spring-tx'
 
     testImplementation project(':axon-support').sourceSets.test.output
     testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
     testImplementation "org.axonframework:axon-test:${axonVersion}"
     testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
     testImplementation "org.hamcrest:hamcrest-library:${hamcrestVersion}"
+    testCompileOnly 'org.springframework:spring-tx'
 }

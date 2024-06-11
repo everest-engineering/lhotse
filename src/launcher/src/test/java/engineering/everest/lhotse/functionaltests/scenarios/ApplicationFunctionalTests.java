@@ -16,6 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.test.context.support.WithAnonymousUser;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -35,6 +36,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 @SpringBootTest(webEnvironment = RANDOM_PORT, classes = Launcher.class)
 @AutoConfigureEmbeddedDatabase(type = POSTGRES)
 @ActiveProfiles("functionaltests")
+@DirtiesContext // Avoids logging noise. Can remove when test containers support shutting down after Spring shut down
 class ApplicationFunctionalTests {
 
     @Autowired

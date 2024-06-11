@@ -1,12 +1,12 @@
 import com.github.jk1.license.render.*
 
 plugins {
-    id 'com.palantir.git-version' version '0.15.0'
+    id 'com.palantir.git-version' version '3.1.0'
     id 'io.spring.dependency-management' version '1.1.5'
-    id 'org.springframework.boot' version '3.0.4' apply false
-    id 'org.owasp.dependencycheck' version '8.0.2'
-    id 'com.github.jk1.dependency-license-report' version '1.16'
-    id 'org.sonarqube' version '4.0.0.2929'
+    id 'org.springframework.boot' version '3.3.0' apply false
+    id 'org.owasp.dependencycheck' version '9.2.0'
+    id 'com.github.jk1.dependency-license-report' version '2.8'
+    id 'org.sonarqube' version '5.0.0.4638'
     id 'com.diffplug.spotless' version '6.14.1'
     id 'jacoco'
 }
@@ -48,23 +48,22 @@ subprojects {
         storageVersion = '1.1.0'
 
         axonVersion = '4.9.3'
-        commonsLangVersion = '3.12.0'
-        commonsTextVersion = '1.9'
-        commonsValidatorVersion = '1.7'
-        jsonHelperVersion = '20220924'
-        keycloakVersion = '21.0.1'
+        commonsLangVersion = '3.14.0'
+        commonsTextVersion = '1.12.0'
+        commonsValidatorVersion = '1.9.0'
+        keycloakVersion = '24.0.5'
         liquibaseVersion = '4.19.1'
-        lombokVersion = '1.18.26'
+        lombokVersion = '1.18.32'
         postgresDriverVersion = '42.5.1'
         prometheusSimpleClientVersion = '0.16.0'
         springBootVersion = '3.3.0'
-        springdocVersion = '2.0.2'
+        springdocVersion = '2.5.0'
 
         gradleDockerComposeVersion = '0.17.7'
         hamcrestVersion = '2.2'
-        junitVersion = '5.9.2'
-        mockitoVersion = '5.1.1'
-        slf4jTestVersion = '2.6.1'
+        junitVersion = '5.10.2'
+        mockitoVersion = '5.12.0'
+        slf4jTestVersion = '3.0.1'
         springSecurityTestAddonVersion = '6.0.12'
         zonkyEmbeddedDbVersion = '2.5.1'
     }

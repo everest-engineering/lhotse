@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.io.ByteArrayInputStream;
@@ -34,6 +35,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @Transactional
 @ExtendWith(MockitoExtension.class)
 @ActiveProfiles("functionaltests")
+@DirtiesContext // Avoids logging noise. Can remove when test containers support shutting down after Spring shut down
 class FileStoreFunctionalTests {
     private static final byte[] TEMPORARY_FILE_CONTENTS = "A temporary file for testing".getBytes();
 

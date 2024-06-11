@@ -12,7 +12,7 @@ import java.util.Locale;
 import static java.util.Locale.ENGLISH;
 import static java.util.Locale.GERMANY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static uk.org.lidalia.slf4jext.Level.ERROR;
+import static org.slf4j.event.Level.ERROR;
 
 @ExtendWith(TestLoggerFactoryExtension.class)
 class TranslationServiceTest {
