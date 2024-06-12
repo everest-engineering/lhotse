@@ -59,7 +59,7 @@ subprojects {
         springBootVersion = '3.3.0'
         springdocVersion = '2.5.0'
 
-        gradleDockerComposeVersion = '0.17.7'
+        gradleDockerComposeVersion = '0.16.11'
         hamcrestVersion = '2.2'
         junitVersion = '5.10.2'
         mockitoVersion = '5.12.0'
