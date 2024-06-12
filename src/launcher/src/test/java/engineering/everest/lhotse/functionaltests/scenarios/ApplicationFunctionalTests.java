@@ -68,7 +68,7 @@ class ApplicationFunctionalTests {
     @Test
     void metricsEndpointPublishesAxonMetrics() throws Exception {
         // Trigger commands + events so that metrics are published
-        apiRestTestClient.createUserAndLogin("Zoltan", "zoltan@example.com");
+        apiRestTestClient.createUserAndLogin("Zol", "Tan", "zoltan@example.com");
         apiRestTestClient.uploadPhoto("test_photo_1.png", CREATED);
 
         apiRestTestClient.loginAsMonitoringClient();
@@ -80,7 +80,7 @@ class ApplicationFunctionalTests {
 
     @Test
     void jsr303errorMessagesAreInternationalized() throws JSONException {
-        apiRestTestClient.createAdminUserAndLogin("Admin Adam", "adam@example.com");
+        apiRestTestClient.createAdminUserAndLogin("Admin", "Adam", "adam@example.com");
 
         var requestBody = new CreateCompetitionRequest(null, Instant.now(),
             Instant.now().plus(5, MINUTES), Instant.now().plus(10, MINUTES), 1);
@@ -99,7 +99,7 @@ class ApplicationFunctionalTests {
 
     @Test
     void domainValidationErrorMessagesAreInternationalized() throws JSONException {
-        apiRestTestClient.createAdminUserAndLogin("Admin Alice", "alice@example.com");
+        apiRestTestClient.createAdminUserAndLogin("Admin", "Alice", "alice@example.com");
 
         var requestBody = new CreateCompetitionRequest("description", Instant.now(),
             Instant.now().plus(5, SECONDS), Instant.now().plus(10, SECONDS), 1);

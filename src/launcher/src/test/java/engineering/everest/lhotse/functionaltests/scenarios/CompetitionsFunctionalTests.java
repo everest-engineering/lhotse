@@ -44,7 +44,7 @@ class CompetitionsFunctionalTests {
 
     @Test
     void adminUsersCanCreateCompetitions() throws JSONException {
-        apiRestTestClient.createAdminUserAndLogin("Admin001", "admin001@example.com");
+        apiRestTestClient.createAdminUserAndLogin("Admin", "001", "admin001@example.com");
         var competitionId = apiRestTestClient.createCompetition("Best holiday snaps", Instant.now(),
             Instant.now().plus(Duration.ofHours(2)), Instant.now().plus(Duration.ofHours(4)), CREATED);
 
@@ -53,18 +53,18 @@ class CompetitionsFunctionalTests {
 
     @Test
     void usersCanEnterCompetitionsAndVoteOnEntries() throws Exception {
-        apiRestTestClient.createAdminUserAndLogin("Admin00", "admin002@example.com");
+        apiRestTestClient.createAdminUserAndLogin("Admin", "00", "admin002@example.com");
         var votingStartTimestamp = Instant.now().plus(Duration.ofSeconds(11));
         var competitionId = apiRestTestClient.createCompetition("Best holiday snaps", Instant.now(),
             votingStartTimestamp, Instant.now().plus(Duration.ofSeconds(50)), CREATED);
 
-        apiRestTestClient.createUserAndLogin("Happy Harry", "harry@example.com");
+        apiRestTestClient.createUserAndLogin("Happy", "Harry", "harry@example.com");
         var harryPhotoId = apiRestTestClient.uploadPhoto("test_photo_2.png", CREATED);
 
         apiRestTestClient.submitPhoto(competitionId, harryPhotoId, CREATED);
         apiRestTestClient.submitPhoto(competitionId, harryPhotoId, BAD_REQUEST); // Same photo can't be submitted twice
 
-        apiRestTestClient.createUserAndLogin("Laughing Larry", "larry@example.com");
+        apiRestTestClient.createUserAndLogin("Laughing", "Larry", "larry@example.com");
         var larryPhotoId = apiRestTestClient.uploadPhoto("test_photo_1.png", CREATED);
 
         apiRestTestClient.submitPhoto(competitionId, larryPhotoId, CREATED);
@@ -72,7 +72,7 @@ class CompetitionsFunctionalTests {
         RetryWithExponentialBackoff.withMaxDuration(Duration.ofSeconds(11)).waitOrThrow(
             () -> Instant.now().isAfter(votingStartTimestamp), "waiting for voting to begin");
 
-        apiRestTestClient.createUserAndLogin("Boasting Barry", "barry@example.com");
+        apiRestTestClient.createUserAndLogin("Boasting", "Barry", "barry@example.com");
         apiRestTestClient.voteForPhoto(competitionId, larryPhotoId, CREATED);
         apiRestTestClient.voteForPhoto(competitionId, larryPhotoId, BAD_REQUEST); // Can only vote once for a photo
         apiRestTestClient.voteForPhoto(competitionId, harryPhotoId, CREATED); // Can vote for multiple photos

@@ -98,14 +98,14 @@ public class ApiRestTestClient {
         this.accessToken = accessToken;
     }
 
-    public UUID createUserAndLogin(String displayName, String emailAddress) throws JSONException {
-        var userId = keycloakClient.createNewKeycloakUser(displayName, emailAddress, PASSWORD);
+    public UUID createUserAndLogin(String firstName, String lastName, String emailAddress) throws JSONException {
+        var userId = keycloakClient.createNewKeycloakUser(firstName, lastName, emailAddress, PASSWORD);
         login(emailAddress);
         return userId;
     }
 
-    public UUID createAdminUserAndLogin(String displayName, String emailAddress) throws JSONException {
-        var userId = keycloakClient.createNewAdminKeycloakUser(displayName, emailAddress, PASSWORD);
+    public UUID createAdminUserAndLogin(String firstName, String lastName, String emailAddress) throws JSONException {
+        var userId = keycloakClient.createNewAdminKeycloakUser(firstName, lastName, emailAddress, PASSWORD);
         login(emailAddress);
         return userId;
     }

@@ -40,7 +40,7 @@ class ReplayFunctionalTests {
     @BeforeEach
     void setUp() throws JSONException {
         apiRestTestClient.setWebTestClient(webTestClient);
-        apiRestTestClient.createAdminUserAndLogin("alice-admin", "alice-admin@example.com");
+        apiRestTestClient.createAdminUserAndLogin("alice", "admin", "alice-admin@example.com");
     }
 
     @Test

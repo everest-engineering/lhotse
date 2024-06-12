@@ -47,7 +47,7 @@ class PhotosFunctionalTests {
 
     @Test
     void registeredUsersCanOnlySeeTheirOwnUploadPhotos() throws Exception {
-        apiRestTestClient.createUserAndLogin("Alice", "alice@example.com");
+        apiRestTestClient.createUserAndLogin("The", "Alice", "alice@example.com");
         var firstPhotoId = apiRestTestClient.uploadPhoto("test_photo_1.png", CREATED);
         var secondPhotoId = apiRestTestClient.uploadPhoto("test_photo_2.png", CREATED);
 
@@ -55,13 +55,13 @@ class PhotosFunctionalTests {
         assertEquals(secondPhotoId, photosVisibleToAlice.get(0).getId());   // Most recent first by default
         assertEquals(firstPhotoId, photosVisibleToAlice.get(1).getId());
 
-        apiRestTestClient.createUserAndLogin("Not Alice", "not-alice@example.com");
+        apiRestTestClient.createUserAndLogin("Not", "Alice", "not-alice@example.com");
         assertTrue(apiRestTestClient.getAllPhotosForCurrentUser(OK).isEmpty());
     }
 
     @Test
     void uploadedPhotosCanBeRetrieved() throws Exception {
-        apiRestTestClient.createUserAndLogin("Bob", "bob@example.com");
+        apiRestTestClient.createUserAndLogin("Bob", "Bob", "bob@example.com");
         var photoId = apiRestTestClient.uploadPhoto("test_photo_1.png", CREATED);
 
         try (var resourceAsStream = this.getClass().getResourceAsStream("/test_photo_1.png")) {
@@ -72,11 +72,11 @@ class PhotosFunctionalTests {
 
     @Test
     void deletingUserAlsoDeletesTheirPhotos() throws Exception {
-        var craigUserId = apiRestTestClient.createUserAndLogin("Craig", "craig@example.com");
+        var craigUserId = apiRestTestClient.createUserAndLogin("Craig", "You Know", "craig@example.com");
         apiRestTestClient.uploadPhoto("test_photo_1.png", CREATED);
         apiRestTestClient.uploadPhoto("test_photo_2.png", CREATED);
 
-        apiRestTestClient.createAdminUserAndLogin("User Deleting Admin", "user-deleting-admin@example.com");
+        apiRestTestClient.createAdminUserAndLogin("User Deleting", "Admin", "user-deleting-admin@example.com");
         apiRestTestClient.deleteAndForgetUser(craigUserId, "GDPR request", OK);
 
         RetryWithExponentialBackoff.withMaxDuration(ofSeconds(20)).waitOrThrow(

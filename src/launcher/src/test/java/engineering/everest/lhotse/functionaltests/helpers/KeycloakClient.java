@@ -61,22 +61,22 @@ public class KeycloakClient {
         this.keycloakServerConnectionPoolSize = keycloakServerConnectionPoolSize;
     }
 
-    public UUID createNewKeycloakUser(String displayName, String emailAddress, String password) throws JSONException {
+    public UUID createNewKeycloakUser(String firstName, String lastName, String emailAddress, String password) throws JSONException {
         createUser(Map.of(
             EMAIL_KEY, emailAddress,
             ENABLED_KEY, true,
-            ATTRIBUTES_KEY, new UserAttribute(displayName),
+            ATTRIBUTES_KEY, new UserAttribute(firstName, lastName),
             CREDENTIALS_KEY,
             List.of(Map.of(TYPE_KEY, PASSWORD_VALUE, VALUE_KEY, password, TEMPORARY_KEY, false))));
 
         return getUserId(emailAddress);
     }
 
-    public UUID createNewAdminKeycloakUser(String displayName, String emailAddress, String password) throws JSONException {
+    public UUID createNewAdminKeycloakUser(String firstName, String lastName, String emailAddress, String password) throws JSONException {
         var userProperties = Map.of(
             EMAIL_KEY, emailAddress,
             ENABLED_KEY, true,
-            ATTRIBUTES_KEY, new UserAttribute(displayName),
+            ATTRIBUTES_KEY, new UserAttribute(firstName, lastName),
             CREDENTIALS_KEY,
             List.of(Map.of(TYPE_KEY, PASSWORD_VALUE, VALUE_KEY, password, TEMPORARY_KEY, false)));
         createUser(userProperties);

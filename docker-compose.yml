@@ -22,11 +22,10 @@ services:
       AXONIQ_AXONSERVER_STANDALONE: "true"
 
   keycloak:
-    image: quay.io/keycloak/keycloak:22.0
+    image: quay.io/keycloak/keycloak:25.0.0
     restart: unless-stopped
     volumes:
       - ./keycloak/imports:/opt/keycloak/data/import
-      - ./keycloak/themes/custom:/opt/keycloak/themes/custom
     environment:
       KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
       KC_DB_DATABASE: keycloak

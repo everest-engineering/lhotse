@@ -1,8 +1,6 @@
 # Introduction
 
-This directory contains the definition for the `default` realm and basic customisation of the self-registration screen. The default Keycloak
-self registration screen asks users for a first and last name. Our preference is
-to [be more flexible](https://www.kalzumeus.com/2010/06/17/falsehoods-programmers-believe-about-names/).
+This directory contains the definition for a `default` realm.
 
 This sample project takes a minimalistic approach to configuration. Any pre-canned configuration is likely to be unsuitable for your
 situation given the myriad of ways that Keycloak can be used.
